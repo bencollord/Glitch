@@ -1,8 +1,6 @@
-﻿using System.Xml;
-
-namespace Glitch
+﻿namespace Glitch.Linq
 {
-    public static class LinqExtensions
+    public static class EnumerableExtensions
     {
         public static IEnumerable<TResult> LeftJoin<TLeft, TRight, TKey, TResult>(
                 this IEnumerable<TLeft> left,
@@ -11,10 +9,10 @@ namespace Glitch
                 Func<TRight, TKey> rightKeySelector,
                 Func<TLeft, TRight, TResult> resultSelector
             ) => left.LeftJoin(
-                     right, 
-                     leftKeySelector, 
-                     rightKeySelector, 
-                     resultSelector, 
+                     right,
+                     leftKeySelector,
+                     rightKeySelector,
+                     resultSelector,
                      EqualityComparer<TKey>.Default
                 );
 
@@ -35,14 +33,14 @@ namespace Glitch
             ArgumentNullException.ThrowIfNull(keyComparer, nameof(keyComparer));
 
             return left.GroupJoin(
-                right, 
-                leftKeySelector, 
-                rightKeySelector, 
+                right,
+                leftKeySelector,
+                rightKeySelector,
                 (l, r) => new { left = l, right = r },
                 keyComparer
             ).SelectMany(
-                x => x.right.DefaultIfEmpty(), 
-                (x, rght) => resultSelector(x.left, rght)
+                x => x.right.DefaultIfEmpty(),
+                (x, right) => resultSelector(x.left, right)
             );
         }
 
@@ -53,10 +51,10 @@ namespace Glitch
                 Func<TRight, TKey> rightKeySelector,
                 Func<TLeft, TRight, TResult> resultSelector
             ) => left.RightJoin(
-                     right, 
-                     leftKeySelector, 
-                     rightKeySelector, 
-                     resultSelector, 
+                     right,
+                     leftKeySelector,
+                     rightKeySelector,
+                     resultSelector,
                      EqualityComparer<TKey>.Default
                 );
 
@@ -82,10 +80,10 @@ namespace Glitch
                 Func<TRight, TKey> rightKeySelector,
                 Func<TLeft, TRight, TResult> resultSelector
             ) => left.FullJoin(
-                     right, 
-                     leftKeySelector, 
-                     rightKeySelector, 
-                     resultSelector, 
+                     right,
+                     leftKeySelector,
+                     rightKeySelector,
+                     resultSelector,
                      EqualityComparer<TKey>.Default
                 );
 
@@ -115,7 +113,7 @@ namespace Glitch
                  );
         }
 
-        public static IEnumerable<T> SelectMany<T>(this IEnumerable<IEnumerable<T>> source)
+        public static IEnumerable<T> Flatten<T>(this IEnumerable<IEnumerable<T>> source)
             => source.SelectMany(x => x);
 
         public static TCollection Collect<T, TCollection>(this IEnumerable<T> source, TCollection collection)

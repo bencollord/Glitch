@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Glitch.Linq;
+using System.Collections;
 
 namespace Glitch.Collections
 {
@@ -24,7 +25,7 @@ namespace Glitch.Collections
 
         public IEnumerable<TKey> Keys => dictionary.Keys;
 
-        public IEnumerable<TValue> Values => dictionary.Values.SelectMany();
+        public IEnumerable<TValue> Values => dictionary.Values.Flatten();
 
         public void Add(TKey key, TValue value)
         {

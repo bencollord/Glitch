@@ -239,6 +239,27 @@ namespace Glitch.Functional
         public T? DefaultIfNone() => IsSome ? value : default;
 
         /// <summary>
+        /// Returns the wrapped value if exists. Otherwise, returns the fallback.
+        /// </summary>
+        /// <remarks>
+        /// Functions like <see cref="IfNone(T)" />, but allows null for the fallback.
+        /// </remarks>
+        /// <param name="fallback"></param>
+        /// <returns></returns>
+        public T? DefaultIfNone(T? fallback) => IsSome ? value : fallback;
+
+        /// <summary>
+        /// Returns the wrapped value if exists. Otherwise, returns the result
+        /// of the fallback function.
+        /// </summary>
+        /// <remarks>
+        /// Functions like <see cref="IfNone(Func{T})" />, but allows null for the fallback.
+        /// </remarks>
+        /// <param name="fallback"></param>
+        /// <returns></returns>
+        public T? DefaultIfNone(Func<T?> fallback) => IsSome ? value : fallback();
+
+        /// <summary>
         /// Yields a singleton sequence if some, otherwise an empty sequence.
         /// </summary>
         /// <returns></returns>
