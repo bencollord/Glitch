@@ -12,4 +12,10 @@
     <Compile Remove="Collections\HashTable - Copy.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="Glitch.Functional.FN">
+      <Static>True</Static>
+    </Using>
+  </ItemGroup>
+
 </Project>

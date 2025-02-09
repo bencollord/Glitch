@@ -1,29 +1,26 @@
 ﻿namespace Glitch.Functional
 {
-    public static partial class Try
+    public static partial class IO
     {
-        public static Try<T> Ok<T>(T value) => new(() => value);
+        public static IO<T> Ok<T>(T value) => new(() => value);
 
-        public static Try<T> Fail<T>(Error error) => new(() => error);
+        public static IO<T> Fail<T>(Error error) => new(() => error);
 
-        public static Try<T> Lift<T>(Result<T> result) => new(() => result);
+        public static IO<T> Lift<T>(Result<T> result) => new(() => result);
 
-        public static Try<T> Lift<T>(Func<Result<T>> function) => new(function);
+        public static IO<T> Lift<T>(Func<Result<T>> function) => new(function);
 
-        public static Try<T> Lift<T>(Func<T> function) => new(() => function());
+        public static IO<T> Lift<T>(Func<T> function) => new(() => function());
 
-        public static Try<TResult> Apply<T, TResult>(this Try<Func<T, TResult>> function, Try<T> value)
+        public static IO<TResult> Apply<T, TResult>(this IO<Func<T, TResult>> function, IO<T> value)
             => value.Apply(function);
-
-        public static Try<T> Flatten<T>(this Try<Try<T>> nested)
-            => nested.AndThen(n => n);
     }
 
-    public class Try<T>
+    public class IO<T>
     {
         private Func<Result<T>> thunk;
 
-        public Try(Func<Result<T>> thunk)
+        public IO(Func<Result<T>> thunk)
         {
             this.thunk = thunk;
         }
@@ -34,7 +31,7 @@
         /// <typeparam name="TResult"></typeparam>
         /// <param name="mapper"></param>
         /// <returns></returns>
-        public Try<TResult> Map<TResult>(Func<T, TResult> mapper)
+        public IO<TResult> Map<TResult>(Func<T, TResult> mapper)
             => new(() => thunk().Map(mapper));
 
         /// <summary>
@@ -43,7 +40,7 @@
         /// </summary>
         /// <param name="mapper"></param>
         /// <returns></returns>
-        public Try<T> MapError(Func<Error, Error> mapper)
+        public IO<T> MapError(Func<Error, Error> mapper)
             => new(() => thunk().MapError(mapper));
 
         /// <summary>
@@ -52,7 +49,7 @@
         /// <typeparam name="TResult"></typeparam>
         /// <param name="function"></param>
         /// <returns></returns>
-        public Try<TResult> Apply<TResult>(Try<Func<T, TResult>> function)
+        public IO<TResult> Apply<TResult>(IO<Func<T, TResult>> function)
             => AndThen(v => function.Map(fn => fn(v)));
 
         /// <summary>
@@ -62,7 +59,7 @@
         /// <typeparam name="TResult"></typeparam>
         /// <param name="other"></param>
         /// <returns></returns>
-        public Try<TResult> And<TResult>(Try<TResult> other)
+        public IO<TResult> And<TResult>(IO<TResult> other)
             => new(() =>
             {
                 var result = thunk();
@@ -72,12 +69,12 @@
 
         /// <summary>
         /// If Okay, applies the function to the wrapped value. Otherwise, returns
-        /// the current error wrapped in a new <see cref="Try{TResult}" /> type.
+        /// the current error wrapped in a new <see cref="IO{TResult}" /> type.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="mapper"></param>
         /// <returns></returns>
-        public Try<TResult> AndThen<TResult>(Func<T, Try<TResult>> mapper)
+        public IO<TResult> AndThen<TResult>(Func<T, IO<TResult>> mapper)
             => new(() =>
             {
                 var result = thunk();
@@ -86,11 +83,11 @@
             });
 
         /// <summary>
-        /// Returns the current <see cref="Try{T}"/> if Ok, otherwise returns other.
+        /// Returns the current <see cref="IO{T}"/> if Ok, otherwise returns other.
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public Try<T> Or(Try<T> other)
+        public IO<T> Or(IO<T> other)
             => new(() =>
             {
                 var result = thunk();
@@ -104,7 +101,7 @@
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public Try<T> OrElse(Func<Error, Try<T>> other)
+        public IO<T> OrElse(Func<Error, IO<T>> other)
             => new(() =>
             {
                 var result = thunk();
@@ -118,7 +115,7 @@
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Try<T> Do(Action<T> action) => new(() => thunk().Do(action));
+        public IO<T> Do(Action<T> action) => new(() => thunk().Do(action));
 
         /// <summary>
         /// Executes an impure action if failed.
@@ -126,7 +123,7 @@
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Try<T> IfFail(Action action) => new(() => thunk().IfFail(action));
+        public IO<T> IfFail(Action action) => new(() => thunk().IfFail(action));
 
         /// <summary>
         /// Executes an impure action if failed.
@@ -134,7 +131,7 @@
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Try<T> IfFail(Action<Error> action) => new(() => thunk().IfFail(action));
+        public IO<T> IfFail(Action<Error> action) => new(() => thunk().IfFail(action));
 
         /// <summary>
         /// If Ok, returns the result of the first function to the wrapped value.
@@ -153,7 +150,7 @@
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <returns></returns>
-        public Try<TResult> Cast<TResult>() => new(() => thunk().Cast<TResult>());
+        public IO<TResult> Cast<TResult>() => new(() => thunk().Cast<TResult>());
 
         /// <summary>
         /// Returns the wrapped value if Ok. Otherwise throws the wrapped error
@@ -202,25 +199,25 @@
             }
         }
 
-        public static Try<T> operator &(Try<T> x, Try<T> y) => x.And(y);
+        public static IO<T> operator &(IO<T> x, IO<T> y) => x.And(y);
 
-        public static Try<T> operator |(Try<T> x, Try<T> y) => x.Or(y);
+        public static IO<T> operator |(IO<T> x, IO<T> y) => x.Or(y);
 
-        public static Try<T> operator >>(Try<T> x, Try<T> y) 
+        public static IO<T> operator >>(IO<T> x, IO<T> y) 
             => new(() =>
             {
                 _ = x.thunk();
                 return y.thunk();
             });
 
-        public static Try<T> operator >>(Try<T> x, Func<Result<T>> y)
+        public static IO<T> operator >>(IO<T> x, Func<Result<T>> y)
             => new(() =>
             {
                 _ = x.thunk();
                 return y();
             });
 
-        public static Try<T> operator >>(Try<T> x, Func<T> y)
+        public static IO<T> operator >>(IO<T> x, Func<T> y)
             => new(() =>
             {
                 _ = x.thunk();

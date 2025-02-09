@@ -3,11 +3,11 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Functional
 {
-    public static partial class Result
+    public abstract partial class Result<T>
     {
-        public class Okay<T> : Result<T>
+        public class Ok : Result<T>
         {
-            public Okay(T value)
+            public Ok(T value)
             {
                 Value = value ?? throw new ArgumentNullException(nameof(value));
             }
@@ -15,7 +15,7 @@ namespace Glitch.Functional
             [NotNull]
             public T Value { get; }
 
-            public override bool IsOkay => true;
+            public override bool IsOk => true;
 
             public override bool IsFail => false;
 
@@ -36,7 +36,7 @@ namespace Glitch.Functional
                 if (other is null) return false;
                 if (ReferenceEquals(this, other)) return true;
 
-                if (other is Okay<T> ok)
+                if (other is Ok ok)
                 {
                     return Value.Equals(ok.Value);
                 }
@@ -67,7 +67,7 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override Result<TResult> Map<TResult>(Func<T, TResult> mapper)
-                => new Okay<TResult>(mapper(Value));
+                => new Result<TResult>.Ok(mapper(Value));
 
             /// <inheritdoc />
             public override Result<T> MapError(Func<Error, Error> _) => this;
@@ -98,6 +98,10 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override T UnwrapOrElse(Func<Error, T> _) => Value;
+
+            public override bool IsOkAnd(Func<T, bool> predicate) => predicate(Value);
+
+            public override bool IsFailAnd(Func<Error, bool> _) => false;
         }
     }
 }

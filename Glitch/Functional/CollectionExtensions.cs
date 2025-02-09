@@ -1,4 +1,6 @@
-﻿namespace Glitch.Functional
+﻿using System.Data;
+
+namespace Glitch.Functional
 {
     public static class CollectionExtensions
     {
@@ -8,6 +10,26 @@
             ArgumentNullException.ThrowIfNull(key, nameof(key));
 
             return dictionary.TryGetValue(key, out var value) ? value : Option.None;
+        }
+
+        public static Option<T> TryPop<T>(this Stack<T> stack)
+        {
+            return stack.TryPop(out var value) ? value : Option.None;
+        }
+
+        public static Option<T> TryPeek<T>(this Stack<T> stack)
+        {
+            return stack.TryPeek(out var value) ? value : Option.None;
+        }
+
+        public static Option<T> TryDequeue<T>(this Queue<T> queue)
+        {
+            return queue.TryDequeue(out var value) ? value : Option.None;
+        }
+
+        public static Option<T> TryPeek<T>(this Queue<T> queue)
+        {
+            return queue.TryPeek(out var value) ? value : Option.None;
         }
     }
 }

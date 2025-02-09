@@ -18,6 +18,58 @@ namespace Glitch.Functional
 
         public static Option<TResult> Apply<T, TResult>(this Option<Func<T, TResult>> function, Option<T> value)
             => value.Apply(function);
+
+        // Extension methods
+        // ====================================================================
+
+        /// <summary>
+        /// Returns a the unwrapped values of all the non-empty options.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public static IEnumerable<T> OnlySomes<T>(this IEnumerable<Option<T>> options)
+            => options.Where(o => o.IsSome).Select(o => o.Unwrap());
+
+        /// <summary>
+        /// Allows three valued logic to be applied to an optional boolean.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="booleanOption"></param>
+        /// <param name="ifTrue"></param>
+        /// <param name="ifFalse"></param>
+        /// <param name="ifNone"></param>
+        /// <returns></returns>
+        public static T Match<T>(this Option<bool> booleanOption, Func<T> ifTrue, Func<T> ifFalse, Func<T> ifNone)
+            => booleanOption.Match(v => v ? ifTrue() : ifFalse(), ifNone);
+
+        /// <summary>
+        /// Unzips an option of a tuple into a tuple of two options.
+        /// </summary>
+        /// <remarks>
+        /// This method is intended to be used inline with tuple deconstruction.
+        /// </remarks>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <param name="option"></param>
+        /// <returns></returns>
+        public static (Option<T1>, Option<T2>) Unzip<T1, T2>(this Option<(T1, T2)> option)
+            => (option.Map(o => o.Item1), option.Map(o => o.Item2));
+
+        /// <summary>
+        /// Flattens a nested option to a single level.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="nested"></param>
+        /// <returns></returns>
+        public static Option<T> Flatten<T>(this Option<Option<T>> nested)
+            => nested.AndThen(o => o);
+
+        public static Result<Option<T>> Invert<T>(this Option<Result<T>> nested)
+            => nested.Match(
+                    res => res.Map(Some),
+                    () => Ok<Option<T>>(None)
+                );
     }
 
     public readonly struct Option<T> : IEquatable<Option<T>>
@@ -35,6 +87,12 @@ namespace Glitch.Functional
 
         public bool IsNone => !hasValue;
 
+        public bool IsSomeAnd(Func<T, bool> predicate)
+            => Map(predicate).IfNone(false);
+
+        public bool IsNoneOr(Func<T, bool> predicate)
+            => Map(predicate).IfNone(true);
+
         /// <summary>
         /// If the <see cref="Option{T}"/> has a value, applies the provided
         /// to the value and returns it wrapped in a new <see cref="Option{TResult}" />. 
@@ -46,8 +104,27 @@ namespace Glitch.Functional
         public Option<TResult> Map<TResult>(Func<T, TResult> mapper)
             => IsSome ? new Option<TResult>(mapper(value!)) : new Option<TResult>();
 
+        /// <summary>
+        /// Maps based on two provided functions depending on whether or not
+        /// the <see cref="Option{T}"/> has a value.
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="ifSome"></param>
+        /// <param name="ifNone"></param>
+        /// <returns></returns>
         public Option<TResult> BiMap<TResult>(Func<T, TResult> ifSome, Func<TResult> ifNone)
             => Match(ifSome, ifNone);
+
+        /// <summary>
+        /// Partially applies the value to a 2 arg function and
+        /// returns an option of the resulting function.
+        /// </summary>
+        /// <typeparam name="T2"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="mapper"></param>
+        /// <returns></returns>
+        public Option<Func<T2, TResult>> PartialMap<T2, TResult>(Func<T, T2, TResult> mapper)
+            => Map(mapper.Curry());
 
         /// <summary>
         /// Applies a wrapped function to the wrapped value if both exist.
@@ -135,6 +212,26 @@ namespace Glitch.Functional
 
             return Option.None;
         }
+
+        /// <summary>
+        /// Combines another option into an option of a tuple.
+        /// </summary>
+        /// <typeparam name="TOther"></typeparam>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public Option<(T, TOther)> Zip<TOther>(Option<TOther> other)
+            => ZipWith(other, (x, y) => (x, y));
+
+        /// <summary>
+        /// Combines two options using a provided function.
+        /// </summary>
+        /// <typeparam name="TOther"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="other"></param>
+        /// <param name="zipper"></param>
+        /// <returns></returns>
+        public Option<TResult> ZipWith<TOther, TResult>(Option<TOther> other, Func<T, TOther, TResult> zipper)
+            => AndThen(x => other.Map(y => zipper(x, y)));
 
         /// <summary>
         /// Executes an impure action against the value if it exists.

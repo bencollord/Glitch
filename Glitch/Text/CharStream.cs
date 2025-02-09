@@ -49,6 +49,14 @@
             return ReadNextChar();
         }
 
+        public void Consume(int count = 1)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                _ = Read();
+            }
+        }
+
         public void Dispose()
         {
             stream.Dispose();

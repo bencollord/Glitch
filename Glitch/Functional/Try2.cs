@@ -64,7 +64,7 @@
             {
                 var result = thunk(arg);
 
-                return result.IsOkay ? other.thunk(arg) : result.Cast<TNewResult>();
+                return result.IsOk ? other.thunk(arg) : result.Cast<TNewResult>();
             });
 
         /// <summary>
@@ -79,7 +79,7 @@
             {
                 var result = thunk(arg);
 
-                return result is Result.Okay<TResult> ok ? mapper(ok.Value).thunk(arg) : result.Cast<TNewResult>();
+                return result is Result<TResult>.Ok ok ? mapper(ok.Value).thunk(arg) : result.Cast<TNewResult>();
             });
 
         /// <summary>
@@ -92,7 +92,7 @@
             {
                 var result = thunk(arg);
 
-                return result.IsOkay ? result : other.thunk(arg);
+                return result.IsOk ? result : other.thunk(arg);
             });
 
         /// <summary>
@@ -106,7 +106,7 @@
             {
                 var result = thunk(arg);
 
-                return result is Result.Failure<TResult> fail ? other(fail.Error).thunk(arg) : result;
+                return result is Result<TResult>.Fail fail ? other(fail.Error).thunk(arg) : result;
             });
 
         /// <summary>

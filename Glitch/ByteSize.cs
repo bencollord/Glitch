@@ -164,4 +164,31 @@ namespace Glitch
             }
         }
     }
+
+    public static class ByteSizeExtensions
+    {
+        public static ByteSize Average(this IEnumerable<ByteSize> source)
+            => ByteSize.FromBytes(Convert.ToInt64(source.Average(s => s.Bytes)));
+
+        public static ByteSize Average<T>(this IEnumerable<T> source, Func<T, ByteSize> selector)
+            => source.Select(selector).Average();
+
+        public static ByteSize Min(this IEnumerable<ByteSize> source)
+            => ByteSize.FromBytes(source.Min(s => s.Bytes));
+
+        public static ByteSize Min<T>(this IEnumerable<T> source, Func<T, ByteSize> selector)
+            => source.Select(selector).Min();
+
+        public static ByteSize Max(this IEnumerable<ByteSize> source)
+            => ByteSize.FromBytes(source.Max(s => s.Bytes));
+        
+        public static ByteSize Max<T>(this IEnumerable<T> source, Func<T, ByteSize> selector)
+            => source.Select(selector).Max();
+
+        public static ByteSize Sum(this IEnumerable<ByteSize> source)
+            => ByteSize.FromBytes(source.Sum(s => s.Bytes));
+
+        public static ByteSize Sum<T>(this IEnumerable<T> source, Func<T, ByteSize> selector)
+            => source.Select(selector).Sum();
+    }
 }

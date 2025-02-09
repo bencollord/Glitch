@@ -1,38 +1,38 @@
 ﻿
 namespace Glitch.Functional
 {
-    public static partial class Result
+    public abstract partial class Result<T>
     {
-        public class Failure<T> : Result<T>
+        public class Fail : Result<T>
         {
-            public Failure(Error error)
+            public Fail(Error error)
             {
                 Error = error;
             }
 
             public Error Error { get; }
 
-            public override bool IsOkay => false;
+            public override bool IsOk => false;
 
             public override bool IsFail => true;
 
             /// <inheritdoc />
             public override Result<TResult> And<TResult>(Result<TResult> other)
-                => new Failure<TResult>(Error);
+                => new Result<TResult>.Fail(Error);
 
             /// <inheritdoc />
             public override Result<TResult> AndThen<TResult>(Func<T, Result<TResult>> mapper)
-                => new Failure<TResult>(Error);
+                => new Result<TResult>.Fail(Error);
 
             /// <inheritdoc />
-            public override Result<TResult> Cast<TResult>() => new Failure<TResult>(Error);
+            public override Result<TResult> Cast<TResult>() => new Result<TResult>.Fail(Error);
 
             public override bool Equals(Result<T>? other)
             {
                 if (other is null) return false;
                 if (ReferenceEquals(this, other)) return true;
 
-                if (other is Failure<T> fail)
+                if (other is Fail fail)
                 {
                     return Error.Equals(fail.Error);
                 }
@@ -64,7 +64,7 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override Result<TResult> Map<TResult>(Func<T, TResult> mapper)
-                => new Failure<TResult>(Error);
+                => new Result<TResult>.Fail(Error);
 
             /// <inheritdoc />
             public override Result<T> MapError(Func<Error, Error> mapper) => mapper(Error);
@@ -95,6 +95,10 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override T UnwrapOrElse(Func<Error, T> fallback) => fallback(Error);
+
+            public override bool IsOkAnd(Func<T, bool> _) => false;
+
+            public override bool IsFailAnd(Func<Error, bool> predicate) => predicate(Error);
         }
     }
 }

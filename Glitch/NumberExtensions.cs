@@ -18,5 +18,11 @@
         public static string ToString(this int value, Radix radix) => Convert.ToString(value, (int)radix);
         public static string ToString(this long value, int radix) => Convert.ToString(value, radix);
         public static string ToString(this long value, Radix radix) => Convert.ToString(value, (int)radix);
+        public static string ToString(this sbyte value, int radix) => Convert.ToString(value, radix);
+        public static string ToString(this sbyte value, Radix radix) => Convert.ToString(value, (int)radix);
+        public static string ToString(this ushort value, int radix) => Convert.ToString(value, radix);
+        public static string ToString(this ushort value, Radix radix) => Convert.ToString(value, (int)radix);
+        public static string ToString(this uint value, int radix) => Convert.ToString(value, radix);
+        public static string ToString(this uint value, Radix radix) => Convert.ToString(value, (int)radix);
     }
 }

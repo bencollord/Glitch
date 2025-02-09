@@ -8,7 +8,7 @@ namespace Glitch.Functional
 
         public abstract string Message { get; }
 
-        public abstract Option<int> Code { get; }
+        public virtual Option<int> Code { get; } = Option.None;
 
         public abstract Option<Error> Inner { get; }
 

@@ -1,20 +1,35 @@
-﻿namespace Glitch.Functional
-{
-    public static partial class Result
-    {
-        public static Result<T> Ok<T>(T value) => new Okay<T>(value);
+﻿using System.Runtime.CompilerServices;
 
-        public static Result<T> Fail<T>(Error error) => new Failure<T>(error);
+namespace Glitch.Functional
+{
+    public static class Result
+    {
+        public static Result<T> Ok<T>(T value) => new Result<T>.Ok(value);
+
+        public static Result<T> Fail<T>(Error error) => new Result<T>.Fail(error);
 
         public static Result<TResult> Apply<T, TResult>(this Result<Func<T, TResult>> function, Result<T> value)
             => value.Apply(function);
+
+        public static Result<T> Flatten<T>(this Result<Result<T>> nested)
+            => nested.AndThen(n => n);
+
+        public static Option<Result<T>> Invert<T>(this Result<Option<T>> nested)
+            => nested.Match(
+                    opt => opt.Map(Ok),
+                    err => Some(Fail<T>(err))
+                );
     }
 
-    public abstract class Result<T> : IEquatable<Result<T>>
+    public abstract partial class Result<T> : IEquatable<Result<T>>
     {
-        public abstract bool IsOkay { get; }
+        public abstract bool IsOk { get; }
 
         public abstract bool IsFail { get; }
+
+        public abstract bool IsOkAnd(Func<T, bool> predicate);
+
+        public abstract bool IsFailAnd(Func<Error, bool> predicate);
 
         /// <summary>
         /// If the result is <see cref="Result.Okay{T}" />, applies
@@ -173,7 +188,7 @@
 
         public abstract override string ToString();
 
-        public static bool operator true(Result<T> result) => result.IsOkay;
+        public static bool operator true(Result<T> result) => result.IsOk;
 
         public static bool operator false(Result<T> result) => result.IsFail;
 
@@ -181,11 +196,11 @@
 
         public static Result<T> operator |(Result<T> x, Result<T> y) => x.Or(y);
 
-        public static implicit operator bool(Result<T> result) => result.IsOkay;
+        public static implicit operator bool(Result<T> result) => result.IsOk;
 
-        public static implicit operator Result<T>(T value) => new Result.Okay<T>(value);
+        public static implicit operator Result<T>(T value) => new Result<T>.Ok(value);
 
-        public static implicit operator Result<T>(Error error) => new Result.Failure<T>(error);
+        public static implicit operator Result<T>(Error error) => new Result<T>.Fail(error);
 
         public static bool operator ==(Result<T>? x, Result<T>? y)
             => x is null ? y is null : x.Equals(y);

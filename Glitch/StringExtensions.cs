@@ -1,4 +1,6 @@
-﻿namespace Glitch
+﻿using Glitch.Functional;
+
+namespace Glitch
 {
     public static class StringExtensions
     {
@@ -64,5 +66,21 @@
 
         public static string TrimEnd(this string input, string trim)
             => input.EndsWith(trim) ? input.Substring(0, input.Length - trim.Length) : input;
+
+        public static T Parse<T>(this string input)
+            where T : IParsable<T>
+            => input.TryParse<T>().Unwrap();
+
+        public static T Parse<T>(this string input, IFormatProvider? formatProvider)
+            where T : IParsable<T>
+            => input.TryParse<T>(formatProvider).Unwrap();
+
+        public static Result<T> TryParse<T>(this string input)
+            where T : IParsable<T>
+            => input.TryParse<T>(null);
+
+        public static Result<T> TryParse<T>(this string input, IFormatProvider? formatProvider)
+            where T : IParsable<T>
+            => Try(() => T.Parse(input, formatProvider)).Run();
     }
 }
