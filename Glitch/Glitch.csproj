@@ -18,4 +18,8 @@
     </Using>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Functional\QuerySyntax\" />
+  </ItemGroup>
+
 </Project>

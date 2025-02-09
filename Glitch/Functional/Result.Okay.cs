@@ -5,9 +5,9 @@ namespace Glitch.Functional
 {
     public abstract partial class Result<T>
     {
-        public class Ok : Result<T>
+        public class Okay : Result<T>
         {
-            public Ok(T value)
+            public Okay(T value)
             {
                 Value = value ?? throw new ArgumentNullException(nameof(value));
             }
@@ -36,7 +36,7 @@ namespace Glitch.Functional
                 if (other is null) return false;
                 if (ReferenceEquals(this, other)) return true;
 
-                if (other is Ok ok)
+                if (other is Okay ok)
                 {
                     return Value.Equals(ok.Value);
                 }
@@ -67,7 +67,7 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override Result<TResult> Map<TResult>(Func<T, TResult> mapper)
-                => new Result<TResult>.Ok(mapper(Value));
+                => new Result<TResult>.Okay(mapper(Value));
 
             /// <inheritdoc />
             public override Result<T> MapError(Func<Error, Error> _) => this;
@@ -81,6 +81,10 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override Result<T> OrElse(Func<Error, Result<T>> _) => this;
+
+            /// <inheritdoc />
+            public override Result<T> Filter(Func<T, bool> predicate)
+                => predicate(Value) ? this : Fail<T>(new ApplicationError("Result failed check"));
 
             /// <inheritdoc />
             public override Option<T> ToOption() => Option.Some(Value);

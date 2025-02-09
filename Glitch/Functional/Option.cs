@@ -156,6 +156,22 @@ namespace Glitch.Functional
             => IsSome ? mapper(value!) : new Option<TResult>();
 
         /// <summary>
+        /// Applies the element selector to the wrapped value
+        /// and then a projection over both the value and the result
+        /// of the first function. A BindMap operation.
+        /// 
+        /// If the current <see cref="Option{T}"/> is none or the provided
+        /// <paramref name="bind"/> function returns none, the result will be none.
+        /// </summary>
+        /// <typeparam name="TElement"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="bind"></param>
+        /// <param name="project"></param>
+        /// <returns></returns>
+        public Option<TResult> AndThen<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project)
+            => AndThen(x => bind(x).Map(y => project(x, y)));
+
+        /// <summary>
         /// Returns the current <see cref="Option{T}"/> if it contains a value. 
         /// Otherwise returns the other <see cref="Option{T}">.
         /// </summary>
@@ -375,7 +391,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="error"></param>
         /// <returns></returns>
-        public Result<T> OkOr(Error error) => IsSome ? Result.Ok(value!) : Result.Fail<T>(error);
+        public Result<T> OkOr(Error error) => IsSome ? Result.Okay(value!) : Result.Fail<T>(error);
 
         /// <summary>
         /// Wraps the value in a <see cref="Result{T}" /> if it exists,
@@ -383,7 +399,7 @@ namespace Glitch.Functional
         /// the result of the provided error function.
         /// </summary>
         /// <param name="error"></param>
-        public Result<T> OkOrElse(Func<Error> function) => IsSome ? Result.Ok(value!) : Result.Fail<T>(function());
+        public Result<T> OkOrElse(Func<Error> function) => IsSome ? Result.Okay(value!) : Result.Fail<T>(function());
 
         public bool Equals(Option<T> other)
         {

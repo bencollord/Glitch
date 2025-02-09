@@ -4,7 +4,7 @@ namespace Glitch.Functional
 {
     public static class Result
     {
-        public static Result<T> Ok<T>(T value) => new Result<T>.Ok(value);
+        public static Result<T> Okay<T>(T value) => new Result<T>.Okay(value);
 
         public static Result<T> Fail<T>(Error error) => new Result<T>.Fail(error);
 
@@ -16,7 +16,7 @@ namespace Glitch.Functional
 
         public static Option<Result<T>> Invert<T>(this Result<Option<T>> nested)
             => nested.Match(
-                    opt => opt.Map(Ok),
+                    opt => opt.Map(Okay),
                     err => Some(Fail<T>(err))
                 );
     }
@@ -79,6 +79,9 @@ namespace Glitch.Functional
         /// <returns></returns>
         public abstract Result<TResult> AndThen<TResult>(Func<T, Result<TResult>> mapper);
 
+        public Result<TResult> AndThen<TElement, TResult>(Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project)
+            => AndThen(x => bind(x).Map(y => project(x, y)));
+
         /// <summary>
         /// Returns the current result if Ok, otherwise returns the other result.
         /// </summary>
@@ -135,6 +138,15 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <returns></returns>
         public abstract Result<TResult> Cast<TResult>();
+
+        /// <summary>
+        /// For a successful result, checks the value against a predicate
+        /// and returns an <see cref="ApplicationError"/> if it fails.
+        /// Does nothing for a failed result.
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public abstract Result<T> Filter(Func<T, bool> predicate);
 
         /// <summary>
         /// Returns the wrapped value if Ok. Otherwise throws the wrapped error
@@ -198,7 +210,7 @@ namespace Glitch.Functional
 
         public static implicit operator bool(Result<T> result) => result.IsOk;
 
-        public static implicit operator Result<T>(T value) => new Result<T>.Ok(value);
+        public static implicit operator Result<T>(T value) => new Result<T>.Okay(value);
 
         public static implicit operator Result<T>(Error error) => new Result<T>.Fail(error);
 

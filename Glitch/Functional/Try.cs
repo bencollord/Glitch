@@ -82,8 +82,11 @@
             {
                 var result = thunk();
 
-                return result is Result<T>.Ok ok ? mapper(ok.Value).thunk() : result.Cast<TResult>();
+                return result is Result<T>.Okay ok ? mapper(ok.Value).thunk() : result.Cast<TResult>();
             });
+
+        public Try<TResult> AndThen<TElement, TResult>(Func<T, Try<TElement>> bind, Func<T, TElement, TResult> project)
+            => AndThen(x => bind(x).Map(y => project(x, y)));
 
         /// <summary>
         /// Returns the current <see cref="Try{T}"/> if Ok, otherwise returns other.
@@ -111,6 +114,9 @@
 
                 return result is Result<T>.Fail fail ? other(fail.Error).thunk() : result;
             });
+
+        public Try<T> Filter(Func<T, bool> predicate)
+            => new(() => thunk().Filter(predicate));
 
         /// <summary>
         /// Executes an impure action against the value if Ok.

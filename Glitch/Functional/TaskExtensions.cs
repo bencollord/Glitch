@@ -2,20 +2,48 @@
 {
     public static class TaskExtensions
     {
-        public static Task<TResult> Map<T, TResult>(this Task<T> task, Func<T, TResult> mapper, CancellationToken cancellationToken = default)
-            => task.ContinueWith(t => mapper(t.Result), cancellationToken);
+        public static async Task<TResult> Map<T, TResult>(this Task<T> task, Func<T, TResult> mapper)
+        {
+            var res = await task.ConfigureAwait(false);
+            return mapper(res);
+        }
 
-        public static Task<TResult> Apply<T, TResult>(this Task<T> task, Task<Func<T, TResult>> function, CancellationToken cancellationToken = default)
-            => task.AndThen(v => function.Map(fn => fn(v), cancellationToken), cancellationToken);
+        public static Task<TResult> Apply<T, TResult>(this Task<T> task, Task<Func<T, TResult>> function)
+            => task.AndThen(v => function.Map(fn => fn(v)));
 
-        public static Task<TResult> AndThen<T, TResult>(this Task<T> task, Func<T, Task<TResult>> mapper, CancellationToken cancellationToken = default)
-            => task.Map(mapper, cancellationToken).Unwrap();
+        public static async Task<TResult> AndThen<T, TResult>(this Task<T> task, Func<T, Task<TResult>> bind)
+        {
+            var res = await task.ConfigureAwait(false);
+            var bnd = await bind(res).ConfigureAwait(false);
 
-        public static Task<T> Do<T>(this Task<T> task, Action<T> action, CancellationToken cancellationToken = default)
-            => task.ContinueWith(t =>
+            return bnd;
+        }
+
+        public static async Task<TResult> AndThen<T, TElement, TResult>(this Task<T> task, Func<T, Task<TElement>> bind, Func<T, TElement, TResult> project)
+        {
+            var res = await task.ConfigureAwait(false);
+            var bnd = await bind(res).ConfigureAwait(false);
+
+            return project(res, bnd);
+        }
+
+        public static async Task<T> Filter<T>(this Task<T> task, Func<T, bool> predicate)
+        {
+            var res = await task.ConfigureAwait(false);
+
+            if (!predicate(res))
             {
-                action(t.Result);
-                return t.Result;
-            }, cancellationToken);
+                throw new TaskCanceledException();
+            }
+
+            return res;
+        }
+
+        public static async Task<T> Do<T>(this Task<T> task, Action<T> action)
+        {
+            var res = await task.ConfigureAwait(false);
+            action(res);
+            return res;
+        }
     }
 }

@@ -82,6 +82,9 @@ namespace Glitch.Functional
             /// <inheritdoc />
             public override Option<T> ToOption() => Option.None;
 
+            /// <inheritdoc />
+            public override Result<T> Filter(Func<T, bool> predicate) => this;
+
             public override string ToString() => $"Error: {Error}";
 
             /// <inheritdoc />

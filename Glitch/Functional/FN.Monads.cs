@@ -8,7 +8,7 @@
 
         public static Option<T> Optional<T>(T? value) => Option.Optional(value);
 
-        public static Result<T> Ok<T>(T value) => Result.Ok(value);
+        public static Result<T> Ok<T>(T value) => Result.Okay(value);
 
         public static Result<T> Fail<T>(Error error) => Result.Fail<T>(error);
 
