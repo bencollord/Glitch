@@ -251,7 +251,7 @@ namespace Glitch.Collections
                     return false;
                 }
 
-                current = current.AndThen(e => Option.Optional(e.Next));
+                current = current.AndThen(e => Option.Maybe(e.Next));
 
                 if (current.IsSome)
                 {

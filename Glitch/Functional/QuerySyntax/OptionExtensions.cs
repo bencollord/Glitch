@@ -13,5 +13,12 @@ namespace Glitch.Functional.QuerySyntax
 
         public static Option<T> Where<T>(this Option<T> source, Func<T, bool> predicate)
             => source.Filter(predicate);
+
+        public static Option<TResult> Join<T, TOther, TKey, TResult>(this Option<T> left, Option<TOther> right, Func<T, TKey> leftKeySelector, Func<TOther, TKey> rightKeySelector, Func<T, TOther, TResult> resultSelector)
+            => left.ZipWith(right,
+                    (x, y) => leftKeySelector(x)!.Equals(rightKeySelector(y))
+                            ? Some(resultSelector(x, y))
+                            : Option<TResult>.None)
+                   .Flatten();
     }
 }

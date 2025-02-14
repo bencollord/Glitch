@@ -8,6 +8,9 @@
         public static Func<T1, T2, T3, TResult> Func<T1, T2, T3, TResult>(Func<T1, T2, T3, TResult> func) => func;
         public static Func<T1, T2, T3, T4, TResult> Func<T1, T2, T3, T4, TResult>(Func<T1, T2, T3, T4, TResult> func) => func;
 
+        public static Func<TResult> Then<T, TResult>(this Func<T> f, Func<T, TResult> g)
+            => () => g(f());
+
         public static Func<T1, T3> Then<T1, T2, T3>(this Func<T1, T2> f, Func<T2, T3> g)
             => x => g(f(x));
 

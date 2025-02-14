@@ -2,6 +2,9 @@
 {
     public static class DirectoryExtensions
     {
+        public static DirectoryInfo GetSubdirectory(this DirectoryInfo directory, string name)
+            => new DirectoryInfo(Path.Combine(directory.FullName, name));
+
         public static FileInfo CreateFile(this DirectoryInfo directory, string fileName)
         {
             var file = directory.GetOrCreateFile(fileName);

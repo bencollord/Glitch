@@ -3,9 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Functional
 {
-    public abstract partial class Result<T>
+    public abstract partial record Result<T>
     {
-        public class Okay : Result<T>
+        public record Okay : Result<T>
         {
             public Okay(T value)
             {
@@ -31,21 +31,6 @@ namespace Glitch.Functional
             public override Result<TResult> Cast<TResult>() 
                 => (TResult)(dynamic)Value!;
 
-            public override bool Equals(Result<T>? other)
-            {
-                if (other is null) return false;
-                if (ReferenceEquals(this, other)) return true;
-
-                if (other is Okay ok)
-                {
-                    return Value.Equals(ok.Value);
-                }
-
-                return false;
-            }
-
-            public override int GetHashCode() => Value.GetHashCode();
-
             /// <inheritdoc />
             public override Result<T> Do(Action<T> action)
             {
@@ -69,6 +54,12 @@ namespace Glitch.Functional
             public override Result<TResult> Map<TResult>(Func<T, TResult> mapper)
                 => new Result<TResult>.Okay(mapper(Value));
 
+            public override Result<TResult> MapOr<TResult>(Func<T, TResult> mapper, TResult _) 
+                => Map(mapper);
+
+            public override Result<TResult> MapOrElse<TResult>(Func<T, TResult> ifOkay, Func<Error, TResult> _) 
+                => Map(ifOkay);
+
             /// <inheritdoc />
             public override Result<T> MapError(Func<Error, Error> _) => this;
 
@@ -87,7 +78,7 @@ namespace Glitch.Functional
                 => predicate(Value) ? this : Fail<T>(new ApplicationError("Result failed check"));
 
             /// <inheritdoc />
-            public override Option<T> ToOption() => Option.Some(Value);
+            public override Option<T> UnwrapOrNone() => Option.Some(Value);
 
             public override string ToString() => $"Ok: {Value}";
 
@@ -106,6 +97,18 @@ namespace Glitch.Functional
             public override bool IsOkAnd(Func<T, bool> predicate) => predicate(Value);
 
             public override bool IsFailAnd(Func<Error, bool> _) => false;
+
+            /// <inheritdoc />
+            public override Try<TResult> Try<TResult>(Func<T, TResult> map) 
+                => FN.Try(() => Map(map));
+
+            /// <inheritdoc />
+            public override Try<TResult> AndThenTry<TResult>(Func<T, Result<TResult>> bind) 
+                => FN.Try(() => AndThen(bind));
+
+            /// <inheritdoc />
+            public override Try<TResult> AndThenTry<TResult>(Func<T, Try<TResult>> bind) 
+                => Functional.Try.Lift(this).AndThen(bind);
         }
     }
 }

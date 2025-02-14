@@ -2,7 +2,7 @@
 {
     public static partial class Try
     {
-        public static Try<T> Ok<T>(T value) => new(() => value);
+        public static Try<T> Okay<T>(T value) => new(() => value);
 
         public static Try<T> Fail<T>(Error error) => new(() => error);
 

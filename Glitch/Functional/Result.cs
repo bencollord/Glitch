@@ -21,7 +21,7 @@ namespace Glitch.Functional
                 );
     }
 
-    public abstract partial class Result<T> : IEquatable<Result<T>>
+    public abstract partial record Result<T>
     {
         public abstract bool IsOk { get; }
 
@@ -41,6 +41,10 @@ namespace Glitch.Functional
         /// <param name="mapper"></param>
         /// <returns></returns>
         public abstract Result<TResult> Map<TResult>(Func<T, TResult> mapper);
+
+        public abstract Result<TResult> MapOr<TResult>(Func<T, TResult> mapper, TResult ifFail);
+
+        public abstract Result<TResult> MapOrElse<TResult>(Func<T, TResult> mapper, Func<Error, TResult> ifFail);
 
         /// <summary>
         /// If the result is a failure, returns a new result with the mapping function
@@ -149,6 +153,33 @@ namespace Glitch.Functional
         public abstract Result<T> Filter(Func<T, bool> predicate);
 
         /// <summary>
+        /// A map operation that wraps the result in
+        /// a <see cref="Try{TResult}"/>.
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="map"></param>
+        /// <returns></returns>
+        public abstract Try<TResult> Try<TResult>(Func<T, TResult> map);
+
+        /// <summary>
+        /// A bind operation that wraps the result in
+        /// a <see cref="Try{TResult}"/>.
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="map"></param>
+        /// <returns></returns>
+        public abstract Try<TResult> AndThenTry<TResult>(Func<T, Result<TResult>> bind);
+
+        /// <summary>
+        /// A bind operation that wraps the result in
+        /// a <see cref="Try{TResult}"/>.
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="map"></param>
+        /// <returns></returns>
+        public abstract Try<TResult> AndThenTry<TResult>(Func<T, Try<TResult>> bind);
+
+        /// <summary>
         /// Returns the wrapped value if Ok. Otherwise throws the wrapped error
         /// as an exception.
         /// </summary>
@@ -183,7 +214,7 @@ namespace Glitch.Functional
         /// an empty <see cref="Option{T}" />.
         /// </summary>
         /// <returns></returns>
-        public abstract Option<T> ToOption();
+        public abstract Option<T> UnwrapOrNone();
 
         /// <summary>
         /// Returns a singleton <see cref="IEnumerable{T}" /> if Ok.
@@ -191,12 +222,6 @@ namespace Glitch.Functional
         /// </summary>
         /// <returns></returns>
         public abstract IEnumerable<T> Iterate();
-
-        public abstract bool Equals(Result<T>? other);
-
-        public override bool Equals(object? obj) => Equals(obj as Result<T>);
-
-        public abstract override int GetHashCode();
 
         public abstract override string ToString();
 
@@ -213,10 +238,5 @@ namespace Glitch.Functional
         public static implicit operator Result<T>(T value) => new Result<T>.Okay(value);
 
         public static implicit operator Result<T>(Error error) => new Result<T>.Fail(error);
-
-        public static bool operator ==(Result<T>? x, Result<T>? y)
-            => x is null ? y is null : x.Equals(y);
-
-        public static bool operator !=(Result<T>? x, Result<T>? y) => !(x == y);
     }
 }

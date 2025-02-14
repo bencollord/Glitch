@@ -14,7 +14,7 @@ namespace Glitch.Functional
         public static Option<T> Some<T>(T value) 
             => value is not null ? new Option<T>(value) : throw new ArgumentNullException(nameof(value));
 
-        public static Option<T> Optional<T>(T? value) => value != null ? Some(value) : None;
+        public static Option<T> Maybe<T>(T? value) => value != null ? Some(value) : None;
 
         public static Option<TResult> Apply<T, TResult>(this Option<Func<T, TResult>> function, Option<T> value)
             => value.Apply(function);
@@ -68,12 +68,19 @@ namespace Glitch.Functional
         public static Result<Option<T>> Invert<T>(this Option<Result<T>> nested)
             => nested.Match(
                     res => res.Map(Some),
-                    () => Ok<Option<T>>(None)
+                    () => Okay<Option<T>>(None)
                 );
     }
 
     public readonly struct Option<T> : IEquatable<Option<T>>
     {
+        public static readonly Option<T> None = new Option<T>();
+
+        public static Option<T> Some(T value)
+            => value is not null ? new Option<T>(value) : throw new ArgumentNullException(nameof(value));
+
+        public static Option<T> Maybe(T? value) => value != null ? Some(value) : None;
+
         private readonly T? value = default;
         private readonly bool hasValue = false;
 
@@ -105,6 +112,18 @@ namespace Glitch.Functional
             => IsSome ? new Option<TResult>(mapper(value!)) : new Option<TResult>();
 
         /// <summary>
+        /// Maps using the provided function if Some.
+        /// Otherwise, returns the fallback value wrapped in 
+        /// an option.
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="mapper"></param>
+        /// <param name="ifNone"></param>
+        /// <returns></returns>
+        public Option<TResult> MapOr<TResult>(Func<T, TResult> mapper, TResult ifNone)
+            => Map(mapper).IfNone(ifNone);
+
+        /// <summary>
         /// Maps based on two provided functions depending on whether or not
         /// the <see cref="Option{T}"/> has a value.
         /// </summary>
@@ -112,7 +131,7 @@ namespace Glitch.Functional
         /// <param name="ifSome"></param>
         /// <param name="ifNone"></param>
         /// <returns></returns>
-        public Option<TResult> BiMap<TResult>(Func<T, TResult> ifSome, Func<TResult> ifNone)
+        public Option<TResult> MapOrElse<TResult>(Func<T, TResult> ifSome, Func<TResult> ifNone)
             => Match(ifSome, ifNone);
 
         /// <summary>
@@ -431,7 +450,7 @@ namespace Glitch.Functional
 
         public static implicit operator bool(Option<T> option) => option.IsSome;
 
-        public static implicit operator Option<T>(T? value) => Option.Optional(value);
+        public static implicit operator Option<T>(T? value) => Option.Maybe(value);
 
         public static implicit operator Option<T>(OptionNone _) => new();
 
