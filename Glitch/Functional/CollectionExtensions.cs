@@ -1,10 +1,25 @@
-﻿using System.Data;
-
-namespace Glitch.Functional
+﻿namespace Glitch.Functional
 {
     public static class CollectionExtensions
     {
         public static Option<TValue> TryGetValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
+        {
+            ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
+            ArgumentNullException.ThrowIfNull(key, nameof(key));
+
+            return dictionary.TryGetValue(key, out var value) ? value : Option.None;
+        }
+
+        public static Option<TValue> TryGetValue<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key)
+        {
+            ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
+            ArgumentNullException.ThrowIfNull(key, nameof(key));
+
+            return dictionary.TryGetValue(key, out var value) ? value : Option.None;
+        }
+
+        // Disambiguate for main dictionary since it implements both of the above interfaces
+        public static Option<TValue> TryGetValue<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key)
         {
             ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
             ArgumentNullException.ThrowIfNull(key, nameof(key));

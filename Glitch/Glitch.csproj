@@ -19,7 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Functional\IO\" />
     <Folder Include="Functional\QuerySyntax\" />
   </ItemGroup>
 

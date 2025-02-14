@@ -1,4 +1,6 @@
-﻿namespace Glitch.Text
+﻿using System.Text;
+
+namespace Glitch.Text
 {
     public class CharStream : IDisposable
     {
@@ -47,6 +49,22 @@
             }
 
             return ReadNextChar();
+        }
+
+        public string ReadToEnd()
+        { 
+            // TODO Check for performance and best practices, this is quick and dirty.
+            var remaining = stream.ReadToEnd();
+            var output = new StringBuilder(buffer.Count + remaining.Length);
+
+            while (!buffer.IsEmpty)
+            {
+                output.Append(buffer.Take());
+            }
+
+            output.Append(remaining);
+
+            return output.ToString();
         }
 
         public void Consume(int count = 1)
