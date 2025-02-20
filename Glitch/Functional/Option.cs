@@ -411,7 +411,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="error"></param>
         /// <returns></returns>
-        public Result<T> OkayOr(Error error) => IsSome ? Result.Okay(value!) : Result.Fail<T>(error);
+        public Result<T> OkayOr(Error error) => IsSome ? Okay(value!) : Fail<T>(error);
 
         /// <summary>
         /// Wraps the value in a <see cref="Result{T}" /> if it exists,
@@ -419,7 +419,7 @@ namespace Glitch.Functional
         /// the result of the provided error function.
         /// </summary>
         /// <param name="error"></param>
-        public Result<T> OkayOrElse(Func<Error> function) => IsSome ? Result.Okay(value!) : Result.Fail<T>(function());
+        public Result<T> OkayOrElse(Func<Error> function) => IsSome ? Okay(value!) : Fail<T>(function());
 
         public bool Equals(Option<T> other)
         {

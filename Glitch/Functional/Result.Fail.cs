@@ -1,31 +1,24 @@
 ﻿
 namespace Glitch.Functional
 {
-    public abstract partial record Result<T>
+    public static partial class Result
     {
-        public record Fail : Result<T>
+        public record Fail<T>(Error Error) : Result<T>
         {
-            public Fail(Error error)
-            {
-                Error = error;
-            }
-
-            public Error Error { get; }
-
             public override bool IsOkay => false;
 
             public override bool IsFail => true;
 
             /// <inheritdoc />
             public override Result<TResult> And<TResult>(Result<TResult> other)
-                => new Result<TResult>.Fail(Error);
+                => new Fail<TResult>(Error);
 
             /// <inheritdoc />
             public override Result<TResult> AndThen<TResult>(Func<T, Result<TResult>> mapper)
-                => new Result<TResult>.Fail(Error);
+                => new Fail<TResult>(Error);
 
             /// <inheritdoc />
-            public override Result<TResult> Cast<TResult>() => new Result<TResult>.Fail(Error);
+            public override Result<TResult> Cast<TResult>() => new Fail<TResult>(Error);
 
             /// <inheritdoc />
             public override Result<T> IfOkay(Action<T> _) => this;
@@ -49,7 +42,7 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override Result<TResult> Map<TResult>(Func<T, TResult> mapper)
-                => new Result<TResult>.Fail(Error);
+                => new Fail<TResult>(Error);
 
             public override Result<TResult> MapOr<TResult>(Func<T, TResult> _, TResult ifFail)
                 => ifFail;
@@ -96,15 +89,15 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override Try<TResult> Try<TResult>(Func<T, TResult> map) 
-                => Functional.Try.Fail<TResult>(Error);
+                => Functional.Try<TResult>.Fail(Error);
 
             /// <inheritdoc />
             public override Try<TResult> AndThenTry<TResult>(Func<T, Result<TResult>> bind)
-                => Functional.Try.Fail<TResult>(Error);
+                => Functional.Try<TResult>.Fail(Error);
 
             /// <inheritdoc />
             public override Try<TResult> AndThenTry<TResult>(Func<T, Try<TResult>> bind)
-                => Functional.Try.Fail<TResult>(Error);
+                => Functional.Try<TResult>.Fail(Error);
         }
     }
 }

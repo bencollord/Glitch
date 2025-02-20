@@ -2,12 +2,8 @@
 
 namespace Glitch.Functional
 {
-    public static class Result
+    public static partial class Result
     {
-        public static Result<T> Okay<T>(T value) => new Result<T>.Okay(value);
-
-        public static Result<T> Fail<T>(Error error) => new Result<T>.Fail(error);
-
         public static Result<TResult> Apply<T, TResult>(this Result<Func<T, TResult>> function, Result<T> value)
             => value.Apply(function);
 
@@ -21,8 +17,12 @@ namespace Glitch.Functional
                 );
     }
 
-    public abstract partial record Result<T>
+    public abstract record Result<T>
     {
+        public static Result<T> Okay(T value) => new Result.Okay<T>(value);
+
+        public static Result<T> Fail(Error error) => new Result.Fail<T>(error);
+
         public abstract bool IsOkay { get; }
 
         public abstract bool IsFail { get; }
@@ -255,8 +255,8 @@ namespace Glitch.Functional
 
         public static implicit operator bool(Result<T> result) => result.IsOkay;
 
-        public static implicit operator Result<T>(T value) => new Result<T>.Okay(value);
+        public static implicit operator Result<T>(T value) => Okay(value);
 
-        public static implicit operator Result<T>(Error error) => new Result<T>.Fail(error);
+        public static implicit operator Result<T>(Error error) => Fail(error);
     }
 }

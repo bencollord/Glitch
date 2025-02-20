@@ -2,16 +2,6 @@
 {
     public static partial class Try
     {
-        public static Try<T> Okay<T>(T value) => new(() => value);
-
-        public static Try<T> Fail<T>(Error error) => new(() => error);
-
-        public static Try<T> Lift<T>(Result<T> result) => new(() => result);
-
-        public static Try<T> Lift<T>(Func<Result<T>> function) => new(function);
-
-        public static Try<T> Lift<T>(Func<T> function) => new(() => function());
-
         public static Try<TResult> Apply<T, TResult>(this Try<Func<T, TResult>> function, Try<T> value)
             => value.Apply(function);
 
@@ -27,6 +17,16 @@
         {
             this.thunk = thunk;
         }
+
+        public static Try<T> Okay(T value) => new(() => value);
+
+        public static Try<T> Fail(Error error) => new(() => error);
+
+        public static Try<T> Lift(Result<T> result) => new(() => result);
+
+        public static Try<T> Lift(Func<Result<T>> function) => new(function);
+
+        public static Try<T> Lift(Func<T> function) => new(() => function());
 
         /// <summary>
         /// Applies the supplied function to the wrapped value.
@@ -82,7 +82,9 @@
             {
                 var result = thunk();
 
-                return result is Result<T>.Okay ok ? mapper(ok.Value).thunk() : result.Cast<TResult>();
+                return result is Result.Okay<T> ok 
+                     ? mapper(ok.Value).thunk() 
+                     : result.Cast<TResult>();
             });
 
         /// <summary>
@@ -113,7 +115,7 @@
         /// <param name="mapper"></param>
         /// <returns></returns>
         public Try<TResult> AndThen<TResult>(Func<T, Result<TResult>> mapper)
-            => AndThen(e => Try.Lift(mapper(e)));
+            => AndThen(e => Try<TResult>.Lift(mapper(e)));
 
         /// <summary>
         /// Implements a bind-map operation, similar to
@@ -151,7 +153,7 @@
             {
                 var result = thunk();
 
-                return result is Result<T>.Fail fail ? other(fail.Error).thunk() : result;
+                return result is Result.Fail<T> fail ? other(fail.Error).thunk() : result;
             });
 
         public Try<T> Filter(Func<T, bool> predicate)
@@ -263,7 +265,7 @@
             }
             catch (Exception ex)
             {
-                return Result.Fail<T>(ex);
+                return Result<T>.Fail(ex);
             }
         }
 

@@ -3,18 +3,10 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Functional
 {
-    public abstract partial record Result<T>
+    public static partial class Result
     {
-        public record Okay : Result<T>
+        public record Okay<T>(T Value) : Result<T>
         {
-            public Okay(T value)
-            {
-                Value = value ?? throw new ArgumentNullException(nameof(value));
-            }
-
-            [NotNull]
-            public T Value { get; }
-
             public override bool IsOkay => true;
 
             public override bool IsFail => false;
@@ -52,7 +44,7 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override Result<TResult> Map<TResult>(Func<T, TResult> mapper)
-                => new Result<TResult>.Okay(mapper(Value));
+                => new Okay<TResult>(mapper(Value));
 
             public override Result<TResult> MapOr<TResult>(Func<T, TResult> mapper, TResult _) 
                 => Map(mapper);
@@ -108,7 +100,7 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override Try<TResult> AndThenTry<TResult>(Func<T, Try<TResult>> bind) 
-                => Functional.Try.Lift(this).AndThen(bind);
+                => Functional.Try<T>.Lift(this).AndThen(bind);
         }
     }
 }
