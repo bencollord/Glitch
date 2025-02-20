@@ -2,8 +2,6 @@
 {
     public class AggregateError : Error
     {
-        public const int AggregateErrorCode = 149264206;
-
         private readonly IEnumerable<Error> errors;
 
         public AggregateError(IEnumerable<Error> errors)
@@ -13,8 +11,6 @@
         }
 
         public override string Message => errors.Select(e => e.Message).Join(", ");
-
-        public override Option<int> Code => AggregateErrorCode;
 
         public override Option<Error> Inner => Option.None;
 
@@ -53,7 +49,6 @@
         }
 
         private IEnumerable<Error> ErrorsInOrder()
-            => errors.OrderBy(e => e.Code.DefaultIfNone())
-                     .ThenBy(e => e.Message);
+            => errors.OrderBy(e => e.Message);
     }
 }

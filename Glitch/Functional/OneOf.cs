@@ -1,5 +1,19 @@
 ﻿namespace Glitch.Functional
 {
+    public static partial class OneOf
+    {
+        public record One<T>(T Value)
+        {
+            public OneOf<TLeft, T> AsRightOf<TLeft>() => new OneOf<TLeft, T>.Right(Value);
+
+            public OneOf<T, TRight> AsLeftOf<TRight>() => new OneOf<T, TRight>.Left(Value);
+        }
+
+        public record Left<T>(T Value);
+
+        public record Right<T>(T Value);
+    }
+
     /// <summary>
     /// Represents a discriminated union that can be
     /// one value or the other.
@@ -87,6 +101,8 @@
         /// <returns></returns>
         public abstract TResult Match<TResult>(Func<TLeft, TResult> ifLeft, Func<TRight, TResult> ifRight);
 
+        public abstract override string ToString();
+
         public TRight IfLeft(TRight fallback) => IfLeft(() => fallback);
 
         public TRight IfLeft(Func<TRight> fallback) => Match(_ => fallback(), r => r);
@@ -95,9 +111,42 @@
 
         public TLeft IfRight(Func<TLeft> fallback) => Match(l => l, _ => fallback());
 
+        public Option<TLeft> LeftOrNone() => Match(Some, _ => None);
+
+        public Option<TRight> RightOrNone() => Match(_ => None, Some);
+
+        public Result<TLeft> LeftOrFail(Error error) => Match(Okay, _ => error);
+        public Result<TRight> RightOrFail(Error error) => Match(_ => error, Okay);
+
+        public Result<TLeft> LeftOrFail(Func<TRight, Error> ifRight) => Match(Okay, r => ifRight(r));
+
+        public Result<TRight> RightOrFail(Func<TLeft, Error> ifLeft) => Match(l => ifLeft(l), Okay);
+
         // TODO Add code to fix type inference issues here.
         public OneOf<TRight, TLeft> Flip() => Match<OneOf<TRight, TLeft>>(
             l => new OneOf<TRight, TLeft>.Right(l),
             r => new OneOf<TRight, TLeft>.Left(r));
+
+        public static implicit operator OneOf<TLeft, TRight>(TLeft left) => new Left(left);
+
+        public static implicit operator OneOf<TLeft, TRight>(TRight right) => new Right(right);
+
+        public static implicit operator OneOf<TLeft, TRight>(OneOf.Left<TLeft> left) => new Left(left.Value);
+
+        public static implicit operator OneOf<TLeft, TRight>(OneOf.Right<TRight> right) => new Right(right.Value);
+
+        public static explicit operator TLeft(OneOf<TLeft, TRight> union)
+            => union switch
+            {
+                Left(var l) => l,
+                _ => throw new InvalidCastException($"Cannot cast {union} to {typeof(TLeft)}")
+            };
+
+        public static explicit operator TRight(OneOf<TLeft, TRight> union)
+            => union switch
+            {
+                Right(var r) => r,
+                _ => throw new InvalidCastException($"Cannot cast {union} to {typeof(TRight)}")
+            };
     }
 }

@@ -8,8 +8,6 @@ namespace Glitch.Functional
 
         public abstract string Message { get; }
 
-        public virtual Option<int> Code { get; } = Option.None;
-
         public abstract Option<Error> Inner { get; }
 
         public static Error New(string message) => new ApplicationError(message);
@@ -27,19 +25,13 @@ namespace Glitch.Functional
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
 
-            if (Code.IsSome && other.Code.IsSome)
-            {
-                return Code == other.Code;
-            }
-
             return MessageComparer.Equals(Message, other.Message);
         }
 
         public sealed override bool Equals(object? obj) => Equals(obj as Error);
 
         public override int GetHashCode() 
-            => Code.Map(c => c.GetHashCode())
-                   .IfNone(MessageComparer.GetHashCode(Message));
+            => HashCode.Combine(GetType().GetHashCode(), MessageComparer.GetHashCode(Message));
 
         public override string ToString() => Message;
 

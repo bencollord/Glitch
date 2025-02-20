@@ -23,11 +23,11 @@ namespace Glitch.Functional
 
     public abstract partial record Result<T>
     {
-        public abstract bool IsOk { get; }
+        public abstract bool IsOkay { get; }
 
         public abstract bool IsFail { get; }
 
-        public abstract bool IsOkAnd(Func<T, bool> predicate);
+        public abstract bool IsOkayAnd(Func<T, bool> predicate);
 
         public abstract bool IsFailAnd(Func<Error, bool> predicate);
 
@@ -107,7 +107,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public abstract Result<T> Do(Action<T> action);
+        public abstract Result<T> IfOkay(Action<T> action);
 
         /// <summary>
         /// Executes an impure action if failed.
@@ -180,6 +180,26 @@ namespace Glitch.Functional
         public abstract Try<TResult> AndThenTry<TResult>(Func<T, Try<TResult>> bind);
 
         /// <summary>
+        /// Combines another result into a result of a tuple.
+        /// </summary>
+        /// <typeparam name="TOther"></typeparam>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public Result<(T, TOther)> Zip<TOther>(Result<TOther> other)
+            => ZipWith(other, (x, y) => (x, y));
+
+        /// <summary>
+        /// Combines two results using a provided function.
+        /// </summary>
+        /// <typeparam name="TOther"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="other"></param>
+        /// <param name="zipper"></param>
+        /// <returns></returns>
+        public Result<TResult> ZipWith<TOther, TResult>(Result<TOther> other, Func<T, TOther, TResult> zipper)
+            => AndThen(x => other.Map(y => zipper(x, y)));
+
+        /// <summary>
         /// Returns the wrapped value if Ok. Otherwise throws the wrapped error
         /// as an exception.
         /// </summary>
@@ -225,7 +245,7 @@ namespace Glitch.Functional
 
         public abstract override string ToString();
 
-        public static bool operator true(Result<T> result) => result.IsOk;
+        public static bool operator true(Result<T> result) => result.IsOkay;
 
         public static bool operator false(Result<T> result) => result.IsFail;
 
@@ -233,7 +253,7 @@ namespace Glitch.Functional
 
         public static Result<T> operator |(Result<T> x, Result<T> y) => x.Or(y);
 
-        public static implicit operator bool(Result<T> result) => result.IsOk;
+        public static implicit operator bool(Result<T> result) => result.IsOkay;
 
         public static implicit operator Result<T>(T value) => new Result<T>.Okay(value);
 

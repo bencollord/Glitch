@@ -67,7 +67,7 @@
             {
                 var result = thunk();
 
-                return result.IsOk ? other.thunk() : result.Cast<TResult>();
+                return result.IsOkay ? other.thunk() : result.Cast<TResult>();
             });
 
         /// <summary>
@@ -85,7 +85,46 @@
                 return result is Result<T>.Okay ok ? mapper(ok.Value).thunk() : result.Cast<TResult>();
             });
 
+        /// <summary>
+        /// Implements a bind-map operation, similar to
+        /// <see cref="Enumerable.SelectMany"/>.
+        /// </summary>
+        /// <typeparam name="TElement"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="bind"></param>
+        /// <param name="project"></param>
+        /// <returns></returns>
         public Try<TResult> AndThen<TElement, TResult>(Func<T, Try<TElement>> bind, Func<T, TElement, TResult> project)
+            => AndThen(x => bind(x).Map(y => project(x, y)));
+
+        /// <summary>
+        /// Convenience method that allows bind operations to work
+        /// with <see cref="Result"/> types.
+        /// </summary>
+        /// <remarks>
+        /// This is here to reflect the common use case of needing
+        /// to bind between tries and results. The two types are
+        /// closely related anyway, since Try is effectively a lazy
+        /// version of result that automatically captures errors,
+        /// C# lacks higher kindred types, and its type inference leaves
+        /// a lot to be desired when coding in a functional style.
+        /// </remarks>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="mapper"></param>
+        /// <returns></returns>
+        public Try<TResult> AndThen<TResult>(Func<T, Result<TResult>> mapper)
+            => AndThen(e => Try.Lift(mapper(e)));
+
+        /// <summary>
+        /// Implements a bind-map operation, similar to
+        /// <see cref="Enumerable.SelectMany"/> for results.
+        /// </summary>
+        /// <typeparam name="TElement"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="bind"></param>
+        /// <param name="project"></param>
+        /// <returns></returns>
+        public Try<TResult> AndThen<TElement, TResult>(Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project)
             => AndThen(x => bind(x).Map(y => project(x, y)));
 
         /// <summary>
@@ -98,7 +137,7 @@
             {
                 var result = thunk();
 
-                return result.IsOk ? result : other.thunk();
+                return result.IsOkay ? result : other.thunk();
             });
 
         /// <summary>
@@ -124,7 +163,7 @@
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Try<T> Do(Action<T> action) => new(() => thunk().Do(action));
+        public Try<T> IfOkay(Action<T> action) => new(() => thunk().IfOkay(action));
 
         /// <summary>
         /// Executes an impure action if failed.
@@ -160,6 +199,26 @@
         /// <typeparam name="TResult"></typeparam>
         /// <returns></returns>
         public Try<TResult> Cast<TResult>() => new(() => thunk().Cast<TResult>());
+
+        /// <summary>
+        /// Combines another try into a try of a tuple.
+        /// </summary>
+        /// <typeparam name="TOther"></typeparam>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public Try<(T, TOther)> Zip<TOther>(Try<TOther> other)
+            => ZipWith(other, (x, y) => (x, y));
+
+        /// <summary>
+        /// Combines two tries using a provided function.
+        /// </summary>
+        /// <typeparam name="TOther"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="other"></param>
+        /// <param name="zipper"></param>
+        /// <returns></returns>
+        public Try<TResult> ZipWith<TOther, TResult>(Try<TOther> other, Func<T, TOther, TResult> zipper)
+            => AndThen(x => other.Map(y => zipper(x, y)));
 
         /// <summary>
         /// Returns the wrapped value if Ok. Otherwise throws the wrapped error
@@ -207,6 +266,14 @@
                 return Result.Fail<T>(ex);
             }
         }
+
+        public static implicit operator Try<T>(Result<T> result) => new(() => result);
+
+        public static explicit operator Result<T>(Try<T> @try) => @try.Run();
+
+        public static implicit operator Try<T>(T value) => new(() => value);
+
+        public static explicit operator T(Try<T> @try) => @try.Run().Unwrap();
 
         public static Try<T> operator &(Try<T> x, Try<T> y) => x.And(y);
 

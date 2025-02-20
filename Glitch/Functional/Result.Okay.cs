@@ -15,7 +15,7 @@ namespace Glitch.Functional
             [NotNull]
             public T Value { get; }
 
-            public override bool IsOk => true;
+            public override bool IsOkay => true;
 
             public override bool IsFail => false;
 
@@ -32,7 +32,7 @@ namespace Glitch.Functional
                 => (TResult)(dynamic)Value!;
 
             /// <inheritdoc />
-            public override Result<T> Do(Action<T> action)
+            public override Result<T> IfOkay(Action<T> action)
             {
                 action(Value);
                 return this;
@@ -94,7 +94,7 @@ namespace Glitch.Functional
             /// <inheritdoc />
             public override T UnwrapOrElse(Func<Error, T> _) => Value;
 
-            public override bool IsOkAnd(Func<T, bool> predicate) => predicate(Value);
+            public override bool IsOkayAnd(Func<T, bool> predicate) => predicate(Value);
 
             public override bool IsFailAnd(Func<Error, bool> _) => false;
 

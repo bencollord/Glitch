@@ -12,7 +12,7 @@ namespace Glitch.Functional
 
             public Error Error { get; }
 
-            public override bool IsOk => false;
+            public override bool IsOkay => false;
 
             public override bool IsFail => true;
 
@@ -28,7 +28,7 @@ namespace Glitch.Functional
             public override Result<TResult> Cast<TResult>() => new Result<TResult>.Fail(Error);
 
             /// <inheritdoc />
-            public override Result<T> Do(Action<T> _) => this;
+            public override Result<T> IfOkay(Action<T> _) => this;
 
             /// <inheritdoc />
             public override Result<T> IfFail(Action action)
@@ -90,7 +90,7 @@ namespace Glitch.Functional
             /// <inheritdoc />
             public override T UnwrapOrElse(Func<Error, T> fallback) => fallback(Error);
 
-            public override bool IsOkAnd(Func<T, bool> _) => false;
+            public override bool IsOkayAnd(Func<T, bool> _) => false;
 
             public override bool IsFailAnd(Func<Error, bool> predicate) => predicate(Error);
 

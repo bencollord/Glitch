@@ -136,7 +136,7 @@ namespace Glitch
                 var numberFormat = Option.Some(format[2..].Trim())
                     .Filter(f => !String.IsNullOrEmpty(f));
 
-                numberFormat.Do(ValidateNumberFormat);
+                numberFormat.IfSome(ValidateNumberFormat);
 
                 return new FormatSpecifier(DenominationMap[denomination], numberFormat);
             }

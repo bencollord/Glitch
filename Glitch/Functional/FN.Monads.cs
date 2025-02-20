@@ -1,4 +1,6 @@
-﻿namespace Glitch.Functional
+﻿using System.Numerics;
+
+namespace Glitch.Functional
 {
     public static partial class FN
     {
@@ -24,8 +26,42 @@
 
         public static Try<T> Try<T>(Error error) => Functional.Try.Fail<T>(error);
 
+        public static OneOf.Left<TLeft> Left<TLeft>(TLeft left) => new(left);
+
         public static OneOf<TLeft, TRight> Left<TLeft, TRight>(TLeft left) => new OneOf<TLeft, TRight>.Left(left);
 
-        public static OneOf<TLeft, TRight> Right<TLeft, TRight>(TRight left) => new OneOf<TLeft, TRight>.Right(left);
+        public static OneOf.Right<TRight> Right<TRight>(TRight right) => new(right);
+        
+        public static OneOf<TLeft, TRight> Right<TLeft, TRight>(TRight right) => new OneOf<TLeft, TRight>.Right(right);
+        
+        public static OneOf<TLeft, TRight> OneOf<TLeft, TRight>(TLeft left) => new OneOf<TLeft, TRight>.Left(left);
+        
+        public static OneOf<TLeft, TRight> OneOf<TLeft, TRight>(TRight right) => new OneOf<TLeft, TRight>.Right(right);
+
+        public static IEnumerable<T> Sequence<T>(IEnumerable<T> items) => items;
+
+        public static IEnumerable<T> Sequence<T>(params T[] items) => items.AsEnumerable();
+
+        public static IEnumerable<T> Range<T>(T start, T end)
+            where T : IComparable<T>, IIncrementOperators<T>
+        {
+            for (T i = start; i.CompareTo(end) < 0; ++i)
+            {
+                yield return i;
+            }
+        }
+
+        public static IEnumerable<T> Repeat<T>(T item, int times) => Enumerable.Repeat(item, times);
+
+        public static IEnumerable<T> Repeat<T>(Func<T> func, int times)
+            => Infinite(func).Take(times);
+
+        public static IEnumerable<T> Infinite<T>(Func<T> func)
+        {
+            while (true)
+            {
+                yield return func();
+            }
+        }
     }
 }

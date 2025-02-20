@@ -20,6 +20,7 @@
 
         // Disambiguate for main dictionary since it implements both of the above interfaces
         public static Option<TValue> TryGetValue<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key)
+            where TKey : notnull
         {
             ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
             ArgumentNullException.ThrowIfNull(key, nameof(key));

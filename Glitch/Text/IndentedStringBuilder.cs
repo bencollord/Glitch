@@ -41,6 +41,17 @@ namespace Glitch.Text
             set => indentation = value;
         }
 
+        public IndentedStringBuilder Append(char value)
+        {
+            if (shouldIndent)
+            {
+                inner.Append(Indentation);
+            }
+
+            inner.Append(value);
+            return this;
+        }
+
         public IndentedStringBuilder Append(string text)
         {
             if (shouldIndent)
@@ -99,7 +110,20 @@ namespace Glitch.Text
             return this;
         }
 
+        public IndentedStringBuilder Clear()
+        {
+            inner.Clear();
+            return this;
+        }
+
         public override string ToString() => inner.ToString();
+
+        public string Flush()
+        {
+            var output = ToString();
+            Clear();
+            return output;
+        }
 
         public IDisposable BeginBlock() => new IndentationBlock(this);
 

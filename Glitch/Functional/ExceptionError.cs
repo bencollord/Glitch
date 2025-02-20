@@ -12,8 +12,6 @@
 
         public override string Message => exception.Message;
 
-        public override Option<int> Code => exception.HResult;
-
         public override Option<Error> Inner { get; }
 
         public override Exception AsException() => exception;

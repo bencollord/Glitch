@@ -27,6 +27,8 @@ namespace Glitch.Functional
 
             public override TResult Match<TResult>(Func<TLeft, TResult> _, Func<TRight, TResult> ifRight)
                 => ifRight(Value);
+
+            public override string ToString() => $"Right({Value})";
         }
     }
 }
