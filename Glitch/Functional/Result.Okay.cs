@@ -70,7 +70,7 @@ namespace Glitch.Functional
                 => predicate(Value) ? this : Fail<T>(new ApplicationError("Result failed check"));
 
             /// <inheritdoc />
-            public override Option<T> UnwrapOrNone() => Option.Some(Value);
+            public override Option<T> UnwrapOrNone() => Some(Value);
 
             public override string ToString() => $"Ok: {Value}";
 
@@ -101,6 +101,15 @@ namespace Glitch.Functional
             /// <inheritdoc />
             public override Try<TResult> AndThenTry<TResult>(Func<T, Try<TResult>> bind) 
                 => Functional.Try<T>.Lift(this).AndThen(bind);
+
+            public override Result<TResult> ZipWith<TOther, TResult>(Result<TOther> other, Func<T, TOther, TResult> zipper) 
+                => other.Map(val => zipper(Value, val));
+
+            public override Error UnwrapErrorOr(Error fallback) => fallback;
+
+            public override Error UnwrapErrorOrElse(Func<T, Error> fallback) => fallback(Value);
+
+            public override Option<Error> UnwrapErrorOrNone() => None;
         }
     }
 }

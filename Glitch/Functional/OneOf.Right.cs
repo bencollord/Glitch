@@ -3,6 +3,11 @@ namespace Glitch.Functional
 {
     public static partial class OneOf
     {
+        public record Right<T>(T Value)
+        {
+            public OneOf<TLeft, T> OrLeft<TLeft>() => Right(Value);
+        }
+
         public record Right<TLeft, TRight>(TRight Value) : OneOf<TLeft, TRight>
         {
             public override bool IsLeft { get; } = false;

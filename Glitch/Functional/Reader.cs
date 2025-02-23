@@ -2,35 +2,35 @@
 {
     public static class Reader
     {
-        public static Reader<TArg, TValue> New<TArg, TValue>(TValue value) => new(_ => value);
-        public static Reader<TArg, TValue> New<TArg, TValue>(Func<TValue> thunk) => new(_ => thunk());
-        public static Reader<TArg, TValue> New<TArg, TValue>(Func<TArg, TValue> thunk) => new(thunk);
+        public static Reader<TEnv, TValue> Lift<TEnv, TValue>(TValue value) => new(_ => value);
+        public static Reader<TEnv, TValue> Lift<TEnv, TValue>(Func<TValue> thunk) => new(_ => thunk());
+        public static Reader<TEnv, TValue> Lift<TEnv, TValue>(Func<TEnv, TValue> thunk) => new(thunk);
     }
 
-    public class Reader<TArg, TValue>
+    public class Reader<TEnv, TValue>
     {
-        private Func<TArg, TValue> thunk;
+        private readonly Func<TEnv, TValue> thunk;
 
-        internal Reader(Func<TArg, TValue> thunk)
+        internal Reader(Func<TEnv, TValue> thunk)
         {
             this.thunk = thunk;
         }
 
-        public Reader<TArg1, TValue> With<TArg1>(Func<TArg1, TArg> argMapper)
+        public Reader<TEnv1, TValue> With<TEnv1>(Func<TEnv1, TEnv> argMapper)
             => new(arg1 => thunk(argMapper(arg1)));
 
-        public Reader<TArg, TResult> Map<TResult>(Func<TValue, TResult> mapper)
+        public Reader<TEnv, TResult> Map<TResult>(Func<TValue, TResult> mapper)
             => new(arg => mapper(thunk(arg)));
 
-        public Reader<TArg, Func<T2, TResult>> PartialMap<T2, TResult>(Func<TValue, T2, TResult> mapper)
+        public Reader<TEnv, Func<T2, TResult>> PartialMap<T2, TResult>(Func<TValue, T2, TResult> mapper)
             => Map(mapper.Curry());
 
-        public Reader<TArg, TResult> AndThen<TResult>(Func<TValue, Reader<TArg, TResult>> bind)
+        public Reader<TEnv, TResult> AndThen<TResult>(Func<TValue, Reader<TEnv, TResult>> bind)
             => new(arg => bind(thunk(arg)).thunk(arg));
 
-        public Reader<TArg, TResult> AndThen<TElement, TResult>(Func<TValue, Reader<TArg, TElement>> bind, Func<TValue, TElement, TResult> project)
+        public Reader<TEnv, TResult> AndThen<TElement, TResult>(Func<TValue, Reader<TEnv, TElement>> bind, Func<TValue, TElement, TResult> project)
             => AndThen(x => bind(x).Map(y => project(x, y)));
 
-        public TValue Run(TArg arg) => thunk(arg);
+        public TValue Run(TEnv arg) => thunk(arg);
     }
 }

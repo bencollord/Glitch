@@ -60,7 +60,10 @@ namespace Glitch.Collections
         bool ICollection<T>.Remove(T item) => items.Remove(item);
 
         private Option<T> Maybe(LinkedListNode<T>? node)
-            => Option.Maybe(node).Map(n => n.Value);
+            // I don't know why C#'s janky type inference got confused here, 
+            // but we need to explicitly type the linked list node or else
+            // it thinks we're trying to map a plain T for some stupid reason.
+            => Maybe<LinkedListNode<T>>(node).Map(n => n.Value);
 
         private Error EmptyDequeError() => new ApplicationError("Deque is empty");
     }

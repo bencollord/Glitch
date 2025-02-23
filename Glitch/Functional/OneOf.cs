@@ -1,25 +1,5 @@
 ﻿namespace Glitch.Functional
 {
-    public static partial class OneOf
-    {
-        public record One<T>(T Value)
-        {
-            public OneOf<TLeft, T> AsRightOf<TLeft>() => Right(Value);
-
-            public OneOf<T, TRight> AsLeftOf<TRight>() => Left(Value);
-        }
-
-        public record Left<T>(T Value)
-        {
-            public OneOf<T, TRight> OrRight<TRight>() => Left(Value);
-        }
-
-        public record Right<T>(T Value)
-        { 
-            public OneOf<TLeft, T> OrLeft<TLeft>() => Right(Value);
-        }
-    }
-
     /// <summary>
     /// Represents a discriminated union that can be
     /// one value or the other.
@@ -126,6 +106,7 @@
         public Option<TRight> RightOrNone() => Match(_ => None, Some);
 
         public Result<TLeft> LeftOrFail(Error error) => Match(Okay, _ => error);
+
         public Result<TRight> RightOrFail(Error error) => Match(_ => error, Okay);
 
         public Result<TLeft> LeftOrFail(Func<TRight, Error> ifRight) => Match(Okay, r => ifRight(r));

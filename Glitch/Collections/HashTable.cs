@@ -219,7 +219,7 @@ namespace Glitch.Collections
                 entry = entry.Next;
             }
 
-            return Option.None;
+            return None;
         }
 
         private int GetBucket(TKey key) => GetBucket(keyComparer.GetHashCode(key));
@@ -235,7 +235,7 @@ namespace Glitch.Collections
             internal Enumerator(HashTable<TKey, TValue> hashTable)
             {
                 entries = hashTable.entries;
-                current = Option.None;
+                current = None;
             }
 
             public KeyValuePair<TKey, TValue> Current
@@ -251,7 +251,7 @@ namespace Glitch.Collections
                     return false;
                 }
 
-                current = current.AndThen(e => Option.Maybe(e.Next));
+                current = current.AndThen(e => Maybe(e.Next));
 
                 if (current.IsSome)
                 {
@@ -269,7 +269,7 @@ namespace Glitch.Collections
             public void Dispose()
             {
                 entries = new Entry[0];
-                current = Option.None;
+                current = None;
                 cursor = -1;
             }
 
@@ -281,7 +281,7 @@ namespace Glitch.Collections
                 }
 
                 cursor = 0;
-                current = Option.None;
+                current = None;
             }
         }
 

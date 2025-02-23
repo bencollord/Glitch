@@ -17,9 +17,9 @@ namespace Glitch.Linq
         [return: NotNullIfNotNull(nameof(node))]
         public override Expression? Visit(Expression? node)
         {
-            return Option.Maybe(node)
-                         .AndThen(expr => replacementMap.TryGetValue(expr))
-                         .DefaultIfNone(() => base.Visit(node));
+            return Maybe(node)
+                .AndThen(expr => replacementMap.TryGetValue(expr))
+                .DefaultIfNone(() => base.Visit(node));
         }
     }
 }

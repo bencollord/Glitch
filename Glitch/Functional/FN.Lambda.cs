@@ -2,10 +2,16 @@
 {
     public static partial class FN
     {
+        public static T Identity<T>(T x) => x;
+
         public static Func<T> Func<T>(Func<T> func) => func;
+        
         public static Func<T, TResult> Func<T, TResult>(Func<T, TResult> func) => func;
+        
         public static Func<T1, T2, TResult> Func<T1, T2, TResult>(Func<T1, T2, TResult> func) => func;
+        
         public static Func<T1, T2, T3, TResult> Func<T1, T2, T3, TResult>(Func<T1, T2, T3, TResult> func) => func;
+        
         public static Func<T1, T2, T3, T4, TResult> Func<T1, T2, T3, T4, TResult>(Func<T1, T2, T3, T4, TResult> func) => func;
 
         public static Func<TResult> Then<T, TResult>(this Func<T> f, Func<T, TResult> g)

@@ -12,7 +12,7 @@
 
         public override string Message => errors.Select(e => e.Message).Join(", ");
 
-        public override Option<Error> Inner => Option.None;
+        public override Option<Error> Inner => None;
 
         public override Exception AsException() 
             => new AggregateException(errors.Select(e => e.AsException()));

@@ -1,6 +1,8 @@
-﻿namespace Glitch.Collections
+﻿using System.Collections;
+
+namespace Glitch.Collections
 {
-    public class RingBuffer<T>
+    public class RingBuffer<T> : IEnumerable<T>
     {
         private T[] buffer;
         private int head;
@@ -11,6 +13,13 @@
             buffer = new T[size];
             head = 0;
             tail = -1;
+        }
+
+        public RingBuffer(T[] buffer)
+        {
+            this.buffer = buffer;
+            head = 0;
+            tail = buffer.Length - 1;
         }
 
         private RingBuffer(RingBuffer<T> copy)
@@ -143,6 +152,16 @@
                 Array.Copy(buffer, 0, array, index + firstCopyCount, Count - firstCopyCount);
             }
         }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            for (int i = 0; i < Count; ++i)
+            {
+                yield return this[i];
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         private int Translate(int index) => index % Capacity;
     }

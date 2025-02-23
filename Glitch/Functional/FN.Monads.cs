@@ -4,11 +4,13 @@ namespace Glitch.Functional
 {
     public static partial class FN
     {
-        public static readonly OptionNone None = Option.None;
+        public static readonly Unit Unit = Unit.Value;
 
-        public static Option<T> Some<T>(T value) => Option.Some(value);
+        public static readonly OptionNone None = OptionNone.Value;
 
-        public static Option<T> Maybe<T>(T? value) => Option.Maybe(value);
+        public static Option<T> Some<T>(T value) => Option<T>.Some(value);
+
+        public static Option<T> Maybe<T>(T? value) => Option<T>.Maybe(value);
 
         public static Result<T> Okay<T>(T value) => Result<T>.Okay(value);
 

@@ -3,10 +3,10 @@
     public class ApplicationError : Error
     {
         public ApplicationError(string message)
-            : this(message, Option.None) { }
+            : this(message, None) { }
 
         public ApplicationError(string message, Error inner)
-            : this(message, Option.Some(inner)) { }
+            : this(message, Some(inner)) { }
 
         public ApplicationError(string message, Option<Error> inner)
         {

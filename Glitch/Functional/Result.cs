@@ -1,22 +1,5 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Glitch.Functional
+﻿namespace Glitch.Functional
 {
-    public static partial class Result
-    {
-        public static Result<TResult> Apply<T, TResult>(this Result<Func<T, TResult>> function, Result<T> value)
-            => value.Apply(function);
-
-        public static Result<T> Flatten<T>(this Result<Result<T>> nested)
-            => nested.AndThen(n => n);
-
-        public static Option<Result<T>> Invert<T>(this Result<Option<T>> nested)
-            => nested.Match(
-                    opt => opt.Map(Okay),
-                    err => Some(Fail<T>(err))
-                );
-    }
-
     public abstract record Result<T>
     {
         public static Result<T> Okay(T value) => new Result.Okay<T>(value);
@@ -189,18 +172,19 @@ namespace Glitch.Functional
             => ZipWith(other, (x, y) => (x, y));
 
         /// <summary>
-        /// Combines two results using a provided function.
+        /// Combines two results using a provided function if both are okay.
+        /// Otherwise, returns the error value of whichever one failed.
+        /// If both are faulted, returns an <see cref="AggregateError>"/>.
         /// </summary>
         /// <typeparam name="TOther"></typeparam>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="other"></param>
         /// <param name="zipper"></param>
         /// <returns></returns>
-        public Result<TResult> ZipWith<TOther, TResult>(Result<TOther> other, Func<T, TOther, TResult> zipper)
-            => AndThen(x => other.Map(y => zipper(x, y)));
+        public abstract Result<TResult> ZipWith<TOther, TResult>(Result<TOther> other, Func<T, TOther, TResult> zipper);
 
         /// <summary>
-        /// Returns the wrapped value if Ok. Otherwise throws the wrapped error
+        /// Returns the wrapped value if ok. Otherwise throws the wrapped error
         /// as an exception.
         /// </summary>
         /// <returns></returns>
@@ -237,11 +221,63 @@ namespace Glitch.Functional
         public abstract Option<T> UnwrapOrNone();
 
         /// <summary>
+        /// Returns the wrapped error if faulted. Otherwise throws an <see cref="InvalidOperationException"/>.
+        /// </summary>
+        /// <returns></returns>
+        public Error UnwrapError()
+            => UnwrapErrorOrElse(() => new InvalidOperationException("Cannot unwrap error of successful result"));
+
+        /// <summary>
+        /// Returns the wrapped error if faulted otherwise returns the fallback error.
+        /// </summary>
+        /// <param name="fallback"></param>
+        /// <returns></returns>
+        public abstract Error UnwrapErrorOr(Error fallback);
+
+        /// <summary>
+        /// Returns the wrapped error if faulted. Otherwise, returns the error
+        /// produced by the fallback function.
+        /// </summary>
+        /// <param name="fallback"></param>
+        /// <returns></returns>
+        public Error UnwrapErrorOrElse(Func<Error> fallback)
+            => UnwrapErrorOrElse(_ => fallback());
+
+        /// <summary>
+        /// Returns the wrapped error if faulted. Otherwise, returns the error
+        /// produced by the fallback function.
+        /// </summary>
+        /// <param name="fallback"></param>
+        /// <returns></returns>
+        public abstract Error UnwrapErrorOrElse(Func<T, Error> fallback);
+
+        /// <summary>
+        /// Returns Some(<see cref="Error"/>) if faulted. Otherwise, returns
+        /// an empty <see cref="Option{Error}"/>.
+        /// </summary>
+        /// <returns></returns>
+        public abstract Option<Error> UnwrapErrorOrNone();
+
+        /// <summary>
         /// Returns a singleton <see cref="IEnumerable{T}" /> if Ok.
         /// Otherwise, yields and empty <see cref="IEnumerable{T}" .
         /// </summary>
         /// <returns></returns>
         public abstract IEnumerable<T> Iterate();
+
+        public OneOf<T, Error> AsLeft() => LeftOrElse(Identity);
+
+        public OneOf<Error, T> AsRight() => RightOrElse(Identity);
+
+        public OneOf<T, TRight> LeftOr<TRight>(TRight value) => LeftOrElse(_ => value);
+
+        public OneOf<T, TRight> LeftOrElse<TRight>(Func<Error, TRight> func)
+            => Match(OneOf<T, TRight>.Left, func.Then(OneOf<T, TRight>.Right));
+
+        public OneOf<TLeft, T> RightOr<TLeft>(TLeft value) => RightOrElse(_ => value);
+
+        public OneOf<TLeft, T> RightOrElse<TLeft>(Func<Error, TLeft> func)
+            => Match(OneOf<TLeft, T>.Right, func.Then(OneOf<TLeft, T>.Left));
 
         public abstract override string ToString();
 
@@ -258,5 +294,13 @@ namespace Glitch.Functional
         public static implicit operator Result<T>(T value) => Okay(value);
 
         public static implicit operator Result<T>(Error error) => Fail(error);
-    }
+
+        public static explicit operator T(Result<T> result) 
+            => result.MapError(err => new InvalidCastException($"Cannot cast a faulted result to a value", err.AsException()))
+                     .Unwrap();
+
+        public static explicit operator Error(Result<T> result)
+            => result is Result.Fail<T>(var err) 
+                   ? err : throw new InvalidCastException("Cannot cast a successful result to an error");
+    };
 }

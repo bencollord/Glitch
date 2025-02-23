@@ -7,7 +7,7 @@
         public ExceptionError(Exception exception)
         {
             this.exception = exception;
-            Inner = Option.Maybe(exception.InnerException).Map(New);
+            Inner = Maybe(exception.InnerException).Map(New);
         }
 
         public override string Message => exception.Message;

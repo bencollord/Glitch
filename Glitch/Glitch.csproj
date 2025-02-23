@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Functional\QuerySyntax\" />
+    <Folder Include="IO\Compression\" />
   </ItemGroup>
 
 </Project>

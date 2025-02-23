@@ -20,6 +20,8 @@ namespace Glitch.Functional
 
         public abstract Exception AsException();
 
+        public bool Is<T>() where T : Error => this is T;
+
         public virtual bool Equals(Error? other)
         {
             if (other is null) return false;

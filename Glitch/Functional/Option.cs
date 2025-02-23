@@ -8,74 +8,9 @@ namespace Glitch.Functional
         public static readonly OptionNone Value = new();
     }
 
-    public static partial class Option
-    {
-        public static readonly OptionNone None = OptionNone.Value;
-
-        public static Option<T> Some<T>(T value) 
-            => value is not null ? new Option<T>(value) : throw new ArgumentNullException(nameof(value));
-
-        public static Option<T> Maybe<T>(T? value) => value != null ? Some(value) : None;
-
-        public static Option<TResult> Apply<T, TResult>(this Option<Func<T, TResult>> function, Option<T> value)
-            => value.Apply(function);
-
-        // Extension methods
-        // ====================================================================
-
-        /// <summary>
-        /// Returns a the unwrapped values of all the non-empty options.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="options"></param>
-        /// <returns></returns>
-        public static IEnumerable<T> OnlySomes<T>(this IEnumerable<Option<T>> options)
-            => options.Where(o => o.IsSome).Select(o => o.Unwrap());
-
-        /// <summary>
-        /// Allows three valued logic to be applied to an optional boolean.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="booleanOption"></param>
-        /// <param name="ifTrue"></param>
-        /// <param name="ifFalse"></param>
-        /// <param name="ifNone"></param>
-        /// <returns></returns>
-        public static T Match<T>(this Option<bool> booleanOption, Func<T> ifTrue, Func<T> ifFalse, Func<T> ifNone)
-            => booleanOption.Match(v => v ? ifTrue() : ifFalse(), ifNone);
-
-        /// <summary>
-        /// Unzips an option of a tuple into a tuple of two options.
-        /// </summary>
-        /// <remarks>
-        /// This method is intended to be used inline with tuple deconstruction.
-        /// </remarks>
-        /// <typeparam name="T1"></typeparam>
-        /// <typeparam name="T2"></typeparam>
-        /// <param name="option"></param>
-        /// <returns></returns>
-        public static (Option<T1>, Option<T2>) Unzip<T1, T2>(this Option<(T1, T2)> option)
-            => (option.Map(o => o.Item1), option.Map(o => o.Item2));
-
-        /// <summary>
-        /// Flattens a nested option to a single level.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="nested"></param>
-        /// <returns></returns>
-        public static Option<T> Flatten<T>(this Option<Option<T>> nested)
-            => nested.AndThen(o => o);
-
-        public static Result<Option<T>> Invert<T>(this Option<Result<T>> nested)
-            => nested.Match(
-                    res => res.Map(Some),
-                    () => Okay<Option<T>>(None)
-                );
-    }
-
     public readonly struct Option<T> : IEquatable<Option<T>>
     {
-        public static readonly Option<T> None = new Option<T>();
+        public static readonly Option<T> None = new();
 
         public static Option<T> Some(T value)
             => value is not null ? new Option<T>(value) : throw new ArgumentNullException(nameof(value));
@@ -246,7 +181,7 @@ namespace Glitch.Functional
                 return this;
             }
 
-            return Option.None;
+            return None;
         }
 
         /// <summary>
@@ -421,6 +356,16 @@ namespace Glitch.Functional
         /// <param name="error"></param>
         public Result<T> OkayOrElse(Func<Error> function) => IsSome ? Okay(value!) : Fail<T>(function());
 
+        public OneOf<T, TRight> LeftOr<TRight>(TRight value) => IsSome ? Left(this.value!) : Right(value);
+
+        public OneOf<T, TRight> LeftOrElse<TRight>(Func<TRight> func)
+            => Match(OneOf<T, TRight>.Left, func.Then(OneOf<T, TRight>.Right));
+
+        public OneOf<TLeft, T> RightOr<TLeft>(TLeft value) => IsSome ? Right(this.value!) : Left(value);
+
+        public OneOf<TLeft, T> RightOrElse<TLeft>(Func<TLeft> func)
+            => Match(OneOf<TLeft, T>.Right, func.Then(OneOf<TLeft, T>.Left));
+
         public bool Equals(Option<T> other)
         {
             if (IsNone) return other.IsNone;
@@ -451,7 +396,7 @@ namespace Glitch.Functional
 
         public static implicit operator bool(Option<T> option) => option.IsSome;
 
-        public static implicit operator Option<T>(T? value) => Option.Maybe(value);
+        public static implicit operator Option<T>(T? value) => Maybe(value);
 
         public static implicit operator Option<T>(OptionNone _) => new();
 

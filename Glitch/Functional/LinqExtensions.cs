@@ -15,24 +15,24 @@
             {
                 if (i == 0)
                 {
-                    return Option.Some(enumerator.Current);
+                    return Some(enumerator.Current);
                 }
             }
 
-            return Option.None;
+            return None;
         }
 
         public static Option<T> FirstOrNone<T>(this IEnumerable<T> source)
-            => source.FirstOrNone(Option.None);
+            => source.FirstOrNone(None);
 
         public static Option<T> FirstOrNone<T>(this IEnumerable<T> source, Func<T, bool> predicate)
-            => source.FirstOrNone(Option.Some(predicate));
+            => source.FirstOrNone(Some(predicate));
 
         private static Option<T> FirstOrNone<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
         {
             bool hasElements = predicate.Match(source.Any, source.Any);
 
-            return hasElements ? Option.Some(source.First()) : Option.None;
+            return hasElements ? Some(source.First()) : None;
         }
     }
 }
