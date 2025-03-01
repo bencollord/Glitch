@@ -50,6 +50,12 @@ namespace Glitch.Functional
             public override Result<TResult> MapOrElse<TResult>(Func<T, TResult> _, Func<Error, TResult> ifFail) 
                 => ifFail(Error);
 
+            public override Result<TResult> MapOr<TResult>(Func<T, TResult> _, Error ifFail)
+                => ifFail;
+
+            public override Result<TResult> MapOrElse<TResult>(Func<T, TResult> _, Func<Error, Error> ifFail)
+                => ifFail(Error);
+
             /// <inheritdoc />
             public override Result<T> MapError(Func<Error, Error> mapper) => mapper(Error);
 
@@ -88,16 +94,16 @@ namespace Glitch.Functional
             public override bool IsFailAnd(Func<Error, bool> predicate) => predicate(Error);
 
             /// <inheritdoc />
-            public override Try<TResult> Try<TResult>(Func<T, TResult> map) 
-                => Functional.Try<TResult>.Fail(Error);
+            public override Fallible<TResult> Try<TResult>(Func<T, TResult> map) 
+                => Functional.Fallible<TResult>.Fail(Error);
 
             /// <inheritdoc />
-            public override Try<TResult> AndThenTry<TResult>(Func<T, Result<TResult>> bind)
-                => Functional.Try<TResult>.Fail(Error);
+            public override Fallible<TResult> AndThenTry<TResult>(Func<T, Result<TResult>> bind)
+                => Functional.Fallible<TResult>.Fail(Error);
 
             /// <inheritdoc />
-            public override Try<TResult> AndThenTry<TResult>(Func<T, Try<TResult>> bind)
-                => Functional.Try<TResult>.Fail(Error);
+            public override Fallible<TResult> AndThenTry<TResult>(Func<T, Fallible<TResult>> bind)
+                => Functional.Fallible<TResult>.Fail(Error);
 
             /// <inheritdoc />
             public override Result<TResult> ZipWith<TOther, TResult>(Result<TOther> other, Func<T, TOther, TResult> _)
@@ -114,6 +120,12 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override Option<Error> UnwrapErrorOrNone() => Some(Error);
+
+            /// <inheritdoc />
+            public override void ThrowIfFail() => Error.Throw();
+
+            public override Result<TResult> AndThen<TResult>(Func<T, Result<TResult>> _, Func<Error, Result<TResult>> ifFail) 
+                => ifFail(Error);
         }
     }
 }

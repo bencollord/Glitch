@@ -16,17 +16,17 @@ namespace Glitch.Functional
 
         public static Result<T> Fail<T>(Error error) => Result<T>.Fail(error);
 
-        public static Try<T> Try<T>(Func<Result<T>> function) => Functional.Try<T>.Lift(function);
+        public static Fallible<T> Try<T>(Func<Result<T>> function) => Functional.Fallible<T>.Lift(function);
 
-        public static Try<T> Try<T>(Func<T> function) => Functional.Try<T>.Lift(function);
+        public static Fallible<T> Try<T>(Func<T> function) => Functional.Fallible<T>.Lift(function);
 
-        public static Try<Unit> Try(Action action) => Functional.Try<Unit>.Lift(action.Return());
+        public static Fallible<Unit> Try(Action action) => Functional.Fallible<Unit>.Lift(action.Return());
 
-        public static Try<T> Try<T>(T value) => Functional.Try<T>.Okay(value);
+        public static Fallible<T> Try<T>(T value) => Functional.Fallible<T>.Okay(value);
 
-        public static Try<T> Try<T>(Result<T> result) => Functional.Try<T>.Lift(result);
+        public static Fallible<T> Try<T>(Result<T> result) => Functional.Fallible<T>.Lift(result);
 
-        public static Try<T> Try<T>(Error error) => Functional.Try<T>.Fail(error);
+        public static Fallible<T> Try<T>(Error error) => Functional.Fallible<T>.Fail(error);
 
         public static OneOf.Left<TLeft> Left<TLeft>(TLeft left) => new(left);
 

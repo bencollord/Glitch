@@ -7,7 +7,7 @@
                 IEnumerable<TRight> right,
                 Func<TLeft, TKey> leftKeySelector,
                 Func<TRight, TKey> rightKeySelector,
-                Func<TLeft, TRight, TResult> resultSelector
+                Func<TLeft, TRight?, TResult> resultSelector
             ) => left.LeftJoin(
                      right,
                      leftKeySelector,
@@ -21,7 +21,7 @@
                 IEnumerable<TRight> right,
                 Func<TLeft, TKey> leftKeySelector,
                 Func<TRight, TKey> rightKeySelector,
-                Func<TLeft, TRight, TResult> resultSelector,
+                Func<TLeft, TRight?, TResult> resultSelector,
                 IEqualityComparer<TKey> keyComparer
             )
         {
@@ -49,7 +49,7 @@
                 IEnumerable<TRight> right,
                 Func<TLeft, TKey> leftKeySelector,
                 Func<TRight, TKey> rightKeySelector,
-                Func<TLeft, TRight, TResult> resultSelector
+                Func<TLeft?, TRight, TResult> resultSelector
             ) => left.RightJoin(
                      right,
                      leftKeySelector,
@@ -63,7 +63,7 @@
                 IEnumerable<TRight> right,
                 Func<TLeft, TKey> leftKeySelector,
                 Func<TRight, TKey> rightKeySelector,
-                Func<TLeft, TRight, TResult> resultSelector,
+                Func<TLeft?, TRight, TResult> resultSelector,
                 IEqualityComparer<TKey> keyComparer
             ) => right.LeftJoin(
                      left,
@@ -78,7 +78,7 @@
                 IEnumerable<TRight> right,
                 Func<TLeft, TKey> leftKeySelector,
                 Func<TRight, TKey> rightKeySelector,
-                Func<TLeft, TRight, TResult> resultSelector
+                Func<TLeft?, TRight?, TResult> resultSelector
             ) => left.FullJoin(
                      right,
                      leftKeySelector,
@@ -92,7 +92,7 @@
                 IEnumerable<TRight> right,
                 Func<TLeft, TKey> leftKeySelector,
                 Func<TRight, TKey> rightKeySelector,
-                Func<TLeft, TRight, TResult> resultSelector,
+                Func<TLeft?, TRight?, TResult> resultSelector,
                 IEqualityComparer<TKey> keyComparer
             )
         {
@@ -143,5 +143,15 @@
 
         public static IEnumerable<T> ExceptWhere<T>(this IEnumerable<T> source, Func<T, bool> predicate)
             => source.Where(e => !predicate(e));
+
+        public static IEnumerable<T> ForEach<T>(this IEnumerable<T> source, Action<T> action)
+        {
+            foreach (var item in source)
+            {
+                action(item);
+            }
+
+            return source;
+        }
     }
 }

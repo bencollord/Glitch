@@ -1,50 +1,72 @@
 ﻿namespace Glitch.Functional
 {
-    public static partial class Try
+    public static partial class Fallible
     {
-        public static Try<TResult> Apply<T, TResult>(this Try<Func<T, TResult>> function, Try<T> value)
+        public static Fallible<T> Okay<T>(T value) => new(() => value);
+
+        public static Fallible<T> Fail<T>(Error error) => new(() => error);
+
+        public static Fallible<T> Lift<T>(Result<T> result) => new(() => result);
+
+        public static Fallible<T> Lift<T>(Func<Result<T>> function) => new(function);
+
+        public static Fallible<T> Lift<T>(Func<T> function) => new(() => function());
+
+        public static Fallible<TResult> Apply<T, TResult>(this Fallible<Func<T, TResult>> function, Fallible<T> value)
             => value.Apply(function);
 
-        public static Try<T> Flatten<T>(this Try<Try<T>> nested)
+        public static Fallible<T> Flatten<T>(this Fallible<Fallible<T>> nested)
             => nested.AndThen(n => n);
     }
 
-    public class Try<T>
+    public class Fallible<T>
     {
         private Func<Result<T>> thunk;
 
-        public Try(Func<Result<T>> thunk)
+        public Fallible(Func<Result<T>> thunk)
         {
             this.thunk = thunk;
         }
 
-        public static Try<T> Okay(T value) => new(() => value);
+        public static Fallible<T> Okay(T value) => new(() => value);
 
-        public static Try<T> Fail(Error error) => new(() => error);
+        public static Fallible<T> Fail(Error error) => new(() => error);
 
-        public static Try<T> Lift(Result<T> result) => new(() => result);
+        public static Fallible<T> Lift(Result<T> result) => new(() => result);
 
-        public static Try<T> Lift(Func<Result<T>> function) => new(function);
+        public static Fallible<T> Lift(Func<Result<T>> function) => new(function);
 
-        public static Try<T> Lift(Func<T> function) => new(() => function());
+        public static Fallible<T> Lift(Func<T> function) => new(() => function());
 
         /// <summary>
         /// Applies the supplied function to the wrapped value.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
-        /// <param name="mapper"></param>
+        /// <param name="map"></param>
         /// <returns></returns>
-        public Try<TResult> Map<TResult>(Func<T, TResult> mapper)
-            => new(() => thunk().Map(mapper));
+        public Fallible<TResult> Map<TResult>(Func<T, TResult> map)
+            => new(() => thunk().Map(map));
+
+        public Fallible<TResult> MapOr<TResult>(Func<T, TResult> map, TResult ifFail)
+            => new(() => thunk().MapOr(map, ifFail));
+
+        public Fallible<TResult> MapOrElse<TResult>(Func<T, TResult> map, Func<Error, TResult> ifFail)
+            => new(() => thunk().MapOrElse(map, ifFail));
+
+        public Fallible<TResult> MapOr<TResult>(Func<T, TResult> map, Error ifFail)
+            => new(() => thunk().MapOr(map, ifFail));
+
+        public Fallible<TResult> MapOrElse<TResult>(Func<T, TResult> map, Func<Error, Error> ifFail)
+            => new(() => thunk().MapOrElse(map, ifFail));
 
         /// <summary>
         /// If the result is a failure, returns a new result with the mapping function
         /// applied to the wrapped error. Otherwise, returns self.
         /// </summary>
-        /// <param name="mapper"></param>
+        /// <param name="map"></param>
         /// <returns></returns>
-        public Try<T> MapError(Func<Error, Error> mapper)
-            => new(() => thunk().MapError(mapper));
+        public Fallible<T> MapError(Func<Error, Error> map)
+            => new(() => thunk().MapError(map));
 
         /// <summary>
         /// Applies a wrapped function to the wrapped value if both are successful.
@@ -52,7 +74,7 @@
         /// <typeparam name="TResult"></typeparam>
         /// <param name="function"></param>
         /// <returns></returns>
-        public Try<TResult> Apply<TResult>(Try<Func<T, TResult>> function)
+        public Fallible<TResult> Apply<TResult>(Fallible<Func<T, TResult>> function)
             => AndThen(v => function.Map(fn => fn(v)));
 
         /// <summary>
@@ -62,7 +84,7 @@
         /// <typeparam name="TResult"></typeparam>
         /// <param name="other"></param>
         /// <returns></returns>
-        public Try<TResult> And<TResult>(Try<TResult> other)
+        public Fallible<TResult> And<TResult>(Fallible<TResult> other)
             => new(() =>
             {
                 var result = thunk();
@@ -72,18 +94,18 @@
 
         /// <summary>
         /// If Okay, applies the function to the wrapped value. Otherwise, returns
-        /// the current error wrapped in a new <see cref="Try{TResult}" /> type.
+        /// the current error wrapped in a new <see cref="Fallible{TResult}" /> type.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
-        /// <param name="mapper"></param>
+        /// <param name="bind"></param>
         /// <returns></returns>
-        public Try<TResult> AndThen<TResult>(Func<T, Try<TResult>> mapper)
+        public Fallible<TResult> AndThen<TResult>(Func<T, Fallible<TResult>> bind)
             => new(() =>
             {
                 var result = thunk();
 
                 return result is Result.Okay<T> ok 
-                     ? mapper(ok.Value).thunk() 
+                     ? bind(ok.Value).thunk() 
                      : result.Cast<TResult>();
             });
 
@@ -96,7 +118,7 @@
         /// <param name="bind"></param>
         /// <param name="project"></param>
         /// <returns></returns>
-        public Try<TResult> AndThen<TElement, TResult>(Func<T, Try<TElement>> bind, Func<T, TElement, TResult> project)
+        public Fallible<TResult> AndThen<TElement, TResult>(Func<T, Fallible<TElement>> bind, Func<T, TElement, TResult> project)
             => AndThen(x => bind(x).Map(y => project(x, y)));
 
         /// <summary>
@@ -112,10 +134,10 @@
         /// a lot to be desired when coding in a functional style.
         /// </remarks>
         /// <typeparam name="TResult"></typeparam>
-        /// <param name="mapper"></param>
+        /// <param name="bind"></param>
         /// <returns></returns>
-        public Try<TResult> AndThen<TResult>(Func<T, Result<TResult>> mapper)
-            => AndThen(e => Try<TResult>.Lift(mapper(e)));
+        public Fallible<TResult> AndThen<TResult>(Func<T, Result<TResult>> bind)
+            => AndThen(e => Fallible<TResult>.Lift(bind(e)));
 
         /// <summary>
         /// Implements a bind-map operation, similar to
@@ -126,15 +148,18 @@
         /// <param name="bind"></param>
         /// <param name="project"></param>
         /// <returns></returns>
-        public Try<TResult> AndThen<TElement, TResult>(Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project)
+        public Fallible<TResult> AndThen<TElement, TResult>(Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project)
             => AndThen(x => bind(x).Map(y => project(x, y)));
 
+        public Fallible<TResult> AndThen<TResult>(Func<T, Fallible<TResult>> ifOkay, Func<Error, Fallible<TResult>> ifFail)
+            => new(() => thunk().Match(ifOkay, ifFail).Run());
+
         /// <summary>
-        /// Returns the current <see cref="Try{T}"/> if Ok, otherwise returns other.
+        /// Returns the current <see cref="Fallible{T}"/> if Ok, otherwise returns other.
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public Try<T> Or(Try<T> other)
+        public Fallible<T> Or(Fallible<T> other)
             => new(() =>
             {
                 var result = thunk();
@@ -148,7 +173,7 @@
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public Try<T> OrElse(Func<Error, Try<T>> other)
+        public Fallible<T> OrElse(Func<Error, Fallible<T>> other)
             => new(() =>
             {
                 var result = thunk();
@@ -156,7 +181,7 @@
                 return result is Result.Fail<T> fail ? other(fail.Error).thunk() : result;
             });
 
-        public Try<T> Filter(Func<T, bool> predicate)
+        public Fallible<T> Filter(Func<T, bool> predicate)
             => new(() => thunk().Filter(predicate));
 
         /// <summary>
@@ -165,7 +190,15 @@
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Try<T> IfOkay(Action<T> action) => new(() => thunk().IfOkay(action));
+        public Fallible<T> Do(Action<T> action) => IfOkay(action); // TODO Not sure how I feel about just aliasing methods like this.
+
+        /// <summary>
+        /// Executes an impure action against the value if Ok.
+        /// No op if fail.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public Fallible<T> IfOkay(Action<T> action) => new(() => thunk().IfOkay(action));
 
         /// <summary>
         /// Executes an impure action if failed.
@@ -173,7 +206,7 @@
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Try<T> IfFail(Action action) => new(() => thunk().IfFail(action));
+        public Fallible<T> IfFail(Action action) => new(() => thunk().IfFail(action));
 
         /// <summary>
         /// Executes an impure action if failed.
@@ -181,7 +214,7 @@
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Try<T> IfFail(Action<Error> action) => new(() => thunk().IfFail(action));
+        public Fallible<T> IfFail(Action<Error> action) => new(() => thunk().IfFail(action));
 
         /// <summary>
         /// If Ok, returns the result of the first function to the wrapped value.
@@ -200,7 +233,7 @@
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <returns></returns>
-        public Try<TResult> Cast<TResult>() => new(() => thunk().Cast<TResult>());
+        public Fallible<TResult> Cast<TResult>() => new(() => thunk().Cast<TResult>());
 
         /// <summary>
         /// Combines another try into a try of a tuple.
@@ -208,7 +241,7 @@
         /// <typeparam name="TOther"></typeparam>
         /// <param name="other"></param>
         /// <returns></returns>
-        public Try<(T, TOther)> Zip<TOther>(Try<TOther> other)
+        public Fallible<(T, TOther)> Zip<TOther>(Fallible<TOther> other)
             => ZipWith(other, (x, y) => (x, y));
 
         /// <summary>
@@ -219,8 +252,8 @@
         /// <param name="other"></param>
         /// <param name="zipper"></param>
         /// <returns></returns>
-        public Try<TResult> ZipWith<TOther, TResult>(Try<TOther> other, Func<T, TOther, TResult> zipper)
-            => AndThen(x => other.Map(y => zipper(x, y)));
+        public Fallible<TResult> ZipWith<TOther, TResult>(Fallible<TOther> other, Func<T, TOther, TResult> zipper)
+            => new(() => thunk().ZipWith(other.thunk(), zipper));
 
         /// <summary>
         /// Returns the wrapped value if Ok. Otherwise throws the wrapped error
@@ -269,33 +302,33 @@
             }
         }
 
-        public static implicit operator Try<T>(Result<T> result) => new(() => result);
+        public static implicit operator Fallible<T>(Result<T> result) => new(() => result);
 
-        public static explicit operator Result<T>(Try<T> @try) => @try.Run();
+        public static explicit operator Result<T>(Fallible<T> @try) => @try.Run();
 
-        public static implicit operator Try<T>(T value) => new(() => value);
+        public static implicit operator Fallible<T>(T value) => new(() => value);
 
-        public static explicit operator T(Try<T> @try) => @try.Run().Unwrap();
+        public static explicit operator T(Fallible<T> @try) => @try.Run().Unwrap();
 
-        public static Try<T> operator &(Try<T> x, Try<T> y) => x.And(y);
+        public static Fallible<T> operator &(Fallible<T> x, Fallible<T> y) => x.And(y);
 
-        public static Try<T> operator |(Try<T> x, Try<T> y) => x.Or(y);
+        public static Fallible<T> operator |(Fallible<T> x, Fallible<T> y) => x.Or(y);
 
-        public static Try<T> operator >>(Try<T> x, Try<T> y) 
+        public static Fallible<T> operator >>(Fallible<T> x, Fallible<T> y) 
             => new(() =>
             {
                 _ = x.thunk();
                 return y.thunk();
             });
 
-        public static Try<T> operator >>(Try<T> x, Func<Result<T>> y)
+        public static Fallible<T> operator >>(Fallible<T> x, Func<Result<T>> y)
             => new(() =>
             {
                 _ = x.thunk();
                 return y();
             });
 
-        public static Try<T> operator >>(Try<T> x, Func<T> y)
+        public static Fallible<T> operator >>(Fallible<T> x, Func<T> y)
             => new(() =>
             {
                 _ = x.thunk();

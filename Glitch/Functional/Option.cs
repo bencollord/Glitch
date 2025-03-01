@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Glitch.Functional
 {
@@ -355,6 +354,23 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="error"></param>
         public Result<T> OkayOrElse(Func<Error> function) => IsSome ? Okay(value!) : Fail<T>(function());
+
+        /// <summary>
+        /// Wraps the value in a <see cref="Fallible{T}" /> if it exists,
+        /// otherwise returns an errored <see cref="Fallible{T}" /> containing 
+        /// the provided error.
+        /// </summary>
+        /// <param name="error"></param>
+        /// <returns></returns>
+        public Fallible<T> TryOr(Error error) => IsSome ? Okay(value!) : Fail<T>(error);
+
+        /// <summary>
+        /// Wraps the value in a <see cref="Fallible{T}" /> if it exists,
+        /// otherwise returns an errored <see cref="Fallible{T}" /> containing 
+        /// the result of the provided error function.
+        /// </summary>
+        /// <param name="error"></param>
+        public Fallible<T> TryOrElse(Func<Error> function) => IsSome ? Okay(value!) : Fail<T>(function());
 
         public OneOf<T, TRight> LeftOr<TRight>(TRight value) => IsSome ? Left(this.value!) : Right(value);
 

@@ -29,6 +29,10 @@
 
         public abstract Result<TResult> MapOrElse<TResult>(Func<T, TResult> mapper, Func<Error, TResult> ifFail);
 
+        public abstract Result<TResult> MapOr<TResult>(Func<T, TResult> mapper, Error ifFail);
+
+        public abstract Result<TResult> MapOrElse<TResult>(Func<T, TResult> mapper, Func<Error, Error> ifFail);
+
         /// <summary>
         /// If the result is a failure, returns a new result with the mapping function
         /// applied to the wrapped error. Otherwise, returns self.
@@ -84,6 +88,16 @@
         /// <returns></returns>
         public abstract Result<T> OrElse(Func<Error, Result<T>> other);
 
+        public abstract Result<TResult> AndThen<TResult>(Func<T, Result<TResult>> ifOkay, Func<Error, Result<TResult>> ifFail);
+
+        /// <summary>
+        /// Executes an impure action against the value if Ok.
+        /// No op if fail.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public Result<T> Do(Action<T> action) => IfOkay(action); // TODO Not sure how I feel about aliasing methods like this.
+
         /// <summary>
         /// Executes an impure action against the value if Ok.
         /// No op if fail.
@@ -107,6 +121,11 @@
         /// <param name="action"></param>
         /// <returns></returns>
         public abstract Result<T> IfFail(Action<Error> action);
+
+        /// <summary>
+        /// Throws the error as an exception if fail. If okay, does nothing.
+        /// </summary>
+        public abstract void ThrowIfFail();
 
         /// <summary>
         /// If Ok, returns the result of the first function to the wrapped value.
@@ -142,7 +161,7 @@
         /// <typeparam name="TResult"></typeparam>
         /// <param name="map"></param>
         /// <returns></returns>
-        public abstract Try<TResult> Try<TResult>(Func<T, TResult> map);
+        public abstract Fallible<TResult> Try<TResult>(Func<T, TResult> map);
 
         /// <summary>
         /// A bind operation that wraps the result in
@@ -151,7 +170,7 @@
         /// <typeparam name="TResult"></typeparam>
         /// <param name="map"></param>
         /// <returns></returns>
-        public abstract Try<TResult> AndThenTry<TResult>(Func<T, Result<TResult>> bind);
+        public abstract Fallible<TResult> AndThenTry<TResult>(Func<T, Result<TResult>> bind);
 
         /// <summary>
         /// A bind operation that wraps the result in
@@ -160,7 +179,7 @@
         /// <typeparam name="TResult"></typeparam>
         /// <param name="map"></param>
         /// <returns></returns>
-        public abstract Try<TResult> AndThenTry<TResult>(Func<T, Try<TResult>> bind);
+        public abstract Fallible<TResult> AndThenTry<TResult>(Func<T, Fallible<TResult>> bind);
 
         /// <summary>
         /// Combines another result into a result of a tuple.
