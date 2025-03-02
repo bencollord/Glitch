@@ -81,13 +81,13 @@ namespace Glitch.Functional
             public override T Unwrap() => Error.Throw<T>();
 
             /// <inheritdoc />
-            public override T UnwrapOr(T fallback) => fallback;
+            public override T IfFail(T fallback) => fallback;
 
             /// <inheritdoc />
-            public override T UnwrapOrElse(Func<T> fallback) => fallback();
+            public override T IfFail(Func<T> fallback) => fallback();
 
             /// <inheritdoc />
-            public override T UnwrapOrElse(Func<Error, T> fallback) => fallback(Error);
+            public override T IfFail(Func<Error, T> fallback) => fallback(Error);
 
             public override bool IsOkayAnd(Func<T, bool> _) => false;
 

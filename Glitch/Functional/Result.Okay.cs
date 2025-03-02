@@ -84,13 +84,13 @@ namespace Glitch.Functional
             public override T Unwrap() => Value;
 
             /// <inheritdoc />
-            public override T UnwrapOr(T _) => Value;
+            public override T IfFail(T _) => Value;
 
             /// <inheritdoc />
-            public override T UnwrapOrElse(Func<T> _) => Value;
+            public override T IfFail(Func<T> _) => Value;
 
             /// <inheritdoc />
-            public override T UnwrapOrElse(Func<Error, T> _) => Value;
+            public override T IfFail(Func<Error, T> _) => Value;
 
             public override bool IsOkayAnd(Func<T, bool> predicate) => predicate(Value);
 

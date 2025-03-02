@@ -256,36 +256,6 @@
             => new(() => thunk().ZipWith(other.thunk(), zipper));
 
         /// <summary>
-        /// Returns the wrapped value if Ok. Otherwise throws the wrapped error
-        /// as an exception.
-        /// </summary>
-        /// <returns></returns>
-        public T Unwrap() => Run().Unwrap();
-
-        /// <summary>
-        /// Returns the wrapped value if Ok, otherwise returns the fallback value.
-        /// </summary>
-        /// <param name="fallback"></param>
-        /// <returns></returns>
-        public T UnwrapOr(T fallback) => Run().UnwrapOr(fallback);
-
-        /// <summary>
-        /// Returns the wrapped value if Ok. Otherwise, returns the result
-        /// of the fallback function.
-        /// </summary>
-        /// <param name="fallback"></param>
-        /// <returns></returns>
-        public T UnwrapOrElse(Func<T> fallback) => Run().UnwrapOrElse(fallback);
-
-        /// <summary>
-        /// Returns the wrapped value if Ok. Otherwise, returns the result
-        /// of the fallback function applied to the wrapped error.
-        /// </summary>
-        /// <param name="fallback"></param>
-        /// <returns></returns>
-        public T UnwrapOrElse(Func<Error, T> fallback) => Run().UnwrapOrElse(fallback);
-
-        /// <summary>
         /// Executes the provided function, catching any exception
         /// thrown and wrapping it in a <see cref="Result{T}"/>
         /// </summary>

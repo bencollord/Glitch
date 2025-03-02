@@ -18,6 +18,8 @@
 
         public override Option<Error> Inner { get; }
 
+        public override bool IsException<T>() => false;
+
         public override Exception AsException() 
             => new ApplicationErrorException(this);
     }

@@ -34,5 +34,33 @@
 
             return hasElements ? Some(source.First()) : None;
         }
+
+        public static Result<T> TrySingle<T>(this IEnumerable<T> source)
+            => source.TrySingle(None);
+
+        public static Result<T> TrySingle<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+            => source.TrySingle(Some(predicate));
+
+        private static Result<T> TrySingle<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
+        {
+            using var iterator = predicate
+                .Map(source.Where)
+                .IfNone(source)
+                .GetEnumerator();
+
+            if (!iterator.MoveNext())
+            {
+                return Result<T>.Fail("Sequence contains no elements");
+            }
+
+            var value = iterator.Current;
+
+            if (iterator.MoveNext())
+            {
+                return Result<T>.Fail("Sequence contains more than one element");
+            }
+
+            return Result<T>.Okay(value);
+        }
     }
 }

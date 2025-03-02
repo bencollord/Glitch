@@ -214,7 +214,7 @@
         /// </summary>
         /// <param name="fallback"></param>
         /// <returns></returns>
-        public abstract T UnwrapOr(T fallback);
+        public abstract T IfFail(T fallback);
 
         /// <summary>
         /// Returns the wrapped value if Ok. Otherwise, returns the result
@@ -222,7 +222,7 @@
         /// </summary>
         /// <param name="fallback"></param>
         /// <returns></returns>
-        public abstract T UnwrapOrElse(Func<T> fallback);
+        public abstract T IfFail(Func<T> fallback);
 
         /// <summary>
         /// Returns the wrapped value if Ok. Otherwise, returns the result
@@ -230,7 +230,7 @@
         /// </summary>
         /// <param name="fallback"></param>
         /// <returns></returns>
-        public abstract T UnwrapOrElse(Func<Error, T> fallback);
+        public abstract T IfFail(Func<Error, T> fallback);
 
         /// <summary>
         /// Returns Some(<typeparamref name="T" />) if Ok. Otherwise, returns

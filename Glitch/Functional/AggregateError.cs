@@ -14,6 +14,8 @@
 
         public override Option<Error> Inner => None;
 
+        public override bool IsException<T>() => typeof(T).Equals(typeof(AggregateException));
+
         public override Exception AsException() 
             => new AggregateException(errors.Select(e => e.AsException()));
 

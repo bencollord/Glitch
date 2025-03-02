@@ -14,6 +14,8 @@
 
         public override Option<Error> Inner { get; }
 
+        public override bool IsException<T>() => exception is T;
+
         public override Exception AsException() => exception;
     }
 }
