@@ -1,7 +1,9 @@
 ﻿namespace Glitch.Functional
 {
-    public abstract record Result<T>
+    public abstract record Result<T> : IComputation<T>
     {
+        private protected Result() { }
+
         public static Result<T> Okay(T value) => new Result.Okay<T>(value);
 
         public static Result<T> Fail(Error error) => new Result.Fail<T>(error);
@@ -330,5 +332,50 @@
         public static explicit operator Error(Result<T> result)
             => result is Result.Fail<T>(var err) 
                    ? err : throw new InvalidCastException("Cannot cast a successful result to an error");
+
+        #region IComputation
+        object? IComputation<T>.Match() => Match<object?>(val => val, err => err);
+
+        IComputation<TResult> IComputation<T>.AndThen<TResult>(Func<T, IComputation<TResult>> bind)
+        {
+            return this switch
+            {
+                Result.Okay<T>(var value) => bind(value),
+                Result.Fail<T>(var error) => Fail<TResult>(error),
+                _ => throw new NotSupportedException("You're not supposed to be extending the Result<T> class")
+            };
+        }
+
+        IComputation<TResult> IComputation<T>.AndThen<TElement, TResult>(Func<T, IComputation<TElement>> bind, Func<T, TElement, TResult> project)
+        {
+            return ((IComputation<T>)this).AndThen(x => bind(x).Map(y => project(x, y)));
+        }
+
+        IComputation<TResult> IComputation<T>.Apply<TResult>(IComputation<Func<T, TResult>> function)
+        {
+            return ((IComputation<T>)this).AndThen(x => function.Map(fn => fn(x)));
+        }
+
+        IComputation<TResult> IComputation<T>.Cast<TResult>()
+        {
+            return Cast<TResult>();
+        }
+
+        IComputation<T> IComputation<T>.Filter(Func<T, bool> predicate)
+        {
+            return Filter(predicate);
+        }
+
+        IComputation<TResult> IComputation<T>.Map<TResult>(Func<T, TResult> map)
+        {
+            return Map(map);
+        }
+
+        IComputation<Func<T2, TResult>> IComputation<T>.PartialMap<T2, TResult>(Func<T, T2, TResult> map)
+        {
+            return PartialMap(map);
+        }
+
+        #endregion
     };
 }

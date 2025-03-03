@@ -61,7 +61,7 @@ namespace Glitch.Functional
             public override Result<T> Or(Result<T> other) => other;
 
             /// <inheritdoc />
-            public override Result<T> OrElse(Func<Error, Result<T>> ifFail) => ifFail(Error);
+            public override Result<T> OrElse(Func<Error, Result<T>> bindFail) => bindFail(Error);
 
             /// <inheritdoc />
             public override Option<T> UnwrapOrNone() => None;

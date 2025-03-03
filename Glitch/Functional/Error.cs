@@ -22,6 +22,8 @@ namespace Glitch.Functional
 
         public bool Is<T>() where T : Error => this is T;
 
+        public bool IsException() => IsException<Exception>();
+
         public abstract bool IsException<T>() where T : Exception;
 
         public virtual bool Equals(Error? other)

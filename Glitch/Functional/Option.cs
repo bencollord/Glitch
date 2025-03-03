@@ -2,12 +2,12 @@
 
 namespace Glitch.Functional
 {
-    public readonly struct OptionNone
+    public readonly struct Nothing
     {
-        public static readonly OptionNone Value = new();
+        public static readonly Nothing Value = new();
     }
 
-    public readonly struct Option<T> : IEquatable<Option<T>>
+    public readonly struct Option<T> : IEquatable<Option<T>>, IComputation<T>
     {
         public static readonly Option<T> None = new();
 
@@ -379,14 +379,56 @@ namespace Glitch.Functional
             return value!.Equals(other.value);
         }
 
-        public override bool Equals([NotNullWhen(true)] object? obj) 
+        public override bool Equals([NotNullWhen(true)] object? obj)
             => obj is Option<T> other && Equals(other);
 
-        public override int GetHashCode() 
+        public override int GetHashCode()
             => IsSome ? value!.GetHashCode() : 0;
 
-        public override string ToString() 
+        public override string ToString()
             => Match(v => $"Some({v})", () => "None");
+
+        #region IComputation
+        object? IComputation<T>.Match() => IsSome ? value : Nothing.Value;
+
+        IComputation<TResult> IComputation<T>.AndThen<TResult>(Func<T, IComputation<TResult>> bind)
+        {
+            if (IsNone) return new Option<TResult>();
+
+            return bind(value!);
+        }
+
+        IComputation<TResult> IComputation<T>.AndThen<TElement, TResult>(Func<T, IComputation<TElement>> bind, Func<T, TElement, TResult> project)
+        {
+            return ((IComputation<T>)this).AndThen(x => bind(x).Map(y => project(x, y)));
+        }
+
+        IComputation<TResult> IComputation<T>.Apply<TResult>(IComputation<Func<T, TResult>> function)
+        {
+            return ((IComputation<T>)this).AndThen(x => function.Map(fn => fn(x)));
+        }
+
+        IComputation<TResult> IComputation<T>.Cast<TResult>()
+        {
+            return Cast<TResult>();
+        }
+
+        IComputation<T> IComputation<T>.Filter(Func<T, bool> predicate)
+        {
+            return Filter(predicate);
+        }
+
+        IComputation<TResult> IComputation<T>.Map<TResult>(Func<T, TResult> map)
+        {
+            return Map(map);
+        }
+
+        IComputation<Func<T2, TResult>> IComputation<T>.PartialMap<T2, TResult>(Func<T, T2, TResult> map)
+        {
+            return PartialMap(map);
+        }
+
+        #endregion
 
         public static bool operator true(Option<T> option) => option.IsSome;
 
@@ -402,7 +444,7 @@ namespace Glitch.Functional
 
         public static implicit operator Option<T>(T? value) => Maybe(value);
 
-        public static implicit operator Option<T>(OptionNone _) => new();
+        public static implicit operator Option<T>(Nothing _) => new();
 
         public static bool operator ==(Option<T> x, Option<T> y) => x.Equals(y);
 

@@ -24,10 +24,10 @@ namespace Glitch.Functional
             public override OneOf<TLeft, TResult> MapRight<TResult>(Func<TRight, TResult> mapper)
                 => new Right<TLeft, TResult>(mapper(Value));
 
-            public override OneOf<TResult, TRight> AndThen<TResult>(Func<TLeft, OneOf<TResult, TRight>> bind)
+            public override OneOf<TResult, TRight> AndThenIfLeft<TResult>(Func<TLeft, OneOf<TResult, TRight>> bind)
                 => new Right<TResult, TRight>(Value);
 
-            public override OneOf<TLeft, TResult> OrElse<TResult>(Func<TRight, OneOf<TLeft, TResult>> bind)
+            public override OneOf<TLeft, TResult> AndThenIfRight<TResult>(Func<TRight, OneOf<TLeft, TResult>> bind)
                 => bind(Value);
 
             public override TResult Match<TResult>(Func<TLeft, TResult> _, Func<TRight, TResult> ifRight)

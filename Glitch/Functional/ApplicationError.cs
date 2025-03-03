@@ -22,5 +22,7 @@
 
         public override Exception AsException() 
             => new ApplicationErrorException(this);
+
+        public static implicit operator ApplicationError(string message) => new(message);
     }
 }

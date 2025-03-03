@@ -4,7 +4,7 @@ namespace Glitch.Functional
 {
     public static partial class FN
     {
-        public static readonly OptionNone None = OptionNone.Value;
+        public static readonly Nothing None = Nothing.Value;
 
         public static Unit Unit() => default;
 

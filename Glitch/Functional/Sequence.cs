@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Functional
 {
-    public class Sequence<T> : IEnumerable<T>
+    public class Sequence<T> : IEnumerable<T>, IComputation<T>
     {
         public static readonly Sequence<T> Empty = new([]);
 
@@ -135,5 +135,47 @@ namespace Glitch.Functional
         public static bool operator ==(Sequence<T> x, Sequence<T> y) => x.Equals(y);
 
         public static bool operator !=(Sequence<T> x, Sequence<T> y) => !(x == y);
+
+        #region IComputation
+        object? IComputation<T>.Match() => Match<object?>(val => val, items => items, () => Nothing.Value);
+
+        IEnumerable<T> IComputation<T>.Iterate() => items;
+
+        IComputation<TResult> IComputation<T>.AndThen<TResult>(Func<T, IComputation<TResult>> bind)
+        {
+            return AndThen(v => bind(v).Iterate());
+        }
+
+        IComputation<TResult> IComputation<T>.AndThen<TElement, TResult>(Func<T, IComputation<TElement>> bind, Func<T, TElement, TResult> project)
+        {
+            return ((IComputation<T>)this).AndThen(x => bind(x).Map(y => project(x, y)));
+        }
+
+        IComputation<TResult> IComputation<T>.Apply<TResult>(IComputation<Func<T, TResult>> function)
+        {
+            return ((IComputation<T>)this).AndThen(x => function.Map(fn => fn(x)));
+        }
+
+        IComputation<TResult> IComputation<T>.Cast<TResult>()
+        {
+            return Cast<TResult>();
+        }
+
+        IComputation<T> IComputation<T>.Filter(Func<T, bool> predicate)
+        {
+            return Filter(predicate);
+        }
+
+        IComputation<TResult> IComputation<T>.Map<TResult>(Func<T, TResult> map)
+        {
+            return Map(map);
+        }
+
+        IComputation<Func<T2, TResult>> IComputation<T>.PartialMap<T2, TResult>(Func<T, T2, TResult> map)
+        {
+            return PartialMap(map);
+        }
+
+        #endregion
     }
 }
