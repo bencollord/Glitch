@@ -4,21 +4,25 @@ namespace Glitch.Functional
 {
     public static partial class FN
     {
-        public static readonly Unit Unit = Unit.Value;
-
         public static readonly OptionNone None = OptionNone.Value;
+
+        public static Unit Unit() => default;
+
+        public static Unit Ignore<T>(T _) => default;
+
+        public static Identity<T> Id<T>(T value) => value;
 
         public static Option<T> Some<T>(T value) => Option<T>.Some(value);
 
         public static Option<T> Maybe<T>(T? value) => Option<T>.Maybe(value);
 
-        public static Result<T> Okay<T>(T value) => Result<T>.Okay(value);
+        public static Result<T> Okay<T>(T value) => new Result.Okay<T>(value);
 
-        public static Result<T> Fail<T>(Error error) => Result<T>.Fail(error);
+        public static Result<T> Fail<T>(Error error) => new Result.Fail<T>(error);
 
-        public static Fallible<T> Try<T>(Func<Result<T>> function) => Functional.Fallible<T>.Lift(function);
+        public static Fallible<T> Try<T>(Func<Result<T>> function) => Fallible<T>.Lift(function);
 
-        public static Fallible<T> Try<T>(Func<T> function) => Functional.Fallible<T>.Lift(function);
+        public static Fallible<T> Try<T>(Func<T> function) => Fallible<T>.Lift(function);
 
         public static Fallible<Unit> Try(Action action) => Functional.Fallible<Unit>.Lift(action.Return());
 

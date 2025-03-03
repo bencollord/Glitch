@@ -6,6 +6,10 @@
 
         public static Fallible<T> Fail<T>(Error error) => new(() => error);
 
+        public static Fallible<T> Lift<T>(T value) => Okay(value);
+
+        public static Fallible<Unit> Lift(Error value) => Fail<Unit>(value);
+
         public static Fallible<T> Lift<T>(Result<T> result) => new(() => result);
 
         public static Fallible<T> Lift<T>(Func<Result<T>> function) => new(function);
@@ -47,11 +51,8 @@
         public Fallible<TResult> Map<TResult>(Func<T, TResult> map)
             => new(() => thunk().Map(map));
 
-        public Fallible<TResult> MapOr<TResult>(Func<T, TResult> map, TResult ifFail)
-            => new(() => thunk().MapOr(map, ifFail));
-
-        public Fallible<TResult> MapOrElse<TResult>(Func<T, TResult> map, Func<Error, TResult> ifFail)
-            => new(() => thunk().MapOrElse(map, ifFail));
+        public Fallible<Func<T2, TResult>> PartialMap<T2, TResult>(Func<T, T2, TResult> map)
+            => Map(map.Curry());
 
         public Fallible<TResult> MapOr<TResult>(Func<T, TResult> map, Error ifFail)
             => new(() => thunk().MapOr(map, ifFail));
@@ -217,6 +218,51 @@
         public Fallible<T> IfFail(Action<Error> action) => new(() => thunk().IfFail(action));
 
         /// <summary>
+        /// Runs and returns the value if success, or the fallback value if fail.
+        /// </summary>
+        /// <param name="fallback"></param>
+        /// <returns></returns>
+        public T IfFail(T fallback) => Run().IfFail(fallback);
+
+        /// <summary>
+        /// Runs the result and returns the value if success, or the
+        /// result of the fallback function if fail.
+        /// </summary>
+        /// <param name="fallback"></param>
+        /// <returns></returns>
+        public T IfFail(Func<T> fallback) => Run().IfFail(fallback);
+
+        /// <summary>
+        /// Runs the result and returns the value if success, or the
+        /// result of the fallback function if fail.
+        /// </summary>
+        /// <param name="fallback"></param>
+        /// <returns></returns>
+        public T IfFail(Func<Error, T> fallback) => Run().IfFail(fallback);
+
+        /// <summary>
+        /// If Ok, returns the result of the first function to the wrapped value.
+        /// Otherwise, returns the provided fallback value.
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="ifOkay"></param>
+        /// <param name="ifFail"></param>
+        /// <returns></returns>
+        public TResult Match<TResult>(Func<T, TResult> ifOkay, TResult ifFail)
+            => Map(ifOkay).IfFail(ifFail);
+
+        /// <summary>
+        /// If Ok, returns the result of the first function to the wrapped value.
+        /// Otherwise, returns the result of the second function.
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="ifOkay"></param>
+        /// <param name="ifFail"></param>
+        /// <returns></returns>
+        public TResult Match<TResult>(Func<T, TResult> ifOkay, Func<TResult> ifFail)
+            => Map(ifOkay).IfFail(ifFail);
+
+        /// <summary>
         /// If Ok, returns the result of the first function to the wrapped value.
         /// Otherwise, returns the result of the second function to the wrapped error.
         /// </summary>
@@ -284,12 +330,11 @@
 
         public static Fallible<T> operator |(Fallible<T> x, Fallible<T> y) => x.Or(y);
 
-        public static Fallible<T> operator >>(Fallible<T> x, Fallible<T> y) 
-            => new(() =>
-            {
-                _ = x.thunk();
-                return y.thunk();
-            });
+        public static Fallible<T> operator >>(Fallible<T> x, Fallible<T> y)
+            => x.AndThen(_ => y);
+
+        public static Fallible<T> operator >>(Fallible<T> x, Fallible<Unit> y)
+            => x.AndThen(v => y.Map(_ => v));
 
         public static Fallible<T> operator >>(Fallible<T> x, Func<Result<T>> y)
             => new(() =>

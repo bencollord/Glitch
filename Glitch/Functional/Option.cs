@@ -41,33 +41,10 @@ namespace Glitch.Functional
         /// Otherwise returns a new empty option.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
-        /// <param name="mapper"></param>
+        /// <param name="map"></param>
         /// <returns></returns>
-        public Option<TResult> Map<TResult>(Func<T, TResult> mapper)
-            => IsSome ? new Option<TResult>(mapper(value!)) : new Option<TResult>();
-
-        /// <summary>
-        /// Maps using the provided function if Some.
-        /// Otherwise, returns the fallback value wrapped in 
-        /// an option.
-        /// </summary>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="mapper"></param>
-        /// <param name="ifNone"></param>
-        /// <returns></returns>
-        public Option<TResult> MapOr<TResult>(Func<T, TResult> mapper, TResult ifNone)
-            => Map(mapper).IfNone(ifNone);
-
-        /// <summary>
-        /// Maps based on two provided functions depending on whether or not
-        /// the <see cref="Option{T}"/> has a value.
-        /// </summary>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="ifSome"></param>
-        /// <param name="ifNone"></param>
-        /// <returns></returns>
-        public Option<TResult> MapOrElse<TResult>(Func<T, TResult> ifSome, Func<TResult> ifNone)
-            => Match(ifSome, ifNone);
+        public Option<TResult> Map<TResult>(Func<T, TResult> map)
+            => IsSome ? new Option<TResult>(map(value!)) : new Option<TResult>();
 
         /// <summary>
         /// Partially applies the value to a 2 arg function and
@@ -75,10 +52,10 @@ namespace Glitch.Functional
         /// </summary>
         /// <typeparam name="T2"></typeparam>
         /// <typeparam name="TResult"></typeparam>
-        /// <param name="mapper"></param>
+        /// <param name="map"></param>
         /// <returns></returns>
-        public Option<Func<T2, TResult>> PartialMap<T2, TResult>(Func<T, T2, TResult> mapper)
-            => Map(mapper.Curry());
+        public Option<Func<T2, TResult>> PartialMap<T2, TResult>(Func<T, T2, TResult> map)
+            => Map(map.Curry());
 
         /// <summary>
         /// Applies a wrapped function to the wrapped value if both exist.
@@ -104,10 +81,10 @@ namespace Glitch.Functional
         /// an empty <see cref="Option{TResult}"/>.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
-        /// <param name="mapper"></param>
+        /// <param name="bind"></param>
         /// <returns></returns>
-        public Option<TResult> AndThen<TResult>(Func<T, Option<TResult>> mapper)
-            => IsSome ? mapper(value!) : new Option<TResult>();
+        public Option<TResult> AndThen<TResult>(Func<T, Option<TResult>> bind)
+            => IsSome ? bind(value!) : new Option<TResult>();
 
         /// <summary>
         /// Applies the element selector to the wrapped value
@@ -236,6 +213,17 @@ namespace Glitch.Functional
         }
 
         /// <summary>
+        /// Maps using the provided function if Some.
+        /// Otherwise, returns the fallback value.
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="ifSome"></param>
+        /// <param name="ifNone"></param>
+        /// <returns></returns>
+        public TResult Match<TResult>(Func<T, TResult> ifSome, TResult ifNone)
+            => Map(ifSome).IfNone(ifNone);
+
+        /// <summary>
         /// If this <see cref="Option{T}"/> contains a value, returns the result of the first function 
         /// applied to the wrapped value.Otherwise, returns the result of the second function.
         /// </summary>
@@ -253,7 +241,7 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <returns></returns>
         public Option<TResult> Cast<TResult>()
-            => Map(val => (TResult)(dynamic)val!);
+            => AndThen(val => Try(() => Id(val).Cast<TResult>().Unwrap()).Run().UnwrapOrNone());
 
         /// <summary>
         /// Returns the wrapped value if it exists. Otherwise throws an exception.

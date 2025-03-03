@@ -21,25 +21,24 @@
         /// wrapped in a new result type.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
-        /// <param name="mapper"></param>
+        /// <param name="map"></param>
         /// <returns></returns>
-        public abstract Result<TResult> Map<TResult>(Func<T, TResult> mapper);
+        public abstract Result<TResult> Map<TResult>(Func<T, TResult> map);
 
-        public abstract Result<TResult> MapOr<TResult>(Func<T, TResult> mapper, TResult ifFail);
+        public Result<Func<T2, TResult>> PartialMap<T2, TResult>(Func<T, T2, TResult> map)
+            => Map(map.Curry());
 
-        public abstract Result<TResult> MapOrElse<TResult>(Func<T, TResult> mapper, Func<Error, TResult> ifFail);
+        public abstract Result<TResult> MapOr<TResult>(Func<T, TResult> map, Error ifFail);
 
-        public abstract Result<TResult> MapOr<TResult>(Func<T, TResult> mapper, Error ifFail);
-
-        public abstract Result<TResult> MapOrElse<TResult>(Func<T, TResult> mapper, Func<Error, Error> ifFail);
+        public abstract Result<TResult> MapOrElse<TResult>(Func<T, TResult> map, Func<Error, Error> ifFail);
 
         /// <summary>
         /// If the result is a failure, returns a new result with the mapping function
         /// applied to the wrapped error. Otherwise, returns self.
         /// </summary>
-        /// <param name="mapper"></param>
+        /// <param name="map"></param>
         /// <returns></returns>
-        public abstract Result<T> MapError(Func<Error, Error> mapper);
+        public abstract Result<T> MapError(Func<Error, Error> map);
 
         /// <summary>
         /// Applies a wrapped function to the wrapped value if both exist.
@@ -66,9 +65,9 @@
         /// the current error wrapped in a new result type.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
-        /// <param name="mapper"></param>
+        /// <param name="bind"></param>
         /// <returns></returns>
-        public abstract Result<TResult> AndThen<TResult>(Func<T, Result<TResult>> mapper);
+        public abstract Result<TResult> AndThen<TResult>(Func<T, Result<TResult>> bind);
 
         public Result<TResult> AndThen<TElement, TResult>(Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project)
             => AndThen(x => bind(x).Map(y => project(x, y)));
@@ -127,21 +126,31 @@
         /// </summary>
         public abstract void ThrowIfFail();
 
+        public Result<TResult> Match<TResult>(Func<T, TResult> ifOkay, TResult ifFail)
+            => Map(ifOkay).IfFail(ifFail);
+
+        public Result<TResult> Match<TResult>(Func<T, TResult> ifOkay, Func<TResult> ifFail)
+            => Match(ifOkay, _ => ifFail());
+
         /// <summary>
         /// If Ok, returns the result of the first function to the wrapped value.
         /// Otherwise, returns the result of the second function to the wrapped error.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="ifOkay"></param>
-        /// <param name="ifError"></param>
+        /// <param name="ifFail"></param>
         /// <returns></returns>
-        public abstract TResult Match<TResult>(Func<T, TResult> ifOkay, Func<Error, TResult> ifError);
+        public abstract TResult Match<TResult>(Func<T, TResult> ifOkay, Func<Error, TResult> ifFail);
 
         /// <summary>
         /// Casts the wrapped value to <typeparamref name="TResult"/> if Ok,
         /// otherwise returns the current error wrapped in a new result type.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
+        /// <exception cref="InvalidCastException">
+        /// If the cast is not valid. If you need safe casting,
+        /// lift the result into the <see cref="Fallible{T}"/> type.
+        /// </exception>
         /// <returns></returns>
         public abstract Result<TResult> Cast<TResult>();
 

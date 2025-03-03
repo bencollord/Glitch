@@ -168,7 +168,6 @@ namespace Glitch.Test.Functional
 
             // Act
             Fallible<int> map            = okayItem.Map(mapFunc);
-            Fallible<int> mapOr          = okayItem.MapOr(mapFunc, -1);
             Fallible<int> mapOrElse      = okayItem.MapOrElse(mapFunc, mapErrFunc);
             Fallible<int> mapOrError     = okayItem.MapOr(mapFunc, inlineError);
             Fallible<int> mapOrElseError = okayItem.MapOrElse(mapFunc, mapErrFunc);
@@ -188,7 +187,6 @@ namespace Glitch.Test.Functional
             var fallibleItems = new Dictionary<string, Fallible<int>>
             {
                 [nameof(map)]            = map,
-                [nameof(mapOr)]          = mapOr,
                 [nameof(mapOrElse)]      = mapOrElse,
                 [nameof(mapOrError)]     = mapOrError,
                 [nameof(mapOrElseError)] = mapOrElseError,
@@ -241,7 +239,6 @@ namespace Glitch.Test.Functional
 
             // Act
             Fallible<int> map            = okayItem.Map(mapFunc(nameof(map)));
-            Fallible<int> mapOr          = okayItem.MapOr(mapFunc(nameof(mapOr)), -1);
             Fallible<int> mapOrError     = okayItem.MapOr(mapFunc(nameof(mapOrError)), errorValue);
             Fallible<int> andThen        = okayItem.AndThen(bindFunc(nameof(andThen)));
             Fallible<int> andThen2       = okayItem.AndThen(bindFunc(nameof(andThen2)), bindProjectionFunc(nameof(andThen2)));
@@ -256,8 +253,6 @@ namespace Glitch.Test.Functional
             Fallible<int> mapError = failItem.MapError(mapErrFunc(nameof(mapError)));
 
             // These items should be run for both Okay and Fail
-            Fallible<int> mapOrElseOkay      = okayItem.MapOrElse(mapFunc(nameof(mapOrElseOkay)), _ => AssertNotCalled<int>());
-            Fallible<int> mapOrElseFail      = failItem.MapOrElse(_ => AssertNotCalled<int>(), mapErrToResultFunc(nameof(mapOrElseFail)));
             Fallible<int> mapOrElseErrorOkay = okayItem.MapOrElse(mapFunc(nameof(mapOrElseErrorOkay)), _ => AssertNotCalled<Error>());
             Fallible<int> mapOrElseErrorFail = failItem.MapOrElse(_ => AssertNotCalled<int>(), mapErrFunc(nameof(mapOrElseErrorFail)));
             Fallible<int> andThenBiBindOkay  = okayItem.AndThen(bindFunc(nameof(andThenBiBindOkay)), err => AssertNotCalled<Fallible<int>>());
@@ -266,9 +261,6 @@ namespace Glitch.Test.Functional
             var fallibles = new Dictionary<string, Fallible<int>>
             {
                 [nameof(map)]                = map,
-                [nameof(mapOr)]              = mapOr,
-                [nameof(mapOrElseOkay)]      = mapOrElseOkay,
-                [nameof(mapOrElseFail)]      = mapOrElseFail,
                 [nameof(mapOrError)]         = mapOrError,
                 [nameof(mapOrElseErrorOkay)] = mapOrElseErrorOkay,
                 [nameof(mapOrElseErrorFail)] = mapOrElseErrorFail,

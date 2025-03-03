@@ -44,12 +44,6 @@ namespace Glitch.Functional
             public override Result<TResult> Map<TResult>(Func<T, TResult> mapper)
                 => new Fail<TResult>(Error);
 
-            public override Result<TResult> MapOr<TResult>(Func<T, TResult> _, TResult ifFail)
-                => ifFail;
-
-            public override Result<TResult> MapOrElse<TResult>(Func<T, TResult> _, Func<Error, TResult> ifFail) 
-                => ifFail(Error);
-
             public override Result<TResult> MapOr<TResult>(Func<T, TResult> _, Error ifFail)
                 => ifFail;
 
