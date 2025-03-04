@@ -20,8 +20,14 @@ namespace Glitch.Functional
                 => mapper(Value);
 
             /// <inheritdoc />
-            public override Result<TResult> Cast<TResult>() 
+            public override Result<TResult> Cast<TResult>()
                 => (TResult)(dynamic)Value!;
+
+            public override Result<TResult> CastOr<TResult>(Error err)
+                => Fallible.Lift(this).CastOr<TResult>(err).Run();
+
+            public override Result<TResult> CastOrElse<TResult>(Func<T, Error> error)
+                => Fallible.Lift(this).CastOrElse<TResult>(error).Run();
 
             /// <inheritdoc />
             public override Result<T> IfOkay(Action<T> action)
@@ -66,8 +72,11 @@ namespace Glitch.Functional
             public override Result<T> OrElse(Func<Error, Result<T>> _) => this;
 
             /// <inheritdoc />
-            public override Result<T> Filter(Func<T, bool> predicate)
-                => predicate(Value) ? this : Fail<T>(new ApplicationError("Result failed check"));
+            public override Result<T> Guard(Func<T, bool> predicate, Error error)
+                => predicate(Value) ? this : error;
+
+            public override Result<T> Guard(Func<T, bool> predicate, Func<T, Error> error)
+                => predicate(Value) ? this : error(Value);
 
             /// <inheritdoc />
             public override Option<T> UnwrapOrNone() => Some(Value);

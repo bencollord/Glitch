@@ -6,8 +6,6 @@ namespace Glitch.Functional
     {
         public static readonly Nothing None = Nothing.Value;
 
-        public static Unit Unit() => default;
-
         public static Unit Ignore<T>(T _) => default;
 
         public static Identity<T> Id<T>(T value) => value;
@@ -44,30 +42,17 @@ namespace Glitch.Functional
         
         public static OneOf<TLeft, TRight> OneOf<TLeft, TRight>(TRight right) => new OneOf.Right<TLeft, TRight>(right);
 
-        public static IEnumerable<T> Sequence<T>(IEnumerable<T> items) => items;
+        public static Sequence<T> Sequence<T>(IEnumerable<T> items) => items.AsSequence();
 
-        public static IEnumerable<T> Sequence<T>(params T[] items) => items.AsEnumerable();
+        public static Sequence<T> Sequence<T>(params T[] items) => items.AsSequence();
 
-        public static IEnumerable<T> Range<T>(T start, T end)
-            where T : IComparable<T>, IIncrementOperators<T>
-        {
-            for (T i = start; i.CompareTo(end) < 0; ++i)
-            {
-                yield return i;
-            }
-        }
+        public static Sequence<T> Range<T>(T start, T end)
+            where T : IComparisonOperators<T, T, bool>, IIncrementOperators<T>
+            => Functional.Sequence.Range(start, end);
 
-        public static IEnumerable<T> Repeat<T>(T item, int times) => Enumerable.Repeat(item, times);
+        public static Sequence<T> Repeat<T>(T item, int times) => Functional.Sequence.Repeat(item, times);
 
-        public static IEnumerable<T> Repeat<T>(Func<T> func, int times)
-            => Infinite(func).Take(times);
-
-        public static IEnumerable<T> Infinite<T>(Func<T> func)
-        {
-            while (true)
-            {
-                yield return func();
-            }
-        }
+        public static Sequence<T> Repeat<T>(Func<T> func, int times)
+            => Functional.Sequence.Repeat(func, times);
     }
 }

@@ -36,7 +36,7 @@
 
         public Option<T> Maybe() => Option<T>.Maybe(Value);
 
-        public Fallible<TResult> Try<TResult>(Func<T, TResult> func) => Fallible.Lift(Value).Map(func);
+        public Fallible<TResult> Try<TResult>(Func<T, TResult> func) => Fallible.Okay(Value).Map(func);
 
         public OneOf<T, TRight> LeftOf<TRight>() => Left(Value!);
 

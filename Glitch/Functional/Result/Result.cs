@@ -1,6 +1,6 @@
 ﻿namespace Glitch.Functional
 {
-    public abstract record Result<T> : IComputation<T>
+    public abstract partial record Result<T> : IComputation<T>
     {
         private protected Result() { }
 
@@ -156,14 +156,29 @@
         /// <returns></returns>
         public abstract Result<TResult> Cast<TResult>();
 
+        public abstract Result<TResult> CastOr<TResult>(Error error);
+
+        public abstract Result<TResult> CastOrElse<TResult>(Func<T, Error> error);
+
+        public Result<T> Filter(Func<T, bool> predicate)
+            => Guard(predicate, new ApplicationError("Result failed check"));
+
         /// <summary>
         /// For a successful result, checks the value against a predicate
-        /// and returns an <see cref="ApplicationError"/> if it fails.
+        /// and returns a the provided <paramref name="error"/> if it fails.
         /// Does nothing for a failed result.
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        public abstract Result<T> Filter(Func<T, bool> predicate);
+        public abstract Result<T> Guard(Func<T, bool> predicate, Error error);
+
+        public abstract Result<T> Guard(Func<T, bool> predicate, Func<T, Error> error);
+
+        public Result<T> Guard(bool condition, Error error)
+            => Guard(_ => condition, error);
+
+        public Result<T> Guard(bool condition, Func<T, Error> error)
+            => Guard(_ => condition, error);
 
         /// <summary>
         /// A map operation that wraps the result in
@@ -332,50 +347,5 @@
         public static explicit operator Error(Result<T> result)
             => result is Result.Fail<T>(var err) 
                    ? err : throw new InvalidCastException("Cannot cast a successful result to an error");
-
-        #region IComputation
-        object? IComputation<T>.Match() => Match<object?>(val => val, err => err);
-
-        IComputation<TResult> IComputation<T>.AndThen<TResult>(Func<T, IComputation<TResult>> bind)
-        {
-            return this switch
-            {
-                Result.Okay<T>(var value) => bind(value),
-                Result.Fail<T>(var error) => Fail<TResult>(error),
-                _ => throw new NotSupportedException("You're not supposed to be extending the Result<T> class")
-            };
-        }
-
-        IComputation<TResult> IComputation<T>.AndThen<TElement, TResult>(Func<T, IComputation<TElement>> bind, Func<T, TElement, TResult> project)
-        {
-            return ((IComputation<T>)this).AndThen(x => bind(x).Map(y => project(x, y)));
-        }
-
-        IComputation<TResult> IComputation<T>.Apply<TResult>(IComputation<Func<T, TResult>> function)
-        {
-            return ((IComputation<T>)this).AndThen(x => function.Map(fn => fn(x)));
-        }
-
-        IComputation<TResult> IComputation<T>.Cast<TResult>()
-        {
-            return Cast<TResult>();
-        }
-
-        IComputation<T> IComputation<T>.Filter(Func<T, bool> predicate)
-        {
-            return Filter(predicate);
-        }
-
-        IComputation<TResult> IComputation<T>.Map<TResult>(Func<T, TResult> map)
-        {
-            return Map(map);
-        }
-
-        IComputation<Func<T2, TResult>> IComputation<T>.PartialMap<T2, TResult>(Func<T, T2, TResult> map)
-        {
-            return PartialMap(map);
-        }
-
-        #endregion
     };
 }

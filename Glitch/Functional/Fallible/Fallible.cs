@@ -1,29 +1,9 @@
-﻿namespace Glitch.Functional
+﻿
+namespace Glitch.Functional
 {
-    public static partial class Fallible
-    {
-        public static Fallible<T> Okay<T>(T value) => new(() => value);
+    using QuerySyntax;
 
-        public static Fallible<T> Fail<T>(Error error) => new(() => error);
-
-        public static Fallible<T> Lift<T>(T value) => Okay(value);
-
-        public static Fallible<Unit> Lift(Error value) => Fail<Unit>(value);
-
-        public static Fallible<T> Lift<T>(Result<T> result) => new(() => result);
-
-        public static Fallible<T> Lift<T>(Func<Result<T>> function) => new(function);
-
-        public static Fallible<T> Lift<T>(Func<T> function) => new(() => function());
-
-        public static Fallible<TResult> Apply<T, TResult>(this Fallible<Func<T, TResult>> function, Fallible<T> value)
-            => value.Apply(function);
-
-        public static Fallible<T> Flatten<T>(this Fallible<Fallible<T>> nested)
-            => nested.AndThen(n => n);
-    }
-
-    public class Fallible<T> : IComputation<T>
+    public partial class Fallible<T> : IComputation<T>
     {
         private Func<Result<T>> thunk;
 
@@ -155,6 +135,18 @@
         public Fallible<TResult> AndThen<TResult>(Func<T, Fallible<TResult>> ifOkay, Func<Error, Fallible<TResult>> ifFail)
             => new(() => thunk().Match(ifOkay, ifFail).Run());
 
+        public Fallible<T> Guard(Func<T, bool> predicate, Error error)
+            => new(() => thunk().Guard(predicate, error));
+
+        public Fallible<T> Guard(Func<T, bool> predicate, Func<T, Error> error)
+            => new(() => thunk().Guard(predicate, error));
+
+        public Fallible<T> Guard(bool condition, Error error)
+            => new(() => thunk().Guard(condition, error));
+
+        public Fallible<T> Guard(bool condition, Func<T, Error> error)
+            => new(() => thunk().Guard(condition, error));
+
         /// <summary>
         /// Returns the current <see cref="Fallible{T}"/> if Ok, otherwise returns other.
         /// </summary>
@@ -279,7 +271,18 @@
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <returns></returns>
-        public Fallible<TResult> Cast<TResult>() => new(() => thunk().Cast<TResult>());
+        public Fallible<TResult> Cast<TResult>()
+            => CastOrElse<TResult>(v => new InvalidCastException($"Cannot cast a value of type {v.GetType()} to {typeof(TResult)}"));
+
+        public Fallible<TResult> CastOr<TResult>(Error error)
+            => MapOr(v => (TResult)(dynamic)v!, error);
+
+        public Fallible<TResult> CastOrElse<TResult>(Func<T, Error> error)
+            => from val  in this
+               let  cast =  Try(() => (TResult)(dynamic)val!)
+               let  err  =  Fallible.Lift<TResult>(error(val))
+               from res  in cast | err
+               select res;
 
         /// <summary>
         /// Combines another try into a try of a tuple.
@@ -349,62 +352,5 @@
                 _ = x.thunk();
                 return y();
             });
-
-        #region IComputation
-        object? IComputation<T>.Match() => Run() switch
-        {
-            Result.Okay<T>(var value) => value,
-            Result.Fail<T>(var error) => error,
-            _ => throw Result.DiscriminatedUnionViolation()
-        };
-
-        IEnumerable<T> IComputation<T>.Iterate()
-        {
-            // Preserve laziness
-            foreach (var item in Run().Iterate())
-            {
-                yield return item;
-            }
-        }
-
-        IComputation<TResult> IComputation<T>.AndThen<TResult>(Func<T, IComputation<TResult>> bind)
-        {
-            return Map(v => bind(v).Iterate())
-                .Match<IComputation<TResult>>(
-                    Sequence.From,
-                    Fallible.Fail<TResult>);
-        }
-
-        IComputation<TResult> IComputation<T>.AndThen<TElement, TResult>(Func<T, IComputation<TElement>> bind, Func<T, TElement, TResult> project)
-        {
-            return ((IComputation<T>)this).AndThen(x => bind(x).Map(y => project(x, y)));
-        }
-
-        IComputation<TResult> IComputation<T>.Apply<TResult>(IComputation<Func<T, TResult>> function)
-        {
-            return ((IComputation<T>)this).AndThen(x => function.Map(fn => fn(x)));
-        }
-
-        IComputation<TResult> IComputation<T>.Cast<TResult>()
-        {
-            return Cast<TResult>();
-        }
-
-        IComputation<T> IComputation<T>.Filter(Func<T, bool> predicate)
-        {
-            return Filter(predicate);
-        }
-
-        IComputation<TResult> IComputation<T>.Map<TResult>(Func<T, TResult> map)
-        {
-            return Map(map);
-        }
-
-        IComputation<Func<T2, TResult>> IComputation<T>.PartialMap<T2, TResult>(Func<T, T2, TResult> map)
-        {
-            return PartialMap(map);
-        }
-
-        #endregion
     }
 }

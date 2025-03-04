@@ -20,6 +20,10 @@ namespace Glitch.Functional
             /// <inheritdoc />
             public override Result<TResult> Cast<TResult>() => new Fail<TResult>(Error);
 
+            public override Result<TResult> CastOr<TResult>(Error _) => Cast<TResult>();
+
+            public override Result<TResult> CastOrElse<TResult>(Func<T, Error> _) => Cast<TResult>();
+
             /// <inheritdoc />
             public override Result<T> IfOkay(Action<T> _) => this;
 
@@ -67,7 +71,9 @@ namespace Glitch.Functional
             public override Option<T> UnwrapOrNone() => None;
 
             /// <inheritdoc />
-            public override Result<T> Filter(Func<T, bool> predicate) => this;
+            public override Result<T> Guard(Func<T, bool> predicate, Error _) => this;
+
+            public override Result<T> Guard(Func<T, bool> predicate, Func<T, Error> _) => this;
 
             public override string ToString() => $"Error: {Error}";
 
