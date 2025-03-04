@@ -156,6 +156,13 @@
         /// <returns></returns>
         public abstract Result<TResult> Cast<TResult>();
 
+        /// <summary>
+        /// Casts the result, or returns the provided error
+        /// if the cast fails.
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="error"></param>
+        /// <returns></returns>
         public abstract Result<TResult> CastOr<TResult>(Error error);
 
         public abstract Result<TResult> CastOrElse<TResult>(Func<T, Error> error);

@@ -23,7 +23,7 @@
 
         IComputation<TResult> IComputation<T>.Cast<TResult>()
         {
-            return Cast<TResult>();
+            return CastOrNone<TResult>();
         }
 
         IComputation<T> IComputation<T>.Filter(Func<T, bool> predicate)

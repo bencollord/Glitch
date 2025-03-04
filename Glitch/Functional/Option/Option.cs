@@ -235,13 +235,29 @@ namespace Glitch.Functional
             => IsSome ? ifSome(value!) : ifNone();
 
         /// <summary>
+        /// Casts the current value if exists.
+        /// </summary>
+        /// <remarks>
+        /// This method will throw if the cast fails. 
+        /// Use <see cref="CastOrNone{TResult}"/> if you want
+        /// to return an empty option on fail.
+        /// </remarks>
+        /// <typeparam name="TResult"></typeparam>
+        /// <exception cref="InvalidCastException">
+        /// If the cast fails
+        /// </exception>
+        /// <returns></returns>
+        public Option<TResult> Cast<TResult>()
+            => Map(DynamicCast<T, TResult>);
+
+        /// <summary>
         /// If the current <see cref="Option{T}"/> contains a value, casts it to 
         /// <typeparamref name="TResult"/>. Otherwise, returns an empty <see cref="Option{TResult}"/>.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <returns></returns>
-        public Option<TResult> Cast<TResult>()
-            => AndThen(val => Try(() => Id(val).Cast<TResult>().Unwrap()).Run().UnwrapOrNone());
+        public Option<TResult> CastOrNone<TResult>()
+            => AndThen(val => Try(() => DynamicCast<T, TResult>(val)).Run().UnwrapOrNone());
 
         /// <summary>
         /// Returns the wrapped value if it exists. Otherwise throws an exception.
