@@ -62,7 +62,10 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <param name="bind"></param>
         /// <returns></returns>
-        public abstract OneOf<TLeft, TResult> AndThenIfRight<TResult>(Func<TRight, OneOf<TLeft, TResult>> bind);
+        public abstract OneOf<TLeft, TResult> AndThenIfRight<TResult>(Func<TRight, OneOf<TLeft, TResult>> bind); // TODO Generic on both parameters
+
+        public OneOf<TNewLeft, TNewRight> Choose<TNewLeft, TNewRight>(Func<TLeft, OneOf<TNewLeft, TNewRight>> bindLeft, Func<TRight, OneOf<TNewLeft, TNewRight>> bindRight)
+            => Match(bindLeft, bindRight);
 
         /// <summary>
         /// Resolves the union into a single value using the pair of supplied functions.

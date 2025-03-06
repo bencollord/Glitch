@@ -94,7 +94,7 @@ namespace Glitch.Functional
             public override bool IsFailAnd(Func<Error, bool> predicate) => predicate(Error);
 
             /// <inheritdoc />
-            public override Fallible<TResult> Try<TResult>(Func<T, TResult> map) 
+            public override Fallible<TResult> TryMap<TResult>(Func<T, TResult> map) 
                 => Functional.Fallible<TResult>.Fail(Error);
 
             /// <inheritdoc />
@@ -124,7 +124,7 @@ namespace Glitch.Functional
             /// <inheritdoc />
             public override void ThrowIfFail() => Error.Throw();
 
-            public override Result<TResult> AndThen<TResult>(Func<T, Result<TResult>> _, Func<Error, Result<TResult>> ifFail) 
+            public override Result<TResult> Choose<TResult>(Func<T, Result<TResult>> _, Func<Error, Result<TResult>> ifFail) 
                 => ifFail(Error);
         }
     }

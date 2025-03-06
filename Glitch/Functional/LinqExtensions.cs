@@ -2,6 +2,9 @@
 {
     public static class LinqExtensions
     {
+        public static IEnumerable<Func<T2, TResult>> PartialSelect<T, T2, TResult>(this IEnumerable<T> source, Func<T, T2, TResult> selector)
+            => source.Select(selector.Curry());
+
         public static Option<T> ElementAtOrNone<T>(this IEnumerable<T> source, int index)
         {
             if (index <= 0)

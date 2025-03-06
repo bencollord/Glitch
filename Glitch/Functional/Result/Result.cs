@@ -71,6 +71,14 @@
         /// <returns></returns>
         public abstract Result<TResult> AndThen<TResult>(Func<T, Result<TResult>> bind);
 
+        /// <summary>
+        /// BindMap operation, similar to the two arg overload of SelectMany.
+        /// </summary>
+        /// <typeparam name="TElement"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="bind"></param>
+        /// <param name="project"></param>
+        /// <returns></returns>
         public Result<TResult> AndThen<TElement, TResult>(Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project)
             => AndThen(x => bind(x).Map(y => project(x, y)));
 
@@ -89,7 +97,14 @@
         /// <returns></returns>
         public abstract Result<T> OrElse(Func<Error, Result<T>> other);
 
-        public abstract Result<TResult> AndThen<TResult>(Func<T, Result<TResult>> ifOkay, Func<Error, Result<TResult>> ifFail);
+        /// <summary>
+        /// BiBind operation
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="ifOkay"></param>
+        /// <param name="ifFail"></param>
+        /// <returns></returns>
+        public abstract Result<TResult> Choose<TResult>(Func<T, Result<TResult>> ifOkay, Func<Error, Result<TResult>> ifFail);
 
         /// <summary>
         /// Executes an impure action against the value if Ok.
@@ -189,16 +204,16 @@
 
         /// <summary>
         /// A map operation that wraps the result in
-        /// a <see cref="Try{TResult}"/>.
+        /// a <see cref="TryMap{TResult}"/>.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="map"></param>
         /// <returns></returns>
-        public abstract Fallible<TResult> Try<TResult>(Func<T, TResult> map);
+        public abstract Fallible<TResult> TryMap<TResult>(Func<T, TResult> map);
 
         /// <summary>
         /// A bind operation that wraps the result in
-        /// a <see cref="Try{TResult}"/>.
+        /// a <see cref="TryMap{TResult}"/>.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="map"></param>
@@ -207,7 +222,7 @@
 
         /// <summary>
         /// A bind operation that wraps the result in
-        /// a <see cref="Try{TResult}"/>.
+        /// a <see cref="TryMap{TResult}"/>.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="map"></param>

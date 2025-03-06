@@ -2,10 +2,7 @@
 
 namespace Glitch.Functional
 {
-    public readonly struct Nothing
-    {
-        public static readonly Nothing Value = new();
-    }
+    public readonly struct OptionNone { }
 
     public readonly partial struct Option<T> : IEquatable<Option<T>>, IComputation<T>
     {
@@ -101,6 +98,9 @@ namespace Glitch.Functional
         /// <returns></returns>
         public Option<TResult> AndThen<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project)
             => AndThen(x => bind(x).Map(y => project(x, y)));
+
+        public Option<TResult> Choose<TResult>(Func<T, Option<TResult>> bindSome, Func<Option<TResult>> bindNone)
+            => Match(bindSome, bindNone);
 
         /// <summary>
         /// Returns the current <see cref="Option{T}"/> if it contains a value. 
@@ -418,7 +418,7 @@ namespace Glitch.Functional
 
         public static implicit operator Option<T>(T? value) => Maybe(value);
 
-        public static implicit operator Option<T>(Nothing _) => new();
+        public static implicit operator Option<T>(OptionNone _) => new();
 
         public static bool operator ==(Option<T> x, Option<T> y) => x.Equals(y);
 

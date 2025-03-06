@@ -4,9 +4,11 @@ namespace Glitch.Functional
 {
     public static partial class FN
     {
-        public static readonly Nothing None = Nothing.Value;
+        public static readonly OptionNone None = new();
 
-        public static Unit Ignore<T>(T _) => default;
+        public static readonly Terminal Terminal = new();
+
+        public static Terminal Ignore<T>(T _) => default;
 
         public static Identity<T> Id<T>(T value) => value;
 
@@ -22,13 +24,15 @@ namespace Glitch.Functional
 
         public static Fallible<T> Try<T>(Func<T> function) => Fallible<T>.Lift(function);
 
-        public static Fallible<Unit> Try(Action action) => Functional.Fallible<Unit>.Lift(action.Return());
+        public static Fallible<Terminal> Try(Action action) => Fallible<Terminal>.Lift(action.Return());
 
-        public static Fallible<T> Try<T>(T value) => Functional.Fallible<T>.Okay(value);
+        public static Fallible<T> Try<T>(T value) => Fallible<T>.Okay(value);
 
-        public static Fallible<T> Try<T>(Result<T> result) => Functional.Fallible<T>.Lift(result);
+        public static Fallible<T> Try<T>(Result<T> result) => Fallible<T>.Lift(result);
 
-        public static Fallible<T> Try<T>(Error error) => Functional.Fallible<T>.Fail(error);
+        public static Fallible<T> Try<T>(Error error) => Fallible<T>.Fail(error);
+
+        public static Fallible<T> TryCast<T>(object obj) => Try(() => (T)(dynamic)obj);
 
         public static OneOf.Left<TLeft> Left<TLeft>(TLeft left) => new(left);
 

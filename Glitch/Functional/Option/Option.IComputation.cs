@@ -2,7 +2,7 @@
 {
     public readonly partial struct Option<T> : IEquatable<Option<T>>, IComputation<T>
     {
-        object? IComputation<T>.Match() => IsSome ? value : Nothing.Value;
+        object? IComputation<T>.Match() => IsSome ? value : Terminal.Value;
 
         IComputation<TResult> IComputation<T>.AndThen<TResult>(Func<T, IComputation<TResult>> bind)
         {
