@@ -272,14 +272,14 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <returns></returns>
         public Fallible<TResult> Cast<TResult>()
-            => CastOrElse<TResult>(v => new InvalidCastException($"Cannot cast a value of type {v.GetType()} to {typeof(TResult)}"));
+            => CastOrElse<TResult>(v => new InvalidCastException($"Cannot cast a value of type {v!.GetType()} to {typeof(TResult)}"));
 
         public Fallible<TResult> CastOr<TResult>(Error error)
             => MapOr(v => (TResult)(dynamic)v!, error);
 
         public Fallible<TResult> CastOrElse<TResult>(Func<T, Error> error)
             => from val  in this
-               let  cast =  Try(() => (TResult)(dynamic)val!)
+               let  cast =  Try(() => DynamicCast<T, TResult>(val))
                let  err  =  Fallible.Lift<TResult>(error(val))
                from res  in cast | err
                select res;
@@ -311,6 +311,9 @@ namespace Glitch.Functional
         /// <returns></returns>
         public Result<T> Run()
         {
+            // Memoize the thunk
+            thunk = thunk.Memo();
+
             try
             {
                 return thunk();
@@ -320,6 +323,10 @@ namespace Glitch.Functional
                 return Result<T>.Fail(ex);
             }
         }
+
+        public T Unwrap() => Run().Unwrap();
+
+        public void ThrowIfFail() => Run().ThrowIfFail();
 
         public static implicit operator Fallible<T>(Result<T> result) => new(() => result);
 

@@ -52,6 +52,8 @@ namespace Glitch.Text
             return this;
         }
 
+        public IndentedStringBuilder Append(object val) => Append(val.ToString() ?? "");
+
         public IndentedStringBuilder Append(string text)
         {
             if (shouldIndent)

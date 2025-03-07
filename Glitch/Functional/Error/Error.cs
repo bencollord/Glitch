@@ -4,6 +4,8 @@ namespace Glitch.Functional
 {
     public abstract class Error : IEquatable<Error>
     {
+        public static readonly EmptyError Empty = EmptyError.Value;
+
         protected static readonly StringComparer MessageComparer = StringComparer.CurrentCultureIgnoreCase;
 
         public abstract string Message { get; }
@@ -25,6 +27,15 @@ namespace Glitch.Functional
         public bool IsException() => IsException<Exception>();
 
         public abstract bool IsException<T>() where T : Exception;
+
+        public virtual Error Combine(Error other)
+        {
+            var errors = Iterate().Concat(other.Iterate());
+
+            return errors.Count() > 1 
+                 ? new AggregateError(errors) 
+                 : errors.Single();
+        }
 
         public virtual bool Equals(Error? other)
         {
@@ -72,5 +83,7 @@ namespace Glitch.Functional
         public static bool operator ==(Error? x, Error? y) => x is null ? y is null : x.Equals(y);
 
         public static bool operator !=(Error? x, Error? y) => !(x == y);
+
+        public static Error operator +(Error? x, Error? y) => (y is null ? x : x?.Combine(y) ?? y) ?? Empty;
     }
 }
