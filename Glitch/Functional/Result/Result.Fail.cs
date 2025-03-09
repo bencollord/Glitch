@@ -94,18 +94,6 @@ namespace Glitch.Functional
             public override bool IsFailAnd(Func<Error, bool> predicate) => predicate(Error);
 
             /// <inheritdoc />
-            public override Fallible<TResult> TryMap<TResult>(Func<T, TResult> map) 
-                => Functional.Fallible<TResult>.Fail(Error);
-
-            /// <inheritdoc />
-            public override Fallible<TResult> AndThenTry<TResult>(Func<T, Result<TResult>> bind)
-                => Functional.Fallible<TResult>.Fail(Error);
-
-            /// <inheritdoc />
-            public override Fallible<TResult> AndThenTry<TResult>(Func<T, Fallible<TResult>> bind)
-                => Functional.Fallible<TResult>.Fail(Error);
-
-            /// <inheritdoc />
             public override Result<TResult> ZipWith<TOther, TResult>(Result<TOther> other, Func<T, TOther, TResult> _)
             {
                 return other.MapError(err => Error.New(Error, err))

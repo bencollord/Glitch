@@ -150,9 +150,7 @@ namespace Glitch.Functional
         /// <returns></returns>
         public Option<T> Filter(Func<T, bool> predicate)
         {
-            if (IsNone) return this;
-
-            if (predicate(value!))
+            if (IsSomeAnd(predicate))
             {
                 return this;
             }
@@ -392,7 +390,7 @@ namespace Glitch.Functional
 
             if (other.IsNone) return false;
 
-            return value!.Equals(other.value);
+            return EqualityComparer<T>.Default.Equals(value, other.value);
         }
 
         public override bool Equals([NotNullWhen(true)] object? obj)

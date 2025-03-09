@@ -6,9 +6,9 @@ namespace Glitch.Functional
     {
         public static readonly OptionNone None = new();
 
-        public static readonly Terminal Terminal = new();
+        public static readonly Unit Terminal = new();
 
-        public static Terminal Ignore<T>(T _) => default;
+        public static Unit Ignore<T>(T _) => default;
 
         public static Identity<T> Id<T>(T value) => value;
 
@@ -24,7 +24,7 @@ namespace Glitch.Functional
 
         public static Fallible<T> Try<T>(Func<T> function) => Fallible<T>.Lift(function);
 
-        public static Fallible<Terminal> Try(Action action) => Fallible<Terminal>.Lift(action.Return());
+        public static Fallible<Unit> Try(Action action) => Fallible<Unit>.Lift(action.Return());
 
         public static Fallible<T> Try<T>(T value) => Fallible<T>.Okay(value);
 

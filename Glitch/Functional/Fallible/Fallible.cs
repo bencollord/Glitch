@@ -49,6 +49,10 @@ namespace Glitch.Functional
         public Fallible<T> MapError(Func<Error, Error> map)
             => new(() => thunk().MapError(map));
 
+        public Fallible<T> MapError<TError>(Func<TError, Error> map)
+            where TError : Error
+            => MapError(err => err is TError e ? map(e) : err);
+
         /// <summary>
         /// Applies a wrapped function to the wrapped value if both are successful.
         /// </summary>
@@ -334,6 +338,8 @@ namespace Glitch.Functional
 
         public static implicit operator Fallible<T>(T value) => new(() => value);
 
+        public static implicit operator Fallible<T>(Error error) => new(() => error);
+
         public static explicit operator T(Fallible<T> @try) => @try.Run().Unwrap();
 
         public static Fallible<T> operator &(Fallible<T> x, Fallible<T> y) => x.And(y);
@@ -343,7 +349,7 @@ namespace Glitch.Functional
         public static Fallible<T> operator >>(Fallible<T> x, Fallible<T> y)
             => x.AndThen(_ => y);
 
-        public static Fallible<T> operator >>(Fallible<T> x, Fallible<Terminal> y)
+        public static Fallible<T> operator >>(Fallible<T> x, Fallible<Unit> y)
             => x.AndThen(v => y.Map(_ => v));
 
         public static Fallible<T> operator >>(Fallible<T> x, Func<Result<T>> y)

@@ -2,7 +2,7 @@
 
 namespace Glitch.Functional
 {
-    public static class Sequence
+    public static partial class Sequence
     {
         public static Sequence<T> AsSequence<T>(this IEnumerable<T> items) => new(items);
 

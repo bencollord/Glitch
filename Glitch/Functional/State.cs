@@ -6,9 +6,9 @@
 
         public static State<TState, TValue> Get<TState, TValue>(Func<TState, TValue> func) => new(s => (s, func(s)));
 
-        public static State<TState, Terminal> Put<TState>(TState state) => new(_ => (state, Terminal.Value));
+        public static State<TState, Unit> Put<TState>(TState state) => new(_ => (state, Unit.Value));
 
-        public static State<TState, Terminal> Modify<TState>(Func<TState, TState> func) => new(s => (func(s), Terminal.Value));
+        public static State<TState, Unit> Modify<TState>(Func<TState, TState> func) => new(s => (func(s), Unit.Value));
 
         public static State<TState, TValue> Lift<TState, TValue>(TValue value) => new(s => (s, value));
         
@@ -23,9 +23,9 @@
 
         public static State<TState, TValue> Get<TValue>(Func<TState, TValue> func) => new(s => (s, func(s)));
 
-        public static State<TState, Terminal> Put(TState state) => new(_ => (state, Terminal.Value));
+        public static State<TState, Unit> Put(TState state) => new(_ => (state, Unit.Value));
 
-        public static State<TState, Terminal> Modify(Func<TState, TState> func) => new(s => (func(s), Terminal.Value));
+        public static State<TState, Unit> Modify(Func<TState, TState> func) => new(s => (func(s), Unit.Value));
 
         public static State<TState, TValue> Lift<TValue>(TValue value) => new(s => (s, value));
 
@@ -84,7 +84,7 @@
         public static State<TState, TValue> operator >>(State<TState, TValue> left, State<TState, TValue> right)
             => left.AndThen(_ => right);
 
-        public static State<TState, TValue> operator >>(State<TState, TValue> left, State<TState, Terminal> right)
+        public static State<TState, TValue> operator >>(State<TState, TValue> left, State<TState, Unit> right)
             => left.AndThen(v => right.Map(_ => v));
 
         public static implicit operator State<TState, TValue>(TValue value) => State<TState>.Lift(value);

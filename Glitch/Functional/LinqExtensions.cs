@@ -33,9 +33,9 @@
 
         private static Option<T> FirstOrNone<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
         {
-            bool hasElements = predicate.Match(source.Any, source.Any);
-
-            return hasElements ? Some(source.First()) : None;
+            return predicate.Choose(
+                filter => Maybe(source.FirstOrDefault(filter)),
+                () => Maybe(source.FirstOrDefault()));
         }
 
         public static Result<T> TrySingle<T>(this IEnumerable<T> source)

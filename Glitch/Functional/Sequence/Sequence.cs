@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Functional
 {
-    public class Sequence<T> : IEnumerable<T>, IComputation<T>
+    public partial class Sequence<T> : IEnumerable<T>, IComputation<T>
     {
         public static readonly Sequence<T> Empty = new([]);
 
@@ -16,6 +16,11 @@ namespace Glitch.Functional
 
         public Sequence<TResult> Map<TResult>(Func<T, TResult> map)
             => new(items.Select(map));
+
+        public Sequence<TResult> Map<TResult>(Func<T, int, TResult> map)
+            => new(items.Select(map));
+
+        public Sequence<(int Index, T Item)> Index() => new(items.Index());
 
         public Sequence<Func<T2, TResult>> PartialMap<T2, TResult>(Func<T, T2, TResult> mapper)
             => Map(mapper.Curry());
@@ -137,7 +142,7 @@ namespace Glitch.Functional
         public static bool operator !=(Sequence<T> x, Sequence<T> y) => !(x == y);
 
         #region IComputation
-        object? IComputation<T>.Match() => Match<object?>(val => val, items => items, () => Terminal.Value);
+        object? IComputation<T>.Match() => Match<object?>(val => val, items => items, () => Unit.Value);
 
         IEnumerable<T> IComputation<T>.Iterate() => items;
 

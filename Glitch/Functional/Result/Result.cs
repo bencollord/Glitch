@@ -204,30 +204,34 @@
 
         /// <summary>
         /// A map operation that wraps the result in
-        /// a <see cref="TryMap{TResult}"/>.
+        /// a <see cref="Try{TResult}"/>.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="map"></param>
         /// <returns></returns>
-        public abstract Fallible<TResult> TryMap<TResult>(Func<T, TResult> map);
+        public Fallible<TResult> Try<TResult>(Func<T, TResult> map) => Fallible.Lift(this).Map(map);
+
+        public Fallible<T> Try(Action<T> action) => Fallible.Lift(this).Do(action);
 
         /// <summary>
         /// A bind operation that wraps the result in
-        /// a <see cref="TryMap{TResult}"/>.
+        /// a <see cref="Try{TResult}"/>.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="map"></param>
         /// <returns></returns>
-        public abstract Fallible<TResult> AndThenTry<TResult>(Func<T, Result<TResult>> bind);
+        public Fallible<TResult> AndThenTry<TResult>(Func<T, Result<TResult>> bind)
+            => Fallible.Lift(this).AndThen(bind);
 
         /// <summary>
         /// A bind operation that wraps the result in
-        /// a <see cref="TryMap{TResult}"/>.
+        /// a <see cref="Try{TResult}"/>.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="map"></param>
         /// <returns></returns>
-        public abstract Fallible<TResult> AndThenTry<TResult>(Func<T, Fallible<TResult>> bind);
+        public Fallible<TResult> AndThenTry<TResult>(Func<T, Fallible<TResult>> bind)
+            => Fallible.Lift(this).AndThen(bind);
 
         /// <summary>
         /// Combines another result into a result of a tuple.

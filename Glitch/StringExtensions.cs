@@ -24,13 +24,18 @@ namespace Glitch
             return new String(result, 0, (int)(current - result));
         }
 
-        public static string Strip(this string input, string target) => input.Replace(target, String.Empty);
+        public static string Strip(this string input, string target) => input.Replace(target, string.Empty);
 
-        public static string Join(this IEnumerable<string> items) => items.Join(String.Empty);
+        public static string Join(this IEnumerable<string> items) => items.Join(string.Empty);
 
         public static string Join(this IEnumerable<string> items, string separator)
         {
-            return String.Join(separator, items);
+            return string.Join(separator, items);
+        }
+
+        public static string Join<T>(this IEnumerable<T> items, string separator)
+        {
+            return string.Join(separator, items);
         }
 
         public static string JoinLines(this IEnumerable<string> items)

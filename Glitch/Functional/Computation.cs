@@ -84,7 +84,7 @@ namespace Glitch.Functional.ComputationQuery
                 }
             };
 
-        public static Fallible<T> TryRun<T>(this IComputation<T> source)
+        public static Fallible<T> AsFallible<T>(this IComputation<T> source)
             => source is Fallible<T> fallible ? fallible : Fallible.Lift(source.Run());
 
         private static InvalidOperationException AsInvalidOperationException(this Error error) => new(error.Message);
