@@ -410,6 +410,9 @@ namespace Glitch.Functional
 
         public static Option<T> operator |(Option<T> x, Option<T> y) => x.Or(y);
 
+        // Coalescing operator
+        public static T operator |(Option<T> x, T y) => x.IfNone(y);
+
         public static Option<T> operator ^(Option<T> x, Option<T> y) => x.Xor(y);
 
         public static implicit operator bool(Option<T> option) => option.IsSome;

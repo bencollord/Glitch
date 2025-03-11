@@ -142,7 +142,7 @@ namespace Glitch.Functional
         public static bool operator !=(Sequence<T> x, Sequence<T> y) => !(x == y);
 
         #region IComputation
-        object? IComputation<T>.Match() => Match<object?>(val => val, items => items, () => Unit.Value);
+        object? IComputation<T>.Match() => Match<object?>(val => val, items => items, () => Terminal.Value);
 
         IEnumerable<T> IComputation<T>.Iterate() => items;
 
