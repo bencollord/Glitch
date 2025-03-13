@@ -196,11 +196,23 @@
 
         public abstract Result<T> Guard(Func<T, bool> predicate, Func<T, Error> error);
 
+        public Result<T> GuardNot(Func<T, bool> predicate, Error error)
+            => Guard(predicate.Not(), error);
+
+        public Result<T> GuardNot(Func<T, bool> predicate, Func<T, Error> error)
+            => Guard(predicate.Not(), error);
+
         public Result<T> Guard(bool condition, Error error)
             => Guard(_ => condition, error);
 
         public Result<T> Guard(bool condition, Func<T, Error> error)
             => Guard(_ => condition, error);
+
+        public Result<T> GuardNot(bool condition, Error error)
+            => Guard(!condition, error);
+
+        public Result<T> GuardNot(bool condition, Func<T, Error> error)
+            => Guard(!condition, error);
 
         /// <summary>
         /// A map operation that wraps the result in

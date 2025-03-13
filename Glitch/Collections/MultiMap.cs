@@ -34,14 +34,16 @@ namespace Glitch.Collections
 
         public IEnumerable<TValue> Values => dictionary.Values.Flatten();
 
-        public void Add(TKey key, TValue value)
+        public IList<TValue> Add(TKey key, TValue value)
         {
             if (!dictionary.ContainsKey(key))
             {
                 dictionary.Add(key, []);
             }
-            
-            dictionary[key].Add(value);
+
+            var list = dictionary[key];
+            list.Add(value);
+            return list;
         }
 
         public void Add(TKey key, IList<TValue> value) => dictionary.Add(key, value);
