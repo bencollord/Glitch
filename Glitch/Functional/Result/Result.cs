@@ -143,10 +143,10 @@
         /// </summary>
         public abstract void ThrowIfFail();
 
-        public Result<TResult> Match<TResult>(Func<T, TResult> ifOkay, TResult ifFail)
+        public TResult Match<TResult>(Func<T, TResult> ifOkay, TResult ifFail)
             => Map(ifOkay).IfFail(ifFail);
 
-        public Result<TResult> Match<TResult>(Func<T, TResult> ifOkay, Func<TResult> ifFail)
+        public TResult Match<TResult>(Func<T, TResult> ifOkay, Func<TResult> ifFail)
             => Match(ifOkay, _ => ifFail());
 
         /// <summary>
