@@ -79,7 +79,7 @@ namespace Glitch.Functional
                 => predicate(Value) ? this : error(Value);
 
             /// <inheritdoc />
-            public override Option<T> UnwrapOrNone() => Some(Value);
+            public override Option<T> NoneIfFail() => Some(Value);
 
             public override string ToString() => $"Ok: {Value}";
 

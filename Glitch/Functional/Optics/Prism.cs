@@ -4,12 +4,50 @@ namespace Glitch.Functional
 {
     public static class Prism
     {
-        public static Prism<TFocus, TValue> New<TFocus, TValue>(Func<TFocus, Option<TValue>> get, Func<TFocus, TValue, TFocus> set) => new(get, set);
+        /// <summary>
+        /// <inheritdoc cref="Prism{TFocus, TValue}.New(System.Func{TFocus, Option{TValue}}, System.Func{TFocus, TValue, TFocus})"/>
+        /// </summary>
+        /// <typeparam name="TFocus"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="get"></param>
+        /// <param name="set"></param>
+        /// <returns></returns>
+        public static Prism<TFocus, TValue> New<TFocus, TValue>(Func<TFocus, Option<TValue>> get, Func<TFocus, TValue, TFocus> set) 
+            => Prism<TFocus, TValue>.New(get, set);
+
+        /// <summary>
+        /// <inheritdoc cref="Prism{TFocus, TValue}.New(System.Func{TFocus, Option{TValue}}, System.Func{TFocus, TValue, TValue, TFocus})"/>
+        /// </summary>
+        /// <typeparam name="TFocus"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="get"></param>
+        /// <param name="set"></param>
+        /// <returns></returns>
+        public static Prism<TFocus, TValue> New<TFocus, TValue>(Func<TFocus, Option<TValue>> get, Func<TFocus, TValue, TValue, TFocus> set)
+            => Prism<TFocus, TValue>.New(get, set);
     }
 
     public static class Prism<TFocus>
     {
-        public static Prism<TFocus, TValue> New<TValue>(Func<TFocus, Option<TValue>> get, Func<TFocus, TValue, TFocus> set) => new(get, set);
+        /// <summary>
+        /// <inheritdoc cref="Prism{TFocus, TValue}.New(System.Func{TFocus, Option{TValue}}, System.Func{TFocus, TValue, TFocus})"/>
+        /// </summary>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="get"></param>
+        /// <param name="set"></param>
+        /// <returns></returns>
+        public static Prism<TFocus, TValue> New<TValue>(Func<TFocus, Option<TValue>> get, Func<TFocus, TValue, TFocus> set) 
+            => Prism<TFocus, TValue>.New(get, set);
+
+        /// <summary>
+        /// <inheritdoc cref="Prism{TFocus, TValue}.New(System.Func{TFocus, Option{TValue}}, System.Func{TFocus, TValue, TValue, TFocus})"/>
+        /// </summary>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="get"></param>
+        /// <param name="set"></param>
+        /// <returns></returns>
+        public static Prism<TFocus, TValue> New<TValue>(Func<TFocus, Option<TValue>> get, Func<TFocus, TValue, TValue, TFocus> set)
+            => Prism<TFocus, TValue>.New(get, set);
     }
 
     public record Prism<TFocus, TValue>
@@ -23,7 +61,24 @@ namespace Glitch.Functional
             this.setter = setter;
         }
 
+        /// <summary>
+        /// Creates a new prism from the provided get and set functions.
+        /// </summary>
+        /// <param name="get"></param>
+        /// <param name="set"></param>
+        /// <returns></returns>
         public static Prism<TFocus, TValue> New(Func<TFocus, Option<TValue>> get, Func<TFocus, TValue, TFocus> set) => new(get, set);
+
+        /// <summary>
+        /// Creates a new prism from the provided get and set functions.
+        /// The set function takes both the old value and the new value as arguments,
+        /// thus allowing things such as replacing an item in an immutable collection.
+        /// </summary>
+        /// <param name="get"></param>
+        /// <param name="set"></param>
+        /// <returns></returns>
+        public static Prism<TFocus, TValue> New(Func<TFocus, Option<TValue>> get, Func<TFocus, TValue, TValue, TFocus> set)
+            => new(get, (focus, newValue) => get(focus).Map(oldValue => set(focus, oldValue, newValue)).IfNone(focus));
 
         public Option<TValue> Get(TFocus focus) => getter(focus);
 

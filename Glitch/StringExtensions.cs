@@ -87,5 +87,22 @@ namespace Glitch
         public static Result<T> TryParse<T>(this string input, IFormatProvider? formatProvider)
             where T : IParsable<T>
             => Try(() => T.Parse(input, formatProvider)).Run();
+
+        // ------
+        public static T ParseEnum<T>(this string input)
+            where T : struct, Enum
+            => input.TryParseEnum<T>().Unwrap();
+
+        public static T ParseEnum<T>(this string input, bool ignoreCase)
+            where T : struct, Enum
+            => input.TryParseEnum<T>(ignoreCase).Unwrap();
+
+        public static Result<T> TryParseEnum<T>(this string input)
+            where T : struct, Enum
+            => input.TryParseEnum<T>(false);
+
+        public static Result<T> TryParseEnum<T>(this string input, bool ignoreCase)
+            where T : struct, Enum
+            => Try(() => Enum.Parse<T>(input, ignoreCase)).Run();
     }
 }

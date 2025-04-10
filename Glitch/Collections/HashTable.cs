@@ -30,7 +30,7 @@ namespace Glitch.Collections
             set
             {
                 FindEntry(key)
-                    .IfSome(e => e.Value = value)
+                    .IfSome((Action<Entry>)(e => e.Value = value))
                     .IfNone(() => Add(key, value));
             }
         }

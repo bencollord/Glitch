@@ -89,7 +89,7 @@ namespace Glitch.Functional
 
             IComputation<TResult> IComputation<TLeft>.Cast<TResult>()
             {
-                return MapLeft(l => Some(l).CastOrNone<TResult>())
+                return MapLeft(l => Some(l).Cast<TResult>())
                     .Match(
                         left => left.Match<IComputation<TResult>>(
                                         val => OneOf<TResult, TRight>.Left(val).LeftBiased(),

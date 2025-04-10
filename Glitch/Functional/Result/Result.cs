@@ -273,6 +273,8 @@
         /// <returns></returns>
         public abstract T Unwrap();
 
+        public T UnwrapOr(T fallback) => IfFail(fallback);
+
         /// <summary>
         /// Returns the wrapped value if Ok, otherwise returns the fallback value.
         /// </summary>
@@ -301,7 +303,7 @@
         /// an empty <see cref="Option{T}" />.
         /// </summary>
         /// <returns></returns>
-        public abstract Option<T> UnwrapOrNone();
+        public abstract Option<T> NoneIfFail();
 
         /// <summary>
         /// Returns the wrapped error if faulted. Otherwise throws an <see cref="InvalidOperationException"/>.

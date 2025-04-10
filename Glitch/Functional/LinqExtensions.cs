@@ -38,6 +38,19 @@
                 () => Maybe(source.FirstOrDefault()));
         }
 
+        public static Option<T> LastOrNone<T>(this IEnumerable<T> source)
+            => source.LastOrNone(None);
+
+        public static Option<T> LastOrNone<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+            => source.LastOrNone(Some(predicate));
+
+        private static Option<T> LastOrNone<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
+        {
+            return predicate.Choose(
+                filter => Maybe(source.LastOrDefault(filter)),
+                () => Maybe(source.LastOrDefault()));
+        }
+
         public static Result<T> TrySingle<T>(this IEnumerable<T> source)
             => source.TrySingle(None);
 

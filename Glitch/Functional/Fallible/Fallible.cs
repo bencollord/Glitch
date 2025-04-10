@@ -53,6 +53,14 @@ namespace Glitch.Functional
             where TError : Error
             => MapError(err => err is TError e ? map(e) : err);
 
+        public Fallible<T> Catch<TException>(Func<TException, T> map)
+            where TException : Exception
+            => OrElse(err => err.IsException<TException>() ? map((TException)err.AsException()) : err);
+
+        public Fallible<T> Catch<TException>(Func<TException, Error> map)
+            where TException : Exception
+            => MapError(err => err.IsException<TException>() ? map((TException)err.AsException()) : err);
+
         /// <summary>
         /// Applies a wrapped function to the wrapped value if both are successful.
         /// </summary>

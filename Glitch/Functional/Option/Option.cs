@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using Glitch.Functional.ComputationQuery;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Functional
 {
@@ -221,6 +222,8 @@ namespace Glitch.Functional
         public TResult Match<TResult>(Func<T, TResult> ifSome, TResult ifNone)
             => Map(ifSome).IfNone(ifNone);
 
+        public Terminal Match(Action<T> ifSome, Action ifNone) => Match(ifSome.Return(), ifNone.Return());
+
         /// <summary>
         /// If this <see cref="Option{T}"/> contains a value, returns the result of the first function 
         /// applied to the wrapped value.Otherwise, returns the result of the second function.
@@ -233,29 +236,18 @@ namespace Glitch.Functional
             => IsSome ? ifSome(value!) : ifNone();
 
         /// <summary>
-        /// Casts the current value if exists.
-        /// </summary>
-        /// <remarks>
-        /// This method will throw if the cast fails. 
-        /// Use <see cref="CastOrNone{TResult}"/> if you want
-        /// to return an empty option on fail.
-        /// </remarks>
-        /// <typeparam name="TResult"></typeparam>
-        /// <exception cref="InvalidCastException">
-        /// If the cast fails
-        /// </exception>
-        /// <returns></returns>
-        public Option<TResult> Cast<TResult>()
-            => Map(DynamicCast<T, TResult>);
-
-        /// <summary>
         /// If the current <see cref="Option{T}"/> contains a value, casts it to 
         /// <typeparamref name="TResult"/>. Otherwise, returns an empty <see cref="Option{TResult}"/>.
+        /// If the cast fails, returns and empty <see cref="Option{TResult}"/>.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <returns></returns>
-        public Option<TResult> CastOrNone<TResult>()
-            => AndThen(val => Try(() => DynamicCast<T, TResult>(val)).Run().UnwrapOrNone());
+        public Option<TResult> Cast<TResult>()
+            => AndThen(DynamicCast<TResult>.TryFrom);
+
+        public Option<TResult> OfType<TResult>()
+            where TResult : T
+            => Filter(val => val is TResult).Map(val => (TResult)val!);
 
         /// <summary>
         /// Returns the wrapped value if it exists. Otherwise throws an exception.
@@ -327,6 +319,10 @@ namespace Glitch.Functional
         /// <param name="fallback"></param>
         /// <returns></returns>
         public T? DefaultIfNone(Func<T?> fallback) => IsSome ? value : fallback();
+
+        public IfSomeFluent<TResult> IfSome<TResult>(Func<T, TResult> map) => new(this, map);
+
+        public IfSomeActionFluent IfSome<TResult>(Action<T> action) => new(this, action);
 
         /// <summary>
         /// Yields a singleton sequence if some, otherwise an empty sequence.
@@ -408,12 +404,14 @@ namespace Glitch.Functional
 
         public static Option<T> operator &(Option<T> x, Option<T> y) => x.And(y);
 
-        public static Option<T> operator |(Option<T> x, Option<T> y) => x.Or(y);
+        public static Option<T> operator ^(Option<T> x, Option<T> y) => x.Xor(y);
 
-        // Coalescing operator
+        public static Option<T> operator |(Option<T> x, Option<T> y) => x.Or(y);
+        
+        // Coalescing operators
         public static T operator |(Option<T> x, T y) => x.IfNone(y);
 
-        public static Option<T> operator ^(Option<T> x, Option<T> y) => x.Xor(y);
+        public static Result<T> operator |(Option<T> x, Error y) => x.OkayOr(y);
 
         public static implicit operator bool(Option<T> option) => option.IsSome;
 
@@ -424,5 +422,47 @@ namespace Glitch.Functional
         public static bool operator ==(Option<T> x, Option<T> y) => x.Equals(y);
 
         public static bool operator !=(Option<T> x, Option<T> y) => !(x == y);
+
+        public class IfSomeFluent<TResult>
+        {
+            private readonly Option<T> option;
+            private readonly Func<T, TResult> ifSome;
+
+            internal IfSomeFluent(Option<T> option, Func<T, TResult> ifSome)
+            {
+                this.option = option;
+                this.ifSome = ifSome;
+            }
+
+            public TResult IfNone(TResult ifNone) => option.Match(ifSome, ifNone);
+
+            public TResult IfNone(Func<TResult> ifNone) => option.Match(ifSome, ifNone);
+        }
+
+        public class IfSomeActionFluent
+        {
+            private readonly Option<T> option;
+            private readonly Action<T> ifSome;
+
+            internal IfSomeActionFluent(Option<T> option, Action<T> ifSome)
+            {
+                this.option = option;
+                this.ifSome = ifSome;
+            }
+
+            public Terminal IfNone(Action ifNone)
+            {
+                if (option.IsSome)
+                {
+                    ifSome(option.value!);
+                }
+                else
+                {
+                    ifNone();
+                }
+
+                return Terminate;
+            }
+        }
     }
 }

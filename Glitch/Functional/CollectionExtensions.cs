@@ -1,4 +1,6 @@
-﻿namespace Glitch.Functional
+﻿using System.Collections.Immutable;
+
+namespace Glitch.Functional
 {
     public static class CollectionExtensions
     {
@@ -18,8 +20,17 @@
             return dictionary.TryGetValue(key, out var value) ? value : None;
         }
 
-        // Disambiguate for main dictionary since it implements both of the above interfaces
+        // Disambiguate for common concrete classes that implement both of the above interfaces
         public static Option<TValue> TryGetValue<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key)
+            where TKey : notnull
+        {
+            ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
+            ArgumentNullException.ThrowIfNull(key, nameof(key));
+
+            return dictionary.TryGetValue(key, out var value) ? value : None;
+        }
+
+        public static Option<TValue> TryGetValue<TKey, TValue>(this ImmutableDictionary<TKey, TValue> dictionary, TKey key)
             where TKey : notnull
         {
             ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));

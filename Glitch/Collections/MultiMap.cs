@@ -8,6 +8,7 @@ namespace Glitch.Collections
 {
     public class MultiMap<TKey, TValue>
         : IDictionary<TKey, IList<TValue>>,
+          IReadOnlyMultiMap<TKey, TValue>,
           ILookup<TKey, TValue>,
           IEnumerable<KeyValuePair<TKey, TValue>>, 
           IMultiMap<TKey, TValue> 
@@ -28,7 +29,7 @@ namespace Glitch.Collections
         public MultiMap(IEnumerable<KeyValuePair<TKey, TValue>> pairs, IEqualityComparer<TKey> comparer)
         {
             dictionary = pairs
-                .GroupBy(p => p.Key, comparer)
+                .GroupBy(p => p.Key, p => p.Value, comparer)
                 .ToDictionary(g => g.Key, g => (IList<TValue>)g.ToList(), comparer);
         }
 
@@ -105,7 +106,7 @@ namespace Glitch.Collections
         public bool TryGetList(TKey key, out IList<TValue> list)
             => dictionary.TryGetValue(key, out list!); // We either ignore nulls here or deal with the "Mismatched type" warning.
 
-        public bool TryGetValue(TKey key, int index, out TValue? value)
+        public bool TryGetValue(TKey key, int index, out TValue value)
         {
             if (TryGetList(key, out IList<TValue> list) && list.Count < index)
             {
@@ -113,7 +114,7 @@ namespace Glitch.Collections
                 return true;
             }
 
-            value = default;
+            value = default!;
             return false;
         }
 
@@ -234,14 +235,46 @@ namespace Glitch.Collections
         #endregion
 
         #region ICollection
-        int ICollection<KeyValuePair<TKey, IList<TValue>>>.Count => dictionary.Count;
+        int ICollection<KeyValuePair<TKey, IList<TValue>>>.Count => KeyCount;
         ICollection<TKey> IDictionary<TKey, IList<TValue>>.Keys => dictionary.Keys;
         ICollection<IList<TValue>> IDictionary<TKey, IList<TValue>>.Values => dictionary.Values;
         bool ICollection<KeyValuePair<TKey, IList<TValue>>>.IsReadOnly => false;
+
+        IEnumerable<IEnumerable<TValue>> IReadOnlyDictionary<TKey, IEnumerable<TValue>>.Values => dictionary.Values;
+
+        int IReadOnlyCollection<KeyValuePair<TKey, IEnumerable<TValue>>>.Count => KeyCount;
+
+        IEnumerable<TValue> IReadOnlyDictionary<TKey, IEnumerable<TValue>>.this[TKey key] => this[key];
+
         void ICollection<KeyValuePair<TKey, IList<TValue>>>.Add(KeyValuePair<TKey, IList<TValue>> item) => ((ICollection<KeyValuePair<TKey, IList<TValue>>>)dictionary).Add(item);
         bool ICollection<KeyValuePair<TKey, IList<TValue>>>.Contains(KeyValuePair<TKey, IList<TValue>> item) => ((ICollection<KeyValuePair<TKey, IList<TValue>>>)dictionary).Contains(item);
         void ICollection<KeyValuePair<TKey, IList<TValue>>>.CopyTo(KeyValuePair<TKey, IList<TValue>>[] array, int arrayIndex) => ((ICollection<KeyValuePair<TKey, IList<TValue>>>)dictionary).CopyTo(array, arrayIndex);
         bool ICollection<KeyValuePair<TKey, IList<TValue>>>.Remove(KeyValuePair<TKey, IList<TValue>> item) => ((ICollection<KeyValuePair<TKey, IList<TValue>>>)dictionary).Remove(item);
+
+        bool IReadOnlyMultiMap<TKey, TValue>.TryGetList(TKey key, out IEnumerable<TValue> list)
+        {
+            if (TryGetList(key, out var stupidHackyCantBelieveOutParametersArentCovariantList))
+            {
+                list = stupidHackyCantBelieveOutParametersArentCovariantList;
+                return true;
+            }
+
+            list = [];
+            return false;
+        }
+
+        bool IReadOnlyDictionary<TKey, IEnumerable<TValue>>.TryGetValue(TKey key, out IEnumerable<TValue> value)
+            => ((IReadOnlyMultiMap<TKey, TValue>)this).TryGetList(key, out value);
+
+
+        IEnumerator<KeyValuePair<TKey, IEnumerable<TValue>>> IEnumerable<KeyValuePair<TKey, IEnumerable<TValue>>>.GetEnumerator()
+        {
+            foreach (var (key, value) in dictionary)
+            {
+                yield return KeyValuePair.Create(key, value.AsEnumerable());
+            }
+        }
+
         #endregion
 
         #endregion

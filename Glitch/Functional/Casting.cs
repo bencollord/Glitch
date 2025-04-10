@@ -12,7 +12,7 @@
             => (T)(dynamic)obj!;
 
         public static Option<T> TryFrom<TOther>(TOther obj)
-            => Try(() => From(obj)).Run().UnwrapOrNone();
+            => Try(() => From(obj)).Run().NoneIfFail();
 
         public static Result<T> TryFrom<TOther>(TOther obj, Error ifFail)
             => TryFrom(obj).OkayOr(ifFail);

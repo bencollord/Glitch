@@ -11,6 +11,8 @@
 
         int ValueCount { get; }
 
+        new IEnumerable<TValue> Values { get; }
+
         IList<TValue> Add(TKey key, TValue value);
         IList<TValue> Add(TKey key, params TValue[] values);
         IList<TValue> AddRange(TKey key, IEnumerable<TValue> items);
