@@ -33,7 +33,7 @@ namespace Glitch.Collections
             .Unwrap();
 
         public Option<T> TryShift() 
-            => TryPeekFront().IfSome(_ => items.RemoveFirst());
+            => TryPeekFront().Do(_ => items.RemoveFirst());
 
         public void Push(T item)
             => items.AddLast(item ?? throw new ArgumentNullException(nameof(item)));
@@ -43,7 +43,7 @@ namespace Glitch.Collections
             .Unwrap();
 
         public Option<T> TryPop() 
-            => TryPeekBack().IfSome(_ => items.RemoveLast());
+            => TryPeekBack().Do(_ => items.RemoveLast());
 
         public IEnumerator<T> GetEnumerator() => items.GetEnumerator();
 

@@ -50,10 +50,15 @@
         private readonly Func<TFocus, TValue> getter;
         private readonly Func<TFocus, TValue, TFocus> setter;
 
-        internal Lens(Func<TFocus, TValue> getter, Func<TFocus, TValue, TFocus> setter)
+        public Lens(Func<TFocus, TValue> getter, Func<TFocus, TValue, TFocus> setter)
         {
             this.getter = getter;
             this.setter = setter;
+        }
+
+        public Lens(Func<TFocus, TValue> getter, Func<TFocus, TValue, TValue, TFocus> setter)
+            : this(getter, (focus, newValue) => setter(focus, getter(focus), newValue))
+        {
         }
 
         /// <summary>
@@ -72,8 +77,7 @@
         /// <param name="get"></param>
         /// <param name="set"></param>
         /// <returns></returns>
-        public static Lens<TFocus, TValue> New(Func<TFocus, TValue> get, Func<TFocus, TValue, TValue, TFocus> set)
-            => new(get, (focus, newValue) => set(focus, get(focus), newValue));
+        public static Lens<TFocus, TValue> New(Func<TFocus, TValue> get, Func<TFocus, TValue, TValue, TFocus> set) => new(get, set);
 
         public TValue Get(TFocus focus) => getter(focus);
 
@@ -86,6 +90,9 @@
         public Func<TFocus, TFocus> Update(Func<TValue, TValue> update) => focus => Set(focus, update(Get(focus)));
 
         public TFocus Update(TFocus focus, Func<TValue, TValue> update) => Set(focus, update(Get(focus)));
+
+        public Lens<TFocus, TDeeper> AndThen<TDeeper>(Func<TValue, TDeeper> get, Func<TValue, TDeeper, TValue> set)
+            => Compose(new Lens<TValue, TDeeper>(get, set));
 
         public Lens<TFocus, TDeeper> Compose<TDeeper>(Lens<TValue, TDeeper> other)
             => new(f => other.Get(Get(f)),

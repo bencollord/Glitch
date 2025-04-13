@@ -185,7 +185,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Option<T> IfSome(Action<T> action)
+        public Option<T> Do(Action<T> action)
         {
             if (IsSome)
             {
@@ -244,6 +244,10 @@ namespace Glitch.Functional
         /// <returns></returns>
         public Option<TResult> Cast<TResult>()
             => AndThen(DynamicCast<TResult>.TryFrom);
+
+        public Option<TUpcast> As<TUpcast>()
+            where TUpcast : class
+            => AndThen(v => FN.Maybe(v as TUpcast));
 
         public Option<TResult> OfType<TResult>()
             where TResult : T
@@ -437,6 +441,8 @@ namespace Glitch.Functional
             public TResult IfNone(TResult ifNone) => option.Match(ifSome, ifNone);
 
             public TResult IfNone(Func<TResult> ifNone) => option.Match(ifSome, ifNone);
+
+            public Option<T> IfNone(Action ifNone) => option.Do(x => ifSome(x)).IfNone(ifNone);
         }
 
         public class IfSomeActionFluent

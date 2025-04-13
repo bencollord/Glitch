@@ -10,7 +10,7 @@ namespace Glitch.Collections
         : IDictionary<TKey, IList<TValue>>,
           IReadOnlyMultiMap<TKey, TValue>,
           ILookup<TKey, TValue>,
-          IEnumerable<KeyValuePair<TKey, TValue>>, 
+          IEnumerable<IGrouping<TKey, TValue>>, 
           IMultiMap<TKey, TValue> 
              where TKey : notnull
     {
@@ -86,7 +86,7 @@ namespace Glitch.Collections
         public IList<TValue> AddRange(TKey key, IList<TValue> list)
         {
             return TryGetList(key)
-                .IfSome(existing => existing.AddRange(list))
+                .Do(existing => existing.AddRange(list))
                 .IfNone(() => dictionary.Add(key, list))
                 .UnwrapOr(list);
         }

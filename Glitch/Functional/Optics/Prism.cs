@@ -55,10 +55,18 @@ namespace Glitch.Functional
         private readonly Func<TFocus, Option<TValue>> getter;
         private readonly Func<TFocus, TValue, TFocus> setter;
 
-        internal Prism(Func<TFocus, Option<TValue>> getter, Func<TFocus, TValue, TFocus> setter)
+        public Prism(Func<TFocus, Option<TValue>> getter, Func<TFocus, TValue, TFocus> setter)
         {
             this.getter = getter;
             this.setter = setter;
+        }
+
+        public Prism(Func<TFocus, Option<TValue>> getter, Func<TFocus, TValue, TValue, TFocus> setter)
+        {
+            this.getter = getter;
+            this.setter = (focus, value) => getter(focus)
+                .Map(old => setter(focus, old, value))
+                .IfNone(focus);
         }
 
         /// <summary>
@@ -78,7 +86,7 @@ namespace Glitch.Functional
         /// <param name="set"></param>
         /// <returns></returns>
         public static Prism<TFocus, TValue> New(Func<TFocus, Option<TValue>> get, Func<TFocus, TValue, TValue, TFocus> set)
-            => new(get, (focus, newValue) => get(focus).Map(oldValue => set(focus, oldValue, newValue)).IfNone(focus));
+            => new(get, set);
 
         public Option<TValue> Get(TFocus focus) => getter(focus);
 
@@ -93,6 +101,12 @@ namespace Glitch.Functional
 
         public TFocus Update(TFocus focus, Func<TValue, TValue> update)
             => Get(focus).Map(old => Set(focus, update(old))).IfNone(focus);
+
+        public Prism<TFocus, TDeeper> AndThen<TDeeper>(Func<TValue, TDeeper> get, Func<TValue, TDeeper, TValue> set)
+            => AndThen(get.Then(Some), set);
+
+        public Prism<TFocus, TDeeper> AndThen<TDeeper>(Func<TValue, Option<TDeeper>> get, Func<TValue, TDeeper, TValue> set)
+            => Compose(new Prism<TValue, TDeeper>(get, set));
 
         public Prism<TFocus, TDeeper> Compose<TDeeper>(Prism<TValue, TDeeper> next)
             => new(focus => Get(focus).AndThen(next.Get),

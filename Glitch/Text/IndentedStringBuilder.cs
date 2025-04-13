@@ -100,6 +100,30 @@ namespace Glitch.Text
         public IndentedStringBuilder AppendLineIf(bool condition, string text)
             => AppendIf(condition, text).AppendLineIf(condition);
 
+        public IndentedStringBuilder AppendJoin<T>(char separator, IEnumerable<T> items) 
+            => AppendJoin(separator, items, i => i?.ToString() ?? string.Empty);
+        
+        public IndentedStringBuilder AppendJoin<T>(char separator, IEnumerable<T> items, Func<T, string> stringify) 
+            => AppendJoin(separator, items.Select(stringify).ToArray());
+        
+        public IndentedStringBuilder AppendJoin(char separator, params string[] items) 
+            => AppendJoin(separator, items.AsEnumerable());
+        
+        public IndentedStringBuilder AppendJoin(char separator, IEnumerable<string> items) 
+            => Append(string.Join(separator, items));
+        
+        public IndentedStringBuilder AppendJoin<T>(string separator, IEnumerable<T> items) 
+            => AppendJoin(separator, items, i => i?.ToString() ?? string.Empty);
+        
+        public IndentedStringBuilder AppendJoin<T>(string separator, IEnumerable<T> items, Func<T, string> stringify) 
+            => AppendJoin(separator, items.Select(stringify).ToArray());
+        
+        public IndentedStringBuilder AppendJoin(string separator, params string[] items) 
+            => AppendJoin(separator, items.AsEnumerable());
+        
+        public IndentedStringBuilder AppendJoin(string separator, IEnumerable<string> items) 
+            => Append(string.Join(separator, items));
+
         public IndentedStringBuilder Indent()
         {
             Indentation++;

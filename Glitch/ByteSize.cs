@@ -179,7 +179,7 @@ namespace Glitch
                 var numberFormat = Some(format[2..].Trim())
                     .Filter(f => !string.IsNullOrEmpty(f));
 
-                numberFormat.IfSome(ValidateNumberFormat);
+                numberFormat.Do(ValidateNumberFormat);
 
                 return new FormatSpecifier(DenominationMap[denomination], numberFormat);
             }

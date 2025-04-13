@@ -21,7 +21,7 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override Result<TResult> Cast<TResult>()
-                => (TResult)(dynamic)Value!;
+                => Fallible.Lift(this).Cast<TResult>().Run();
 
             public override Result<TResult> CastOr<TResult>(Error err)
                 => Fallible.Lift(this).CastOr<TResult>(err).Run();
