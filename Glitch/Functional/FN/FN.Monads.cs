@@ -6,7 +6,7 @@ namespace Glitch.Functional
     {
         public static readonly OptionNone None = new();
 
-        public static readonly Terminal Terminate = new();
+        public static readonly Terminal Fin = new();
 
         public static Terminal Ignore<T>(T _) => default;
 

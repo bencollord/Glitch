@@ -31,7 +31,7 @@ namespace Glitch.IO
 
             byte[] result = new byte[file.Length];
 
-            stream.Read(result, 0, result.Length);
+            stream.ReadExactly(result);
 
             return result;
         }

@@ -245,9 +245,9 @@ namespace Glitch.Functional
         public Option<TResult> Cast<TResult>()
             => AndThen(DynamicCast<TResult>.TryFrom);
 
-        public Option<TUpcast> As<TUpcast>()
-            where TUpcast : class
-            => AndThen(v => FN.Maybe(v as TUpcast));
+        public Option<TResult> As<TResult>()
+            where TResult : class
+            => AndThen(v => FN.Maybe(v as TResult));
 
         public Option<TResult> OfType<TResult>()
             where TResult : T
@@ -467,7 +467,7 @@ namespace Glitch.Functional
                     ifNone();
                 }
 
-                return Terminate;
+                return Fin;
             }
         }
     }

@@ -2,6 +2,7 @@
 {
     public static partial class FN
     {
+        public static Func<TResult> Apply<T, TResult>(this Func<T, TResult> func, T arg) => () => func(arg);
         public static Func<T2, TResult> Apply<T1, T2, TResult>(this Func<T1, T2, TResult> func, T1 arg1) => (arg2) => func(arg1, arg2);
         public static Func<T2, T3, TResult> Apply<T1, T2, T3, TResult>(this Func<T1, T2, T3, TResult> func, T1 arg1) => (arg2, arg3) => func(arg1, arg2, arg3);
         public static Func<T2, T3, T4, TResult> Apply<T1, T2, T3, T4, TResult>(this Func<T1, T2, T3, T4, TResult> func, T1 arg1) => (arg2, arg3, arg4) => func(arg1, arg2, arg3, arg4);

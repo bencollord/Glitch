@@ -97,5 +97,8 @@
         public Lens<TFocus, TDeeper> Compose<TDeeper>(Lens<TValue, TDeeper> other)
             => new(f => other.Get(Get(f)),
                    (f, v) => Set(f, other.Set(Get(f), v)));
+
+        public Prism<TFocus, TDeeper> Compose<TDeeper>(Prism<TValue, TDeeper> prism)
+            => Prism.New<TFocus, TValue>(f => Some(Get(f)), Set).Compose(prism);
     }
 }

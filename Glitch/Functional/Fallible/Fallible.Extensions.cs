@@ -16,6 +16,14 @@ namespace Glitch.Functional
                 (list, item) => list.AndThen(_ => traverse(item), (lst, i) => lst.Add(i)),
                 list => list.Map(l => l.AsEnumerable()));
 
+        public static Fallible<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<Fallible<T>> source, Func<T, int, TResult> traverse)
+            => source.Select((s, i) => s.PartialMap(traverse).Apply(i))
+                     .Traverse();
+
+        public static Fallible<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<T> source, Func<T, int, Fallible<TResult>> traverse)
+            => source.Select((s, i) => traverse(s, i))
+                     .Traverse();
+
         public static Fallible<TResult> Apply<T, TResult>(this Fallible<Func<T, TResult>> function, Fallible<T> value)
             => value.Apply(function);
 

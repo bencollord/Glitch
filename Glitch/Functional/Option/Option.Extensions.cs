@@ -16,6 +16,14 @@ namespace Glitch.Functional
                 (list, item) => list.AndThen(_ => traverse(item), (lst, i) => lst.Add(i)),
                 list => list.Map(l => l.AsEnumerable()));
 
+        public static Option<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<Option<T>> source, Func<T, int, TResult> traverse)
+            => source.Select((s, i) => s.PartialMap(traverse).Apply(i))
+                     .Traverse();
+
+        public static Option<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<T> source, Func<T, int, Option<TResult>> traverse)
+            => source.Select((s, i) => traverse(s, i))
+                     .Traverse();
+
         public static T? AsNullable<T>(this Option<T> option)
             where T : struct
             => option.Match(v => v, () => new T?());

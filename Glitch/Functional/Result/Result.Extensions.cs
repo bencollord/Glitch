@@ -10,17 +10,19 @@ namespace Glitch.Functional
         public static Result<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<Result<T>> source, Func<T, TResult> traverse)
             => source.Traverse(opt => opt.Map(traverse));
 
+        public static Result<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<Result<T>> source, Func<T, int, TResult> traverse)
+            => source.Select((s, i) => s.PartialMap(traverse).Apply(i))
+                     .Traverse();
+
+        public static Result<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<T> source, Func<T, int, Result<TResult>> traverse)
+            => source.Select((s, i) => traverse(s, i))
+                     .Traverse();
+
         public static Result<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<T> source, Func<T, Result<TResult>> traverse)
             => source.Aggregate(
                 Okay(ImmutableList<TResult>.Empty),
                 (list, item) => list.AndThen(_ => traverse(item), (lst, i) => lst.Add(i)),
                 list => list.Map(l => l.AsEnumerable()));
-
-        public static Result<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<Result<T>> source, Func<T, int, TResult> traverse)
-            => source.Traverse((opt, idx) => opt.Map(o => traverse(o, idx)));
-
-        public static Result<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<T> source, Func<T, int, Result<TResult>> traverse)
-            => source.Index().Traverse(pair => traverse(pair.Item, pair.Index));
 
         /// <summary>
         /// Returns a the unwrapped values of all the successful results.

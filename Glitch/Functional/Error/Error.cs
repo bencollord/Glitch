@@ -8,11 +8,20 @@ namespace Glitch.Functional
 
         protected static readonly StringComparer MessageComparer = StringComparer.CurrentCultureIgnoreCase;
 
+        protected Error(int code)
+        {
+            Code = code;
+        }
+
+        public virtual int Code { get; }
+
         public abstract string Message { get; }
 
         public abstract Option<Error> Inner { get; }
 
-        public static Error New(string message) => new ApplicationError(message);
+        public static Error New(string message) => New(0, message);
+
+        public static Error New(int code, string message) => new ApplicationError(code, message);
 
         public static Error New(Exception exception) => new ExceptionError(exception);
 
@@ -22,11 +31,13 @@ namespace Glitch.Functional
 
         public abstract Exception AsException();
 
-        public bool Is<T>() where T : Error => this is T;
+        public virtual bool IsCode(int code) => Code == code;
+
+        public virtual bool IsError<T>() where T : Error => this is T;
 
         public bool IsException() => IsException<Exception>();
 
-        public abstract bool IsException<T>() where T : Exception;
+        public virtual bool IsException<T>() where T : Exception => false;
 
         public virtual Error Combine(Error other)
         {
@@ -42,13 +53,13 @@ namespace Glitch.Functional
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
 
-            return MessageComparer.Equals(Message, other.Message);
+            return Code != 0 ? Code == other.Code : MessageComparer.Equals(Message, other.Message);
         }
 
-        public sealed override bool Equals(object? obj) => Equals(obj as Error);
+        public override int GetHashCode()
+            => Code != 0 ? Code.GetHashCode() : MessageComparer.GetHashCode(Message);
 
-        public override int GetHashCode() 
-            => HashCode.Combine(GetType().GetHashCode(), MessageComparer.GetHashCode(Message));
+        public sealed override bool Equals(object? obj) => Equals(obj as Error);
 
         public override string ToString() => Message;
 

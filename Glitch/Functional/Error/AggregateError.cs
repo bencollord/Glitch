@@ -2,10 +2,12 @@
 {
     public class AggregateError : Error
     {
+        public const int AggregateErrorCode = -0xC0FFEE;
+
         private readonly IEnumerable<Error> errors;
 
         public AggregateError(IEnumerable<Error> errors)
-            : base()
+            : base(AggregateErrorCode)
         {
             this.errors = errors;
         }
@@ -14,7 +16,13 @@
 
         public override Option<Error> Inner => None;
 
-        public override bool IsException<T>() => typeof(T).Equals(typeof(AggregateException));
+        public override bool IsException<T>() 
+            => errors.Any(e => e.IsException<T>()) || typeof(T).Equals(typeof(AggregateException));
+
+        public override bool IsCode(int code) => base.IsCode(code) || errors.Any(e => e.IsCode(code));
+
+        public override bool IsError<T>() 
+            => errors.Any(e => e.IsError<T>() || typeof(T).IsAssignableTo(typeof(AggregateError)));
 
         public override Exception AsException() 
             => new AggregateException(errors.Select(e => e.AsException()));

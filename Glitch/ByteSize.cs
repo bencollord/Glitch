@@ -13,11 +13,12 @@ namespace Glitch
           IMultiplyOperators<ByteSize, ByteSize, ByteSize>,
           IDivisionOperators<ByteSize, ByteSize, ByteSize>
     {
-        private const int BitsInByte = 8;
         private const int SizeMultiplier = 1024;
-        private const int BytesInKilobyte = SizeMultiplier;
-        private const int BytesInMegabyte = BytesInKilobyte * SizeMultiplier;
-        private const int BytesInGigabyte = BytesInMegabyte * SizeMultiplier;
+        
+        public const int BitsInByte = 8;
+        public const int BytesInKilobyte = SizeMultiplier;
+        public const int BytesInMegabyte = BytesInKilobyte * SizeMultiplier;
+        public const int BytesInGigabyte = BytesInMegabyte * SizeMultiplier;
 
         public static readonly ByteSize Zero = new(0);
 
