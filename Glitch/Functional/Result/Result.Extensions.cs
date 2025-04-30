@@ -56,5 +56,11 @@ namespace Glitch.Functional
                     opt => opt.Map(Okay),
                     err => Some(Fail<T>(err))
                 );
+
+        public static T Match<T>(this Result<bool> result, Func<T> ifTrue, Func<T> ifFalse, Func<Error, T> ifFail)
+            => result.Match(flag => flag ? ifTrue() : ifFalse(), ifFail);
+
+        public static Terminal Match(this Result<bool> result, Action ifTrue, Action ifFalse, Action<Error> ifFail)
+            => result.Match(flag => flag ? ifTrue.Return()() : ifFalse.Return()(), ifFail.Return());
     }
 }

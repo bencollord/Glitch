@@ -15,5 +15,36 @@
                 collection.Add(item);
             }
         }
+
+        public static void Merge<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, IDictionary<TKey, TValue> other)
+            => dictionary.Merge(other, MergeOption.Strict);
+
+        public static void Merge<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, IDictionary<TKey, TValue> other, MergeOption mergeOption)
+        {
+            foreach (var (key, value) in other)
+            {
+                switch (mergeOption)
+                {
+                    case MergeOption.Ignore:
+                        dictionary.TryAdd(key, value);
+                        break;
+
+                    case MergeOption.Overwrite:
+                        dictionary[key] = value;
+                        break;
+
+                    case MergeOption.Strict:
+                        dictionary.Add(key, value);
+                        break;
+
+                    default:
+                        throw new ArgumentException($"Invalid merge option {mergeOption}");
+                }
+            }
+        }
+
+        public static Dictionary<TValue, TKey> Flip<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
+            where TValue : notnull
+            => dictionary.ToDictionary(p => p.Value, p => p.Key);
     }
 }

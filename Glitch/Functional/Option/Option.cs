@@ -224,6 +224,8 @@ namespace Glitch.Functional
 
         public Terminal Match(Action<T> ifSome, Action ifNone) => Match(ifSome.Return(), ifNone.Return());
 
+        public Terminal Match(Action<T> ifSome, Action<Terminal> ifNone) => Match(ifSome, () => ifNone(default));
+
         /// <summary>
         /// If this <see cref="Option{T}"/> contains a value, returns the result of the first function 
         /// applied to the wrapped value.Otherwise, returns the result of the second function.
@@ -234,6 +236,9 @@ namespace Glitch.Functional
         /// <returns></returns>
         public TResult Match<TResult>(Func<T, TResult> ifSome, Func<TResult> ifNone)
             => IsSome ? ifSome(value!) : ifNone();
+
+        public TResult Match<TResult>(Func<T, TResult> ifSome, Func<Terminal, TResult> ifNone)
+            => Match(ifSome, () => ifNone(default));
 
         /// <summary>
         /// If the current <see cref="Option{T}"/> contains a value, casts it to 
@@ -326,7 +331,7 @@ namespace Glitch.Functional
 
         public IfSomeFluent<TResult> IfSome<TResult>(Func<T, TResult> map) => new(this, map);
 
-        public IfSomeActionFluent IfSome<TResult>(Action<T> action) => new(this, action);
+        public IfSomeActionFluent IfSome(Action<T> action) => new(this, action);
 
         /// <summary>
         /// Yields a singleton sequence if some, otherwise an empty sequence.

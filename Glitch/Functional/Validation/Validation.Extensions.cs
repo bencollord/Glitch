@@ -42,5 +42,11 @@ namespace Glitch.Functional
 
         public static Validation<T> Flatten<T>(this Validation<Validation<T>> nested)
             => nested.AndThen(n => n);
+
+        public static T Match<T>(this Validation<bool> result, Func<T> ifTrue, Func<T> ifFalse, Func<Error, T> ifFail)
+            => result.Match(flag => flag ? ifTrue() : ifFalse(), ifFail);
+
+        public static Terminal Match(this Validation<bool> result, Action ifTrue, Action ifFalse, Action<Error> ifFail)
+            => result.Match(flag => flag ? ifTrue.Return()() : ifFalse.Return()(), ifFail.Return());
     }
 }

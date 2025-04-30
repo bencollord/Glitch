@@ -62,6 +62,10 @@ namespace Glitch.Functional
         public static T Match<T>(this Option<bool> booleanOption, Func<T> ifTrue, Func<T> ifFalse, Func<T> ifNone)
             => booleanOption.Match(v => v ? ifTrue() : ifFalse(), ifNone);
 
+
+        public static Terminal Match(this Option<bool> result, Action ifTrue, Action ifFalse, Action ifNone)
+            => result.Match(flag => flag ? ifTrue.Return()() : ifFalse.Return()(), ifNone.Return());
+
         /// <summary>
         /// Unzips an option of a tuple into a tuple of two options.
         /// </summary>
