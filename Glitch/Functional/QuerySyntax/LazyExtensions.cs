@@ -10,5 +10,8 @@ namespace Glitch.Functional.QuerySyntax
 
         public static Lazy<TResult> SelectMany<T, TElement, TResult>(this Lazy<T> source, Func<T, Lazy<TElement>> bind, Func<T, TElement, TResult> bindMap)
             => source.AndThen(s => bind(s).Map(e => bindMap(s, e)));
+
+        public static Lazy<Option<T>> Where<T>(this Lazy<T> source, Func<T, bool> predicate)
+            => source.Map(s => predicate(s) ? Some(s) : None);
     }
 }

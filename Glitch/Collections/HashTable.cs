@@ -25,12 +25,13 @@ namespace Glitch.Collections
             {
                 return FindEntry(key)
                     .Map(x => x.Value)
-                    .IfNone(() => throw new KeyNotFoundException());
+                    .OkayOrElse(_ => new KeyNotFoundException())
+                    .Unwrap();
             }
             set
             {
                 FindEntry(key)
-                    .Do((Action<Entry>)(e => e.Value = value))
+                    .Do(e => e.Value = value)
                     .IfNone(() => Add(key, value));
             }
         }

@@ -51,6 +51,26 @@
                 () => Maybe(source.LastOrDefault()));
         }
 
+        public static Option<T> SingleOrNone<T>(this IEnumerable<T> source)
+            => source.SingleOrNone(None);
+
+        public static Option<T> SingleOrNone<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+            => source.SingleOrNone(Some(predicate));
+
+        private static Option<T> SingleOrNone<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
+            => source.TrySingle(predicate) switch
+            {
+                Result.Okay<T>(var value) => Some(value),
+
+                Result.Fail<T>(Error e)
+                    when e.IsCode(ErrorCodes.NoElements) => None,
+
+                Result.Fail<T>(Error e) => throw e.AsException(),
+
+                _ => throw Errors.BadDiscriminatedUnion()
+            };
+                     
+
         public static Result<T> TrySingle<T>(this IEnumerable<T> source)
             => source.TrySingle(None);
 
@@ -66,14 +86,14 @@
 
             if (!iterator.MoveNext())
             {
-                return Result<T>.Fail("Sequence contains no elements");
+                return Result<T>.Fail(Errors.NoElements);
             }
 
             var value = iterator.Current;
 
             if (iterator.MoveNext())
             {
-                return Result<T>.Fail("Sequence contains more than one element");
+                return Result<T>.Fail(Errors.MoreThanOneElement);
             }
 
             return Result<T>.Okay(value);

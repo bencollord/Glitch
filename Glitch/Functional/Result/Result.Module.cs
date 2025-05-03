@@ -21,7 +21,5 @@
 
         public static Result<T> Guard<T>(T value, Func<T, bool> predicate, Func<T, Error> error)
             => predicate(value) ? Okay(value) : Fail<T>(error(value));
-
-        internal static NotSupportedException DiscriminatedUnionViolation() => new("Result<T> is a discriminated union. You should not be extending it from your own code");
     }
 }

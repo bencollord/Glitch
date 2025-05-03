@@ -1,11 +1,8 @@
-﻿
-using System.Diagnostics.CodeAnalysis;
-
-namespace Glitch.Functional
+﻿namespace Glitch.Functional
 {
     public static partial class Result
     {
-        public record Okay<T>(T Value) : Result<T>
+        public sealed record Okay<T>(T Value) : Result<T>
         {
             public override bool IsOkay => true;
 
@@ -99,7 +96,7 @@ namespace Glitch.Functional
 
             public override bool IsFailAnd(Func<Error, bool> _) => false;
 
-            public override Result<TResult> ZipWith<TOther, TResult>(Result<TOther> other, Func<T, TOther, TResult> zipper) 
+            public override Result<TResult> Zip<TOther, TResult>(Result<TOther> other, Func<T, TOther, TResult> zipper) 
                 => other.Map(val => zipper(Value, val));
 
             public override Error UnwrapErrorOr(Error fallback) => fallback;

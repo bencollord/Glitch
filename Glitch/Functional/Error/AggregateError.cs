@@ -2,12 +2,10 @@
 {
     public class AggregateError : Error
     {
-        public const int AggregateErrorCode = -0xC0FFEE;
-
         private readonly IEnumerable<Error> errors;
 
         public AggregateError(IEnumerable<Error> errors)
-            : base(AggregateErrorCode)
+            : base(ErrorCodes.Aggregate)
         {
             this.errors = errors;
         }

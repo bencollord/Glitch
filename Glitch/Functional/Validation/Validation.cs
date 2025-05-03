@@ -77,9 +77,9 @@ namespace Glitch.Functional
             => Guard(_ => condition, error);
 
         public Validation<(T, TOther)> Zip<TOther>(Validation<TOther> other)
-            => ZipWith(other, (x, y) => (x, y));
+            => Zip(other, (x, y) => (x, y));
 
-        public abstract Validation<TResult> ZipWith<TOther, TResult>(Validation<TOther> other, Func<T, TOther, TResult> zipper);
+        public abstract Validation<TResult> Zip<TOther, TResult>(Validation<TOther> other, Func<T, TOther, TResult> zipper);
 
         public abstract T Unwrap();
 

@@ -120,7 +120,23 @@
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
+        public Result<T> Do(Func<T, Terminal> action) => IfOkay(action); // TODO Not sure how I feel about aliasing methods like this.
+
+        /// <summary>
+        /// Executes an impure action against the value if Ok.
+        /// No op if fail.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
         public abstract Result<T> IfOkay(Action<T> action);
+
+        /// <summary>
+        /// Executes an impure action against the value if Ok.
+        /// No op if fail.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public Result<T> IfOkay(Func<T, Terminal> action) => IfOkay(v => action(v));
 
         /// <summary>
         /// Executes an impure action if failed.
@@ -183,7 +199,7 @@
         public abstract Result<TResult> CastOrElse<TResult>(Func<T, Error> error);
 
         public Result<T> Filter(Func<T, bool> predicate)
-            => Guard(predicate, new ApplicationError("Result failed check"));
+            => Guard(predicate, Error.Empty);
 
         /// <summary>
         /// For a successful result, checks the value against a predicate
@@ -252,7 +268,7 @@
         /// <param name="other"></param>
         /// <returns></returns>
         public Result<(T, TOther)> Zip<TOther>(Result<TOther> other)
-            => ZipWith(other, (x, y) => (x, y));
+            => Zip(other, (x, y) => (x, y));
 
         /// <summary>
         /// Combines two results using a provided function if both are okay.
@@ -264,7 +280,7 @@
         /// <param name="other"></param>
         /// <param name="zipper"></param>
         /// <returns></returns>
-        public abstract Result<TResult> ZipWith<TOther, TResult>(Result<TOther> other, Func<T, TOther, TResult> zipper);
+        public abstract Result<TResult> Zip<TOther, TResult>(Result<TOther> other, Func<T, TOther, TResult> zipper);
 
         /// <summary>
         /// Returns the wrapped value if ok. Otherwise throws the wrapped error

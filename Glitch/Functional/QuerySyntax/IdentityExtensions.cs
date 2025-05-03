@@ -11,7 +11,7 @@ namespace Glitch.Functional.QuerySyntax
         public static Identity<TResult> SelectMany<T, TElement, TResult>(this Identity<T> source, Func<T, Identity<TElement>> bind, Func<T, TElement, TResult> bindMap)
             => source.AndThen(s => bind(s).Map(e => bindMap(s, e)));
 
-        // TODO See if this works!
+        // This works!!
         public static Option<T> Where<T>(this Identity<T> source, Func<T, bool> predicate)
             => predicate(source.Value) ? Some(source.Value) : None;
     }

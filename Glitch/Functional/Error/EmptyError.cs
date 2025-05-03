@@ -2,11 +2,10 @@
 {
     public class EmptyError : Error
     {
-        public const int EmptyErrorCode = -0xDEAD;
 
         public static readonly EmptyError Value = new();
 
-        private EmptyError() : base(EmptyErrorCode) { }
+        private EmptyError() : base(ErrorCodes.Empty) { }
 
         public override string Message => "No error";
 

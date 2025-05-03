@@ -17,9 +17,9 @@
             => new(project(Value, bind(Value).Value));
 
         public Identity<(T, TOther)> Zip<TOther>(Identity<TOther> other)
-            => ZipWith(other, (x, y) => (x, y));
+            => Zip(other, (x, y) => (x, y));
 
-        public Identity<TResult> ZipWith<TOther, TResult>(Identity<TOther> other, Func<T, TOther, TResult> zipper)
+        public Identity<TResult> Zip<TOther, TResult>(Identity<TOther> other, Func<T, TOther, TResult> zipper)
             => new(zipper(Value, other.Value));
 
         public Identity<TResult> Cast<TResult>()
@@ -35,6 +35,8 @@
         public Result<T> Okay() => new Result.Okay<T>(Value);
 
         public Option<T> Maybe() => Option<T>.Maybe(Value);
+
+        public Option<T> Filter(Func<T, bool> predicate) => predicate(Value) ? Some(Value) : None;
 
         public Fallible<TResult> Try<TResult>(Func<T, TResult> func) => Fallible.Okay(Value).Map(func);
 

@@ -55,9 +55,9 @@ namespace Glitch.Functional
             => new(items.Where(predicate));
 
         public Sequence<(T, TOther)> Zip<TOther>(Sequence<TOther> other)
-            => ZipWith(other, (x, y) => (x, y));
+            => Zip(other, (x, y) => (x, y));
 
-        public Sequence<TResult> ZipWith<TOther, TResult>(Sequence<TOther> other, Func<T, TOther, TResult> zipper)
+        public Sequence<TResult> Zip<TOther, TResult>(Sequence<TOther> other, Func<T, TOther, TResult> zipper)
             => AndThen(x => other, zipper);
 
         public T Reduce<TResult>(Func<T, T, T> reduce)

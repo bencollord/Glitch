@@ -303,7 +303,7 @@ namespace Glitch.Functional
         /// <param name="other"></param>
         /// <returns></returns>
         public Fallible<(T, TOther)> Zip<TOther>(Fallible<TOther> other)
-            => ZipWith(other, (x, y) => (x, y));
+            => Zip(other, (x, y) => (x, y));
 
         /// <summary>
         /// Combines two tries using a provided function.
@@ -313,8 +313,8 @@ namespace Glitch.Functional
         /// <param name="other"></param>
         /// <param name="zipper"></param>
         /// <returns></returns>
-        public Fallible<TResult> ZipWith<TOther, TResult>(Fallible<TOther> other, Func<T, TOther, TResult> zipper)
-            => new(() => thunk().ZipWith(other.thunk(), zipper));
+        public Fallible<TResult> Zip<TOther, TResult>(Fallible<TOther> other, Func<T, TOther, TResult> zipper)
+            => new(() => thunk().Zip(other.thunk(), zipper));
 
         /// <summary>
         /// Executes the provided function, catching any exception

@@ -6,7 +6,7 @@
         {
             Result.Okay<T>(var value) => value,
             Result.Fail<T>(var error) => error,
-            _ => throw Result.DiscriminatedUnionViolation()
+            _ => throw Errors.BadDiscriminatedUnion()
         };
 
         IEnumerable<T> IComputation<T>.Iterate()

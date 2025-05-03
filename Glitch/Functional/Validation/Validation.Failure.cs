@@ -95,7 +95,7 @@ namespace Glitch.Functional
             public override bool IsFailAnd(Func<Error, bool> predicate) => predicate(Error);
 
             /// <inheritdoc />
-            public override Validation<TResult> ZipWith<TOther, TResult>(Validation<TOther> other, Func<T, TOther, TResult> _)
+            public override Validation<TResult> Zip<TOther, TResult>(Validation<TOther> other, Func<T, TOther, TResult> _)
             {
                 return other.Match(_ => new Failure<TResult>(Error), 
                                    err => new Failure<TResult>(Error + err));

@@ -83,7 +83,7 @@ namespace Glitch.Functional
 
             public override Option<T> UnwrapOrNone() => Value;
 
-            public override Validation<TResult> ZipWith<TOther, TResult>(Validation<TOther> other, Func<T, TOther, TResult> zipper) 
+            public override Validation<TResult> Zip<TOther, TResult>(Validation<TOther> other, Func<T, TOther, TResult> zipper) 
                 => AndThen(_ => other, zipper);
         }
     }

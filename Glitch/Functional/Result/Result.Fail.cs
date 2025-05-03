@@ -3,7 +3,7 @@ namespace Glitch.Functional
 {
     public static partial class Result
     {
-        public record Fail<T>(Error Error) : Result<T>
+        public sealed record Fail<T>(Error Error) : Result<T>
         {
             public override bool IsOkay => false;
 
@@ -94,7 +94,7 @@ namespace Glitch.Functional
             public override bool IsFailAnd(Func<Error, bool> predicate) => predicate(Error);
 
             /// <inheritdoc />
-            public override Result<TResult> ZipWith<TOther, TResult>(Result<TOther> other, Func<T, TOther, TResult> _)
+            public override Result<TResult> Zip<TOther, TResult>(Result<TOther> other, Func<T, TOther, TResult> _)
             {
                 return other.MapError(err => Error.New(Error, err))
                             .AndThen(_ => Fail<TResult>(Error));

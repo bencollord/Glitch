@@ -27,7 +27,7 @@ namespace Glitch.Functional
 
         public static Error New(IEnumerable<Error> errors) => new AggregateError(errors);
 
-        public static Error New(params Error[] errors) => new AggregateError(errors);
+        public static Error New(params Error[] errors) => errors.Length == 0 ? Empty : new AggregateError(errors);
 
         public abstract Exception AsException();
 
@@ -88,6 +88,7 @@ namespace Glitch.Functional
         }
 
         public static implicit operator Error(string message) => New(message);
+        public static implicit operator Error((int code, string message) pair) => New(pair.code, pair.message);
 
         public static implicit operator Error(Exception exception) => New(exception);
 
