@@ -175,9 +175,9 @@ namespace Glitch.Test.Functional
             Fallible<int> andThen2       = okayItem.AndThen(bindFunc, bindProjectionFunc);
             Fallible<int> andThenResult  = okayItem.AndThen(bindResultFunc);
             Fallible<int> andThenResult2 = okayItem.AndThen(bindResultFunc, bindProjectionFunc);
-            Fallible<int> andThenBiBind  = okayItem.AndThen(bindFunc, bindErrFunc);
+            Fallible<int> andThenBiBind  = okayItem.Choose(bindFunc, bindErrFunc);
             Fallible<int> filter         = okayItem.Filter(filterFunc);
-            Fallible<int> zipWith        = okayItem.ZipWith(Fallible.Okay(1), bindProjectionFunc);
+            Fallible<int> zipWith        = okayItem.Zip(Fallible.Okay(1), bindProjectionFunc);
 
             // These two items will only run for faulted items
             var failItem           = Fallible.Fail<int>("Should be an error");
@@ -245,7 +245,7 @@ namespace Glitch.Test.Functional
             Fallible<int> andThenResult  = okayItem.AndThen(bindResultFunc(nameof(andThenResult)));
             Fallible<int> andThenResult2 = okayItem.AndThen(bindResultFunc(nameof(andThenResult2)), bindProjectionFunc(nameof(andThenResult2)));
             Fallible<int> filter         = okayItem.Filter(filterFunc(nameof(filter)));
-            Fallible<int> zipWith        = okayItem.ZipWith(Fallible.Okay(1), bindProjectionFunc(nameof(zipWith)));
+            Fallible<int> zipWith        = okayItem.Zip(Fallible.Okay(1), bindProjectionFunc(nameof(zipWith)));
 
              // These two items will only run for faulted items
             var failItem           = Fallible.Fail<int>("Should be an error");
@@ -255,8 +255,8 @@ namespace Glitch.Test.Functional
             // These items should be run for both Okay and Fail
             Fallible<int> mapOrElseErrorOkay = okayItem.MapOrElse(mapFunc(nameof(mapOrElseErrorOkay)), _ => AssertNotCalled<Error>());
             Fallible<int> mapOrElseErrorFail = failItem.MapOrElse(_ => AssertNotCalled<int>(), mapErrFunc(nameof(mapOrElseErrorFail)));
-            Fallible<int> andThenBiBindOkay  = okayItem.AndThen(bindFunc(nameof(andThenBiBindOkay)), err => AssertNotCalled<Fallible<int>>());
-            Fallible<int> andThenBiBindFail  = failItem.AndThen(_ => AssertNotCalled<Fallible<int>>(), bindErrFunc(nameof(andThenBiBindFail)));
+            Fallible<int> andThenBiBindOkay  = okayItem.Choose(bindFunc(nameof(andThenBiBindOkay)), err => AssertNotCalled<Fallible<int>>());
+            Fallible<int> andThenBiBindFail  = failItem.Choose(_ => AssertNotCalled<Fallible<int>>(), bindErrFunc(nameof(andThenBiBindFail)));
             
             var fallibles = new Dictionary<string, Fallible<int>>
             {
@@ -294,7 +294,7 @@ namespace Glitch.Test.Functional
             var right = Fallible<int>.Okay(20);
 
             // Act
-            var result = left.ZipWith(right, (x, y) => x + y).Run();
+            var result = left.Zip(right, (x, y) => x + y).Run();
 
             // Assert
             Assert.True(result.IsOkay);
@@ -310,8 +310,8 @@ namespace Glitch.Test.Functional
             var rightError = Fallible<int>.Fail("Right failed");
 
             // Act
-            var leftResult = leftError.ZipWith(okay, (x, y) => x + y).Run();
-            var rightResult = okay.ZipWith(rightError, (x, y) => x + y).Run();
+            var leftResult = leftError.Zip(okay, (x, y) => x + y).Run();
+            var rightResult = okay.Zip(rightError, (x, y) => x + y).Run();
 
             // Assert
             Assert.False(leftResult.IsOkay);
@@ -328,7 +328,7 @@ namespace Glitch.Test.Functional
             var right = Fallible<int>.Fail("Right failed");
 
             // Act
-            var result = left.ZipWith(right, (x, y) => x + y).Run();
+            var result = left.Zip(right, (x, y) => x + y).Run();
 
             // Assert
             Assert.False(result.IsOkay);

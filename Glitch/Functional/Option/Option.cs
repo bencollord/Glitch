@@ -1,11 +1,10 @@
-﻿using Glitch.Functional.ComputationQuery;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Functional
 {
     public readonly struct OptionNone { }
 
-    public readonly partial struct Option<T> : IEquatable<Option<T>>, IComputation<T>
+    public readonly partial struct Option<T> : IEquatable<Option<T>>
     {
         public static readonly Option<T> None = new();
 
@@ -244,7 +243,7 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <returns></returns>
         public Option<TResult> Cast<TResult>()
-            => AndThen(DynamicCast<TResult>.TryFrom);
+            => AndThen(v => DynamicCast<TResult>.TryFrom(v).Run().NoneIfFail());
 
         public Option<TResult> As<TResult>()
             where TResult : class

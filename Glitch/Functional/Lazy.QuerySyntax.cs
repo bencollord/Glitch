@@ -1,6 +1,6 @@
-namespace Glitch.Functional.QuerySyntax
+namespace Glitch.Functional
 {
-    public static class LazyExtensions
+    public static partial class LazyExtensions
     {
         public static Lazy<TResult> Select<T, TResult>(this Lazy<T> source, Func<T, TResult> mapper)
             => source.Map(mapper);

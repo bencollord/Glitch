@@ -10,11 +10,17 @@ namespace Glitch.Functional
 
         public static Terminal Ignore<T>(T _) => default;
 
+        public static Identity<T> Id<T>() where T : new() => Id<T>(new());
+
         public static Identity<T> Id<T>(T value) => value;
+
+        public static Option<T> Some<T>() where T : new() => Some<T>(new());
 
         public static Option<T> Some<T>(T value) => Option<T>.Some(value);
 
         public static Option<T> Maybe<T>(T? value) => Option<T>.Maybe(value);
+
+        public static Result<T> Okay<T>() where T : new() => Okay<T>(new());
 
         public static Result<T> Okay<T>(T value) => new Result.Okay<T>(value);
 
@@ -22,15 +28,30 @@ namespace Glitch.Functional
 
         public static Fallible<T> Try<T>(Func<Result<T>> function) => Fallible<T>.Lift(function);
 
+        public static Fallible<T> Try<T>(Func<Terminal, Result<T>> function) => Fallible<T>.Lift(() => function(Fin));
+
         public static Fallible<T> Try<T>(Func<T> function) => Fallible<T>.Lift(function);
 
+        public static Fallible<T> Try<T>(Func<Terminal, T> function) => Fallible<T>.Lift(() => function(Fin));
+
         public static Fallible<Terminal> Try(Action action) => Fallible<Terminal>.Lift(action.Return());
+
+        public static Fallible<Terminal> Try(Action<Terminal> action) => Try(action.Return());
 
         public static Fallible<T> Try<T>(T value) => Fallible<T>.Okay(value);
 
         public static Fallible<T> Try<T>(Result<T> result) => Fallible<T>.Lift(result);
 
         public static Fallible<T> Try<T>(Error error) => Fallible<T>.Fail(error);
+
+        public static Effect<TInput, Terminal> Try<TInput>(Action<TInput> function)
+            => Try(function.Return());
+
+        public static Effect<TInput, TOutput> Try<TInput, TOutput>(Func<TInput, TOutput> function)
+            => Effect.Lift(function);
+
+        public static Effect<TInput, TOutput> Try<TInput, TOutput>(Func<TInput, Result<TOutput>> function)
+           => Effect.Lift(function);
 
         public static Fallible<T> TryCast<T>(object obj) => Try(() => (T)(dynamic)obj);
 

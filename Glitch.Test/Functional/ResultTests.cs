@@ -13,7 +13,7 @@ namespace Glitch.Test.Functional
             var right = Okay(20);
 
             // Act
-            var result = left.ZipWith(right, (x, y) => x + y);
+            var result = left.Zip(right, (x, y) => x + y);
 
             // Assert
             Assert.True(result.IsOkay);
@@ -29,8 +29,8 @@ namespace Glitch.Test.Functional
             var rightError = Fail<int>("Right failed");
 
             // Act
-            var leftResult = leftError.ZipWith(okay, (x, y) => x + y);
-            var rightResult = okay.ZipWith(rightError, (x, y) => x + y);
+            var leftResult = leftError.Zip(okay, (x, y) => x + y);
+            var rightResult = okay.Zip(rightError, (x, y) => x + y);
 
             // Assert
             Assert.False(leftResult.IsOkay);
@@ -47,7 +47,7 @@ namespace Glitch.Test.Functional
             var right = Fail<int>("Right failed");
 
             // Act
-            var result = left.ZipWith(right, (x, y) => x + y);
+            var result = left.Zip(right, (x, y) => x + y);
 
             // Assert
             Assert.False(result.IsOkay);

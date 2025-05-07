@@ -1,6 +1,6 @@
 ﻿namespace Glitch.Functional
 {
-    public readonly record struct Identity<T>(T Value) : IEquatable<Identity<T>>, IComputation<T>
+    public readonly record struct Identity<T>(T Value) : IEquatable<Identity<T>>
     {
         public Identity<TResult> Map<TResult>(Func<T, TResult> map) => new(map(Value));
 
@@ -58,45 +58,5 @@
         public static implicit operator Identity<T>(T value) => new(value);
 
         public static implicit operator T(Identity<T> id) => id.Value;
-
-        #region IComputation
-        object? IComputation<T>.Match() => Value;
-
-        IComputation<TResult> IComputation<T>.AndThen<TResult>(Func<T, IComputation<TResult>> bind)
-        {
-            return bind(Value);
-        }
-
-        IComputation<TResult> IComputation<T>.AndThen<TElement, TResult>(Func<T, IComputation<TElement>> bind, Func<T, TElement, TResult> project)
-        {
-            return ((IComputation<T>)this).AndThen(x => bind(x).Map(y => project(x, y)));
-        }
-
-        IComputation<TResult> IComputation<T>.Apply<TResult>(IComputation<Func<T, TResult>> function)
-        {
-            return ((IComputation<T>)this).AndThen(x => function.Map(fn => fn(x)));
-        }
-
-        IComputation<TResult> IComputation<T>.Cast<TResult>()
-        {
-            return Cast<TResult>();
-        }
-
-        IComputation<T> IComputation<T>.Filter(Func<T, bool> predicate)
-        {
-            return predicate(Value) ? this : Option<T>.None;
-        }
-
-        IComputation<TResult> IComputation<T>.Map<TResult>(Func<T, TResult> map)
-        {
-            return Map(map);
-        }
-
-        IComputation<Func<T2, TResult>> IComputation<T>.PartialMap<T2, TResult>(Func<T, T2, TResult> map)
-        {
-            return PartialMap(map);
-        }
-
-        #endregion
     }
 }

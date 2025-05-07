@@ -1,6 +1,6 @@
-namespace Glitch.Functional.QuerySyntax
+namespace Glitch.Functional
 {
-    public static class TryExtensions
+    public static class FallibleExtensions
     {
         public static Fallible<TResult> Select<T, TResult>(this Fallible<T> source, Func<T, TResult> mapper)
             => source.Map(mapper);

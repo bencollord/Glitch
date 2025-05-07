@@ -1,9 +1,7 @@
 ﻿
 namespace Glitch.Functional
 {
-    using QuerySyntax;
-
-    public partial class Fallible<T> : IComputation<T>
+    public partial class Fallible<T>
     {
         private Func<Result<T>> thunk;
 
@@ -39,6 +37,9 @@ namespace Glitch.Functional
 
         public Fallible<TResult> MapOrElse<TResult>(Func<T, TResult> map, Func<Error, Error> ifFail)
             => new(() => thunk().MapOrElse(map, ifFail));
+
+        public Fallible<T> WithError(Error error)
+            => new(() => thunk().WithError(error));
 
         /// <summary>
         /// If the result is a failure, returns a new result with the mapping function
@@ -144,7 +145,7 @@ namespace Glitch.Functional
         public Fallible<TResult> AndThen<TElement, TResult>(Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project)
             => AndThen(x => bind(x).Map(y => project(x, y)));
 
-        public Fallible<TResult> AndThen<TResult>(Func<T, Fallible<TResult>> ifOkay, Func<Error, Fallible<TResult>> ifFail)
+        public Fallible<TResult> Choose<TResult>(Func<T, Fallible<TResult>> ifOkay, Func<Error, Fallible<TResult>> ifFail)
             => new(() => thunk().Match(ifOkay, ifFail).Run());
 
         public Fallible<T> Guard(Func<T, bool> predicate, Error error)
@@ -315,6 +316,8 @@ namespace Glitch.Functional
         /// <returns></returns>
         public Fallible<TResult> Zip<TOther, TResult>(Fallible<TOther> other, Func<T, TOther, TResult> zipper)
             => new(() => thunk().Zip(other.thunk(), zipper));
+
+        public Effect<TInput, T> WithInput<TInput>() => Effect<TInput, T>.Lift(this);
 
         /// <summary>
         /// Executes the provided function, catching any exception

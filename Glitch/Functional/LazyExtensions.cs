@@ -1,6 +1,6 @@
 ﻿namespace Glitch.Functional
 {
-    public static class LazyExtensions
+    public static partial class LazyExtensions
     {
         public static Lazy<TResult> Map<T, TResult>(this Lazy<T> lazy, Func<T, TResult> mapper)
             => new(() => mapper(lazy.Value));

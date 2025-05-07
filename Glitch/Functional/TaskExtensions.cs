@@ -1,6 +1,6 @@
 ﻿namespace Glitch.Functional
 {
-    public static class TaskExtensions
+    public static partial class TaskExtensions
     {
         public static async Task<TResult> Map<T, TResult>(this Task<T> task, Func<T, TResult> mapper)
         {

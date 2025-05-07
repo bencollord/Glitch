@@ -1,5 +1,4 @@
 ﻿using Glitch.Functional;
-using Glitch.Functional.QuerySyntax;
 
 namespace Glitch.Reflection
 {

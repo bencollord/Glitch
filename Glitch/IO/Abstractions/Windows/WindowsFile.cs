@@ -28,7 +28,7 @@ namespace Glitch.IO.Abstractions.Windows
 
         public ByteSize Length => ByteSize.FromBytes(file.Length);
 
-        public Option<string> Stem => Path.Stem;
+        public Option<string> Stem => Maybe<string>(Path.Stem);
 
         public TextWriter AppendText() => file.AppendText();
 

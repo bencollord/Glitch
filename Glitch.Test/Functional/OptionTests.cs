@@ -58,7 +58,7 @@ namespace Glitch.Test.Functional
 
             Assert.False(failedValues.IsSome);
             Assert.False(failedOptions.IsSome);
-            Assert.True(successfulOptions.ZipWith(successfulValues, (o, v) => o.SequenceEqual(v)));
+            Assert.True(successfulOptions.Zip(successfulValues, (o, v) => o.SequenceEqual(v)));
         }
     }
 }

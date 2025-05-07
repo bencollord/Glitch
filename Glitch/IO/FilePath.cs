@@ -2,11 +2,13 @@
 {
     public sealed class FilePath : IEquatable<FilePath>, IComparable<FilePath>
     {
+        public static readonly FilePath Empty = new(string.Empty);
+
         private readonly string path;
 
-        public FilePath(string path)
+        public FilePath(string? path)
         {
-            this.path = Normalize(path);
+            this.path = Normalize(path ?? string.Empty);
         }
 
         public FilePath(FileSystemInfo fileOrDirectory)
@@ -18,10 +20,10 @@
         public static char DirectorySeparatorChar => Path.DirectorySeparatorChar;
         public static char AltDirectorySeparatorChar => Path.AltDirectorySeparatorChar;
 
-        public string? DirectoryName => Path.GetDirectoryName(path);
-        public string? FileName => Path.GetFileName(path);
-        public string? Stem => Path.GetFileNameWithoutExtension(path);
-        public FilePath? Root => Path.GetPathRoot(path) is string root ? new FilePath(root) : null;
+        public FilePath Directory => new(Path.GetDirectoryName(path));
+        public FilePath FileName => new(Path.GetFileName(path));
+        public FilePath Stem => new(Path.GetFileNameWithoutExtension(path));
+        public FilePath Root => new(Path.GetPathRoot(path));
         public bool EndsInDirectorySeparator => Path.EndsInDirectorySeparator(path);
         public bool Exists => Path.Exists(path);
         public string? Extension => Path.GetExtension(path);
@@ -132,6 +134,16 @@
 
             return path.Replace(AltDirectorySeparatorChar, DirectorySeparatorChar);
         }
+
+        public static implicit operator string(FilePath path) => path.path;
+
+        public static explicit operator FilePath(string path) => new(path);
+
+        public static implicit operator FilePath(FileSystemInfo node) => new(node.FullName);
+
+        public static explicit operator DirectoryInfo(FilePath path) => new(path);
+
+        public static explicit operator FileInfo(FilePath path) => new(path);
 
         public static bool operator ==(FilePath? left, FilePath? right) => left is null ? right == null : left.Equals(right);
 

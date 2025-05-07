@@ -2,8 +2,6 @@
 
 namespace Glitch.Functional
 {
-    // TODO Find a better name than this. It may be mathematically accurate, but I don't like it.
-    // "Terminal" is what I call it in FN, but that causes naming collisions when you import the module...
     public readonly struct Terminal : IEquatable<Terminal>, IComparable<Terminal>
     {
         public static readonly Terminal Value = new();

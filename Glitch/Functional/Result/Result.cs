@@ -1,6 +1,6 @@
 ﻿namespace Glitch.Functional
 {
-    public abstract partial record Result<T> : IComputation<T>
+    public abstract partial record Result<T>
     {
         private protected Result() { }
 
@@ -33,6 +33,13 @@
         public abstract Result<TResult> MapOr<TResult>(Func<T, TResult> map, Error ifFail);
 
         public abstract Result<TResult> MapOrElse<TResult>(Func<T, TResult> map, Func<Error, Error> ifFail);
+
+        /// <summary>
+        /// Replaces the error if fail, otherwise returns the success value of self.
+        /// </summary>
+        /// <param name="error"></param>
+        /// <returns></returns>
+        public Result<T> WithError(Error error) => Or(error);
 
         /// <summary>
         /// If the result is a failure, returns a new result with the mapping function

@@ -78,12 +78,6 @@ namespace Glitch.Functional
 
         public abstract override string ToString();
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public virtual LeftBiasedComputation LeftBiased() => new(this);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public virtual RightBiasedComputation RightBiased() => new(this);
-
         public TRight IfLeft(TRight fallback) => IfLeft(() => fallback);
 
         public TRight IfLeft(Func<TRight> fallback) => Match(_ => fallback(), r => r);

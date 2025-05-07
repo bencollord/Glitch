@@ -1,4 +1,4 @@
-namespace Glitch.Functional.QuerySyntax
+namespace Glitch.Functional
 {
     public static class ResultExtensions
     {

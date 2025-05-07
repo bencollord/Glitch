@@ -112,6 +112,8 @@
             }
 
             public override Result<TResult> Choose<TResult>(Func<T, Result<TResult>> ifOkay, Func<Error, Result<TResult>> _) => AndThen(ifOkay);
+
+            public static implicit operator T(Okay<T> ok) => ok.Value;
         }
     }
 }
