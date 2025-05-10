@@ -68,7 +68,7 @@ namespace Glitch.Functional
             public override Result<T> OrElse(Func<Error, Result<T>> bindFail) => bindFail(Error);
 
             /// <inheritdoc />
-            public override Option<T> NoneIfFail() => None;
+            public override Option<T> OrNone() => None;
 
             /// <inheritdoc />
             public override Result<T> Guard(Func<T, bool> predicate, Error _) => this;
@@ -79,6 +79,18 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override T Unwrap() => Error.Throw<T>();
+
+            public override bool TryUnwrap(out T result)
+            {
+                result = default!;
+                return false;
+            }
+
+            public override bool TryUnwrapError(out Error result)
+            {
+                result = Error;
+                return true;
+            }
 
             /// <inheritdoc />
             public override T IfFail(T fallback) => fallback;

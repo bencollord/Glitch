@@ -6,7 +6,7 @@
             : this(0, message) { }
 
         public ApplicationError(int code, string message)
-            : this(code, message, None) { }
+            : this(code, message, FN.None) { }
 
         public ApplicationError(string message, Error inner)
             : this(0, message, inner) { }

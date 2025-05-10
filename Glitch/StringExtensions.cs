@@ -26,6 +26,12 @@ namespace Glitch
 
         public static string Strip(this string input, string target) => input.Replace(target, string.Empty);
 
+        public static string StripStart(this string input, string trim)
+            => input.StartsWith(trim) ? input.Substring(trim.Length) : input;
+
+        public static string StripEnd(this string input, string trim)
+            => input.EndsWith(trim) ? input.Substring(0, input.Length - trim.Length) : input;
+
         public static string Join(this IEnumerable<string> items) => items.Join(string.Empty);
 
         public static string Join(this IEnumerable<string> items, string separator)
@@ -65,12 +71,6 @@ namespace Glitch
         {
             return input.Substring(start, end - start);
         }
-
-        public static string TrimStart(this string input, string trim)
-            => input.StartsWith(trim) ? input.Substring(trim.Length) : input;
-
-        public static string TrimEnd(this string input, string trim)
-            => input.EndsWith(trim) ? input.Substring(0, input.Length - trim.Length) : input;
 
         public static T Parse<T>(this string input)
             where T : IParsable<T>

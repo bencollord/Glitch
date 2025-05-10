@@ -15,7 +15,7 @@
             => Try(() => From(obj));
 
         public static Fallible<T> TryFrom<TOther>(TOther obj, Error ifFail)
-            => TryFrom(obj).WithError(ifFail);
+            => TryFrom(obj).MapError(_ => ifFail);
 
         public static Fallible<T> TryFrom<TOther>(TOther obj, Func<Error> ifFail)
             => TryFrom(obj).MapError(_ => ifFail());

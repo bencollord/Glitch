@@ -23,11 +23,11 @@ namespace Glitch.Functional
 
         public static Effect<TInput, TOutput> Lift(Result<TOutput> result) => new(_ => result);
 
-        public static Effect<TInput, TOutput> Lift(Fallible<TOutput> fallible) => new(_ => fallible.Run());
+        public static Effect<TInput, TOutput> New(Fallible<TOutput> fallible) => new(_ => fallible.Run());
 
-        public static Effect<TInput, TOutput> Lift(Func<TInput, Result<TOutput>> function) => new(function);
+        public static Effect<TInput, TOutput> New(Func<TInput, Result<TOutput>> function) => new(function);
 
-        public static Effect<TInput, TOutput> Lift(Func<TInput, TOutput> function) => new(i => function(i));
+        public static Effect<TInput, TOutput> New(Func<TInput, TOutput> function) => new(i => function(i));
 
         /// <summary>
         /// Applies the supplied function to the wrapped value.
@@ -154,7 +154,7 @@ namespace Glitch.Functional
         /// <param name="bind"></param>
         /// <returns></returns>
         public Effect<TInput, TResult> AndThen<TResult>(Func<TOutput, Fallible<TResult>> bind)
-            => AndThen(e => Effect<TInput, TResult>.Lift(bind(e)));
+            => AndThen(e => Effect<TInput, TResult>.New(bind(e)));
 
         /// <summary>
         /// Implements a bind-map operation, similar to
@@ -257,7 +257,7 @@ namespace Glitch.Functional
 
         public Effect<TInput, TResult> CastOrElse<TResult>(Func<TOutput, Error> error)
             => from val  in this
-               let  cast =  Effect<TInput, TResult>.Lift(_ => DynamicCast<TOutput, TResult>(val))
+               let  cast =  Effect<TInput, TResult>.New(_ => DynamicCast<TOutput, TResult>(val))
                let  err  =  Effect<TInput, TResult>.Lift(error(val))
                from res  in cast | err
                select res;
@@ -282,7 +282,7 @@ namespace Glitch.Functional
         public Effect<TInput, TResult> Zip<TOther, TResult>(Effect<TInput, TOther> other, Func<TOutput, TOther, TResult> zipper)
             => new(i => thunk(i).Zip(other.thunk(i), zipper));
 
-        public Fallible<TOutput> Apply(TInput input) => Fallible<TOutput>.Lift(() => Run(input));
+        public Fallible<TOutput> Apply(TInput input) => Fallible<TOutput>.New(() => Run(input));
 
         /// <summary>
         /// Executes the provided function, catching any exception
@@ -315,13 +315,13 @@ namespace Glitch.Functional
             => x.AndThen(_ => y);
 
         public static Effect<TInput, TOutput> operator >>(Effect<TInput, TOutput> x, Fallible<TOutput> y)
-            => x.AndThen(_ => Lift(y));
+            => x.AndThen(_ => New(y));
 
         public static Effect<TInput, TOutput> operator >>(Effect<TInput, TOutput> x, Effect<TInput, Terminal> y)
             => x.AndThen(v => y.Map(_ => v));
 
         public static Effect<TInput, TOutput> operator >>(Effect<TInput, TOutput> x, Fallible<Terminal> y)
-            => x.AndThen(v => Lift(y.Map(_ => v)));
+            => x.AndThen(v => New(y.Map(_ => v)));
 
         public static Effect<TInput, TOutput> operator >>(Effect<TInput, TOutput> x, Func<TInput, Result<TOutput>> y)
             => new(i =>

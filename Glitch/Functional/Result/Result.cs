@@ -35,13 +35,6 @@
         public abstract Result<TResult> MapOrElse<TResult>(Func<T, TResult> map, Func<Error, Error> ifFail);
 
         /// <summary>
-        /// Replaces the error if fail, otherwise returns the success value of self.
-        /// </summary>
-        /// <param name="error"></param>
-        /// <returns></returns>
-        public Result<T> WithError(Error error) => Or(error);
-
-        /// <summary>
         /// If the result is a failure, returns a new result with the mapping function
         /// applied to the wrapped error. Otherwise, returns self.
         /// </summary>
@@ -206,7 +199,7 @@
         public abstract Result<TResult> CastOrElse<TResult>(Func<T, Error> error);
 
         public Result<T> Filter(Func<T, bool> predicate)
-            => Guard(predicate, Error.Empty);
+            => Guard(predicate, Error.None);
 
         /// <summary>
         /// For a successful result, checks the value against a predicate
@@ -298,6 +291,10 @@
 
         public T UnwrapOr(T fallback) => IfFail(fallback);
 
+        public abstract bool TryUnwrap(out T result);
+
+        public abstract bool TryUnwrapError(out Error result);
+
         /// <summary>
         /// Returns the wrapped value if Ok, otherwise returns the fallback value.
         /// </summary>
@@ -326,7 +323,7 @@
         /// an empty <see cref="Option{T}" />.
         /// </summary>
         /// <returns></returns>
-        public abstract Option<T> NoneIfFail();
+        public abstract Option<T> OrNone();
 
         /// <summary>
         /// Returns the wrapped error if faulted. Otherwise throws an <see cref="InvalidOperationException"/>.
@@ -372,6 +369,10 @@
         /// </summary>
         /// <returns></returns>
         public abstract IEnumerable<T> Iterate();
+
+        public Fallible<T> AsFallible() => Fallible.Lift(this);
+
+        public Effect<TInput, T> AsEffect<TInput>() => Effect<TInput, T>.Lift(this);
 
         public OneOf<T, Error> AsLeft() => LeftOrElse(Identity);
 

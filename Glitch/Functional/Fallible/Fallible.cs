@@ -14,11 +14,11 @@ namespace Glitch.Functional
 
         public static Fallible<T> Fail(Error error) => new(() => error);
 
-        public static Fallible<T> Lift(Result<T> result) => new(() => result);
+        public static Fallible<T> New(Result<T> result) => new(() => result);
 
-        public static Fallible<T> Lift(Func<Result<T>> function) => new(function);
+        public static Fallible<T> New(Func<Result<T>> function) => new(function);
 
-        public static Fallible<T> Lift(Func<T> function) => new(() => function());
+        public static Fallible<T> New(Func<T> function) => new(() => function());
 
         /// <summary>
         /// Applies the supplied function to the wrapped value.
@@ -37,9 +37,6 @@ namespace Glitch.Functional
 
         public Fallible<TResult> MapOrElse<TResult>(Func<T, TResult> map, Func<Error, Error> ifFail)
             => new(() => thunk().MapOrElse(map, ifFail));
-
-        public Fallible<T> WithError(Error error)
-            => new(() => thunk().WithError(error));
 
         /// <summary>
         /// If the result is a failure, returns a new result with the mapping function
@@ -131,7 +128,7 @@ namespace Glitch.Functional
         /// <param name="bind"></param>
         /// <returns></returns>
         public Fallible<TResult> AndThen<TResult>(Func<T, Result<TResult>> bind)
-            => AndThen(e => Fallible<TResult>.Lift(bind(e)));
+            => AndThen(e => Fallible<TResult>.New(bind(e)));
 
         /// <summary>
         /// Implements a bind-map operation, similar to
@@ -317,7 +314,7 @@ namespace Glitch.Functional
         public Fallible<TResult> Zip<TOther, TResult>(Fallible<TOther> other, Func<T, TOther, TResult> zipper)
             => new(() => thunk().Zip(other.thunk(), zipper));
 
-        public Effect<TInput, T> WithInput<TInput>() => Effect<TInput, T>.Lift(this);
+        public Effect<TInput, T> WithInput<TInput>() => Effect<TInput, T>.New(this);
 
         /// <summary>
         /// Executes the provided function, catching any exception
@@ -356,6 +353,10 @@ namespace Glitch.Functional
         public static Fallible<T> operator &(Fallible<T> x, Fallible<T> y) => x.And(y);
 
         public static Fallible<T> operator |(Fallible<T> x, Fallible<T> y) => x.Or(y);
+
+        public static Fallible<T> operator |(Fallible<T> x, Result<T> y) => x.Or(y);
+
+        public static Fallible<T> operator |(Fallible<T> x, Error y) => x.Or(y);
 
         public static Fallible<T> operator >>(Fallible<T> x, Fallible<T> y)
             => x.AndThen(_ => y);

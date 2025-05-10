@@ -76,7 +76,7 @@
                 => predicate(Value) ? this : error(Value);
 
             /// <inheritdoc />
-            public override Option<T> NoneIfFail() => Some(Value);
+            public override Option<T> OrNone() => Some(Value);
 
             public override string ToString() => $"Ok: {Value}";
 
@@ -102,6 +102,18 @@
             public override Error UnwrapErrorOr(Error fallback) => fallback;
 
             public override Error UnwrapErrorOrElse(Func<T, Error> fallback) => fallback(Value);
+
+            public override bool TryUnwrap(out T result)
+            {
+                result = Value;
+                return true;
+            }
+
+            public override bool TryUnwrapError(out Error result)
+            {
+                result = default!;
+                return false;
+            }
 
             public override Option<Error> UnwrapErrorOrNone() => None;
 

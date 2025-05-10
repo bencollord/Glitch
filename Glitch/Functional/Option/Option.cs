@@ -243,7 +243,7 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <returns></returns>
         public Option<TResult> Cast<TResult>()
-            => AndThen(v => DynamicCast<TResult>.TryFrom(v).Run().NoneIfFail());
+            => AndThen(v => DynamicCast<TResult>.TryFrom(v).Run().OrNone());
 
         public Option<TResult> As<TResult>()
             where TResult : class
@@ -288,6 +288,12 @@ namespace Glitch.Functional
         /// </summary>
         /// <returns></returns>
         public T? UnwrapOrDefault() => IsSome ? value : default;
+
+        public bool TryUnwrap(out T result)
+        {
+            result = value!;
+            return IsSome;
+        }
 
         /// <summary>
         /// Returns the wrapped value if it exists, otherwise returns the fallback value.
@@ -337,22 +343,6 @@ namespace Glitch.Functional
         public Option<T> IfNone(Action<Terminal> action) => IfNone(() => action(Terminal.Value));
 
         /// <summary>
-        /// Executes an impure action if empty.
-        /// No op if some.
-        /// </summary>
-        /// <param name="action"></param>
-        /// <returns></returns>
-        public Option<T> IfNone(Func<Terminal> action) => IfNone(new Action(() => action()));
-
-        /// <summary>
-        /// Executes an impure action if empty.
-        /// No op if some.
-        /// </summary>
-        /// <param name="action"></param>
-        /// <returns></returns>
-        public Option<T> IfNone(Func<Terminal, Terminal> action) => IfNone(new Action(() => action(Terminal.Value)));
-
-        /// <summary>
         /// Returns the wrapped value if exists. Otherwise, returns the default value
         /// of <typeparamref name="T"/>.
         /// </summary>
@@ -383,6 +373,8 @@ namespace Glitch.Functional
         public IfSomeFluent<TResult> IfSome<TResult>(TResult value) => new(this, _ => value);
 
         public IfSomeFluent<TResult> IfSome<TResult>(Func<T, TResult> map) => new(this, map);
+
+        public IfSomeActionFluent IfSome<TResult>(Func<T, Terminal> action) => new(this, action);
 
         public IfSomeActionFluent IfSome(Action<T> action) => new(this, action);
 
@@ -518,6 +510,9 @@ namespace Glitch.Functional
             private readonly Option<T> option;
             private readonly Action<T> ifSome;
 
+            internal IfSomeActionFluent(Option<T> option, Func<T, Terminal> ifSome)
+                : this(option, new Action<T>(t => ifSome(t))) { }
+
             internal IfSomeActionFluent(Option<T> option, Action<T> ifSome)
             {
                 this.option = option;
@@ -539,7 +534,7 @@ namespace Glitch.Functional
                     ifNone();
                 }
 
-                return Fin;
+                return End;
             }
         }
     }

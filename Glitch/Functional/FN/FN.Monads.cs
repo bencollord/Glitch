@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 
 namespace Glitch.Functional
 {
@@ -6,7 +7,18 @@ namespace Glitch.Functional
     {
         public static readonly OptionNone None = new();
 
-        public static readonly Terminal Fin = new();
+        public static readonly Terminal End = new();
+
+        public static NotSupportedException BadMatch()
+        {
+            var message = "If you've reached this message, a pattern match against a discriminated union reached the base case. " +
+                          "This error is only intended to handle the C# compiler wanting switch expression matches to be exhaustive, " +
+                          "so if you're seeing this message, you dun goofed";
+
+            Debug.Fail(message);
+
+            return new NotSupportedException(message);
+        }
 
         public static Terminal Ignore<T>(T _) => default;
 
@@ -26,32 +38,35 @@ namespace Glitch.Functional
 
         public static Result<T> Fail<T>(Error error) => new Result.Fail<T>(error);
 
-        public static Fallible<T> Try<T>(Func<Result<T>> function) => Fallible<T>.Lift(function);
+        public static Fallible<T> Try<T>(Func<Result<T>> function) => Fallible<T>.New(function);
 
-        public static Fallible<T> Try<T>(Func<Terminal, Result<T>> function) => Fallible<T>.Lift(() => function(Fin));
+        public static Fallible<T> Try<T>(Func<Terminal, Result<T>> function) => Fallible<T>.New(() => function(End));
 
-        public static Fallible<T> Try<T>(Func<T> function) => Fallible<T>.Lift(function);
+        public static Fallible<T> Try<T>(Func<T> function) => Fallible<T>.New(function);
 
-        public static Fallible<T> Try<T>(Func<Terminal, T> function) => Fallible<T>.Lift(() => function(Fin));
+        public static Fallible<T> Try<T>(Func<Terminal, T> function) => Fallible<T>.New(() => function(End));
 
-        public static Fallible<Terminal> Try(Action action) => Fallible<Terminal>.Lift(action.Return());
+        public static Fallible<Terminal> Try(Action action) => Fallible<Terminal>.New(action.Return());
 
         public static Fallible<Terminal> Try(Action<Terminal> action) => Try(action.Return());
 
         public static Fallible<T> Try<T>(T value) => Fallible<T>.Okay(value);
 
-        public static Fallible<T> Try<T>(Result<T> result) => Fallible<T>.Lift(result);
+        public static Fallible<T> Try<T>(Result<T> result) => Fallible<T>.New(result);
 
-        public static Fallible<T> Try<T>(Error error) => Fallible<T>.Fail(error);
+        public static Effect<TInput, Terminal> TryWith<TInput>(Action<TInput> function)
+            => TryWith(function.Return());
 
-        public static Effect<TInput, Terminal> Try<TInput>(Action<TInput> function)
-            => Try(function.Return());
+        public static Effect<TInput, Terminal> TryWith<TInput>(Func<TInput, Terminal> function)
+            => TryWith<TInput, Terminal>(function);
 
-        public static Effect<TInput, TOutput> Try<TInput, TOutput>(Func<TInput, TOutput> function)
-            => Effect.Lift(function);
+        public static Effect<TInput, TOutput> TryWith<TInput, TOutput>(Func<TInput, TOutput> function)
+            => Effect.TryWith(function);
 
-        public static Effect<TInput, TOutput> Try<TInput, TOutput>(Func<TInput, Result<TOutput>> function)
-           => Effect.Lift(function);
+        public static Effect<TInput, TOutput> TryWith<TInput, TOutput>(Func<TInput, Result<TOutput>> function)
+            => Effect.TryWith(function);
+
+        public static Effect<T, T> Ask<T>() => Effect.Ask<T>();
 
         public static Fallible<T> TryCast<T>(object obj) => Try(() => (T)(dynamic)obj);
 

@@ -67,7 +67,7 @@
 
                 Result.Fail<T>(Error e) => throw e.AsException(),
 
-                _ => throw Errors.BadDiscriminatedUnion()
+                _ => throw BadMatch()
             };
                      
 

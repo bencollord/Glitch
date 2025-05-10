@@ -9,7 +9,7 @@
 
         public override string Message => "No error";
 
-        public override Option<Error> Inner => None;
+        public override Option<Error> Inner => FN.None;
 
         public override Exception AsException() => throw new NullReferenceException("There's no actual error here");
 
