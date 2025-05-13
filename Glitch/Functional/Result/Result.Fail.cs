@@ -28,16 +28,20 @@ namespace Glitch.Functional
             public override Result<T> IfOkay(Action<T> _) => this;
 
             /// <inheritdoc />
-            public override Result<T> IfFail(Action action)
+            public override Result<T> IfFail(Action<Error> action)
             {
-                action();
+                action(Error);
                 return this;
             }
 
             /// <inheritdoc />
-            public override Result<T> IfFail(Action<Error> action)
+            public override Result<T> IfError<TError>(Action<TError> action)
             {
-                action(Error);
+                if (Error is TError derived)
+                {
+                    action(derived);
+                }
+
                 return this;
             }
 
@@ -119,7 +123,7 @@ namespace Glitch.Functional
             public override Error UnwrapErrorOrElse(Func<T, Error> _) => Error;
 
             /// <inheritdoc />
-            public override Option<Error> UnwrapErrorOrNone() => Some(Error);
+            public override Option<Error> ErrorOrNone() => Some(Error);
 
             /// <inheritdoc />
             public override void ThrowIfFail() => Error.Throw();

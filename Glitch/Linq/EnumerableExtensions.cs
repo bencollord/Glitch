@@ -1,4 +1,6 @@
-﻿namespace Glitch.Linq
+﻿using Glitch.Functional;
+
+namespace Glitch.Linq
 {
     public static class EnumerableExtensions
     {

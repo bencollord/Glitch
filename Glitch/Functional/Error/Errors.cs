@@ -2,7 +2,7 @@
 {
     internal static class ErrorCodes
     {
-        internal const int Empty              = -0xBC00000;
+        internal const int None              = -0xBC00000;
         internal const int Aggregate          = -0xBC00001;
         internal const int NoElements         = -0xBC00002;
         internal const int MoreThanOneElement = -0xBC00003;

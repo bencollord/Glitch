@@ -16,10 +16,12 @@
             }
         }
 
-        public static void Merge<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, IDictionary<TKey, TValue> other)
+        public static void Merge<TKey, TValue, TMerge>(this IDictionary<TKey, TValue> dictionary, IDictionary<TKey, TMerge> other)
+            where TMerge : TValue
             => dictionary.Merge(other, MergeOption.Strict);
 
-        public static void Merge<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, IDictionary<TKey, TValue> other, MergeOption mergeOption)
+        public static void Merge<TKey, TValue, TMerge>(this IDictionary<TKey, TValue> dictionary, IDictionary<TKey, TMerge> other, MergeOption mergeOption)
+            where TMerge : TValue
         {
             foreach (var (key, value) in other)
             {

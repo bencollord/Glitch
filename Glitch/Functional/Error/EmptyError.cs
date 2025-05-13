@@ -5,7 +5,7 @@
 
         public static readonly EmptyError Value = new();
 
-        private EmptyError() : base(ErrorCodes.Empty) { }
+        private EmptyError() : base(ErrorCodes.None) { }
 
         public override string Message => "No error";
 

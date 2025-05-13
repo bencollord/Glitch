@@ -34,10 +34,10 @@
             }
 
             /// <inheritdoc />
-            public override Result<T> IfFail(Action _) => this;
+            public override Result<T> IfFail(Action<Error> _) => this;
 
             /// <inheritdoc />
-            public override Result<T> IfFail(Action<Error> _) => this;
+            public override Result<T> IfError<TError>(Action<TError> _) => this;
 
             /// <inheritdoc />
             public override IEnumerable<T> Iterate()
@@ -115,7 +115,7 @@
                 return false;
             }
 
-            public override Option<Error> UnwrapErrorOrNone() => None;
+            public override Option<Error> ErrorOrNone() => None;
 
             /// <inheritdoc />
             public override void ThrowIfFail()

@@ -144,7 +144,7 @@
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public abstract Result<T> IfFail(Action action);
+        public Result<T> IfFail(Action action) => IfFail(_ => action());
 
         /// <summary>
         /// Executes an impure action if failed.
@@ -153,6 +153,25 @@
         /// <param name="action"></param>
         /// <returns></returns>
         public abstract Result<T> IfFail(Action<Error> action);
+
+        /// <summary>
+        /// Executes an impure action if failed and the error matches the provided type.
+        /// No op if Okay or a different error type.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public Result<T> IfError<TError>(Action action)
+            where TError : Error
+            => IfError<TError>(_ => action());
+
+        /// <summary>
+        /// Executes an impure action if failed and the error matches the provided type.
+        /// No op if Okay or a different error type.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public abstract Result<T> IfError<TError>(Action<TError> action)
+            where TError : Error;
 
         /// <summary>
         /// Throws the error as an exception if fail. If okay, does nothing.
@@ -361,7 +380,7 @@
         /// an empty <see cref="Option{Error}"/>.
         /// </summary>
         /// <returns></returns>
-        public abstract Option<Error> UnwrapErrorOrNone();
+        public abstract Option<Error> ErrorOrNone();
 
         /// <summary>
         /// Returns a singleton <see cref="IEnumerable{T}" /> if Ok.
@@ -404,12 +423,12 @@
 
         public static implicit operator Result<T>(Error error) => Fail(error);
 
-        public static explicit operator T(Result<T> result) 
+        public static explicit operator T(Result<T> result)
             => result.MapError(err => new InvalidCastException($"Cannot cast a faulted result to a value", err.AsException()))
                      .Unwrap();
 
         public static explicit operator Error(Result<T> result)
-            => result is Result.Fail<T>(var err) 
+            => result is Result.Fail<T>(var err)
                    ? err : throw new InvalidCastException("Cannot cast a successful result to an error");
     };
 }

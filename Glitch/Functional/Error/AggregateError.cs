@@ -10,6 +10,8 @@
             this.errors = errors;
         }
 
+        public override int Code => errors.Any() ? ErrorCodes.Aggregate : ErrorCodes.None;
+
         public override string Message => errors.Select(e => e.Message).Join(", ");
 
         public override Option<Error> Inner => FN.None;
