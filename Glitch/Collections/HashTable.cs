@@ -4,6 +4,7 @@ using System.Collections;
 namespace Glitch.Collections
 {
     public class HashTable<TKey, TValue> : IDictionary<TKey, TValue>
+        where TKey : notnull
     {
         private const int DefaultCapacity = 10;
 
@@ -97,7 +98,7 @@ namespace Glitch.Collections
             }
         }
 
-        public Enumerator GetEnumerator() => new Enumerator(this);
+        public Enumerator GetEnumerator() => new(this);
 
         public bool Remove(TKey key)
         {
@@ -163,7 +164,7 @@ namespace Glitch.Collections
         {
             var entry = FindEntry(key);
 
-            value = entry.Map(e => e.Value).IfNone(default(TValue));
+            value = entry.Map(e => e.Value).DefaultIfNone()!;
 
             return entry.IsSome;
         }

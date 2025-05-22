@@ -1,21 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Glitch.Text
+﻿namespace Glitch.Text
 {
     public readonly record struct Indentation
     {
-        public static readonly Indentation Empty = new Indentation(string.Empty);
+        public static readonly Indentation Empty = new(string.Empty);
 
-        public static readonly Indentation Spaces = new Indentation(' ', 4);
+        public static readonly Indentation Spaces = new(' ', 4);
 
-        public static readonly Indentation HalfSpaces = new Indentation(' ', 2);
+        public static readonly Indentation HalfSpaces = new(' ', 2);
         
-        public static readonly Indentation Tabs = new Indentation('\t', 1);
+        public static readonly Indentation Tabs = new('\t', 1);
 
         private readonly string text;
         private readonly int level;
@@ -40,17 +33,13 @@ namespace Glitch.Text
             get => level;
             init
             {
-                if (value < 0)
-                {
-                    throw new ArgumentOutOfRangeException("Cannot have indent less than zero");
-                }
-
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
                 level = value;
             }
         }
 
         public Indentation Replace(string text)
-            => new Indentation(text, Level);
+            => new(text, Level);
 
         public override string ToString() => Enumerable.Repeat(text, Level).Join();
 

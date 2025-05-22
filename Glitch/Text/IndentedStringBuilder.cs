@@ -4,7 +4,7 @@ namespace Glitch.Text
 {
     public class IndentedStringBuilder
     {
-        private StringBuilder inner;
+        private readonly StringBuilder inner;
         private Indentation indentation;
         private bool shouldIndent = false;
 
@@ -27,6 +27,11 @@ namespace Glitch.Text
         {
             this.inner = inner;
             this.indentation = indentation;
+
+            if (indentation.Level > 0)
+            {
+                shouldIndent = true;
+            }
         }
 
         public char this[int index]
@@ -104,7 +109,7 @@ namespace Glitch.Text
             => AppendJoin(separator, items, i => i?.ToString() ?? string.Empty);
         
         public IndentedStringBuilder AppendJoin<T>(char separator, IEnumerable<T> items, Func<T, string> stringify) 
-            => AppendJoin(separator, items.Select(stringify).ToArray());
+            => AppendJoin(separator, [.. items.Select(stringify)]);
         
         public IndentedStringBuilder AppendJoin(char separator, params string[] items) 
             => AppendJoin(separator, items.AsEnumerable());
@@ -116,7 +121,7 @@ namespace Glitch.Text
             => AppendJoin(separator, items, i => i?.ToString() ?? string.Empty);
         
         public IndentedStringBuilder AppendJoin<T>(string separator, IEnumerable<T> items, Func<T, string> stringify) 
-            => AppendJoin(separator, items.Select(stringify).ToArray());
+            => AppendJoin(separator, [.. items.Select(stringify)]);
         
         public IndentedStringBuilder AppendJoin(string separator, params string[] items) 
             => AppendJoin(separator, items.AsEnumerable());
@@ -155,7 +160,7 @@ namespace Glitch.Text
 
         private class IndentationBlock : IDisposable
         {
-            private IndentedStringBuilder inner;
+            private readonly IndentedStringBuilder inner;
 
             public IndentationBlock(IndentedStringBuilder inner)
             {
