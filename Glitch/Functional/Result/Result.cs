@@ -218,7 +218,7 @@
         public abstract Result<TResult> CastOrElse<TResult>(Func<T, Error> error);
 
         public Result<T> Filter(Func<T, bool> predicate)
-            => Guard(predicate, Error.None);
+            => Guard(predicate, Error.Empty);
 
         /// <summary>
         /// For a successful result, checks the value against a predicate

@@ -32,12 +32,12 @@ namespace Glitch.Grep.Internal
             return this;
         }
 
-        internal override GrepFilter AsFixedString()
+        internal override GrepFilter FixedString()
         {
             return new StringGrepFilter(pattern, options);
         }
 
-        internal override GrepFilter AsRegularExpression()
+        internal override GrepFilter RegularExpression()
         {
             return this;
         }
@@ -52,7 +52,7 @@ namespace Glitch.Grep.Internal
             return this;
         }
 
-        internal override GrepFilter AsCaseSensitive()
+        internal override GrepFilter MatchCase()
         {
             if (options.HasFlag(GrepOptions.IgnoreCase))
             {
@@ -82,7 +82,7 @@ namespace Glitch.Grep.Internal
             return this;
         }
 
-        internal override bool IsMatch(string line) => regex.Value.IsMatch(line);
+        protected override bool IsMatch(string line) => regex.Value.IsMatch(line);
 
         private Regex BuildRegex()
         {

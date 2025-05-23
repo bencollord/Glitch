@@ -1,43 +1,45 @@
 ﻿using Glitch.Grep.Internal;
+using Glitch.IO;
 using System.Collections;
 
 namespace Glitch.Grep
 {
-    public class GrepQuery : IEnumerable<FileLine>
+    public abstract class GrepQuery<TDerived> : IEnumerable<FileLine>
+        where TDerived : GrepQuery<TDerived>
     {
-        private readonly GrepTraversal traversal;
         private readonly GrepFilter filter;
 
-        internal GrepQuery(GrepTraversal traversal, GrepFilter filter)
+        private protected GrepQuery(GrepFilter filter)
         {
-            this.traversal = traversal;
             this.filter = filter;
         }
 
-        public GrepQuery FixedString() => WithFilter(filter.AsFixedString());
-        public GrepQuery RegularExpression() => WithFilter(filter.AsRegularExpression());
-        public GrepQuery IgnoreCase() => WithFilter(filter.IgnoreCase());
-        public GrepQuery MatchCase() => WithFilter(filter.AsCaseSensitive());
-        public GrepQuery MatchWholeLine() => WithFilter(filter.MatchWholeLine());
-        public GrepQuery AllowPartialMatch() => WithFilter(filter.AllowPartialMatch());
-        public GrepQuery LocaleAware() => WithFilter(filter.LocaleAware());
-        public GrepQuery LocaleAgnostic() => WithFilter(filter.LocaleAgnostic());
+        public TDerived FixedString() => WithFilter(filter.FixedString());
+        public TDerived RegularExpression() => WithFilter(filter.RegularExpression());
+        public TDerived IgnoreCase() => WithFilter(filter.IgnoreCase());
+        public TDerived MatchCase() => WithFilter(filter.MatchCase());
+        public TDerived MatchWholeLine() => WithFilter(filter.MatchWholeLine());
+        public TDerived AllowPartialMatch() => WithFilter(filter.AllowPartialMatch());
+        public TDerived LocaleAware() => WithFilter(filter.LocaleAware());
+        public TDerived LocaleAgnostic() => WithFilter(filter.LocaleAgnostic());
+
+        //public GrepQuery IncludeFiles(params string[] paths) => WithTraversal(traversal.IncludeFiles(paths));
+        //public GrepQuery ExcludeFiles(params string[] paths) => WithTraversal(traversal.ExcludeFiles(paths));
+
+        //public GrepQuery IncludeDirectories(params string[] paths) => WithTraversal(traversal.IncludeDirectories(paths));
+        //public GrepQuery ExcludeDirectories(params string[] paths) => WithTraversal(traversal.ExcludeDirectories(paths));
 
         public IEnumerator<FileLine> GetEnumerator()
         {
-            //return traversal.Execute();
-            throw new NotImplementedException();
+            return EnumerateFiles()
+                .SelectMany(filter.Scan)
+                .GetEnumerator();
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
+        protected abstract IEnumerable<FileInfo> EnumerateFiles();
 
-        private GrepQuery WithFilter(GrepFilter filter) 
-            => filter == this.filter ? this : new GrepQuery(traversal, filter);
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        private GrepQuery WithTraversal(GrepTraversal traversal)
-            => traversal == this.traversal ? this : new GrepQuery(traversal, filter);
+        private protected abstract TDerived WithFilter(GrepFilter filter);
     }
 }

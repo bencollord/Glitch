@@ -140,7 +140,12 @@ namespace Glitch.Linq
 
         public static IEnumerable<TResult> Cartesian<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TSource, TResult> projection)
         {
-            return source.SelectMany(_ => source, projection);
+            return source.CrossJoin(source, projection);
+        }
+
+        public static IEnumerable<TResult> CrossJoin<TSource, TOther, TResult>(this IEnumerable<TSource> source, IEnumerable<TOther> other, Func<TSource, TOther, TResult> projection)
+        {
+            return source.SelectMany(_ => other, projection);
         }
 
         public static IEnumerable<T> ExceptWhere<T>(this IEnumerable<T> source, Func<T, bool> predicate)
