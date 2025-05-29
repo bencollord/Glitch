@@ -1,5 +1,6 @@
 ﻿namespace Glitch.Functional
 {
+    // UNDONE
     public class OptionalResult<T>
     {
         public static readonly OptionalResult<T> None = new(Option<Result<T>>.None);

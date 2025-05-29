@@ -1,4 +1,6 @@
-﻿namespace Glitch.Functional
+﻿using System.Collections.Immutable;
+
+namespace Glitch.Functional
 {
     public abstract partial record Result<T>
     {
@@ -112,7 +114,7 @@
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Result<T> Do(Action<T> action) => IfOkay(action); // TODO Not sure how I feel about aliasing methods like this.
+        public abstract Result<T> Do(Action<T> action);
 
         /// <summary>
         /// Executes an impure action against the value if Ok.
@@ -120,23 +122,7 @@
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Result<T> Do(Func<T, Terminal> action) => IfOkay(action); // TODO Not sure how I feel about aliasing methods like this.
-
-        /// <summary>
-        /// Executes an impure action against the value if Ok.
-        /// No op if fail.
-        /// </summary>
-        /// <param name="action"></param>
-        /// <returns></returns>
-        public abstract Result<T> IfOkay(Action<T> action);
-
-        /// <summary>
-        /// Executes an impure action against the value if Ok.
-        /// No op if fail.
-        /// </summary>
-        /// <param name="action"></param>
-        /// <returns></returns>
-        public Result<T> IfOkay(Func<T, Terminal> action) => IfOkay(v => action(v));
+        public Result<T> Do(Func<T, Terminal> action) => Do(v => action(v));
 
         /// <summary>
         /// Executes an impure action if failed.
@@ -176,7 +162,7 @@
         /// <summary>
         /// Throws the error as an exception if fail. If okay, does nothing.
         /// </summary>
-        public abstract void ThrowIfFail();
+        public abstract Result<T> ThrowIfFail();
 
         public TResult Match<TResult>(Func<T, TResult> ifOkay, TResult ifFail)
             => Map(ifOkay).IfFail(ifFail);
@@ -393,9 +379,9 @@
 
         public Effect<TInput, T> AsEffect<TInput>() => Effect<TInput, T>.Lift(this);
 
-        public OneOf<T, Error> AsLeft() => LeftOrElse(Identity);
+        public OneOf<T, Error> AsLeft() => LeftOrElse(x => x);
 
-        public OneOf<Error, T> AsRight() => RightOrElse(Identity);
+        public OneOf<Error, T> AsRight() => RightOrElse(x => x);
 
         public OneOf<T, TRight> LeftOr<TRight>(TRight value) => LeftOrElse(_ => value);
 
@@ -430,5 +416,87 @@
         public static explicit operator Error(Result<T> result)
             => result is Result.Fail<T>(var err)
                    ? err : throw new InvalidCastException("Cannot cast a successful result to an error");
-    };
+
+        // UNDONE Needs more comprehensive functionality
+        public FluentActionContext IfOkay(Func<T, Terminal> ifOkay) => IfOkay(new Action<T>(t => ifOkay(t)));
+
+        public FluentActionContext IfOkay(Action<T> ifOkay) => new FluentActionContext(this, ifOkay);
+
+        // UNDONE Naming inconsistency
+        public FluentActionContext ForError<TError>(Action<TError> ifError)
+            where TError : Error
+            => IfOkay(_ => { /* Nop */ }).Catch(ifError);
+
+        /// <summary>
+        /// Fluent context for chaining actions against a result.
+        /// 
+        /// Experimental API and may be removed.
+        /// </summary>
+        /// <remarks>
+        /// Might remove because this is really stretching the responsibility
+        /// of a Result type and kind of turning it more into an effect.
+        /// Right now, I'll keep it for convenience, but I'll come back and 
+        /// clean this up later.
+        /// </remarks>
+        public readonly struct FluentActionContext
+        {
+            private readonly Result<T> result;
+            private readonly Action<T> ifOkay;
+            private readonly ImmutableDictionary<Type, Action<Error>> errorHandlers;
+
+            internal FluentActionContext(Result<T> result, Action<T> ifOkay) 
+                : this(result, ifOkay, ImmutableDictionary<Type, Action<Error>>.Empty) { }
+
+            internal FluentActionContext(Result<T> result, Action<T> ifOkay, ImmutableDictionary<Type, Action<Error>> errorHandlers)
+            {
+                this.result = result;
+                this.ifOkay = ifOkay;
+                this.errorHandlers = errorHandlers;
+            }
+
+            public FluentActionContext Then(Action<T> ifOkay) => new(result, this.ifOkay + ifOkay, errorHandlers);
+
+            public FluentActionContext Then(Func<T, Terminal> ifOkay) => Then(new Action<T>(v => ifOkay(v)));
+
+            public FluentActionContext Catch<TError>(Func<Error, Terminal> ifFail) 
+                where TError : Error
+                => Catch(new Action<TError>(v => ifFail(v)));
+
+            public FluentActionContext Catch<TError>(Action<TError> ifError)
+                where TError : Error
+                => new(result, ifOkay, errorHandlers.Add(typeof(TError), err => ifError((TError)err)));
+
+            public Terminal Otherwise(Func<Error, Terminal> ifFail) => Otherwise(new Action<Error>(v => ifFail(v)));
+
+            public Terminal Otherwise(Action<Error> ifFail)
+            {
+                switch (result)
+                {
+                    case Result.Okay<T>(T value):
+                        ifOkay(value);
+                        break;
+
+                    case Result.Fail<T>(Error err)
+                        when errorHandlers.TryGetValue(err.GetType(), out var handler):
+                        handler(err);
+                        break;
+
+                    case Result.Fail<T>(Error err):
+                        ifFail(err);
+                        break;
+
+                    default:
+                        throw BadMatchException();
+                }
+
+                return Terminal.Value;
+            }
+
+            public Terminal OtherwiseThrow() => Otherwise(err => err.Throw());
+
+            public Terminal OtherwiseDoNothing() => Otherwise(_ => { /* Nop */ });
+
+            public Result<T> OtherwiseContinue() => Otherwise(_ => { /* Nop */ }).Return(result);
+        }
+    }
 }

@@ -67,7 +67,7 @@
 
                 Result.Fail<T>(Error e) => throw e.AsException(),
 
-                _ => throw BadMatch()
+                _ => throw BadMatchException()
             };
                      
 

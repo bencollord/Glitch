@@ -50,6 +50,9 @@ namespace Glitch.Functional
         public static IEnumerable<T> Somes<T>(this IEnumerable<Option<T>> options)
             => options.Where(o => o.IsSome).Select(o => o.Unwrap());
 
+        public static Option<T> Map<T>(this Option<bool> result, Func<Terminal, T> ifTrue, Func<Terminal, T> ifFalse)
+            => result.Map(flag => flag ? ifTrue(default) : ifFalse(default));
+
         /// <summary>
         /// Allows three valued logic to be applied to an optional boolean.
         /// </summary>

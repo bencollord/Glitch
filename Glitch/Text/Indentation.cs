@@ -30,12 +30,8 @@
 
         public int Level
         {
-            get => level;
-            init
-            {
-                ArgumentOutOfRangeException.ThrowIfNegative(value);
-                level = value;
-            }
+            get => level; 
+            init => level = value > 0 ? value : 0;
         }
 
         public Indentation Replace(string text)

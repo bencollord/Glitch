@@ -25,7 +25,7 @@ namespace Glitch.Functional
             public override Result<TResult> CastOrElse<TResult>(Func<T, Error> _) => Cast<TResult>();
 
             /// <inheritdoc />
-            public override Result<T> IfOkay(Action<T> _) => this;
+            public override Result<T> Do(Action<T> _) => this;
 
             /// <inheritdoc />
             public override Result<T> IfFail(Action<Error> action)
@@ -126,7 +126,11 @@ namespace Glitch.Functional
             public override Option<Error> ErrorOrNone() => Some(Error);
 
             /// <inheritdoc />
-            public override void ThrowIfFail() => Error.Throw();
+            public override Result<T> ThrowIfFail()
+            {
+                Error.Throw();
+                return this;
+            }
 
             public override Result<TResult> Choose<TResult>(Func<T, Result<TResult>> _, Func<Error, Result<TResult>> ifFail) 
                 => ifFail(Error);

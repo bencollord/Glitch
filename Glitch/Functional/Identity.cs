@@ -51,7 +51,7 @@
 
         public static implicit operator Result<T>(Identity<T> identity) => identity.Okay();
 
-        public static implicit operator Fallible<T>(Identity<T> identity) => identity.Try(FN.Identity);
+        public static implicit operator Fallible<T>(Identity<T> identity) => identity.Try(i => i);
 
         public static implicit operator Sequence<T>(Identity<T> identity) => identity.Iterate().AsSequence();
 

@@ -9,7 +9,7 @@ namespace Glitch.Functional
 
         public static readonly Terminal End = new();
 
-        public static NotSupportedException BadMatch()
+        public static NotSupportedException BadMatchException()
         {
             var message = "If you've reached this message, a pattern match against a discriminated union reached the base case. " +
                           "This error is only intended to handle the C# compiler wanting switch expression matches to be exhaustive, " +
@@ -22,9 +22,9 @@ namespace Glitch.Functional
 
         public static Terminal Ignore<T>(T _) => default;
 
-        public static Identity<T> Id<T>() where T : new() => Id<T>(new());
+        public static Identity<T> Id<T>() where T : new() => IdentityMonad<T>(new());
 
-        public static Identity<T> Id<T>(T value) => value;
+        public static Identity<T> IdentityMonad<T>(T value) => value;
 
         public static Option<T> Some<T>() where T : new() => Some<T>(new());
 

@@ -201,7 +201,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Fallible<T> IfOkay(Action<T> action) => new(() => thunk().IfOkay(action));
+        public Fallible<T> IfOkay(Action<T> action) => new(() => thunk().Do(action));
 
         /// <summary>
         /// Executes an impure action if failed.

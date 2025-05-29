@@ -54,24 +54,20 @@ namespace Glitch.CodeAnalysis
         public CompilationUnitSyntax GetRoot() => GetTree().GetCompilationUnitRoot();
 
         public CSharpFile Rewrite(CSharpSyntaxRewriter visitor)
-            => Rewrite(visitor.Visit);
+            => ReplaceRoot(visitor.Visit);
 
-        public CSharpFile Rewrite<T>(Func<T, SyntaxNode> updater)
-            where T : SyntaxNode
-            => Rewrite(n => n.DescendantNodes<T>().Aggregate(n, (x, y) => x.ReplaceNode(y, updater(y))));
-
-        public CSharpFile Rewrite(Func<SyntaxNode, SyntaxNode> updater)
+        public CSharpFile ReplaceRoot(Func<SyntaxNode, SyntaxNode> updater)
         {
-            return Replace(updater(GetRoot()));
+            return ReplaceRoot(updater(GetRoot()));
         }
 
-        public CSharpFile Replace(SyntaxNode newRoot)
+        public CSharpFile ReplaceRoot(SyntaxNode newRoot)
         {
             updated = tree.Value.WithRootAndOptions(newRoot, tree.Value.Options);
             return this;
         }
 
-        public CSharpFile Replace(CSharpSyntaxTree newTree)
+        public CSharpFile ReplaceTree(CSharpSyntaxTree newTree)
         {
             updated = newTree;
             return this;

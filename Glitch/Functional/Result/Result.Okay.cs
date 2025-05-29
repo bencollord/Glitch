@@ -27,7 +27,7 @@
                 => Fallible.Lift(this).CastOrElse<TResult>(error).Run();
 
             /// <inheritdoc />
-            public override Result<T> IfOkay(Action<T> action)
+            public override Result<T> Do(Action<T> action)
             {
                 action(Value);
                 return this;
@@ -118,9 +118,9 @@
             public override Option<Error> ErrorOrNone() => None;
 
             /// <inheritdoc />
-            public override void ThrowIfFail()
+            public override Result<T> ThrowIfFail()
             {
-                // Nop
+                return this;
             }
 
             public override Result<TResult> Choose<TResult>(Func<T, Result<TResult>> ifOkay, Func<Error, Result<TResult>> _) => AndThen(ifOkay);
