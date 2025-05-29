@@ -6,22 +6,22 @@
 
         public static void Rename(this FileInfo file, string newName)
         {
-            var path = new FilePath(newName);
+            // TODO Use FilePath class when tested
+            var newPath = Maybe(file.Directory)
+                .Map(d => Path.Combine(d.FullName, newName))
+                .IfNone(newName);
 
-            if (path.IsFullyQualified)
-            {
-                file.MoveTo(path.ToFullPath(file.Directory ?? FilePath.Empty));
-            }
+            file.MoveTo(newPath);
         }
 
         public static void Rename(this DirectoryInfo directory, string newName)
         {
-            var path = new FilePath(newName);
+            // TODO Use FilePath class when tested
+            var newPath = Maybe(directory.Parent)
+                .Map(d => Path.Combine(d.FullName, newName))
+                .IfNone(newName);
 
-            if (path.IsFullyQualified)
-            {
-                directory.MoveTo(path.ToFullPath(directory.Parent ?? FilePath.Empty));
-            }
+            directory.MoveTo(newPath);
         }
     }
 }
