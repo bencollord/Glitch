@@ -104,8 +104,8 @@ namespace Glitch.Functional
             {
                 var result = thunk(i);
 
-                return result is Result.Okay<TOutput> ok 
-                     ? bind(ok.Value).thunk(i) 
+                return result is Result.Okay<TOutput> ok
+                     ? bind(ok.Value).thunk(i)
                      : result.Cast<TResult>();
             });
 
@@ -256,10 +256,10 @@ namespace Glitch.Functional
             => MapOr(v => (TResult)(dynamic)v!, error);
 
         public Effect<TInput, TResult> CastOrElse<TResult>(Func<TOutput, Error> error)
-            => from val  in this
-               let  cast =  Effect<TInput, TResult>.New(_ => DynamicCast<TOutput, TResult>(val))
-               let  err  =  Effect<TInput, TResult>.Lift(error(val))
-               from res  in cast | err
+            => from val in this
+               let cast = Effect<TInput, TResult>.New(_ => DynamicCast<TOutput, TResult>(val))
+               let err = Effect<TInput, TResult>.Lift(error(val))
+               from res in cast | err
                select res;
 
         /// <summary>

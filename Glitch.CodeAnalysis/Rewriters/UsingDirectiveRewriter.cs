@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Glitch.CodeAnalysis
+namespace Glitch.CodeAnalysis.Rewriters
 {
     public class UsingDirectiveRewriter : CSharpSyntaxRewriter
     {

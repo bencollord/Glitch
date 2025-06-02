@@ -2,7 +2,7 @@
 
 namespace Glitch.Text
 {
-    public class IndentedStringBuilder
+    public class IndentedStringBuilder : IIndentable
     {
         private readonly StringBuilder inner;
         private Indentation indentation;
@@ -156,22 +156,6 @@ namespace Glitch.Text
             return output;
         }
 
-        public IDisposable BeginBlock() => new IndentationBlock(this);
-
-        private class IndentationBlock : IDisposable
-        {
-            private readonly IndentedStringBuilder inner;
-
-            public IndentationBlock(IndentedStringBuilder inner)
-            {
-                this.inner = inner;
-                inner.Indentation++;
-            }
-
-            public void Dispose()
-            {
-                inner.Indentation--;
-            }
-        }
+        public IDisposable BeginBlock() => new IndentationScope(this);
     }
 }

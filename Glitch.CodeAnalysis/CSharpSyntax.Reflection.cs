@@ -1,4 +1,5 @@
-﻿using Glitch.Reflection;
+﻿using Glitch.CodeAnalysis.Builders;
+using Glitch.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,29 +11,25 @@ namespace Glitch.CodeAnalysis
 {
     [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "This is intentionally an instance wrapper around a static class")]
     [SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "Intentionally being suppressed at the class level")]
-    public partial class CSharpSyntaxFactory
+    public static partial class CSharpSyntax
     {
-        public TypeSyntax TypeName(Type type) => ParseTypeName(type.Signature());
+        public static TypeSyntax TypeName(Type type) => ParseTypeName(type.Signature());
 
-        public BaseTypeDeclarationSyntax TypeDeclaration(Type type)
+        public static BaseTypeDeclarationSyntax TypeDeclaration(Type type)
         {
-            var modifiers = new ModifierListBuilder(this)
-                .WithTrailingTrivia(Space);
+            var modifiers = new TokenListBuilder();
 
             modifiers
                 .AddIf(type.IsPublic, SyntaxKind.PublicKeyword)
-                .AddIf(type.IsNestedPrivate, SyntaxKind.PrivateKeyword)
-                .AddIf(type.IsNestedFamily, SyntaxKind.ProtectedKeyword)
-                .AddIf(type.IsNestedFamANDAssem, SyntaxKind.PrivateKeyword, SyntaxKind.ProtectedKeyword)
-                .AddIf(type.IsNestedFamORAssem, SyntaxKind.ProtectedKeyword, SyntaxKind.InternalKeyword)
-                .AddIf(type.IsNestedFamily, SyntaxKind.InternalKeyword);
+                .AddIf(type.IsNestedPrivate || type.IsNestedFamANDAssem, SyntaxKind.PrivateKeyword)
+                .AddIf(type.IsNestedFamily || type.IsNestedFamANDAssem || type.IsNestedFamORAssem, SyntaxKind.ProtectedKeyword)
+                .AddIf(type.IsNestedFamily || type.IsNestedFamORAssem, SyntaxKind.InternalKeyword);
 
             modifiers.AddIf(type.IsAbstract, SyntaxKind.AbstractKeyword)
                      .AddIf(type.IsSealed, SyntaxKind.SealedKeyword);
 
             // TODO Static classes
             // TODO Attributes
-
             var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
             var fields = type.GetFields(flags);
 
@@ -67,18 +64,15 @@ namespace Glitch.CodeAnalysis
                 .WithMembers(List(members));
         }
 
-        public FieldDeclarationSyntax FieldDeclaration(FieldInfo field)
+        public static FieldDeclarationSyntax FieldDeclaration(FieldInfo field)
         {
-            var modifiers = new ModifierListBuilder(this)
-                .WithTrailingTrivia(Space);
+            var modifiers = new TokenListBuilder();
 
             modifiers
                 .AddIf(field.IsPublic, SyntaxKind.PublicKeyword)
-                .AddIf(field.IsAssembly, SyntaxKind.InternalKeyword)
-                .AddIf(field.IsFamilyOrAssembly, SyntaxKind.ProtectedKeyword, SyntaxKind.InternalKeyword)
-                .AddIf(field.IsFamilyAndAssembly, SyntaxKind.PrivateKeyword, SyntaxKind.ProtectedKeyword)
-                .AddIf(field.IsFamily, SyntaxKind.ProtectedKeyword)
-                .AddIf(field.IsPrivate, SyntaxKind.PrivateKeyword)
+                .AddIf(field.IsPrivate || field.IsFamilyAndAssembly, SyntaxKind.PrivateKeyword)
+                .AddIf(field.IsFamily || field.IsFamilyAndAssembly || field.IsFamilyOrAssembly, SyntaxKind.ProtectedKeyword)
+                .AddIf(field.IsAssembly || field.IsFamilyOrAssembly, SyntaxKind.InternalKeyword)
                 .AddIf(field.IsStatic, SyntaxKind.StaticKeyword)
                 .AddIf(field.IsInitOnly, SyntaxKind.ReadOnlyKeyword); // TODO Constants
 
@@ -89,7 +83,7 @@ namespace Glitch.CodeAnalysis
                 .WithModifiers(modifiers.ToTokenList());
         }
 
-        public PropertyDeclarationSyntax PropertyDeclaration(PropertyInfo property)
+        public static PropertyDeclarationSyntax PropertyDeclaration(PropertyInfo property)
         {
             var getMethod = Maybe(property.GetMethod);
             var setMethod = Maybe(property.SetMethod);
@@ -118,7 +112,6 @@ namespace Glitch.CodeAnalysis
                 })
                 .Where(e => e.Get.Access > e.Set.Access)
                 .Map(e => GetAccessModifiers(e.Set.Method))
-                .Map(e => e.WithTrailingTrivia(Space))
                 .Map(e => e.ToTokenList());
 
             var getAccessor = getMethod.Map(_ => AccessorDeclaration(SyntaxKind.GetAccessorDeclaration));
@@ -140,12 +133,12 @@ namespace Glitch.CodeAnalysis
                         List(accessors)));
         }
 
-        public ConstructorDeclarationSyntax ConstructorDeclaration(ConstructorInfo constructor)
+        public static ConstructorDeclarationSyntax ConstructorDeclaration(ConstructorInfo constructor)
         {
             ArgumentNullException.ThrowIfNull(constructor.DeclaringType);
 
             var modifiers = constructor.IsStatic
-                          ? new ModifierListBuilder(this).Add(SyntaxKind.StaticKeyword)
+                          ? new TokenListBuilder().Add(SyntaxKind.StaticKeyword)
                           : GetAccessModifiers(constructor);
 
             var identifier = Identifier(constructor.DeclaringType.Name);
@@ -160,18 +153,16 @@ namespace Glitch.CodeAnalysis
 
             // TODO Generics
             return ConstructorDeclaration(identifier)
-                .WithModifiers(modifiers.WithTrailingTrivia(Space).ToTokenList())
+                .WithModifiers(modifiers.ToTokenList())
                 .WithParameterList(
                     ParameterList(
                         SeparatedList(parameters.Select(p =>
-                            Parameter(
-                                p.Type.WithTrailingTrivia(Space), // TODO Parameter modifiers
-                                p.Name)),
-                            Token(SyntaxKind.CommaToken).WithTrailingTrivia(Space))))
+                            Parameter(p.Type, p.Name)), // TODO Parameter modifiers
+                            Token(SyntaxKind.CommaToken))))
                 .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
         }
 
-        public MethodDeclarationSyntax MethodDeclaration(MethodInfo method)
+        public static MethodDeclarationSyntax MethodDeclaration(MethodInfo method)
         {
             var modifiers = GetMethodModifiers(method);
 
@@ -184,22 +175,23 @@ namespace Glitch.CodeAnalysis
                     Name = Identifier(p.Name ?? $"p{p.Position}"),
                     Type = ParseTypeName(p.ParameterType.Signature()),
                     // TODO Default values
-                });
+                    // TODO Parameter modifiers
+                })
+                .Select(p => Parameter(
+                    p.Type.WithTrailingTrivia(Space),
+                    p.Name));
+
+            var parameterList = parameters.Any() ? SeparatedList(parameters, Token(SyntaxKind.CommaToken).WithTrailingTrivia(Space)) : SeparatedList<ParameterSyntax>();
 
             // TODO Generics
-            return MethodDeclaration(returnType.WithTrailingTrivia(Space), method.Name)
-                .WithModifiers(modifiers.WithTrailingTrivia(Space).ToTokenList())
+            return MethodDeclaration(returnType, method.Name)
+                .WithModifiers(modifiers.ToTokenList())
                 .WithParameterList(
-                    ParameterList(
-                        SeparatedList(parameters.Select(p =>
-                            Parameter(
-                                p.Type.WithTrailingTrivia(Space), // TODO Parameter modifiers
-                                p.Name)),
-                            Token(SyntaxKind.CommaToken).WithTrailingTrivia(Space))))
+                    ParameterList(parameterList))
                 .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
         }
 
-        private ModifierListBuilder GetMethodModifiers(MethodInfo method)
+        private static TokenListBuilder GetMethodModifiers(MethodInfo method)
         {
             var modifiers = GetAccessModifiers(method)
                 .AddIf(method.IsStatic, SyntaxKind.StaticKeyword)
@@ -219,59 +211,18 @@ namespace Glitch.CodeAnalysis
             return modifiers;
         }
 
-        private ModifierListBuilder GetAccessModifiers(MethodBase method)
+        private static TokenListBuilder GetAccessModifiers(MethodBase method)
         {
-            var modifiers = new ModifierListBuilder(this)
-                .WithTrailingTrivia(Space);
+            var modifiers = new TokenListBuilder();
 
             modifiers
                 .AddIf(method.IsPublic, SyntaxKind.PublicKeyword)
-                .AddIf(method.IsAssembly, SyntaxKind.InternalKeyword)
-                .AddIf(method.IsFamilyOrAssembly, SyntaxKind.ProtectedKeyword, SyntaxKind.InternalKeyword)
-                .AddIf(method.IsFamilyAndAssembly, SyntaxKind.PrivateKeyword, SyntaxKind.ProtectedKeyword)
-                .AddIf(method.IsFamily, SyntaxKind.ProtectedKeyword)
+                .AddIf(method.IsFamilyOrAssembly || method.IsFamily || method.IsFamilyOrAssembly, SyntaxKind.ProtectedKeyword)
+                .AddIf(method.IsFamilyOrAssembly || method.IsAssembly, SyntaxKind.InternalKeyword)
+                .AddIf(method.IsFamilyAndAssembly || method.IsPrivate, SyntaxKind.PrivateKeyword)
                 .AddIf(method.IsPrivate, SyntaxKind.PrivateKeyword);
 
             return modifiers;
-        }
-
-        private class ModifierListBuilder
-        {
-            private readonly CSharpSyntaxFactory F;
-            private List<SyntaxToken> modifiers = [];
-
-            internal ModifierListBuilder(CSharpSyntaxFactory factory)
-            {
-                F = factory;
-            }
-
-            internal ModifierListBuilder Add(SyntaxKind modifier) => Add(F.Token(modifier));
-
-            internal ModifierListBuilder Add(SyntaxToken modifier) => AddIf(true, modifier);
-
-            internal ModifierListBuilder AddIf(bool condition, params SyntaxKind[] modifiers)
-                => AddRangeIf(condition, modifiers.Select(F.Token));
-
-            internal ModifierListBuilder AddIf(bool condition, params SyntaxToken[] modifiers)
-                => AddRangeIf(condition, modifiers);
-
-            internal ModifierListBuilder AddRangeIf(bool condition, IEnumerable<SyntaxToken> modifiers)
-            {
-                if (condition)
-                {
-                    this.modifiers.AddRange(modifiers);
-                }
-
-                return this;
-            }
-
-            internal ModifierListBuilder WithTrailingTrivia(SyntaxTrivia trivia)
-            {
-                modifiers = modifiers.ConvertAll(e => e.WithTrailingTrivia(trivia));
-                return this;
-            }
-
-            internal SyntaxTokenList ToTokenList() => F.TokenList(modifiers);
         }
     }
 }

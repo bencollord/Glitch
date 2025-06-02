@@ -2,7 +2,7 @@
 
 namespace Glitch.Text
 {
-    public class IndentedTextWriter : TextWriter
+    public class IndentedTextWriter : TextWriter, IIndentable
     {
         private TextWriter inner;
         private Indentation indentation;
@@ -415,7 +415,7 @@ namespace Glitch.Text
 
         public override void Flush() => inner.Flush();
 
-        public IDisposable BeginBlock() => new IndentationBlock(this);
+        public IDisposable BeginBlock() => new IndentationScope(this);
 
         private void ApplyIndent()
         {
@@ -423,22 +423,6 @@ namespace Glitch.Text
             {
                 inner.Write(Indentation);
                 shouldIndent = false;
-            }
-        }
-
-        private class IndentationBlock : IDisposable
-        {
-            private IndentedTextWriter inner;
-
-            public IndentationBlock(IndentedTextWriter inner)
-            {
-                this.inner = inner;
-                inner.Indentation++;
-            }
-
-            public void Dispose()
-            {
-                inner.Indentation--;
             }
         }
     }
