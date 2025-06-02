@@ -534,7 +534,7 @@ namespace Glitch.Functional
                     ifNone();
                 }
 
-                return Nothing;
+                return End;
             }
         }
     }

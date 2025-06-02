@@ -7,7 +7,7 @@ namespace Glitch.Functional
     {
         public static readonly OptionNone None = new();
 
-        public static readonly Terminal Nothing = new();
+        public static readonly Terminal End = new();
 
         public static NotSupportedException BadMatchException()
         {
@@ -40,11 +40,11 @@ namespace Glitch.Functional
 
         public static Fallible<T> Try<T>(Func<Result<T>> function) => Fallible<T>.New(function);
 
-        public static Fallible<T> Try<T>(Func<Terminal, Result<T>> function) => Fallible<T>.New(() => function(Nothing));
+        public static Fallible<T> Try<T>(Func<Terminal, Result<T>> function) => Fallible<T>.New(() => function(End));
 
         public static Fallible<T> Try<T>(Func<T> function) => Fallible<T>.New(function);
 
-        public static Fallible<T> Try<T>(Func<Terminal, T> function) => Fallible<T>.New(() => function(Nothing));
+        public static Fallible<T> Try<T>(Func<Terminal, T> function) => Fallible<T>.New(() => function(End));
 
         public static Fallible<Terminal> Try(Action action) => Fallible<Terminal>.New(action.Return());
 
