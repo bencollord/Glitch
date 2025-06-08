@@ -134,7 +134,7 @@ namespace Glitch.Functional
             return one.Match(ifOne, _ => ifMany(self.many));
         }
 
-        public Terminal Match(Action<T> ifOne, Action<IEnumerable<T>> ifMany) => Match(ifOne.Return(), ifMany.Return());
+        public Unit Match(Action<T> ifOne, Action<IEnumerable<T>> ifMany) => Match(ifOne.Return(), ifMany.Return());
 
         public OneOrMany<TResult> Cast<TResult>()
             => Map(DynamicCast<TResult>.From);

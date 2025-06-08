@@ -8,13 +8,13 @@
 
         public static Effect<TInput, TOutput> Fail<TInput, TOutput>(Error error) => Effect<TInput>.Fail<TOutput>(error);
 
-        public static Effect<TInput, Terminal> Fail<TInput>(Error error) => Effect<TInput, Terminal>.Fail(error);
+        public static Effect<TInput, Unit> Fail<TInput>(Error error) => Effect<TInput, Unit>.Fail(error);
 
         public static Effect<TInput, TOutput> New<TInput, TOutput>(Result<TOutput> result) => Effect<TInput>.Lift(result);
 
         public static Effect<TInput, TOutput> TryWith<TInput, TOutput>(Func<TInput, Result<TOutput>> function) => Effect<TInput>.New(function);
 
-        public static Effect<TInput, Terminal> New<TInput>(Action<TInput> action) => Effect<TInput>.New(action);
+        public static Effect<TInput, Unit> New<TInput>(Action<TInput> action) => Effect<TInput>.New(action);
 
         public static Effect<TInput, TOutput> TryWith<TInput, TOutput>(Func<TInput, TOutput> function) => Effect<TInput>.New(function);
     }
@@ -31,7 +31,7 @@
 
         public static Effect<T, TOutput> New<TOutput>(Func<T, Result<TOutput>> function) => new(i => function(i));
 
-        public static Effect<T, Terminal> New(Action<T> action) => New(action.Return());
+        public static Effect<T, Unit> New(Action<T> action) => New(action.Return());
 
         public static Effect<T, TOutput> New<TOutput>(Func<T, TOutput> function) => new(i => function(i));
     }

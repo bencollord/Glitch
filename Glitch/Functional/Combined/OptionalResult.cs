@@ -34,7 +34,7 @@
                     e => OptionalResult<TResult>.Fail(e)), 
                 _ => OptionalResult<TResult>.None);
 
-        public TResult Match<TResult>(Func<T, TResult> ifOkay, Func<Error, TResult> ifFail, Func<Terminal, TResult> ifNone)
+        public TResult Match<TResult>(Func<T, TResult> ifOkay, Func<Error, TResult> ifFail, Func<Unit, TResult> ifNone)
             => option.Match(r => r.Match(ifOkay, ifFail), ifNone);
     }
 }

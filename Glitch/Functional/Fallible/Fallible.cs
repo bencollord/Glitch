@@ -361,7 +361,7 @@ namespace Glitch.Functional
         public static Fallible<T> operator >>(Fallible<T> x, Fallible<T> y)
             => x.AndThen(_ => y);
 
-        public static Fallible<T> operator >>(Fallible<T> x, Fallible<Terminal> y)
+        public static Fallible<T> operator >>(Fallible<T> x, Fallible<Unit> y)
             => x.AndThen(v => y.Map(_ => v));
 
         public static Fallible<T> operator >>(Fallible<T> x, Func<Result<T>> y)

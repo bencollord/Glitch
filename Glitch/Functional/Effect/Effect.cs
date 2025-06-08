@@ -317,10 +317,10 @@ namespace Glitch.Functional
         public static Effect<TInput, TOutput> operator >>(Effect<TInput, TOutput> x, Fallible<TOutput> y)
             => x.AndThen(_ => New(y));
 
-        public static Effect<TInput, TOutput> operator >>(Effect<TInput, TOutput> x, Effect<TInput, Terminal> y)
+        public static Effect<TInput, TOutput> operator >>(Effect<TInput, TOutput> x, Effect<TInput, Unit> y)
             => x.AndThen(v => y.Map(_ => v));
 
-        public static Effect<TInput, TOutput> operator >>(Effect<TInput, TOutput> x, Fallible<Terminal> y)
+        public static Effect<TInput, TOutput> operator >>(Effect<TInput, TOutput> x, Fallible<Unit> y)
             => x.AndThen(v => New(y.Map(_ => v)));
 
         public static Effect<TInput, TOutput> operator >>(Effect<TInput, TOutput> x, Func<TInput, Result<TOutput>> y)

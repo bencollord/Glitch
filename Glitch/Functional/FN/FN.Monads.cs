@@ -7,7 +7,7 @@ namespace Glitch.Functional
     {
         public static readonly OptionNone None = new();
 
-        public static readonly Terminal End = new();
+        public static readonly Unit End = new();
 
         public static NotSupportedException BadMatchException()
         {
@@ -20,7 +20,7 @@ namespace Glitch.Functional
             return new NotSupportedException(message);
         }
 
-        public static Terminal Ignore<T>(T _) => default;
+        public static Unit Ignore<T>(T _) => default;
 
         public static Identity<T> Id<T>() where T : new() => IdentityMonad<T>(new());
 
@@ -40,25 +40,25 @@ namespace Glitch.Functional
 
         public static Fallible<T> Try<T>(Func<Result<T>> function) => Fallible<T>.New(function);
 
-        public static Fallible<T> Try<T>(Func<Terminal, Result<T>> function) => Fallible<T>.New(() => function(End));
+        public static Fallible<T> Try<T>(Func<Unit, Result<T>> function) => Fallible<T>.New(() => function(End));
 
         public static Fallible<T> Try<T>(Func<T> function) => Fallible<T>.New(function);
 
-        public static Fallible<T> Try<T>(Func<Terminal, T> function) => Fallible<T>.New(() => function(End));
+        public static Fallible<T> Try<T>(Func<Unit, T> function) => Fallible<T>.New(() => function(End));
 
-        public static Fallible<Terminal> Try(Action action) => Fallible<Terminal>.New(action.Return());
+        public static Fallible<Unit> Try(Action action) => Fallible<Unit>.New(action.Return());
 
-        public static Fallible<Terminal> Try(Action<Terminal> action) => Try(action.Return());
+        public static Fallible<Unit> Try(Action<Unit> action) => Try(action.Return());
 
         public static Fallible<T> Try<T>(T value) => Fallible<T>.Okay(value);
 
         public static Fallible<T> Try<T>(Result<T> result) => Fallible<T>.New(result);
 
-        public static Effect<TInput, Terminal> TryWith<TInput>(Action<TInput> function)
+        public static Effect<TInput, Unit> TryWith<TInput>(Action<TInput> function)
             => TryWith(function.Return());
 
-        public static Effect<TInput, Terminal> TryWith<TInput>(Func<TInput, Terminal> function)
-            => TryWith<TInput, Terminal>(function);
+        public static Effect<TInput, Unit> TryWith<TInput>(Func<TInput, Unit> function)
+            => TryWith<TInput, Unit>(function);
 
         public static Effect<TInput, TOutput> TryWith<TInput, TOutput>(Func<TInput, TOutput> function)
             => Effect.TryWith(function);

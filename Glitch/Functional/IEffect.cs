@@ -23,6 +23,6 @@ namespace Glitch.Functional
         public static virtual IEffect<TInput, TOutput> operator &(IEffect<TInput, TOutput> x, IEffect<TInput, TOutput> y) => x.And(y);
         public static IEffect<TInput, TOutput> operator |(IEffect<TInput, TOutput> x, IEffect<TInput, TOutput> y) => x.Or(y);
         public static IEffect<TInput, TOutput> operator >>(IEffect<TInput, TOutput> x, IEffect<TInput, TOutput> y) => x.AndThen(_ => y);
-        public static IEffect<TInput, TOutput> operator >>(IEffect<TInput, TOutput> x, IEffect<TInput, Terminal> y) => x.AndThen(v => y.Map(_ => v));
+        public static IEffect<TInput, TOutput> operator >>(IEffect<TInput, TOutput> x, IEffect<TInput, Unit> y) => x.AndThen(v => y.Map(_ => v));
     }
 }

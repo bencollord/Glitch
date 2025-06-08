@@ -7,8 +7,8 @@
 
         public static bool IsFail<T>(Result<T> result) => result.IsFail;
 
-        public static Result<Terminal> Guard(bool condition, Error error)
-            => Guard(condition, Terminal.Value, error);
+        public static Result<Unit> Guard(bool condition, Error error)
+            => Guard(condition, Unit.Value, error);
 
         public static Result<T> Guard<T>(bool condition, T value, Error error)
             => condition ? Okay(value) : Fail<T>(error);

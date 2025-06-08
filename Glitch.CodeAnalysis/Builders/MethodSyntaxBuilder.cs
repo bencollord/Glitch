@@ -24,11 +24,6 @@ namespace Glitch.CodeAnalysis.Builders
             this.identifier = identifier;
         }
 
-        public MethodSyntaxBuilder(MethodDeclarationSyntax node)
-        {
-
-        }
-
         public override MethodDeclarationSyntax Build()
         {
             return MethodDeclaration(returnType, identifier)

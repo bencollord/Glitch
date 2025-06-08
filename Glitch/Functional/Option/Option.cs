@@ -102,7 +102,7 @@ namespace Glitch.Functional
         public Option<TResult> Choose<TResult>(Func<T, Option<TResult>> bindSome, Func<Option<TResult>> bindNone)
             => Match(bindSome, bindNone);
 
-        public Option<TResult> Choose<TResult>(Func<T, Option<TResult>> bindSome, Func<Terminal, Option<TResult>> bindNone)
+        public Option<TResult> Choose<TResult>(Func<T, Option<TResult>> bindSome, Func<Unit, Option<TResult>> bindNone)
             => Match(bindSome, bindNone);
 
         /// <summary>
@@ -150,7 +150,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public Option<T> OrElse(Func<Terminal, Option<T>> other)
+        public Option<T> OrElse(Func<Unit, Option<T>> other)
             => IsSome ? this : other(default);
 
         /// <summary>
@@ -217,9 +217,9 @@ namespace Glitch.Functional
         public TResult Match<TResult>(Func<T, TResult> ifSome, TResult ifNone)
             => Map(ifSome).IfNone(ifNone);
 
-        public Terminal Match(Action<T> ifSome, Action ifNone) => Match(ifSome.Return(), ifNone.Return());
+        public Unit Match(Action<T> ifSome, Action ifNone) => Match(ifSome.Return(), ifNone.Return());
 
-        public Terminal Match(Action<T> ifSome, Action<Terminal> ifNone) => Match(ifSome, () => ifNone(default));
+        public Unit Match(Action<T> ifSome, Action<Unit> ifNone) => Match(ifSome, () => ifNone(default));
 
         /// <summary>
         /// If this <see cref="Option{T}"/> contains a value, returns the result of the first function 
@@ -232,7 +232,7 @@ namespace Glitch.Functional
         public TResult Match<TResult>(Func<T, TResult> ifSome, Func<TResult> ifNone)
             => IsSome ? ifSome(value!) : ifNone();
 
-        public TResult Match<TResult>(Func<T, TResult> ifSome, Func<Terminal, TResult> ifNone)
+        public TResult Match<TResult>(Func<T, TResult> ifSome, Func<Unit, TResult> ifNone)
             => Match(ifSome, () => ifNone(default));
 
         /// <summary>
@@ -280,7 +280,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="fallback"></param>
         /// <returns></returns>
-        public T UnwrapOrElse(Func<Terminal, T> fallback) => Match(val => val, fallback);
+        public T UnwrapOrElse(Func<Unit, T> fallback) => Match(val => val, fallback);
 
         /// <summary>
         /// Returns the wrapped value if exists. Otherwise, returns the default value
@@ -316,7 +316,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="fallback"></param>
         /// <returns></returns>
-        public T IfNone(Func<Terminal, T> fallback) => Match(val => val, fallback);
+        public T IfNone(Func<Unit, T> fallback) => Match(val => val, fallback);
 
         /// <summary>
         /// Executes an impure action if empty.
@@ -340,7 +340,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Option<T> IfNone(Action<Terminal> action) => IfNone(() => action(Terminal.Value));
+        public Option<T> IfNone(Action<Unit> action) => IfNone(() => action(Unit.Value));
 
         /// <summary>
         /// Returns the wrapped value if exists. Otherwise, returns the default value
@@ -374,7 +374,7 @@ namespace Glitch.Functional
 
         public IfSomeFluent<TResult> IfSome<TResult>(Func<T, TResult> map) => new(this, map);
 
-        public IfSomeActionFluent IfSome<TResult>(Func<T, Terminal> action) => new(this, action);
+        public IfSomeActionFluent IfSome<TResult>(Func<T, Unit> action) => new(this, action);
 
         public IfSomeActionFluent IfSome(Action<T> action) => new(this, action);
 
@@ -413,7 +413,7 @@ namespace Glitch.Functional
         /// the result of the provided error function.
         /// </summary>
         /// <param name="error"></param>
-        public Result<T> OkayOrElse(Func<Terminal, Error> function) => IsSome ? Okay(value!) : Fail<T>(function(default));
+        public Result<T> OkayOrElse(Func<Unit, Error> function) => IsSome ? Okay(value!) : Fail<T>(function(default));
 
         /// <summary>
         /// Wraps the value in a <see cref="Fallible{T}" /> if it exists,
@@ -500,7 +500,7 @@ namespace Glitch.Functional
 
             public TResult IfNone(Func<TResult> ifNone) => option.Match(ifSome, ifNone);
 
-            public TResult IfNone(Func<Terminal, TResult> ifNone) => option.Match(ifSome, ifNone);
+            public TResult IfNone(Func<Unit, TResult> ifNone) => option.Match(ifSome, ifNone);
 
             public TResult? DefaultIfNone() => default;
         }
@@ -510,7 +510,7 @@ namespace Glitch.Functional
             private readonly Option<T> option;
             private readonly Action<T> ifSome;
 
-            internal IfSomeActionFluent(Option<T> option, Func<T, Terminal> ifSome)
+            internal IfSomeActionFluent(Option<T> option, Func<T, Unit> ifSome)
                 : this(option, new Action<T>(t => ifSome(t))) { }
 
             internal IfSomeActionFluent(Option<T> option, Action<T> ifSome)
@@ -519,11 +519,11 @@ namespace Glitch.Functional
                 this.ifSome = ifSome;
             }
 
-            public Terminal DoNothingIfNone() => IfNone(_ => { /* Nop */ });
+            public Unit DoNothingIfNone() => IfNone(_ => { /* Nop */ });
 
-            public Terminal IfNone(Action<Terminal> ifNone) => IfNone(() => ifNone(default));
+            public Unit IfNone(Action<Unit> ifNone) => IfNone(() => ifNone(default));
 
-            public Terminal IfNone(Action ifNone)
+            public Unit IfNone(Action ifNone)
             {
                 if (option.IsSome)
                 {

@@ -22,6 +22,24 @@ namespace Glitch.CodeAnalysis.Rewriters
         public int ExpressionBodyNewLineThreshold { get; set; } = 160;
         public bool ExtraLineBreakBetweenMembers { get; set; } = true;
 
+        public override SyntaxNode? VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
+        {
+            var updated = node.WithNamespaceKeyword(
+                node.NamespaceKeyword
+                    .WithTrailingTrivia(Space))
+                .WithName(
+                    node.Name.WithTrailingTrivia(LineBreak))
+                .WithOpenBraceToken(
+                    node.OpenBraceToken.WithTrailingTrivia(LineBreak))
+                .WithCloseBraceToken(
+                    node.CloseBraceToken.WithLeadingTrivia(LineBreak));
+
+            using (new IndentationScope(this))
+            {
+                return base.VisitNamespaceDeclaration(updated);
+            }
+        }
+
         public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node)
         {
             return VisitTypeDeclaration((TypeDeclarationSyntax)base.VisitClassDeclaration(node)!);
@@ -44,13 +62,21 @@ namespace Glitch.CodeAnalysis.Rewriters
 
         private TypeDeclarationSyntax VisitTypeDeclaration(TypeDeclarationSyntax node)
         {
-            return node.WithIdentifier(
-                           node.Identifier.WithTrailingTrivia(LineBreak))
-                       .WithOpenBraceToken(
-                           node.OpenBraceToken
-                               .WithTrailingTrivia(LineBreak))
-                       .WithMembers(
-                           VisitMemberList(node.Members));
+            return node
+                .WithLeadingTrivia(
+                    TriviaList([LineBreak, Whitespace(Indentation)]))
+                .WithOpenBraceToken(
+                    node.OpenBraceToken
+                        .WithLeadingTrivia(
+                            TriviaList([LineBreak, Whitespace(Indentation)]))
+                        .WithTrailingTrivia(LineBreak))
+                .WithCloseBraceToken(
+                    node.CloseBraceToken
+                        .WithLeadingTrivia(
+                            TriviaList([LineBreak, Whitespace(Indentation)]))
+                        .WithTrailingTrivia(LineBreak))
+                .WithMembers(
+                    VisitMemberList(node.Members));
         }
 
         private SyntaxList<MemberDeclarationSyntax> VisitMemberList(SyntaxList<MemberDeclarationSyntax> members)
@@ -117,6 +143,7 @@ namespace Glitch.CodeAnalysis.Rewriters
             var updated = expressionBody
                 .Or(blockBody)
                 .IfNone(AddSemicolonToken(node))
+                .WithReturnType(node.ReturnType.WithTrailingTrivia(Space))
                 .WithLeadingTrivia(
                     Whitespace(Indentation))
                 .WithTrailingTrivia(LineBreak);
@@ -146,20 +173,24 @@ namespace Glitch.CodeAnalysis.Rewriters
             var updated = node
                 .WithOpenBraceToken(
                     node.OpenBraceToken
-                        .WithLeadingTrivia(LineBreak)
+                        .WithLeadingTrivia(
+                            TriviaList([LineBreak, Whitespace(Indentation)]))
                         .WithTrailingTrivia(LineBreak))
                 .WithCloseBraceToken(
                     node.CloseBraceToken
-                        .WithLeadingTrivia(LineBreak)
+                        .WithLeadingTrivia(
+                            TriviaList([LineBreak, Whitespace(Indentation)]))
                         .WithTrailingTrivia(LineBreak));
 
             using (new IndentationScope(this))
             {
                 var indentTrivia = Whitespace(Indentation.ToString());
-                var newLines = updated.DescendantTrivia()
-                    .Where(t => t.IsKind(SyntaxKind.EndOfLineTrivia));
-
-                updated = newLines.Aggregate(updated, (node, line) => node.ReplaceTrivia(line, [indentTrivia, line]));
+                
+                updated = updated.WithStatements(
+                    List(
+                        updated.Statements
+                               .Select(s => s.WithLeadingTrivia(
+                                    Whitespace(Indentation)))));
 
                 return updated;
             }

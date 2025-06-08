@@ -4,7 +4,7 @@ namespace Glitch.Functional
 {
     public static class CollectionExtensions
     {
-        public static Option<TValue> TryGetValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
+        public static Option<TValue> TryGetValue<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key)
         {
             ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
             ArgumentNullException.ThrowIfNull(key, nameof(key));
@@ -12,7 +12,7 @@ namespace Glitch.Functional
             return dictionary.TryGetValue(key, out var value) ? value : None;
         }
 
-        public static Option<TValue> TryGetValue<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key)
+        public static Option<TValue> TryGetValue<TKey, TValue>(this IImmutableDictionary<TKey, TValue> dictionary, TKey key)
         {
             ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
             ArgumentNullException.ThrowIfNull(key, nameof(key));

@@ -122,7 +122,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Result<TOkay, TError> Do(Func<TOkay, Terminal> action) => Do(v => action(v));
+        public Result<TOkay, TError> Do(Func<TOkay, Unit> action) => Do(v => action(v));
 
         /// <summary>
         /// Executes an impure action if failed.
@@ -355,7 +355,7 @@ namespace Glitch.Functional
                    ? err : throw new InvalidCastException("Cannot cast a successful result to an error");
 
         // UNDONE Needs more comprehensive functionality
-        public FluentActionContext IfOkay(Func<TOkay, Terminal> ifOkay) => IfOkay(new Action<TOkay>(t => ifOkay(t)));
+        public FluentActionContext IfOkay(Func<TOkay, Unit> ifOkay) => IfOkay(new Action<TOkay>(t => ifOkay(t)));
 
         public FluentActionContext IfOkay(Action<TOkay> ifOkay) => new FluentActionContext(this, ifOkay);
 
@@ -388,11 +388,11 @@ namespace Glitch.Functional
 
             public FluentActionContext Then(Action<TOkay> ifOkay) => new(result, this.ifOkay + ifOkay, errorHandlers);
 
-            public FluentActionContext Then(Func<TOkay, Terminal> ifOkay) => Then(new Action<TOkay>(v => ifOkay(v)));
+            public FluentActionContext Then(Func<TOkay, Unit> ifOkay) => Then(new Action<TOkay>(v => ifOkay(v)));
 
-            public Terminal Otherwise(Func<TError, Terminal> ifFail) => Otherwise(new Action<TError>(v => ifFail(v)));
+            public Unit Otherwise(Func<TError, Unit> ifFail) => Otherwise(new Action<TError>(v => ifFail(v)));
 
-            public Terminal Otherwise(Action<TError> ifFail)
+            public Unit Otherwise(Action<TError> ifFail)
             {
                 switch (result)
                 {
@@ -413,10 +413,10 @@ namespace Glitch.Functional
                         throw BadMatchException();
                 }
 
-                return Terminal.Value;
+                return Unit.Value;
             }
 
-            public Terminal OtherwiseDoNothing() => Otherwise(_ => { /* Nop */ });
+            public Unit OtherwiseDoNothing() => Otherwise(_ => { /* Nop */ });
 
             public Result<TOkay, TError> OtherwiseContinue() => Otherwise(_ => { /* Nop */ }).Return(result);
         }

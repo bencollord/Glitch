@@ -122,7 +122,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Result<T> Do(Func<T, Terminal> action) => Do(v => action(v));
+        public Result<T> Do(Func<T, Unit> action) => Do(v => action(v));
 
         /// <summary>
         /// Executes an impure action if failed.
@@ -418,7 +418,7 @@ namespace Glitch.Functional
                    ? err : throw new InvalidCastException("Cannot cast a successful result to an error");
 
         // UNDONE Needs more comprehensive functionality
-        public FluentActionContext IfOkay(Func<T, Terminal> ifOkay) => IfOkay(new Action<T>(t => ifOkay(t)));
+        public FluentActionContext IfOkay(Func<T, Unit> ifOkay) => IfOkay(new Action<T>(t => ifOkay(t)));
 
         public FluentActionContext IfOkay(Action<T> ifOkay) => new FluentActionContext(this, ifOkay);
 
@@ -456,9 +456,9 @@ namespace Glitch.Functional
 
             public FluentActionContext Then(Action<T> ifOkay) => new(result, this.ifOkay + ifOkay, errorHandlers);
 
-            public FluentActionContext Then(Func<T, Terminal> ifOkay) => Then(new Action<T>(v => ifOkay(v)));
+            public FluentActionContext Then(Func<T, Unit> ifOkay) => Then(new Action<T>(v => ifOkay(v)));
 
-            public FluentActionContext Catch<TError>(Func<Error, Terminal> ifFail) 
+            public FluentActionContext Catch<TError>(Func<Error, Unit> ifFail) 
                 where TError : Error
                 => Catch(new Action<TError>(v => ifFail(v)));
 
@@ -466,9 +466,9 @@ namespace Glitch.Functional
                 where TError : Error
                 => new(result, ifOkay, errorHandlers.Add(typeof(TError), err => ifError((TError)err)));
 
-            public Terminal Otherwise(Func<Error, Terminal> ifFail) => Otherwise(new Action<Error>(v => ifFail(v)));
+            public Unit Otherwise(Func<Error, Unit> ifFail) => Otherwise(new Action<Error>(v => ifFail(v)));
 
-            public Terminal Otherwise(Action<Error> ifFail)
+            public Unit Otherwise(Action<Error> ifFail)
             {
                 switch (result)
                 {
@@ -489,12 +489,12 @@ namespace Glitch.Functional
                         throw BadMatchException();
                 }
 
-                return Terminal.Value;
+                return Unit.Value;
             }
 
-            public Terminal OtherwiseThrow() => Otherwise(err => err.Throw());
+            public Unit OtherwiseThrow() => Otherwise(err => err.Throw());
 
-            public Terminal OtherwiseDoNothing() => Otherwise(_ => { /* Nop */ });
+            public Unit OtherwiseDoNothing() => Otherwise(_ => { /* Nop */ });
 
             public Result<T> OtherwiseContinue() => Otherwise(_ => { /* Nop */ }).Return(result);
         }

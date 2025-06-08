@@ -50,7 +50,7 @@ namespace Glitch.Functional
         public static IEnumerable<T> Somes<T>(this IEnumerable<Option<T>> options)
             => options.Where(o => o.IsSome).Select(o => o.Unwrap());
 
-        public static Option<T> Map<T>(this Option<bool> result, Func<Terminal, T> ifTrue, Func<Terminal, T> ifFalse)
+        public static Option<T> Map<T>(this Option<bool> result, Func<Unit, T> ifTrue, Func<Unit, T> ifFalse)
             => result.Map(flag => flag ? ifTrue(default) : ifFalse(default));
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Glitch.Functional
             => booleanOption.Match(v => v ? ifTrue() : ifFalse(), ifNone);
 
 
-        public static Terminal Match(this Option<bool> result, Action ifTrue, Action ifFalse, Action ifNone)
+        public static Unit Match(this Option<bool> result, Action ifTrue, Action ifFalse, Action ifNone)
             => result.Match(flag => flag ? ifTrue.Return()() : ifFalse.Return()(), ifNone.Return());
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Glitch.Functional
         /// the result of the provided function.
         /// </summary>
         /// <param name="function"></param>
-        public static Result<TValue> FailOrElse<TError, TValue>(this Option<TError> opt, Func<Terminal, TValue> function)
+        public static Result<TValue> FailOrElse<TError, TValue>(this Option<TError> opt, Func<Unit, TValue> function)
             where TError : Error
             => opt.Match(Fail<TValue>, function.Then(Okay));
 

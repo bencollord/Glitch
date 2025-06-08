@@ -10,7 +10,7 @@ namespace Glitch.Collections
         : IDictionary<TKey, IList<TValue>>,
           IReadOnlyMultiMap<TKey, TValue>,
           ILookup<TKey, TValue>,
-          IEnumerable<IGrouping<TKey, TValue>>, 
+          IEnumerable<KeyValuePair<TKey, TValue>>, 
           IMultiMap<TKey, TValue> 
              where TKey : notnull
     {

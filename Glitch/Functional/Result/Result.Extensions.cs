@@ -57,13 +57,13 @@ namespace Glitch.Functional
                     err => Some(Fail<T>(err))
                 );
 
-        public static Result<T> Map<T>(this Result<bool> result, Func<Terminal, T> ifTrue, Func<Terminal, T> ifFalse)
+        public static Result<T> Map<T>(this Result<bool> result, Func<Unit, T> ifTrue, Func<Unit, T> ifFalse)
             => result.Map(flag => flag ? ifTrue(default) : ifFalse(default));
 
-        public static T Match<T>(this Result<bool> result, Func<Terminal, T> ifTrue, Func<Terminal, T> ifFalse, Func<Error, T> ifFail)
+        public static T Match<T>(this Result<bool> result, Func<Unit, T> ifTrue, Func<Unit, T> ifFalse, Func<Error, T> ifFail)
             => result.Match(flag => flag ? ifTrue(default) : ifFalse(default), ifFail);
 
-        public static Terminal Match(this Result<bool> result, Action ifTrue, Action ifFalse, Action<Error> ifFail)
+        public static Unit Match(this Result<bool> result, Action ifTrue, Action ifFalse, Action<Error> ifFail)
             => result.Match(flag => flag ? ifTrue.Return()() : ifFalse.Return()(), ifFail.Return());
     }
 }
