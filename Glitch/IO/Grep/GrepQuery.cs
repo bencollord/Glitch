@@ -23,12 +23,6 @@ namespace Glitch.Grep
         public TDerived LocaleAware() => WithFilter(filter.LocaleAware());
         public TDerived LocaleAgnostic() => WithFilter(filter.LocaleAgnostic());
 
-        //public GrepQuery IncludeFiles(params string[] paths) => WithTraversal(traversal.IncludeFiles(paths));
-        //public GrepQuery ExcludeFiles(params string[] paths) => WithTraversal(traversal.ExcludeFiles(paths));
-
-        //public GrepQuery IncludeDirectories(params string[] paths) => WithTraversal(traversal.IncludeDirectories(paths));
-        //public GrepQuery ExcludeDirectories(params string[] paths) => WithTraversal(traversal.ExcludeDirectories(paths));
-
         public IEnumerator<FileLine> GetEnumerator()
         {
             return EnumerateFiles()

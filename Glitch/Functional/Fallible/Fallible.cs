@@ -323,9 +323,6 @@ namespace Glitch.Functional
         /// <returns></returns>
         public Result<T> Run()
         {
-            // Memoize the thunk
-            thunk = thunk.Memo();
-
             try
             {
                 return thunk();

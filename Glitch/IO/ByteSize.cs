@@ -1,7 +1,8 @@
 ﻿using Glitch.Functional;
+using Glitch.IO;
 using System.Numerics;
 
-namespace Glitch
+namespace Glitch.IO
 {
     public readonly struct ByteSize 
         : IEquatable<ByteSize>, 
