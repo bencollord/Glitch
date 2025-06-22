@@ -207,6 +207,16 @@ namespace Glitch.CodeAnalysis.Rewriters
                             .Select(m => m.WithTrailingTrivia(Space))));
         }
 
+        public override SyntaxNode? VisitAssignmentExpression(AssignmentExpressionSyntax node)
+        {
+            var updated = node.WithOperatorToken(
+                node.OperatorToken
+                    .WithLeadingTrivia(Space)
+                    .WithTrailingTrivia(Space));
+
+            return base.VisitAssignmentExpression(updated);
+        }
+
         private static SyntaxTrivia Whitespace(Indentation indentation)
             => Whitespace(indentation.ToString());
 

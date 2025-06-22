@@ -10,6 +10,8 @@
   <ItemGroup>
     <Compile Remove="ByteSize - Copy.cs" />
     <Compile Remove="Collections\HashTable - Copy.cs" />
+    <Compile Remove="Data\ObjectResultStream`1 - Copy %282%29.cs" />
+    <Compile Remove="Data\ObjectResultStream`1 - Copy.cs" />
   </ItemGroup>
 
   <ItemGroup>
