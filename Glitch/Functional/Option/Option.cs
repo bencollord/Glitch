@@ -2,7 +2,10 @@
 
 namespace Glitch.Functional
 {
-    public readonly struct OptionNone { }
+    public readonly struct OptionNone 
+    {
+        public static readonly OptionNone Value = new();
+    }
 
     public readonly partial struct Option<T> : IEquatable<Option<T>>
     {
@@ -519,11 +522,15 @@ namespace Glitch.Functional
                 this.ifSome = ifSome;
             }
 
-            public Unit DoNothingIfNone() => IfNone(_ => { /* Nop */ });
+            public IfSomeActionFluent Then(Action<T> action) => new(option, ifSome + action);
 
-            public Unit IfNone(Action<Unit> ifNone) => IfNone(() => ifNone(default));
+            public IfSomeActionFluent Then(Func<T, Unit> action) => Then(new Action<T>(t => action(t)));
 
-            public Unit IfNone(Action ifNone)
+            public Unit OtherwiseDoNothing() => Otherwise(_ => { /* Nop */ });
+
+            public Unit Otherwise(Action<Unit> ifNone) => Otherwise(() => ifNone(default));
+
+            public Unit Otherwise(Action ifNone)
             {
                 if (option.IsSome)
                 {

@@ -458,10 +458,6 @@ namespace Glitch.Functional
 
             public FluentActionContext Then(Func<T, Unit> ifOkay) => Then(new Action<T>(v => ifOkay(v)));
 
-            public FluentActionContext Catch<TError>(Func<Error, Unit> ifFail) 
-                where TError : Error
-                => Catch(new Action<TError>(v => ifFail(v)));
-
             public FluentActionContext Catch<TError>(Action<TError> ifError)
                 where TError : Error
                 => new(result, ifOkay, errorHandlers.Add(typeof(TError), err => ifError((TError)err)));
