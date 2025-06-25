@@ -8,7 +8,7 @@ namespace Glitch.Collections
     {
         private const int DefaultCapacity = 10;
 
-        private Entry[] entries;
+        private Entry?[] entries;
         private IEqualityComparer<TKey> keyComparer;
         private int count;
 
@@ -45,7 +45,7 @@ namespace Glitch.Collections
 
         private IEnumerable<Entry> AllEntries
             => entries.Where(e => e is not null)
-                      .SelectMany(e => e.Flatten());
+                      .SelectMany(e => e!.Flatten());
 
         ICollection<TKey> IDictionary<TKey, TValue>.Keys => Keys.ToList().AsReadOnly();
         ICollection<TValue> IDictionary<TKey, TValue>.Values => Values.ToList().AsReadOnly();
@@ -62,7 +62,7 @@ namespace Glitch.Collections
             int hashCode = keyComparer.GetHashCode(key);
             int bucket = GetBucket(hashCode);
 
-            Entry entry = entries[bucket];
+            Entry? entry = entries[bucket];
 
             if (entry is null)
             {
@@ -178,7 +178,7 @@ namespace Glitch.Collections
 
             var newEntryGroups = entries
                 .Where(e => e is not null)
-                .SelectMany(e => e.Flatten())
+                .SelectMany(e => e!.Flatten())
                 .GroupBy(e => e.HashCode % newEntries.Length)
                 .Select(e => new
                 {
@@ -236,7 +236,7 @@ namespace Glitch.Collections
 
             internal Enumerator(HashTable<TKey, TValue> hashTable)
             {
-                entries = hashTable.entries;
+                entries = hashTable.entries!;
                 current = None;
             }
 

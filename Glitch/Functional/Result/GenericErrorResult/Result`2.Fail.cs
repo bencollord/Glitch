@@ -59,7 +59,7 @@ namespace Glitch.Functional
                 => ifFail(Error);
 
             /// <inheritdoc />
-            public override Result<TOkay, TError> MapError(Func<TError, TError> mapper) => mapper(Error);
+            public override Result<TOkay, TNewError> MapError<TNewError>(Func<TError, TNewError> mapper) => mapper(Error);
 
             /// <inheritdoc />
             public override TResult Match<TResult>(Func<TOkay, TResult> _, Func<TError, TResult> ifFail)

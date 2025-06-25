@@ -506,6 +506,8 @@ namespace Glitch.Functional
             public TResult IfNone(Func<Unit, TResult> ifNone) => option.Match(ifSome, ifNone);
 
             public TResult? DefaultIfNone() => default;
+
+            public Option<TResult> OtherwiseContinue() => option.Map(ifSome);
         }
 
         public class IfSomeActionFluent

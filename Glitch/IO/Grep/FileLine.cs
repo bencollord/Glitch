@@ -45,6 +45,19 @@ namespace Glitch.Grep
                 && text.Equals(other.text);
         }
 
+        public override bool Equals(object? obj) => Equals(obj as FileLine);
+
+        public override int GetHashCode()
+        {
+            var hash = new HashCode();
+
+            hash.Add(fileName.GetHashCode());
+            hash.Add(lineNumber.GetHashCode());
+            hash.Add(text.GetHashCode());
+
+            return hash.ToHashCode();
+        }
+
         public static bool operator ==(FileLine? left, FileLine? right) => left is null ? right == null : left.Equals(right);
 
         public static bool operator !=(FileLine? left, FileLine? right) => !(left == right);

@@ -58,6 +58,8 @@
             /// <inheritdoc />
             public override Result<T> MapError(Func<Error, Error> _) => this;
 
+            public override Result<T, TError> MapError<TError>(Func<Error, TError> _) => Result<T, TError>.Okay(Value);
+
             /// <inheritdoc />
             public override TResult Match<TResult>(Func<T, TResult> ifOkay, Func<Error, TResult> _)
                 => ifOkay(Value);

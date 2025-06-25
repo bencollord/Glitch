@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.CodeAnalysis.Rewriters
 {
@@ -83,20 +84,30 @@ namespace Glitch.CodeAnalysis.Rewriters
         {
             using (new IndentationScope(this))
             {
-                var visited = members
+                var updated = members
                     .Select(Visit)
                     .Cast<MemberDeclarationSyntax>();
 
                 if (ExtraLineBreakBetweenMembers)
                 {
-                    visited = visited.SkipLast(1)
+                    updated = updated.SkipLast(1)
                         .Select(m => m.WithTrailingTrivia(
                             m.GetTrailingTrivia()
                              .Add(LineBreak)))
-                        .Append(visited.Last());
+                        .Append(updated.Last());
                 }
 
-                return List(visited);
+                updated = from member in updated
+                          let token = member.GetFirstToken()
+                          let trivia = from t in Some(token.LeadingTrivia)
+                                       from l in t.LastOrNone(e => e.IsKind(SyntaxKind.EndOfLineTrivia))
+                                       let i = t.IndexOf(l) + 1
+                                       select i >= t.Count
+                                            ? t.Add(Whitespace(Indentation))
+                                            : t.Insert(i, Whitespace(Indentation))
+                          select trivia.Match(member.WithLeadingTrivia, member);
+
+                return List(updated);
             }
         }
 
@@ -104,7 +115,7 @@ namespace Glitch.CodeAnalysis.Rewriters
         {
             if (token.IsKeyword())
             {
-                return token.WithTrailingTrivia(Space);
+                token = token.WithTrailingTrivia(Space);
             }
 
             return base.VisitToken(token);
@@ -166,6 +177,22 @@ namespace Glitch.CodeAnalysis.Rewriters
                     .WithTrailingTrivia(Space));
 
             return base.VisitArrowExpressionClause(updated);
+        }
+
+        public override SyntaxNode? VisitEqualsValueClause(EqualsValueClauseSyntax node)
+        {
+            var updated = node.WithEqualsToken(
+                node.EqualsToken
+                    .WithLeadingTrivia(Space)
+                    .WithTrailingTrivia(Space));
+
+            return base.VisitEqualsValueClause(updated);
+        }
+
+        public override SyntaxNode? VisitVariableDeclaration(VariableDeclarationSyntax node)
+        {
+            return node.WithType(node.Type.WithTrailingTrivia(Space))
+                       .PipeInto(base.VisitVariableDeclaration);
         }
 
         public override SyntaxNode? VisitBlock(BlockSyntax node)

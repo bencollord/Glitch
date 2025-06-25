@@ -42,7 +42,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="map"></param>
         /// <returns></returns>
-        public abstract Result<TOkay, TError> MapError(Func<TError, TError> map);
+        public abstract Result<TOkay, TNewError> MapError<TNewError>(Func<TError, TNewError> map);
 
         /// <summary>
         /// Applies a wrapped function to the wrapped value if both exist.

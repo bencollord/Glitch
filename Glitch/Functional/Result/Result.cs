@@ -45,6 +45,16 @@ namespace Glitch.Functional
         public abstract Result<T> MapError(Func<Error, Error> map);
 
         /// <summary>
+        /// If the result is a failure, returns a new <see cref="Result{TOkay, TError}"/>
+        /// with the mapping function applied to the error. Otherwise, returns the okay
+        /// value of self wrapped in the <see cref="Result{TOkay, TError}"/> type.
+        /// </summary>
+        /// <typeparam name="TError"></typeparam>
+        /// <param name="map"></param>
+        /// <returns></returns>
+        public abstract Result<T, TError> MapError<TError>(Func<Error, TError> map);
+
+        /// <summary>
         /// Applies a wrapped function to the wrapped value if both exist.
         /// Otherwise, returns a faulted <see cref="Result{TResult}" /> containing the 
         /// error value of self if it exists or the error value of <paramref name="function"/>.
@@ -408,6 +418,10 @@ namespace Glitch.Functional
         public static implicit operator Result<T>(T value) => Okay(value);
 
         public static implicit operator Result<T>(Error error) => Fail(error);
+
+        public static implicit operator Result<T>(Result<T, Error> result) => result.Match(Okay, Fail);
+
+        public static explicit operator Result<T, Error>(Result<T> result) => result.Match(Result<T, Error>.Okay, Result<T, Error>.Fail);
 
         public static explicit operator T(Result<T> result)
             => result.MapError(err => new InvalidCastException($"Cannot cast a faulted result to a value", err.AsException()))

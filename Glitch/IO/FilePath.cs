@@ -1,4 +1,6 @@
-﻿namespace Glitch.IO
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Glitch.IO
 {
     public sealed class FilePath : IEquatable<FilePath>, IComparable<FilePath>
     {
@@ -149,15 +151,19 @@
 
         public static bool operator !=(FilePath? left, FilePath? right) => !(left == right);
 
+        [return: NotNullIfNotNull(nameof(left))]
         public static FilePath? operator +(FilePath? left, string? right)
             => right is null ? left : left + new FilePath(right);
 
+        [return: NotNullIfNotNull(nameof(left))]
         public static FilePath? operator +(FilePath? left, FilePath? right)
             => (left is not null && right is not null) ? new FilePath(left.path + right.path) : left ?? right;
 
+        [return: NotNullIfNotNull(nameof(left))]
         public static FilePath? operator /(FilePath? left, string? right)
             => right is null ? left : left / new FilePath(right);
 
+        [return: NotNullIfNotNull(nameof(left))]
         public static FilePath? operator /(FilePath? left, FilePath? right)
             => (left is not null && right is not null) ? left.Append(right) : left ?? right;
 

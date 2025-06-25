@@ -11,7 +11,7 @@
 
         public override Option<Error> Inner => FN.None;
 
-        public override Exception AsException() => throw new NullReferenceException("There's no actual error here");
+        public override Exception AsException() => throw new BottomException("Error is empty");
 
         public override Error Combine(Error other) => other;
 
