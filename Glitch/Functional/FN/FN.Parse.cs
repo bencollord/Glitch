@@ -40,6 +40,6 @@
         public static Result<ulong> ParseULong(string input) => ulong.TryParse(input, out var result) ? Okay(result) : ParseError<ulong>(input);
         public static Result<ushort> ParseUShort(string input) => ushort.TryParse(input, out var result) ? Okay(result) : ParseError<ushort>(input);
 
-        private static Result<T> ParseError<T>(string input) => new ParseError(input, typeof(T));
+        private static Result<T> ParseError<T>(string input) => new FormatError(input, typeof(T));
     }
 }

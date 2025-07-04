@@ -113,7 +113,7 @@ namespace Glitch.Collections
                     .IfNone(EqualityComparer<TKey>.Default);
 
 
-                var map = new MultiMap<TKey, TValue>(comparer); // TODO Figure out what ValueComparer is for
+                var map = new MultiMap<TKey, TValue>(comparer);
                 
                 if (immutable.IsNoneOr(i => i.dictionary.Count == 0))
                 {

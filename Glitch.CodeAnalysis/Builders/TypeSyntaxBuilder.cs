@@ -14,6 +14,7 @@ namespace Glitch.CodeAnalysis.Builders
         private SyntaxToken identifier;
         private TokenListBuilder modifiers = [];
         private TypeDeclarationKind declarationKind;
+        private List<TypeParameterSyntax> typeParameters = [];
         private List<PropertySyntaxBuilder> properties = [];
         private List<MethodSyntaxBuilder> methods = [];
 
@@ -97,6 +98,15 @@ namespace Glitch.CodeAnalysis.Builders
                 AccessModifier.Private           => Private(),
                 _ => throw new ArgumentOutOfRangeException(nameof(accessModifier))
             };
+        }
+
+        public TypeSyntaxBuilder AddTypeParameter(string name) 
+            => AddTypeParameter(TypeParameter(name));
+
+        public TypeSyntaxBuilder AddTypeParameter(TypeParameterSyntax typeParameter)
+        {
+            typeParameters.Add(typeParameter);
+            return this;
         }
 
         public TypeSyntaxBuilder AddProperty(PropertySyntaxBuilder property)

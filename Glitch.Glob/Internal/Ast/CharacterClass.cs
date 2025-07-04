@@ -4,12 +4,12 @@
     {
         internal static CharacterClass Negate(CharacterClass node)
         {
-            if (node is NegatedCharacterClassNode negated)
+            if (node is NegatedCharacterClass negated)
             {
                 return negated.Inner;
             }
 
-            return new NegatedCharacterClassNode(node);
+            return new NegatedCharacterClass(node);
         }
 
         public override string ToString() => $"[{RawText}]";
@@ -21,9 +21,9 @@
 
         protected abstract bool IsMatch(char c);
 
-        private class NegatedCharacterClassNode : CharacterClass
+        private class NegatedCharacterClass : CharacterClass
         {
-            internal NegatedCharacterClassNode(CharacterClass inner)
+            internal NegatedCharacterClass(CharacterClass inner)
             {
                 ArgumentNullException.ThrowIfNull(inner, nameof(inner));
                 Inner = inner;

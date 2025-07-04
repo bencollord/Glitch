@@ -417,7 +417,11 @@ namespace Glitch.Functional
 
         public static implicit operator Result<T>(T value) => Okay(value);
 
+        public static implicit operator Result<T>(Success<T> success) => Okay(success.Value);
+
         public static implicit operator Result<T>(Error error) => Fail(error);
+
+        public static implicit operator Result<T>(Failure<Error> failure) => Fail(failure.Error);
 
         public static implicit operator Result<T>(Result<T, Error> result) => result.Match(Okay, Fail);
 
@@ -439,7 +443,7 @@ namespace Glitch.Functional
         // UNDONE Naming inconsistency
         public FluentActionContext ForError<TError>(Action<TError> ifError)
             where TError : Error
-            => IfOkay(_ => { /* Nop */ }).Catch(ifError);
+            => IfOkay(_ => { /* Nop */ }).IfError(ifError);
 
         /// <summary>
         /// Fluent context for chaining actions against a result.
@@ -472,7 +476,7 @@ namespace Glitch.Functional
 
             public FluentActionContext Then(Func<T, Unit> ifOkay) => Then(new Action<T>(v => ifOkay(v)));
 
-            public FluentActionContext Catch<TError>(Action<TError> ifError)
+            public FluentActionContext IfError<TError>(Action<TError> ifError)
                 where TError : Error
                 => new(result, ifOkay, errorHandlers.Add(typeof(TError), err => ifError((TError)err)));
 

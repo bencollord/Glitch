@@ -345,6 +345,10 @@ namespace Glitch.Functional
 
         public static implicit operator Result<TOkay, TError>(TError error) => Fail(error);
 
+        public static implicit operator Result<TOkay, TError>(Success<TOkay> success) => Okay(success.Value);
+
+        public static implicit operator Result<TOkay, TError>(Failure<TError> failure) => Fail(failure.Error);
+
         public static explicit operator TOkay(Result<TOkay, TError> result)
             => Try(result.Unwrap)
                    .MapError(err => new InvalidCastException($"Cannot cast a faulted result to {typeof(TOkay)}", err.AsException()))

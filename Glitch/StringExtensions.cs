@@ -6,7 +6,7 @@ namespace Glitch
     {
         public static string Capitalize(this string input) => Char.ToUpper(input[0]) + input.Substring(1);
 
-        public static string Decapitalize(this string input) => Char.ToLower(input[0]) + input.Substring(1);
+        public static string Uncapitalize(this string input) => Char.ToLower(input[0]) + input.Substring(1);
 
         public static unsafe string Strip(this string input, char target)
         {

@@ -34,7 +34,11 @@ namespace Glitch.Functional
 
         public static Result<T> Okay<T>() where T : new() => Okay<T>(new());
 
-        public static Result<T> Okay<T>(T value) => new Result.Okay<T>(value);
+        public static Result<T> Okay<T>(T value) => new Success<T>(value);
+
+        public static Result<T, TError> Okay<T, TError>() where T : new() => Okay<T, TError>(new());
+
+        public static Result<T, TError> Okay<T, TError>(T value) => new Result.Okay<T, TError>(value);
 
         public static Result<T> Fail<T>(Error error) => new Result.Fail<T>(error);
 
@@ -61,10 +65,10 @@ namespace Glitch.Functional
             => TryWith<TInput, Unit>(function);
 
         public static Effect<TInput, TOutput> TryWith<TInput, TOutput>(Func<TInput, TOutput> function)
-            => Effect.TryWith(function);
+            => Effect.Lift(function);
 
         public static Effect<TInput, TOutput> TryWith<TInput, TOutput>(Func<TInput, Result<TOutput>> function)
-            => Effect.TryWith(function);
+            => Effect.Lift(function);
 
         public static Effect<T, T> Ask<T>() => Effect.Ask<T>();
 
