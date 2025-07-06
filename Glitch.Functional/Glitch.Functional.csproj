@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Parsing - Copy\**" />
+    <EmbeddedResource Remove="Parsing - Copy\**" />
+    <None Remove="Parsing - Copy\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Glitch.Functional.FN">
+      <Static>True</Static>
+    </Using>
+  </ItemGroup>
+
+</Project>
