@@ -104,7 +104,7 @@ namespace Glitch.Functional
             {
                 var result = thunk(i);
 
-                return result is Result.Okay<TOutput> ok
+                return result is Result.Success<TOutput> ok
                      ? bind(ok.Value).thunk(i)
                      : result.Cast<TResult>();
             });
@@ -205,7 +205,7 @@ namespace Glitch.Functional
             {
                 var result = thunk(i);
 
-                return result is Result.Fail<TOutput> fail ? other(fail.Error).thunk(i) : result;
+                return result is Result.Failure<TOutput> fail ? other(fail.Error).thunk(i) : result;
             });
 
         public Effect<TInput, TOutput> Filter(Func<TOutput, bool> predicate)

@@ -95,7 +95,7 @@ namespace Glitch.Functional
             {
                 var result = thunk();
 
-                return result is Result.Okay<T> ok 
+                return result is Result.Success<T> ok 
                      ? bind(ok.Value).thunk() 
                      : result.Cast<TResult>();
             });
@@ -181,7 +181,7 @@ namespace Glitch.Functional
             {
                 var result = thunk();
 
-                return result is Result.Fail<T> fail ? other(fail.Error).thunk() : result;
+                return result is Result.Failure<T> fail ? other(fail.Error).thunk() : result;
             });
 
         public Fallible<T> Filter(Func<T, bool> predicate)

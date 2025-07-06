@@ -3,7 +3,7 @@ namespace Glitch.Functional
 {
     public static partial class Result
     {
-        public sealed record Fail<T>(Error Error) : Result<T>
+        public sealed record Failure<T>(Error Error) : Result<T>
         {
             public override bool IsOkay => false;
 
@@ -11,14 +11,14 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override Result<TResult> And<TResult>(Result<TResult> other)
-                => new Fail<TResult>(Error);
+                => new Failure<TResult>(Error);
 
             /// <inheritdoc />
             public override Result<TResult> AndThen<TResult>(Func<T, Result<TResult>> mapper)
-                => new Fail<TResult>(Error);
+                => new Failure<TResult>(Error);
 
             /// <inheritdoc />
-            public override Result<TResult> Cast<TResult>() => new Fail<TResult>(Error);
+            public override Result<TResult> Cast<TResult>() => new Failure<TResult>(Error);
 
             public override Result<TResult> CastOr<TResult>(Error _) => Cast<TResult>();
 
@@ -50,7 +50,7 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override Result<TResult> Map<TResult>(Func<T, TResult> mapper)
-                => new Fail<TResult>(Error);
+                => new Failure<TResult>(Error);
 
             public override Result<TResult> MapOr<TResult>(Func<T, TResult> _, Error ifFail)
                 => ifFail;

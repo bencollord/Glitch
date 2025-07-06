@@ -6,9 +6,9 @@ namespace Glitch.Functional
     {
         private protected Result() { }
 
-        public static Result<T> Okay(T value) => new Result.Okay<T>(value);
+        public static Result<T> Okay(T value) => new Result.Success<T>(value);
 
-        public static Result<T> Fail(Error error) => new Result.Fail<T>(error);
+        public static Result<T> Fail(Error error) => new Result.Failure<T>(error);
 
         public abstract bool IsOkay { get; }
 
@@ -19,7 +19,7 @@ namespace Glitch.Functional
         public abstract bool IsFailAnd(Func<Error, bool> predicate);
 
         /// <summary>
-        /// If the result is <see cref="Result.Okay{T}" />, applies
+        /// If the result is <see cref="Result.Success{T}" />, applies
         /// the provided function to the value and returns it wrapped in a
         /// new <see cref="Result{T}" />. Otherwise, returns the current error
         /// wrapped in a new result type.
@@ -403,7 +403,11 @@ namespace Glitch.Functional
 
         public static implicit operator Result<T>(T value) => Okay(value);
 
+        public static implicit operator Result<T>(Success<T> success) => Okay(success.Value);
+
         public static implicit operator Result<T>(Error error) => Fail(error);
+
+        public static implicit operator Result<T>(Failure<Error> failure) => Fail(failure.Error);
 
         public static implicit operator Result<T>(Result<T, Error> result) => result.Match(Okay, Fail);
 
@@ -414,7 +418,7 @@ namespace Glitch.Functional
                      .Unwrap();
 
         public static explicit operator Error(Result<T> result)
-            => result is Result.Fail<T>(var err)
+            => result is Result.Failure<T>(var err)
                    ? err : throw new InvalidCastException("Cannot cast a successful result to an error");
 
         // UNDONE Needs more comprehensive functionality
@@ -468,16 +472,16 @@ namespace Glitch.Functional
             {
                 switch (result)
                 {
-                    case Result.Okay<T>(T value):
+                    case Result.Success<T>(T value):
                         ifOkay(value);
                         break;
 
-                    case Result.Fail<T>(Error err)
+                    case Result.Failure<T>(Error err)
                         when errorHandlers.TryGetValue(err.GetType(), out var handler):
                         handler(err);
                         break;
 
-                    case Result.Fail<T>(Error err):
+                    case Result.Failure<T>(Error err):
                         ifFail(err);
                         break;
 

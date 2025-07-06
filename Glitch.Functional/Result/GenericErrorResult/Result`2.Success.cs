@@ -2,11 +2,11 @@ namespace Glitch.Functional
 {
     public static partial class Result
     {
-        public sealed record Okay<TOkay, TError>(TOkay Value) : Result<TOkay, TError>
+        public sealed record Success<TOkay, TError>(TOkay Value) : Result<TOkay, TError>
         {
             public override bool IsOkay => true;
 
-            public override bool IsFail => false;
+            public override bool IsError => false;
 
             /// <inheritdoc />
             public override Result<TResult, TError> And<TResult>(Result<TResult, TError> other)
@@ -25,7 +25,7 @@ namespace Glitch.Functional
 
             // TODO Clean up syntax here
             public override Result<TResult, TError> CastOrElse<TResult>(Func<TOkay, TError> error)
-                => AndThen(v => DynamicCast<TResult>.TryFrom(v).Match<Result<TResult, TError>>(r => new Okay<TResult, TError>(r), _ => new Fail<TResult, TError>(error(v))));
+                => AndThen(v => DynamicCast<TResult>.TryFrom(v).Match<Result<TResult, TError>>(r => new Success<TResult, TError>(r), _ => new Failure<TResult, TError>(error(v))));
 
             /// <inheritdoc />
             public override Result<TOkay, TError> Do(Action<TOkay> action)
@@ -48,7 +48,7 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override Result<TResult, TError> Map<TResult>(Func<TOkay, TResult> mapper)
-                => new Okay<TResult, TError>(mapper(Value));
+                => new Success<TResult, TError>(mapper(Value));
 
             public override Result<TResult, TError> MapOr<TResult>(Func<TOkay, TResult> mapper, TError _)
                 => Map(mapper);

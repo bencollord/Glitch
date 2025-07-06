@@ -12,9 +12,9 @@
     public partial class Parser<T>
     {
         public static Parser<T> Return(T value)
-            => new(input => Success(value));
+            => new(input => Okay(value));
 
         public static Parser<T> Error(ParseError error)
-             => new(input => Failure(error));
+             => new(input => Fail(error));
     }
 }

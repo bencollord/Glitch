@@ -6,20 +6,20 @@ namespace Glitch.Functional
     {
         private protected Result() { }
 
-        public static Result<TOkay, TError> Okay(TOkay value) => new Result.Okay<TOkay, TError>(value);
+        public static Result<TOkay, TError> Okay(TOkay value) => new Result.Success<TOkay, TError>(value);
 
-        public static Result<TOkay, TError> Fail(TError error) => new Result.Fail<TOkay, TError>(error);
+        public static Result<TOkay, TError> Fail(TError error) => new Result.Failure<TOkay, TError>(error);
 
         public abstract bool IsOkay { get; }
 
-        public abstract bool IsFail { get; }
+        public abstract bool IsError { get; }
 
         public abstract bool IsOkayAnd(Func<TOkay, bool> predicate);
 
         public abstract bool IsFailAnd(Func<TError, bool> predicate);
 
         /// <summary>
-        /// If the result is <see cref="Result.Okay{T}" />, applies
+        /// If the result is <see cref="Result.Success{T}" />, applies
         /// the provided function to the value and returns it wrapped in a
         /// new <see cref="Result{T}" />. Otherwise, returns the current error
         /// wrapped in a new result type.
@@ -319,7 +319,7 @@ namespace Glitch.Functional
 
         public static bool operator true(Result<TOkay, TError> result) => result.IsOkay;
 
-        public static bool operator false(Result<TOkay, TError> result) => result.IsFail;
+        public static bool operator false(Result<TOkay, TError> result) => result.IsError;
 
         public static Result<TOkay, TError> operator &(Result<TOkay, TError> x, Result<TOkay, TError> y) => x.And(y);
 
@@ -329,7 +329,11 @@ namespace Glitch.Functional
 
         public static implicit operator Result<TOkay, TError>(TOkay value) => Okay(value);
 
+        public static implicit operator Result<TOkay, TError>(Success<TOkay> success) => Okay(success.Value);
+
         public static implicit operator Result<TOkay, TError>(TError error) => Fail(error);
+
+        public static implicit operator Result<TOkay, TError>(Failure<TError> failure) => Fail(failure.Error);
 
         public static explicit operator TOkay(Result<TOkay, TError> result)
             => Try(result.Unwrap)
@@ -337,7 +341,7 @@ namespace Glitch.Functional
                    .Unwrap();
 
         public static explicit operator TError(Result<TOkay, TError> result)
-            => result is Result.Fail<TOkay, TError>(var err)
+            => result is Result.Failure<TOkay, TError>(var err)
                    ? err : throw new InvalidCastException("Cannot cast a successful result to an error");
 
         // UNDONE Needs more comprehensive functionality
@@ -382,16 +386,16 @@ namespace Glitch.Functional
             {
                 switch (result)
                 {
-                    case Result.Okay<TOkay, TError>(TOkay value):
+                    case Result.Success<TOkay, TError>(TOkay value):
                         ifOkay(value);
                         break;
 
-                    case Result.Fail<TOkay, TError>(TError err)
+                    case Result.Failure<TOkay, TError>(TError err)
                         when errorHandlers.TryGetValue(err.GetType(), out var handler):
                         handler(err);
                         break;
 
-                    case Result.Fail<TOkay, TError>(TError err):
+                    case Result.Failure<TOkay, TError>(TError err):
                         ifFail(err);
                         break;
 

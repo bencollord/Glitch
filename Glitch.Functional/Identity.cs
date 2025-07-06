@@ -32,7 +32,7 @@
             yield return Value;
         }
 
-        public Result<T> Okay() => new Result.Okay<T>(Value);
+        public Result<T> Okay() => new Result.Success<T>(Value);
 
         public Option<T> Maybe() => Option<T>.Maybe(Value);
 

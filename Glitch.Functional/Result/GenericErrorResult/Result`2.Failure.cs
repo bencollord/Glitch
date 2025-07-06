@@ -3,22 +3,22 @@ namespace Glitch.Functional
 {
     public static partial class Result
     {
-        public sealed record Fail<TOkay, TError>(TError Error) : Result<TOkay, TError>
+        public sealed record Failure<TOkay, TError>(TError Error) : Result<TOkay, TError>
         {
             public override bool IsOkay => false;
 
-            public override bool IsFail => true;
+            public override bool IsError => true;
 
             /// <inheritdoc />
             public override Result<TResult, TError> And<TResult>(Result<TResult, TError> other)
-                => new Fail<TResult, TError>(Error);
+                => new Failure<TResult, TError>(Error);
 
             /// <inheritdoc />
             public override Result<TResult, TError> AndThen<TResult>(Func<TOkay, Result<TResult, TError>> mapper)
-                => new Fail<TResult, TError>(Error);
+                => new Failure<TResult, TError>(Error);
 
             /// <inheritdoc />
-            public override Result<TResult, TError> Cast<TResult>() => new Fail<TResult, TError>(Error);
+            public override Result<TResult, TError> Cast<TResult>() => new Failure<TResult, TError>(Error);
 
             public override Result<TResult, TError> CastOr<TResult>(TError _) => Cast<TResult>();
 
@@ -50,7 +50,7 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override Result<TResult, TError> Map<TResult>(Func<TOkay, TResult> mapper)
-                => new Fail<TResult, TError>(Error);
+                => new Failure<TResult, TError>(Error);
 
             public override Result<TResult, TError> MapOr<TResult>(Func<TOkay, TResult> _, TError ifFail)
                 => ifFail;

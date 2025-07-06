@@ -400,7 +400,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="error"></param>
         /// <returns></returns>
-        public Result<T> OkayOr(Error error) => IsSome ? Okay(value!) : Fail<T>(error);
+        public Result<T> OkayOr(Error error) => IsSome ? Okay(value!) : Fail(error);
 
         /// <summary>
         /// Wraps the value in a <see cref="Result{T}" /> if it exists,
@@ -408,7 +408,7 @@ namespace Glitch.Functional
         /// the result of the provided error function.
         /// </summary>
         /// <param name="error"></param>
-        public Result<T> OkayOrElse(Func<Error> function) => IsSome ? Okay(value!) : Fail<T>(function());
+        public Result<T> OkayOrElse(Func<Error> function) => IsSome ? Okay(value!) : Fail(function());
 
         /// <summary>
         /// Wraps the value in a <see cref="Result{T}" /> if it exists,
@@ -416,24 +416,7 @@ namespace Glitch.Functional
         /// the result of the provided error function.
         /// </summary>
         /// <param name="error"></param>
-        public Result<T> OkayOrElse(Func<Unit, Error> function) => IsSome ? Okay(value!) : Fail<T>(function(default));
-
-        /// <summary>
-        /// Wraps the value in a <see cref="Fallible{T}" /> if it exists,
-        /// otherwise returns an errored <see cref="Fallible{T}" /> containing 
-        /// the provided error.
-        /// </summary>
-        /// <param name="error"></param>
-        /// <returns></returns>
-        public Fallible<T> TryOr(Error error) => IsSome ? Okay(value!) : Fail<T>(error);
-
-        /// <summary>
-        /// Wraps the value in a <see cref="Fallible{T}" /> if it exists,
-        /// otherwise returns an errored <see cref="Fallible{T}" /> containing 
-        /// the result of the provided error function.
-        /// </summary>
-        /// <param name="error"></param>
-        public Fallible<T> TryOrElse(Func<Error> function) => IsSome ? Okay(value!) : Fail<T>(function());
+        public Result<T> OkayOrElse(Func<Unit, Error> function) => IsSome ? Okay(value!) : Fail(function(default));
 
         public bool Equals(Option<T> other)
         {

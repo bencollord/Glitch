@@ -22,21 +22,17 @@ namespace Glitch.Functional
 
         public static Unit Ignore<T>(T _) => default;
 
-        public static Identity<T> Id<T>() where T : new() => IdentityMonad<T>(new());
-
-        public static Identity<T> IdentityMonad<T>(T value) => value;
-
         public static Option<T> Some<T>() where T : new() => Some<T>(new());
 
         public static Option<T> Some<T>(T value) => Option<T>.Some(value);
 
         public static Option<T> Maybe<T>(T? value) => Option<T>.Maybe(value);
 
-        public static Result<T> Okay<T>() where T : new() => Okay<T>(new());
+        public static Success<T> Okay<T>() where T : new() => Okay<T>(new());
 
-        public static Result<T> Okay<T>(T value) => new Result.Okay<T>(value);
+        public static Success<T> Okay<T>(T value) => new(value);
 
-        public static Result<T> Fail<T>(Error error) => new Result.Fail<T>(error);
+        public static Failure<T> Fail<T>(T error) => new(error);
 
         public static Fallible<T> Try<T>(Func<Result<T>> function) => Fallible<T>.New(function);
 
@@ -69,11 +65,6 @@ namespace Glitch.Functional
         public static Effect<T, T> Ask<T>() => Effect.Ask<T>();
 
         public static Fallible<T> TryCast<T>(object obj) => Try(() => (T)(dynamic)obj);
-
-        // TODO Experimental. Replace Okay/Fail if this works
-        public static Success<T> Success<T>(T value) => new(value);
-
-        public static Failure<T> Failure<T>(T error) => new(error);
 
         public static Sequence<T> Sequence<T>(IEnumerable<T> items) => items.AsSequence();
 

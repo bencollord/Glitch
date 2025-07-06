@@ -4,7 +4,7 @@
     {
         public Result<Sequence<TResult>> Traverse<TResult>(Func<T, Result<TResult>> traverse)
             => this.Aggregate(
-                Okay(Sequence<TResult>.Empty),
+                Result.Okay(Sequence<TResult>.Empty),
                 (list, item) => list.AndThen(_ => traverse(item), (lst, i) => lst.Append(i)));
 
         public Result<Sequence<TResult>> Traverse<TResult>(Func<T, int, Result<TResult>> traverse)

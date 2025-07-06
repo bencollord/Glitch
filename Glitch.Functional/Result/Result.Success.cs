@@ -2,7 +2,7 @@
 {
     public static partial class Result
     {
-        public sealed record Okay<T>(T Value) : Result<T>
+        public sealed record Success<T>(T Value) : Result<T>
         {
             public override bool IsOkay => true;
 
@@ -47,7 +47,7 @@
 
             /// <inheritdoc />
             public override Result<TResult> Map<TResult>(Func<T, TResult> mapper)
-                => new Okay<TResult>(mapper(Value));
+                => new Success<TResult>(mapper(Value));
 
             public override Result<TResult> MapOr<TResult>(Func<T, TResult> mapper, Error _)
                 => Map(mapper);
@@ -127,7 +127,7 @@
 
             public override Result<TResult> Choose<TResult>(Func<T, Result<TResult>> ifOkay, Func<Error, Result<TResult>> _) => AndThen(ifOkay);
 
-            public static implicit operator T(Okay<T> ok) => ok.Value;
+            public static implicit operator T(Success<T> ok) => ok.Value;
         }
     }
 }
