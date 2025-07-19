@@ -1,25 +1,38 @@
 ﻿namespace Glitch.Functional.Parsing
 {
-
-    public partial class Parser<T>
+    public partial class Parser<TToken, T>
     {
-        private Func<string, ParseResult<T>> parser;
+        private Func<TokenSequence<TToken>, ParseResult<TToken, T>> parser;
 
-        internal Parser(Func<string, ParseResult<T>> parser)
+        internal Parser(Func<TokenSequence<TToken>, ParseResult<TToken, T>> parser)
         {
             this.parser = parser;
         }
 
-        public Parser<TResult> Map<TResult>(Func<T, TResult> selector)
+        public Parser<TToken, TResult> Map<TResult>(Func<T, TResult> selector)
             => new(input => parser(input).Map(selector));
 
-        public Parser<TResult> AndThen<TResult>(Func<T, Parser<TResult>> selector)
-            => new(input => parser(input).AndThen(output => selector(output).parser(input)));
+        public Parser<TToken, TResult> Try<TResult>(Func<T, TResult> selector)
+            => from value in this
+               from result in Fallible.Lift(() => selector(value)).Run()
+                    .Match(ifOkay: Parser<TToken>.Return,
+                           ifFail: err => Parser<TToken>.Error<TResult>(err.Message))
+               select result;
 
-        public Parser<TResult> AndThen<TElement, TResult>(Func<T, Parser<TElement>> selector, Func<T, TElement, TResult> projection)
-            => new(input => parser(input).AndThen(output => selector(output).parser(input), projection));
+        public Parser<TToken, T> Filter(Func<T, bool> predicate)
+           => new(input => parser(input).Filter(predicate));
 
-        public ParseResult<T> Parse(string input)
+        public Parser<TToken, T> Guard(Func<T, bool> predicate, Func<T, ParseError<TToken>> ifFail)
+            => new(input => parser(input).Guard(predicate, ifFail));
+
+        public Parser<TToken, TResult> Match<TResult>(Func<T, TResult> ifOkay, Func<ParseError<TToken>, TResult> ifFail)
+            => new(input => parser(input).Match(ifOkay, ifFail));
+
+        public ParseResult<TToken, T> Execute(TokenSequence<TToken> input)
             => parser(input);
+
+        public static implicit operator Parser<TToken, T>(ParseResult<TToken, T> result) => new(_ => result);
+
+        public static implicit operator Parser<TToken, T>(Func<TokenSequence<TToken>, ParseResult<TToken, T>> parser) => new(parser);
     }
 }

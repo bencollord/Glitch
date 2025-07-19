@@ -2,19 +2,28 @@
 {
     public static partial class Parser
     {
-        public static Parser<T> Return<T>(T value)
-            => Parser<T>.Return(value);
+        public static Parser<TToken, T> Return<TToken, T>(T value)
+            => Parser<TToken, T>.Return(value);
 
-        public static Parser<T> Error<T>(ParseError error)
-            => Parser<T>.Error(error);
+        public static Parser<TToken, T> Error<TToken, T>(ParseError<TToken> error)
+            => Parser<TToken, T>.Error(error);
     }
 
-    public partial class Parser<T>
+    public static partial class Parser<TToken>
     {
-        public static Parser<T> Return(T value)
-            => new(input => Okay(value));
+        public static Parser<TToken, T> Return<T>(T value)
+            => Parser<TToken, T>.Return(value);
 
-        public static Parser<T> Error(ParseError error)
-             => new(input => Fail(error));
+        public static Parser<TToken, T> Error<T>(ParseError<TToken> error)
+            => Parser<TToken, T>.Error(error);
+    }
+
+    public partial class Parser<TToken, T>
+    {
+        public static Parser<TToken, T> Return(T value)
+            => new(input => ParseResult.Okay<TToken, T>(value));
+
+        public static Parser<TToken, T> Error(ParseError<TToken> error)
+            => new(input => ParseResult.Fail<TToken, T>(error));
     }
 }

@@ -1,0 +1,35 @@
+﻿namespace Glitch.Functional.Parsing
+{
+    public abstract record TokenSequence<TToken>
+    {
+        public static readonly TokenSequence<TToken> Empty = EmptyTokenSequence<TToken>.Singleton;
+
+        /// <summary>
+        /// The current token in the sequence.
+        /// Invalid if the sequence is at its end.
+        /// </summary>
+        /// <remarks>
+        /// The return value of this property is undefined if <see cref="IsEnd"/>
+        /// is true. Inheritors are free to return an empty value, null, or throw an
+        /// exception depending on the implementation. It's the caller's responsibility
+        /// to check the <see cref="IsEnd"/> property.
+        /// </remarks>
+        public abstract TToken Current { get; }
+
+        public abstract bool IsEnd { get; }
+
+        public abstract TokenSequence<TToken> Advance();
+
+        public virtual TokenSequence<TToken> Advance(int count)
+        {
+            var current = this;
+
+            for (int i = 0; i < count && !current.IsEnd; i++)
+            {
+                current = current.Advance();
+            }
+
+            return current;
+        }
+    }
+}

@@ -7,9 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Parsing - Copy %282%29\**" />
     <Compile Remove="Parsing - Copy\**" />
+    <EmbeddedResource Remove="Parsing - Copy %282%29\**" />
     <EmbeddedResource Remove="Parsing - Copy\**" />
+    <None Remove="Parsing - Copy %282%29\**" />
     <None Remove="Parsing - Copy\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="FN\FN.Parse.cs" />
+    <Compile Remove="Parsing\ParseError - Copy.cs" />
   </ItemGroup>
 
   <ItemGroup>

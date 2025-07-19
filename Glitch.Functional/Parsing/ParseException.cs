@@ -15,7 +15,7 @@
 
         public ParseException(string message, Exception inner) : base(message, inner) 
         {
-            Error = new ParseError(message, inner);
+            Error = new ParseError(message);
         }
 
         public ParseError Error { get; }

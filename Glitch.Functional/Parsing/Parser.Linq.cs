@@ -1,31 +1,48 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Glitch.Functional.Parsing
 {
     public static partial class Parser
     {
         [DebuggerStepThrough]
-        public static Parser<TResult> Select<T, TResult>(this Parser<T> parser, Func<T, TResult> selector)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Parser<TToken, TResult> Select<TToken, T, TResult>(this Parser<TToken, T> parser, Func<T, TResult> selector)
             => parser.Map(selector);
 
         [DebuggerStepThrough]
-        public static Parser<TResult> SelectMany<T, TResult>(this Parser<T> parser, Func<T, Parser<TResult>> selector)
-            => parser.AndThen(selector);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Parser<TToken, TResult> SelectMany<TToken, T, TResult>(this Parser<TToken, T> parser, Func<T, Parser<TToken, TResult>> selector)
+            => parser.Then(selector);
 
         [DebuggerStepThrough]
-        public static Parser<TResult> SelectMany<T, TElement, TResult>(this Parser<T> parser, Func<T, Parser<TElement>> selector, Func<T, TElement, TResult> projection)
-            => parser.AndThen(selector, projection);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Parser<TToken, TResult> SelectMany<TToken, T, TElement, TResult>(this Parser<TToken, T> parser, Func<T, Parser<TToken, TElement>> selector, Func<T, TElement, TResult> projection)
+            => parser.Then(selector, projection);
 
         [DebuggerStepThrough]
-        public static ParseResult<TResult> Select<T, TResult>(this ParseResult<T> result, Func<T, TResult> selector)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Parser<TToken, T> Where<TToken, T>(this Parser<TToken, T> parser, Func<T, bool> predicate)
+            => parser.Filter(predicate);
+
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ParseResult<TToken, TResult> Select<TToken, T, TResult>(this ParseResult<TToken, T> result, Func<T, TResult> selector)
             => result.Map(selector);
 
         [DebuggerStepThrough]
-        public static ParseResult<TResult> SelectMany<T, TResult>(this ParseResult<T> result, Func<T, ParseResult<TResult>> selector)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ParseResult<TToken, TResult> SelectMany<TToken, T, TResult>(this ParseResult<TToken, T> result, Func<T, ParseResult<TToken, TResult>> selector)
             => result.AndThen(selector);
 
         [DebuggerStepThrough]
-        public static ParseResult<TResult> SelectMany<T, TElement, TResult>(this ParseResult<T> result, Func<T, ParseResult<TElement>> selector, Func<T, TElement, TResult> projection)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ParseResult<TToken, TResult> SelectMany<TToken, T, TElement, TResult>(this ParseResult<TToken, T> result, Func<T, ParseResult<TToken, TElement>> selector, Func<T, TElement, TResult> projection)
             => result.AndThen(selector, projection);
+
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ParseResult<TToken, T> Where<TToken, T>(this ParseResult<TToken, T> result, Func<T, bool> predicate)
+            => result.Filter(predicate);
     }
 }
