@@ -12,7 +12,7 @@ namespace Glitch.Functional
 
         public abstract bool IsOkay { get; }
 
-        public abstract bool IsError { get; }
+        public abstract bool IsFail { get; }
 
         public abstract bool IsOkayAnd(Func<TOkay, bool> predicate);
 
@@ -319,7 +319,7 @@ namespace Glitch.Functional
 
         public static bool operator true(Result<TOkay, TError> result) => result.IsOkay;
 
-        public static bool operator false(Result<TOkay, TError> result) => result.IsError;
+        public static bool operator false(Result<TOkay, TError> result) => result.IsFail;
 
         public static Result<TOkay, TError> operator &(Result<TOkay, TError> x, Result<TOkay, TError> y) => x.And(y);
 

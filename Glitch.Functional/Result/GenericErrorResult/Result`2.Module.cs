@@ -11,7 +11,7 @@ namespace Glitch.Functional
 
         public static bool IsOkay<TOkay, TError>(Result<TOkay, TError> result) => result.IsOkay;
 
-        public static bool IsFail<TOkay, TError>(Result<TOkay, TError> result) => result.IsError;
+        public static bool IsFail<TOkay, TError>(Result<TOkay, TError> result) => result.IsFail;
 
         public static Result<TOkay, TError> Guard<TOkay, TError>(bool condition, TOkay value, TError error)
             => condition ? new Success<TOkay, TError>(value) : new Failure<TOkay, TError>(error);

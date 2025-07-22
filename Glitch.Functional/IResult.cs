@@ -1,4 +1,6 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Glitch.Functional
 {
@@ -8,22 +10,61 @@ namespace Glitch.Functional
         bool IsFail { get; }
 
         IResult<TResult, TError> Map<TResult>(Func<TSuccess, TResult> map);
-        IResult<TSuccess, TNewError> MapError<TNewError>(Func<TError, TNewError> map);
-        IResult<TResult, TError> Cast<TResult>();
-        IResult<TSuccess, TError> Do(Action<TSuccess> action);
-        IResult<TSuccess, TError> Guard(bool condition, Func<TSuccess, TError> error);
-        
-        IResult<TResult, TError> And<TResult>(IResult<TResult, TError> other);
-        IResult<TResult, TError> AndThen<TResult>(Func<TSuccess, IResult<TResult, TError>> bind);
 
-        IResult<TSuccess, TError> Or(IResult<TSuccess, TError> other);
-        IResult<TSuccess, TNewError> OrElse<TNewError>(Func<TError, IResult<TSuccess, TNewError>> other);
+        IResult<TSuccess, TNewError> MapError<TNewError>(Func<TError, TNewError> map);
+
+        IResult<TSuccess, TError> Guard(Func<TSuccess, bool> predicate, Func<TSuccess, TError> error);
 
         TResult Match<TResult>(Func<TSuccess, TResult> ifOkay, Func<TError, TResult> ifFail);
-    }
 
+        virtual IResult<TResult, TError> Cast<TResult>() => Map(v => (TResult)(dynamic)v!);
+        virtual IResult<TSuccess, TNewError> CastError<TNewError>() => MapError(v => (TNewError)(dynamic)v!);
+        virtual IResult<TSuccess, TError> Do(Action<TSuccess> action)
+            => Map(v =>
+            {
+                action(v);
+                return v;
+            });
+
+        virtual IResult<TResult, TError> And<TResult>(IResult<TResult, TError> other)
+            => Match(ifOkay: _ => other,
+                     ifFail: _ => Cast<TResult>());
+
+        virtual IResult<TSuccess, TError> Or(IResult<TSuccess, TError> other)
+            => Match(ifOkay: _ => this,
+                     ifFail: _ => other);
+
+        virtual IResult<TResult, TError> AndThen<TResult>(Func<TSuccess, IResult<TResult, TError>> bind)
+            => Match(ifOkay: bind, ifFail: _ => Cast<TResult>());
+
+        virtual IResult<TSuccess, TNewError> OrElse<TNewError>(Func<TError, IResult<TSuccess, TNewError>> bind)
+            => Match(ifOkay: _ => CastError<TNewError>(), ifFail: bind);
+    }
     public static class IResultExtensions
     {
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IResult<TResult, TError> Select<TSuccess, TError, TResult>(this IResult<TSuccess, TError> result, Func<TSuccess, TResult> map)
+            => result.Map(map);
+
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IResult<TResult, TError> SelectMany<TSuccess, TError, TResult>(this IResult<TSuccess, TError> result, Func<TSuccess, IResult<TResult, TError>> bind)
+            => result.AndThen(bind);
+
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IResult<TResult, TError> SelectMany<TSuccess, TElement, TError, TResult>(this IResult<TSuccess, TError> result, Func<TSuccess, IResult<TElement, TError>> bind, Func<TSuccess, TElement, TResult> projection)
+            => result.AndThen(v => bind(v).Map(x => projection(v, x)));
+
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IResult<TSuccess, TError> Where<TSuccess, TError>(this IResult<TSuccess, TError> result, Func<TSuccess, bool> predicate)
+            where TError : ICanBeEmpty<TError>
+        {
+            return result.Guard(predicate, _ => TError.Empty);
+        }
+
         public static FluentContext<TSource, TError, TResult> IfOkay<TSource, TError, TResult>(this IResult<TSource, TError> result, Func<TSource, TResult> ifOkay)
             => new(result, ifOkay);
 

@@ -104,8 +104,8 @@ namespace Glitch.Functional
             {
                 var result = thunk(i);
 
-                return result is Result.Success<TOutput> ok
-                     ? bind(ok.Value).thunk(i)
+                return result is Result.Success<TOutput>(var ok)
+                     ? bind(ok).thunk(i)
                      : result.Cast<TResult>();
             });
 
@@ -283,6 +283,11 @@ namespace Glitch.Functional
             => new(i => thunk(i).Zip(other.thunk(i), zipper));
 
         public Fallible<TOutput> Apply(TInput input) => Fallible<TOutput>.New(() => Run(input));
+
+        public Effect<TInput, TResult> Match<TResult>(Func<TOutput, TResult> ifOkay, Func<Error, TResult> ifFail)
+        {
+            return new(input => thunk(input).Match(ifOkay, ifFail));
+        }
 
         /// <summary>
         /// Executes the provided function, catching any exception

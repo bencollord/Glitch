@@ -12,13 +12,6 @@
         public Parser<TToken, TResult> Map<TResult>(Func<T, TResult> selector)
             => new(input => parser(input).Map(selector));
 
-        public Parser<TToken, TResult> Try<TResult>(Func<T, TResult> selector)
-            => from value in this
-               from result in Fallible.Lift(() => selector(value)).Run()
-                    .Match(ifOkay: Parser<TToken>.Return,
-                           ifFail: err => Parser<TToken>.Error<TResult>(err.Message))
-               select result;
-
         public Parser<TToken, T> Filter(Func<T, bool> predicate)
            => new(input => parser(input).Filter(predicate));
 
@@ -30,6 +23,10 @@
 
         public ParseResult<TToken, T> Execute(TokenSequence<TToken> input)
             => parser(input);
+
+        public static implicit operator Parser<TToken, T>(T value) => Return(value);
+
+        public static implicit operator Parser<TToken, T>(ParseError<TToken> error) => Error(error);
 
         public static implicit operator Parser<TToken, T>(ParseResult<TToken, T> result) => new(_ => result);
 

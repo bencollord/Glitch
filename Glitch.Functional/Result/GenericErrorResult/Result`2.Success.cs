@@ -6,7 +6,7 @@ namespace Glitch.Functional
         {
             public override bool IsOkay => true;
 
-            public override bool IsError => false;
+            public override bool IsFail => false;
 
             /// <inheritdoc />
             public override Result<TResult, TError> And<TResult>(Result<TResult, TError> other)
