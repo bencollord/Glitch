@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Glitch.Functional.Parsing
+﻿namespace Glitch.Functional.Parsing
 {
     internal record CharSequence : TokenSequence<char>
     {
@@ -36,7 +29,5 @@ namespace Glitch.Functional.Parsing
 
             return this with { cursor = Math.Min(nextPosition, sourceText.Length) };
         }
-
-        public static implicit operator CharSequence(string text) => new(text);
     }
 }

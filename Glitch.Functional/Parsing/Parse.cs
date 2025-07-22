@@ -42,7 +42,7 @@ namespace Glitch.Functional.Parsing
                 input.IsEnd
                     ? ParseResult.Fail<char, char>("End of input reached")
                     : ParseResult.Okay(input.Current, input.Advance())
-                                 .Guard(predicate, $"Unexpected {input.Current}")
+                                 .Guard(predicate, Expectation.Unexpected(input.Current))
             );
 
         public static Parser<char, string> Literal(string text)

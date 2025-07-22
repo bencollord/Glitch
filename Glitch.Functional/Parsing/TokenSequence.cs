@@ -18,6 +18,8 @@
 
         public abstract bool IsEnd { get; }
 
+        public virtual TToken Peek(int count = 1) => Advance(count).Current;
+
         public abstract TokenSequence<TToken> Advance();
 
         public virtual TokenSequence<TToken> Advance(int count)

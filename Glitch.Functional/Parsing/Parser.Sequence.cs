@@ -43,7 +43,9 @@
 
             return AtLeastOnce()
                 .Guard(items => items.Count() == count, 
-                       items => $"Expected {string.Join(", ", items)} {count} times, found {items.Count()} times");
+                       // TODO Extract expected tokens
+                       // UNDONE 
+                       items => new Expectation<TToken>($"Expected {count} times, found {items.Count()} times"));
 
         }
     }

@@ -2,19 +2,21 @@
 
 namespace Glitch.Functional.Parsing
 {
+    /// <summary>
+    /// Factory methods for <see cref="Expectation{TToken}"/>.
+    /// </summary>
+    public static class Expectation
+    {
+        public static Expectation<TToken> Unexpected<TToken>(TToken token) => new(unexpected: token);
+    }
+
     public record Expectation<TToken>
     {
-        public Expectation(TToken unexpected)
-            : this(Some(unexpected), None) { }
+        public static readonly Expectation<TToken> None = new(Option<string>.None, Option<TToken>.None, Option<IEnumerable<TToken>>.None);
 
-        public Expectation(IEnumerable<TToken> expected)
-            : this(None, Some(expected)) { }
-
-        public Expectation(TToken unexpected, IEnumerable<TToken> expected)
-            : this(Some(unexpected), Some(expected)) { }
-
-        private Expectation(Option<TToken> unexpected, Option<IEnumerable<TToken>> expected)
+        public Expectation(Option<string> label = default, Option<TToken> unexpected = default, Option<IEnumerable<TToken>> expected = default)
         {
+            Label = label;
             Unexpected = unexpected;
             Expected = expected.Match(e => e.ToImmutableHashSet(), _ => []);
         }

@@ -1,41 +1,43 @@
 ﻿
+
 namespace Glitch.Functional.Parsing
 {
-    public record ParseError
+    public record ParseError<TToken, T> : ParseResult<TToken, T>
     {
-        public static readonly ParseError Empty = new(None, None);
-
         private const string DefaultMessage = "Parse error";
-
-        public ParseError() : this(None, None) { }
+        
+        private Option<string> message;
 
         public ParseError(string message)
-            : this(Some(message), None) { }
+            : this(Some(message), Expectation<TToken>.None, TokenSequence<TToken>.Empty) { }
 
-        public ParseError(Position position) : this(None, Some(position)) { }
+        public ParseError(Expectation<TToken> expectation)
+            : this(None, expectation, TokenSequence<TToken>.Empty) { }
 
-        public ParseError(string message, Position position)
-            : this(Some(message), Some(position)) { }
+        public ParseError(string message, Expectation<TToken> expectation)
+            : this(Some(message), expectation, TokenSequence<TToken>.Empty) { }
 
-        protected ParseError(Option<string> message, Option<Position> position)
+        public ParseError(string message, TokenSequence<TToken> remaining)
+            : this(message, Expectation<TToken>.None, remaining) { }
+
+        public ParseError(Option<string> message, Expectation<TToken> expectation, TokenSequence<TToken> remaining)
+            : base(remaining, expectation)
         {
-            Message = message.IfNone(DefaultMessage);
-            Position = position;
+            this.message = message;
+            Expectation = expectation;
         }
 
-        public virtual string Message { get; }
+        public string Message => message.OrElse(() => Expectation.ToString())
+                                        .IfNone(DefaultMessage);
 
-        public Option<Position> Position { get; }
+        public override bool WasSuccessful => false;
 
-        public static ParseError<TToken> Unexpected<TToken>(TToken unexpected) => new(new Expectation<TToken>(unexpected));
+        public override ParseResult<TToken, TResult> AndThen<TResult>(Func<T, ParseResult<TToken, TResult>> bind) => Cast<TResult>();
 
-        public static ParseError<TToken> Expected<TToken>(params IEnumerable<TToken> expected) => new(new Expectation<TToken>(expected));
+        public override ParseResult<TToken, TResult> Cast<TResult>() => new ParseError<TToken, TResult>(message, Expectation, Remaining);
 
-        public override string ToString()
-        {
-            return Position.Match(
-                ifSome: pos => $"{Message} {pos}", 
-                ifNone: Message);
-        }
+        public override ParseResult<TToken, TResult> Map<TResult>(Func<T, TResult> _) => Cast<TResult>();
+
+        public override TResult Match<TResult>(Func<ParseSuccess<TToken, T>, TResult> _, Func<ParseError<TToken, T>, TResult> ifFail) => ifFail(this);
     }
 }
