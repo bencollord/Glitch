@@ -66,9 +66,9 @@ namespace Glitch.Functional
 
         public static Fallible<T> TryCast<T>(object obj) => Try(() => (T)(dynamic)obj);
 
-        public static Sequence<T> Sequence<T>(IEnumerable<T> items) => items.AsSequence();
+        public static Sequence<T> Sequence<T>(T item) => Sequence([item]);
 
-        public static Sequence<T> Sequence<T>(params T[] items) => items.AsSequence();
+        public static Sequence<T> Sequence<T>(params IEnumerable<T> items) => items.AsSequence();
 
         public static Sequence<T> Range<T>(T start, T end)
             where T : IComparisonOperators<T, T, bool>, IIncrementOperators<T>

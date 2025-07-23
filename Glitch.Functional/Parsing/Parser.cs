@@ -1,4 +1,7 @@
-﻿namespace Glitch.Functional.Parsing
+﻿using Glitch.Functional.Parsing.Input;
+using Glitch.Functional.Parsing.Results;
+
+namespace Glitch.Functional.Parsing
 {
     public partial class Parser<TToken, T>
     {
@@ -21,8 +24,19 @@
         public Parser<TToken, TResult> Match<TResult>(Func<ParseSuccess<TToken, T>, TResult> ifOkay, Func<ParseError<TToken, T>, TResult> ifFail)
             => new(input => parser(input).Match(ifOkay, ifFail));
 
-        public ParseResult<TToken, T> Execute(TokenSequence<TToken> input)
-            => parser(input);
+        public Parser<TToken, TResult> Match<TResult>(Func<ParseSuccess<TToken, T>, ParseResult<TToken, TResult>> ifOkay, Func<ParseError<TToken, T>, ParseResult<TToken, TResult>> ifFail)
+            => new(input => parser(input).Match(ifOkay, ifFail));
+
+        public Parser<TToken, T> WithRemaining(TokenSequence<TToken> remaining)
+            => Match(ok => ok with { Remaining = remaining },
+                     err => err with { Remaining = remaining });
+
+        public static Parser<TToken, T> operator |(Parser<TToken, T> x, Parser<TToken, T> y) => x.Or(y);
+
+        public static Parser<TToken, IEnumerable<T>> operator +(Parser<TToken, T> x, Parser<TToken, T> y) => x.Then<T, IEnumerable<T>>(y, (a, b) => [a, b]);
+
+        public static Parser<TToken, T> operator >>(Parser<TToken, T> x, Parser<TToken, T> y) => x.Then(y);
+        public static Parser<TToken, T> operator >>(Parser<TToken, T> x, Parser<TToken, Unit> y) => x.Then(v => y.Map(_ => v));
 
         public static implicit operator Parser<TToken, T>(T value) => Return(value);
 

@@ -1,6 +1,6 @@
-﻿
+﻿using Glitch.Functional.Parsing.Input;
 
-namespace Glitch.Functional.Parsing
+namespace Glitch.Functional.Parsing.Results
 {
     public record ParseError<TToken, T> : ParseResult<TToken, T>
     {
@@ -12,7 +12,10 @@ namespace Glitch.Functional.Parsing
             : this(Some(message), Expectation<TToken>.None, TokenSequence<TToken>.Empty) { }
 
         public ParseError(Expectation<TToken> expectation)
-            : this(None, expectation, TokenSequence<TToken>.Empty) { }
+            : this(expectation, TokenSequence<TToken>.Empty) { }
+
+        public ParseError(Expectation<TToken> expectation, TokenSequence<TToken> remaining)
+           : this(None, expectation, remaining) { }
 
         public ParseError(string message, Expectation<TToken> expectation)
             : this(Some(message), expectation, TokenSequence<TToken>.Empty) { }
@@ -27,8 +30,7 @@ namespace Glitch.Functional.Parsing
             Expectation = expectation;
         }
 
-        public string Message => message.OrElse(() => Expectation.ToString())
-                                        .IfNone(DefaultMessage);
+        public string Message => message.IfNone(DefaultMessage);
 
         public override bool WasSuccessful => false;
 
@@ -39,5 +41,14 @@ namespace Glitch.Functional.Parsing
         public override ParseResult<TToken, TResult> Map<TResult>(Func<T, TResult> _) => Cast<TResult>();
 
         public override TResult Match<TResult>(Func<ParseSuccess<TToken, T>, TResult> _, Func<ParseError<TToken, T>, TResult> ifFail) => ifFail(this);
+        
+        public override string ToString() => $"Error: {Message} - {Expectation}, Remaining: {Remaining}";
+
+        public void Deconstruct(out string message, Expectation<TToken> expectation, out TokenSequence<TToken> remaining)
+        {
+            message = Message;
+            expectation = Expectation;
+            remaining = Remaining;
+        }
     }
 }

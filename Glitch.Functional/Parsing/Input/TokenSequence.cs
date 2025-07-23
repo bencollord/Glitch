@@ -1,4 +1,6 @@
-﻿namespace Glitch.Functional.Parsing
+﻿using System.Text;
+
+namespace Glitch.Functional.Parsing.Input
 {
     public abstract record TokenSequence<TToken>
     {
@@ -15,6 +17,8 @@
         /// to check the <see cref="IsEnd"/> property.
         /// </remarks>
         public abstract TToken Current { get; }
+
+        public abstract int Position { get; }
 
         public abstract bool IsEnd { get; }
 
@@ -33,5 +37,16 @@
 
             return current;
         }
+
+        public override string ToString()
+        {
+            return new StringBuilder()
+                .Append(IsEnd ? "EOF" : $"Current: {Current}")
+                .Append($", Remaining: {DisplayRemainder()}")
+                .Append($", Pos: {Position}")
+                .ToString();
+        }
+
+        protected abstract string DisplayRemainder();
     }
 }

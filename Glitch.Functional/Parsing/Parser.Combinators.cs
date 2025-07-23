@@ -1,16 +1,24 @@
-﻿namespace Glitch.Functional.Parsing
+﻿using Glitch.Functional.Parsing.Results;
+
+namespace Glitch.Functional.Parsing
 {
     public partial class Parser<TToken, T>
     {
         public Parser<TToken, TOther> Then<TOther>(Parser<TToken, TOther> other)
             => Then(_ => other);
 
+        public Parser<TToken, TResult> Then<TElement, TResult>(Parser<TToken, TElement> other, Func<T, TElement, TResult> projection)
+            => Then(x => other.Map(y => projection(x, y)));
+
         public Parser<TToken, TResult> Then<TResult>(Func<T, Parser<TToken, TResult>> selector)
             => new(input => parser(input).Match(ok => selector(ok.Value).parser(ok.Remaining),
-                                                err => err.Cast<TResult>()));
+                                                err => err.Cast<TResult>() with { Remaining = input }));
 
         public Parser<TToken, TResult> Then<TElement, TResult>(Func<T, Parser<TToken, TElement>> selector, Func<T, TElement, TResult> projection)
             => Then(x => selector(x).Map(y => projection(x, y)));
+
+        public Parser<TToken, T> Before<TOther>(Parser<TToken, TOther> parser)
+            => parser.Then(this, (_, me) => me);
 
         public Parser<TToken, T> Or(Parser<TToken, T> other)
             => new(input =>
@@ -57,23 +65,5 @@
                from v in this
                from r in right
                select v;
-
-        public Parser<TToken, T> EndOfInput() => new(input =>
-        {
-            var result = parser(input);
-
-            if (result.WasSuccessful && !result.Remaining.IsEnd)
-            {
-                var expectation = new Expectation<TToken>
-                {
-                    Label = "end of input",
-                    Unexpected = result.Remaining.Peek()
-                };
-
-                return ParseResult.Fail<TToken, T>("Expected end of input");
-            }
-
-            return result;
-        });
     }
 }

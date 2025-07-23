@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Immutable;
 
-namespace Glitch.Functional.Parsing
+namespace Glitch.Functional.Parsing.Input
 {
-    internal record ListTokenSequence<TToken> : TokenSequence<TToken>
+    internal record ArrayTokenSequence<TToken> : TokenSequence<TToken>
     {
-        private ImmutableList<TToken> tokens;
+        private TToken[] tokens;
         private int cursor;
 
-        internal ListTokenSequence(IEnumerable<TToken> tokens)
+        internal ArrayTokenSequence(IEnumerable<TToken> tokens)
         {
-            this.tokens = tokens.ToImmutableList();
+            this.tokens = tokens.ToArray();
             cursor = 0;
         }
 
@@ -22,8 +17,10 @@ namespace Glitch.Functional.Parsing
         /// <inheritdoc />
         /// </summary>
         public override TToken Current => !IsEnd ? tokens[cursor] : default!; // Suppress null warnings. It's the caller's responsibility to check the IsEnd property.
+        
+        public override int Position => cursor;
 
-        public override bool IsEnd => cursor >= tokens.Count;
+        public override bool IsEnd => cursor >= tokens.Length;
 
         public override TokenSequence<TToken> Advance()
         {
@@ -34,7 +31,9 @@ namespace Glitch.Functional.Parsing
         {
             var nextPosition = cursor + count;
 
-            return this with { cursor = Math.Min(nextPosition, tokens.Count) };
+            return this with { cursor = Math.Min(nextPosition, tokens.Length) };
         }
+
+        protected override string DisplayRemainder() => string.Join(", ", tokens[(cursor + 1)..]);
     }
 }

@@ -1,41 +1,39 @@
-﻿namespace Glitch.Functional.Parsing
+﻿using Glitch.Functional.Parsing.Results;
+
+namespace Glitch.Functional.Parsing
 {
     public partial class Parser<TToken, T>
     {
         public Parser<TToken, IEnumerable<T>> AtLeastOnce()
         {
-            return new(input =>
-            {
-                var result = parser(input);
-                var remaining = result.Remaining;
-
-                if (!result.WasSuccessful)
-                {
-                    return result.Cast<IEnumerable<T>>();
-                }
-
-                var items = new List<T>();
-
-                while (result.WasSuccessful)
-                {
-                    // Add previous result to the list
-                    items.Add((T)result);
-                    result = parser(remaining);
-                    remaining = result.Remaining;
-
-                    if (remaining.IsEnd)
-                    {
-                        // Add the current result to the list
-                        items.Add((T)result);
-                        break;
-                    }
-                }
-
-                return ParseResult<TToken, IEnumerable<T>>.Okay([.. items], remaining);
-            });
+            return from once in Map(Sequence.Single)
+                   from tail in ZeroOrMoreTimes()
+                   select Enumerable.Concat(once, tail);
         }
 
-        public Parser<TToken, IEnumerable<T>> ZeroOrMoreTimes() => AtLeastOnce().Or(Parser<TToken>.Return(Enumerable.Empty<T>()));
+        public Parser<TToken, IEnumerable<T>> ZeroOrMoreTimes()
+        {
+            return new(input =>
+            {
+                var remaining = input;
+                var items = new List<T>();
+
+                while (!remaining.IsEnd)
+                {
+                    var result = parser(remaining);
+
+                    if (!result.WasSuccessful)
+                    {
+                        break;
+                    }
+
+                    items.Add((T)result);
+                    remaining = result.Remaining;
+                }
+
+                return ParseResult.Okay(items.AsEnumerable(), remaining);
+            });
+        }
 
         public Parser<TToken, IEnumerable<T>> Times(int count)
         {

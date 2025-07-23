@@ -1,4 +1,6 @@
-﻿namespace Glitch.Functional.Parsing
+﻿using Glitch.Functional.Parsing.Input;
+
+namespace Glitch.Functional.Parsing.Results
 {
     public static class ParseResult
     {
@@ -29,10 +31,10 @@
         public Expectation<TToken> Expectation { get; init; }
 
         public static ParseResult<TToken, T> Okay(T value, TokenSequence<TToken> remaining)
-            => throw new NotImplementedException();
+            => new ParseSuccess<TToken, T>(value, remaining);
 
         public static ParseResult<TToken, T> Fail(Expectation<TToken> error, TokenSequence<TToken> remaining)
-            => throw new NotImplementedException();
+            => new ParseError<TToken, T>(error, remaining);
 
         public abstract ParseResult<TToken, TResult> Map<TResult>(Func<T, TResult> map);
 
@@ -56,6 +58,10 @@
 
         public static implicit operator ParseResult<TToken, T>(T value) => Okay(value, TokenSequence<TToken>.Empty);
 
-        public static explicit operator T(ParseResult<TToken, T> result) => ((ParseSuccess<TToken, T>)result).Value;
+        public static explicit operator T(ParseResult<TToken, T> result) => result switch
+        {
+            ParseSuccess<TToken, T>(var value, _) => value,
+            _ => throw new InvalidCastException($"Cannot faulted result to value of type {typeof(T).Name}"),
+        };
     }
 }

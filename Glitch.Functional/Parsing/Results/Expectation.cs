@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 
-namespace Glitch.Functional.Parsing
+namespace Glitch.Functional.Parsing.Results
 {
     /// <summary>
     /// Factory methods for <see cref="Expectation{TToken}"/>.
@@ -18,14 +18,14 @@ namespace Glitch.Functional.Parsing
         {
             Label = label;
             Unexpected = unexpected;
-            Expected = expected.Match(e => e.ToImmutableHashSet(), _ => []);
+            Expected = expected.IfNone([]);
         }
 
         public Option<string> Label { get; init; }
 
         public Option<TToken> Unexpected { get; init; }
 
-        public IImmutableSet<TToken> Expected { get; init; }
+        public IEnumerable<TToken> Expected { get; init; }
 
         public override string ToString()
         {

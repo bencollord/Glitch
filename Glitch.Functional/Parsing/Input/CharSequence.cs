@@ -1,4 +1,4 @@
-﻿namespace Glitch.Functional.Parsing
+﻿namespace Glitch.Functional.Parsing.Input
 {
     internal record CharSequence : TokenSequence<char>
     {
@@ -16,6 +16,8 @@
         /// </summary>
         public override char Current => !IsEnd ? sourceText[cursor] : '\0';
 
+        public override int Position => cursor;
+
         public override bool IsEnd => cursor >= sourceText.Length;
 
         public override TokenSequence<char> Advance()
@@ -29,5 +31,7 @@
 
             return this with { cursor = Math.Min(nextPosition, sourceText.Length) };
         }
+
+        protected override string DisplayRemainder() => sourceText.Substring(cursor + 1);
     }
 }

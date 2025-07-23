@@ -1,4 +1,6 @@
-﻿namespace Glitch.Functional.Parsing
+﻿using Glitch.Functional.Parsing.Results;
+
+namespace Glitch.Functional.Parsing
 {
     public class ParseException : Exception
     {
