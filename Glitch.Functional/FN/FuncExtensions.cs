@@ -2,6 +2,8 @@ namespace Glitch.Functional
 {
     public static class FuncExtensions
     {
+        public static Func<T2, T1, TResult> Flip<T1, T2, TResult>(this Func<T1, T2, TResult> func) => (a2, a1) => func(a1, a2);
+
         public static Func<T1, Func<T2, R>> Curry<T1, T2, R>(this Func<T1, T2, R> func) => FN.Curry(func);
 
         public static Func<T1, Func<T2, Func<T3, R>>> Curry<T1, T2, T3, R>(this Func<T1, T2, T3, R> func) => FN.Curry(func);

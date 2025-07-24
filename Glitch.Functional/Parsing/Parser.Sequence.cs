@@ -1,17 +1,18 @@
-﻿using Glitch.Functional.Parsing.Results;
+﻿using Glitch.Functional.Parsing.Input;
+using Glitch.Functional.Parsing.Results;
 
 namespace Glitch.Functional.Parsing
 {
     public partial class Parser<TToken, T>
     {
-        public Parser<TToken, IEnumerable<T>> AtLeastOnce()
+        public virtual Parser<TToken, IEnumerable<T>> AtLeastOnce()
         {
             return from once in Map(Sequence.Single)
                    from tail in ZeroOrMoreTimes()
                    select Enumerable.Concat(once, tail);
         }
 
-        public Parser<TToken, IEnumerable<T>> ZeroOrMoreTimes()
+        public virtual Parser<TToken, IEnumerable<T>> ZeroOrMoreTimes()
         {
             return new(input =>
             {
@@ -35,7 +36,7 @@ namespace Glitch.Functional.Parsing
             });
         }
 
-        public Parser<TToken, IEnumerable<T>> Times(int count)
+        public virtual Parser<TToken, IEnumerable<T>> Times(int count)
         {
             ArgumentOutOfRangeException.ThrowIfNegative(count);
 
@@ -47,4 +48,33 @@ namespace Glitch.Functional.Parsing
 
         }
     }
+
+    //public class SequenceParser<TToken, T> : Parser<TToken, IEnumerable<T>>
+    //{
+    //    internal SequenceParser(Func<TokenSequence<TToken>, ParseResult<TToken, T> parser) 
+    //        : base(this.Execute)
+    //    {
+    //    }
+
+    //    public override ParseResult<TToken, IEnumerable<T>> Execute(TokenSequence<TToken> input)
+    //    {
+    //        var remaining = input;
+    //        var items = new List<T>();
+
+    //        while (!remaining.IsEnd)
+    //        {
+    //            var result = parser(remaining);
+
+    //            if (!result.WasSuccessful)
+    //            {
+    //                break;
+    //            }
+
+    //            items.Add((T)result);
+    //            remaining = result.Remaining;
+    //        }
+
+    //        return ParseResult.Okay(items.AsEnumerable(), remaining);
+    //    }
+    //}
 }

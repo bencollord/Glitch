@@ -7,11 +7,11 @@ namespace Glitch.Functional.Parsing
         public Parser<TToken, TOther> Then<TOther>(Parser<TToken, TOther> other)
             => Then(_ => other);
 
-        public Parser<TToken, TResult> Then<TElement, TResult>(Parser<TToken, TElement> other, Func<T, TElement, TResult> projection)
-            => Then(x => other.Map(y => projection(x, y)));
+        public Parser<TToken, TResult> Then<TElement, TResult>(Parser<TToken, TElement> next, Func<T, TElement, TResult> projection)
+            => Then(x => next.Map(y => projection(x, y)));
 
-        public Parser<TToken, TResult> Then<TResult>(Func<T, Parser<TToken, TResult>> selector)
-            => new(input => parser(input).Match(ok => selector(ok.Value).parser(ok.Remaining),
+        public Parser<TToken, TResult> Then<TResult>(Func<T, Parser<TToken, TResult>> next)
+            => new(input => parser(input).Match(ok => next(ok.Value).parser(ok.Remaining),
                                                 err => err.Cast<TResult>() with { Remaining = input }));
 
         public Parser<TToken, TResult> Then<TElement, TResult>(Func<T, Parser<TToken, TElement>> selector, Func<T, TElement, TResult> projection)

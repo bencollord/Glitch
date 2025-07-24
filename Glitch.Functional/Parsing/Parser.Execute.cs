@@ -5,7 +5,7 @@ namespace Glitch.Functional.Parsing
 {
     public partial class Parser<TToken, T>
     {
-        public ParseResult<TToken, T> Execute(TokenSequence<TToken> input)
+        public virtual ParseResult<TToken, T> Execute(TokenSequence<TToken> input)
             => parser(input);
 
         public Result<T, ParseError> TryParse(TokenSequence<TToken> input)

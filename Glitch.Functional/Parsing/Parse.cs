@@ -1,6 +1,5 @@
 ﻿using Glitch.Functional.Parsing.Results;
 using System.Collections.Immutable;
-using System.Globalization;
 
 namespace Glitch.Functional.Parsing
 {
@@ -18,6 +17,9 @@ namespace Glitch.Functional.Parsing
         {
             return Satisfy<TToken>(t => t?.Equals(token) == true);
         }
+
+        public static Parser<TToken, Unit> Not<TToken, T>(Parser<TToken, T> parser)
+            => parser.Not();
 
         public static Parser<TToken, TToken> OneOf<TToken>(params IEnumerable<TToken> tokens)
             => OneOf(tokens.Select(Literal));

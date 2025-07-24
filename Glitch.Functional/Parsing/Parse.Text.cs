@@ -7,8 +7,6 @@
         public static Parser<char, char> LetterOrDigit => Char(char.IsLetterOrDigit).WithLabel("letter or digit");
         public static Parser<char, char> Whitespace => Char(char.IsWhiteSpace).WithLabel("whitespace");
 
-        public static Parser<char, string> Numeric => Digit.AtLeastOnce().Token();
-
         public static Parser<char, string> LineBreak => from cr in Char('\r').Maybe()
                                                         from lf in Char('\n')
                                                         select Environment.NewLine;
