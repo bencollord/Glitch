@@ -3,6 +3,8 @@ using Glitch.Functional.Parsing.Results;
 
 namespace Glitch.Functional.Parsing
 {
+    using static Parse;
+
     public static partial class ParserExtensions
     {
         public static ParseResult<char, T> Execute<T>(this Parser<char, T> parser, string input)
