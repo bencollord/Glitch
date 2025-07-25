@@ -13,24 +13,15 @@ namespace Glitch.Functional.Parsing
                                  .Guard(predicate, Expectation.Unexpected(input.Current))
             );
 
-        public static Parser<TToken, TToken> Literal<TToken>(TToken token)
+        public static Parser<TToken, TToken> Any<TToken>() => Satisfy<TToken>(_ => true);
+
+        public static Parser<TToken, TToken> Token<TToken>(TToken token)
         {
             return Satisfy<TToken>(t => t?.Equals(token) == true);
         }
 
         public static Parser<TToken, Unit> Not<TToken, T>(Parser<TToken, T> parser)
             => parser.Not();
-
-        public static Parser<TToken, TToken> OneOf<TToken>(params IEnumerable<TToken> tokens)
-            => OneOf(tokens.Select(Literal));
-
-        public static Parser<TToken, T> OneOf<TToken, T>(params IEnumerable<Parser<TToken, T>> parsers)
-            => new(input =>
-            {
-                var results = parsers.Select(p => p.Execute(input));
-
-                return results.FirstOrNone(p => p.WasSuccessful).IfNone(results.First());
-            });
 
         public static Parser<TToken, IEnumerable<TToken>> Sequence<TToken>(IEnumerable<Parser<TToken, TToken>> parsers)
         {

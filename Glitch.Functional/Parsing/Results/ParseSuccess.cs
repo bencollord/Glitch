@@ -16,10 +16,9 @@ namespace Glitch.Functional.Parsing.Results
 
         public override ParseResult<TToken, TResult> AndThen<TResult>(Func<T, ParseResult<TToken, TResult>> bind) => bind(Value);
 
-        public override ParseResult<TToken, TResult> Map<TResult>(Func<T, TResult> map)
-        {
-            return AndThen(v => new ParseSuccess<TToken, TResult>(map(v), Remaining));
-        }
+        public override ParseResult<TToken, T> OrElse(Func<ParseError<TToken, T>, ParseResult<TToken, T>> bind) => this;
+
+        public override ParseResult<TToken, TResult> Map<TResult>(Func<T, TResult> map) => AndThen(v => new ParseSuccess<TToken, TResult>(map(v), Remaining));
 
         public override ParseResult<TToken, TResult> Cast<TResult>() => Map(DynamicCast<TResult>.From);
 

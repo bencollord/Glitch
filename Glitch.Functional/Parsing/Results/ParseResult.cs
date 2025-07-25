@@ -4,6 +4,10 @@ namespace Glitch.Functional.Parsing.Results
 {
     public static class ParseResult
     {
+        public static ParseResult<TToken, T> Empty<TToken, T>() => new EmptyParseResult<TToken, T>();
+
+        public static ParseResult<TToken, T> Empty<TToken, T>(TokenSequence<TToken> remaining) => new EmptyParseResult<TToken, T>(remaining);
+
         public static ParseResult<TToken, T> Okay<TToken, T>(T value) => Okay(value, TokenSequence<TToken>.Empty);
 
         public static ParseResult<TToken, T> Okay<TToken, T>(T value, TokenSequence<TToken> remaining) => new ParseSuccess<TToken, T>(value, remaining);
@@ -38,12 +42,27 @@ namespace Glitch.Functional.Parsing.Results
 
         public abstract ParseResult<TToken, TResult> Map<TResult>(Func<T, TResult> map);
 
+        public abstract ParseResult<TToken, TResult> Cast<TResult>();
+
         public abstract ParseResult<TToken, TResult> AndThen<TResult>(Func<T, ParseResult<TToken, TResult>> bind);
 
         public ParseResult<TToken, TResult> AndThen<TElement, TResult>(Func<T, ParseResult<TToken, TElement>> bind, Func<T, TElement, TResult> project)
             => AndThen(x => bind(x).Map(y => project(x, y)));
 
-        public abstract ParseResult<TToken, TResult> Cast<TResult>();
+        public abstract ParseResult<TToken, T> OrElse(Func<ParseError<TToken, T>, ParseResult<TToken, T>> bind);
+        
+        public ParseResult<TToken, TResult> And<TResult>(ParseResult<TToken, TResult> other)
+            => WasSuccessful ? other : Cast<TResult>();
+
+        public ParseResult<TToken, T> Or(ParseResult<TToken, T> other) => WasSuccessful ? this : other;
+
+        public ParseResult<TToken, T> XOr(ParseResult<TToken, T> other)
+            => (WasSuccessful, other.WasSuccessful) switch
+            {
+                (true, true) => ParseResult.Fail<TToken, T>($"Exclusive OR failed. Both results succeeded. Left {(T)this}, Right: {(T)other}"),
+                (true, _) => other,
+                (false, _) => this,
+            };
 
         public ParseResult<TToken, T> Filter(Func<T, bool> predicate)
             => Guard(predicate, Expectation<TToken>.None);
@@ -63,5 +82,11 @@ namespace Glitch.Functional.Parsing.Results
             ParseSuccess<TToken, T>(var value, _) => value,
             _ => throw new InvalidCastException($"Cannot faulted result to value of type {typeof(T).Name}"),
         };
+
+        public static implicit operator bool(ParseResult<TToken, T> result) => result.WasSuccessful;
+
+        public static ParseResult<TToken, T> operator &(ParseResult<TToken, T> x, ParseResult<TToken, T> y) => x.And(y);
+        public static ParseResult<TToken, T> operator |(ParseResult<TToken, T> x, ParseResult<TToken, T> y) => x.Or(y);
+        public static ParseResult<TToken, T> operator ^(ParseResult<TToken, T> x, ParseResult<TToken, T> y) => x.XOr(y);
     }
 }

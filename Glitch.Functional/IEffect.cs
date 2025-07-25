@@ -17,9 +17,7 @@ namespace Glitch.Functional
 
         virtual IEffect<TInput, TResult> AndThen<TResult>(Func<TOutput, IEffect<TInput, TResult>> bind)
             => new EffectContinuation<TInput, TOutput, TResult>(this, bind);
-        virtual IEffect<TInput, TOutput> OrElse(Func<Error, IEffect<TInput, TOutput>> bind)
-            => new EffectRecovery<TInput, TOutput>(this, bind);
-
+        
         virtual IEffect<TInput, TOutput> MapError<TError>(Func<TError, Error> map) where TError : Error
             => MapError(error => error is TError derived ? map(derived) : error);
 
@@ -31,14 +29,7 @@ namespace Glitch.Functional
                 action(v);
                 return v;
             });
-        virtual IEffect<TInput, TResult> And<TResult>(IEffect<TInput, TResult> other)
-            => AndThen(_ => other);
 
-        virtual IEffect<TInput, TOutput> Or(IEffect<TInput, TOutput> other)
-            => OrElse(_ => other);
-
-        public static virtual IEffect<TInput, TOutput> operator &(IEffect<TInput, TOutput> x, IEffect<TInput, TOutput> y) => x.And(y);
-        public static virtual IEffect<TInput, TOutput> operator |(IEffect<TInput, TOutput> x, IEffect<TInput, TOutput> y) => x.Or(y);
         public static virtual IEffect<TInput, TOutput> operator >>(IEffect<TInput, TOutput> x, IEffect<TInput, TOutput> y) => x.AndThen(_ => y);
         public static virtual IEffect<TInput, TOutput> operator >>(IEffect<TInput, TOutput> x, IEffect<TInput, Unit> y) => x.AndThen(v => y.Map(_ => v));
     }

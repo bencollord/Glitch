@@ -6,14 +6,14 @@ namespace Glitch.Functional.Parsing
     {
         private static readonly Func<int, Func<string, int>> parseInt = radix => input => Convert.ToInt32(input, radix);
 
-        public static Parser<char, string> Numeric => Digit.AtLeastOnce().Token();
+        public static Parser<char, string> Numeric => Digit.AtLeastOnce().AsString();
 
         public static Parser<char, string> Hex
             => Digit.Or(OneOf("ABCDEF")) // TODO Case-insensitive
                     .Or(OneOf("abcdef"))
                     .AtLeastOnce()
-                    .Before(Literal("0x").Maybe())
-                    .Token();
+                    .After(Literal("0x").Maybe())
+                    .AsString();
 
         public static Parser<char, int> Int => Numeric.Map(parseInt(10)) | Hex.Map(parseInt(16));
 

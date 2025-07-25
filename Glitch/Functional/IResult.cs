@@ -9,8 +9,8 @@ namespace Glitch.Functional
 
         IResult<TResult, TError> Map<TResult>(Func<TSuccess, TResult> map);
         IResult<TSuccess, TNewError> MapError<TNewError>(Func<TError, TNewError> map);
-        IResult<TResult, TError> Cast<TResult>();
-        IResult<TSuccess, TError> Do(Action<TSuccess> action);
+        virtual IResult<TResult, TError> Cast<TResult>() => Map(v => (TResult)(dynamic)v!);
+        virtual IResult<TSuccess, TError> Do(Action<TSuccess> action) => Map(v => { action(v); return v; });
         IResult<TSuccess, TError> Guard(bool condition, Func<TSuccess, TError> error);
         
         IResult<TResult, TError> And<TResult>(IResult<TResult, TError> other);
