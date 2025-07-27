@@ -4,17 +4,32 @@ namespace Glitch.Functional.Parsing.Results
 {
     public static class ParseResult
     {
-        public static ParseResult<TToken, T> Empty<TToken, T>() => new EmptyParseResult<TToken, T>();
+        public static ParseResult<TToken, T> Empty<TToken, T>() => ParseResult<TToken>.Empty<T>();
 
-        public static ParseResult<TToken, T> Empty<TToken, T>(TokenSequence<TToken> remaining) => new EmptyParseResult<TToken, T>(remaining);
+        public static ParseResult<TToken, T> Empty<TToken, T>(TokenSequence<TToken> remaining) => ParseResult<TToken>.Empty<T>(remaining);
 
-        public static ParseResult<TToken, T> Okay<TToken, T>(T value) => Okay(value, TokenSequence<TToken>.Empty);
+        public static ParseResult<TToken, T> Okay<TToken, T>(T value) => ParseResult<TToken>.Okay(value);
 
-        public static ParseResult<TToken, T> Okay<TToken, T>(T value, TokenSequence<TToken> remaining) => new ParseSuccess<TToken, T>(value, remaining);
+        public static ParseResult<TToken, T> Okay<TToken, T>(T value, TokenSequence<TToken> remaining) => ParseResult<TToken>.Okay(value, remaining);
 
-        public static ParseResult<TToken, T> Fail<TToken, T>(string message) => Fail<TToken, T>(message, TokenSequence<TToken>.Empty);
+        public static ParseResult<TToken, T> Error<TToken, T>(string message) => ParseResult<TToken>.Error<T>(message);
 
-        public static ParseResult<TToken, T> Fail<TToken, T>(string message, TokenSequence<TToken> remaining) => new ParseError<TToken, T>(message, remaining);
+        public static ParseResult<TToken, T> Error<TToken, T>(string message, TokenSequence<TToken> remaining) => ParseResult<TToken>.Error<T>(message, remaining);
+    }
+
+    public static class ParseResult<TToken>
+    {
+        public static ParseResult<TToken, T> Empty<T>() => new EmptyParseResult<TToken, T>();
+
+        public static ParseResult<TToken, T> Empty<T>(TokenSequence<TToken> remaining) => new EmptyParseResult<TToken, T>(remaining);
+
+        public static ParseResult<TToken, T> Okay<T>(T value) => Okay(value, TokenSequence<TToken>.Empty);
+
+        public static ParseResult<TToken, T> Okay<T>(T value, TokenSequence<TToken> remaining) => new ParseSuccess<TToken, T>(value, remaining);
+
+        public static ParseResult<TToken, T> Error<T>(string message) => Error<T>(message, TokenSequence<TToken>.Empty);
+
+        public static ParseResult<TToken, T> Error<T>(string message, TokenSequence<TToken> remaining) => new ParseError<TToken, T>(message, remaining);
     }
 
     public abstract record ParseResult<TToken, T>
@@ -59,7 +74,7 @@ namespace Glitch.Functional.Parsing.Results
         public ParseResult<TToken, T> XOr(ParseResult<TToken, T> other)
             => (WasSuccessful, other.WasSuccessful) switch
             {
-                (true, true) => ParseResult.Fail<TToken, T>($"Exclusive OR failed. Both results succeeded. Left {(T)this}, Right: {(T)other}"),
+                (true, true) => ParseResult.Error<TToken, T>($"Exclusive OR failed. Both results succeeded. Left {(T)this}, Right: {(T)other}"),
                 (true, _) => other,
                 (false, _) => this,
             };
