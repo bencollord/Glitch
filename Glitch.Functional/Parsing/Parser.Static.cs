@@ -22,12 +22,6 @@ namespace Glitch.Functional.Parsing
 
         public static Parser<TToken, T> Error<TToken, T>(string message, TokenSequence<TToken> remaining)
             => Parser<TToken, T>.Error(message, remaining);
-
-        public static Parser<TToken, T> Error<TToken, T>(ParseError<TToken, T> error)
-            => Parser<TToken, T>.Error(error);
-
-        public static Parser<TToken, T> Error<TToken, T>(ParseError<TToken, T> error, TokenSequence<TToken> remaining)
-            => Parser<TToken, T>.Error(error, remaining);
     }
 
     public static partial class Parser<TToken>
@@ -49,38 +43,26 @@ namespace Glitch.Functional.Parsing
 
         public static Parser<TToken, T> Error<T>(string message, TokenSequence<TToken> remaining)
             => Parser<TToken, T>.Error(message, remaining);
-
-        public static Parser<TToken, T> Error<T>(ParseError<TToken, T> error)
-            => Parser<TToken, T>.Error(error);
-
-        public static Parser<TToken, T> Error<T>(ParseError<TToken, T> error, TokenSequence<TToken> remaining)
-            => Parser<TToken, T>.Error(error, remaining);
     }
 
     public partial class Parser<TToken, T>
     {
         public static Parser<TToken, T> Return(T value)
-            => new(input => ParseResult.Okay(value, input));
+            => new ReturnParser<TToken, T>(value);
 
         public static Parser<TToken, T> Return(T value, TokenSequence<TToken> remaining)
-            => new(input => ParseResult.Okay(value, remaining));
+            => new ReturnParser<TToken, T>(value, remaining);
 
         public static Parser<TToken, T> Error(Expectation<TToken> expectation)
-            => Error(new ParseError<TToken, T>(expectation));
+            => new ReturnParser<TToken, T>(expectation);
 
         public static Parser<TToken, T> Error(Expectation<TToken> expectation, TokenSequence<TToken> remaining)
-            => Error(new ParseError<TToken, T>(expectation, remaining));
-
+            => new ReturnParser<TToken, T>(expectation, remaining);
+        
         public static Parser<TToken, T> Error(string message)
-            => Error(new ParseError<TToken, T>(message));
+            => Error(Expectation.Labeled<TToken>(message));
 
         public static Parser<TToken, T> Error(string message, TokenSequence<TToken> remaining)
-            => Error(new ParseError<TToken, T>(message), remaining);
-
-        public static Parser<TToken, T> Error(ParseError<TToken, T> error)
-            => new(input => error);
-
-        public static Parser<TToken, T> Error(ParseError<TToken, T> error, TokenSequence<TToken> remaining)
-            => Error(error).WithRemaining(remaining);
+            => Error(Expectation.Labeled<TToken>(message), remaining);
     }
 }

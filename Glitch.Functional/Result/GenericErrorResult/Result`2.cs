@@ -170,10 +170,10 @@ namespace Glitch.Functional
         /// Otherwise, returns the result of the second function to the wrapped error.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
-        /// <param name="ifOkay"></param>
-        /// <param name="ifFail"></param>
+        /// <param name="okay"></param>
+        /// <param name="error"></param>
         /// <returns></returns>
-        public abstract TResult Match<TResult>(Func<TOkay, TResult> ifOkay, Func<TError, TResult> ifFail);
+        public abstract TResult Match<TResult>(Func<TOkay, TResult> okay, Func<TError, TResult> error);
 
         /// <summary>
         /// Casts the wrapped value to <typeparamref name="TResult"/> if Ok,
