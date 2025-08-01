@@ -77,7 +77,7 @@ namespace Glitch.Functional
                 => predicate(Value) ? this : error(Value);
 
             /// <inheritdoc />
-            public override Option<TOkay> OrNone() => Some(Value);
+            public override Option<TOkay> OkayOrNone() => Some(Value);
 
             public override string ToString() => $"Ok: {Value}";
 
@@ -92,10 +92,6 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override TOkay IfFail(Func<TError, TOkay> _) => Value;
-
-            public override bool IsOkayAnd(Func<TOkay, bool> predicate) => predicate(Value);
-
-            public override bool IsFailAnd(Func<TError, bool> _) => false;
 
             public override TError UnwrapErrorOr(TError fallback) => fallback;
 

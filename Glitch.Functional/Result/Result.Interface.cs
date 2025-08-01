@@ -1,6 +1,6 @@
 ﻿namespace Glitch.Functional
 {
-    public abstract partial record Result<T> : IResult<T, Error>
+    public partial record Result<T> : IResult<T, Error>
     {
         IResult<T, Error> IResult<T, Error>.Guard(Func<T, bool> predicate, Func<T, Error> error) => Guard(predicate, error);
 

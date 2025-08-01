@@ -72,7 +72,7 @@ namespace Glitch.Functional
             public override Result<TOkay, TError> OrElse(Func<TError, Result<TOkay, TError>> bindFail) => bindFail(Error);
 
             /// <inheritdoc />
-            public override Option<TOkay> OrNone() => None;
+            public override Option<TOkay> OkayOrNone() => None;
 
             /// <inheritdoc />
             public override Result<TOkay, TError> Guard(Func<TOkay, bool> predicate, TError _) => this;
@@ -104,10 +104,6 @@ namespace Glitch.Functional
 
             /// <inheritdoc />
             public override TOkay IfFail(Func<TError, TOkay> fallback) => fallback(Error);
-
-            public override bool IsOkayAnd(Func<TOkay, bool> _) => false;
-
-            public override bool IsFailAnd(Func<TError, bool> predicate) => predicate(Error);
 
             /// <inheritdoc />
             public override TError UnwrapErrorOr(TError _) => Error;

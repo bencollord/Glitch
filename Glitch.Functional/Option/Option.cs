@@ -246,7 +246,7 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <returns></returns>
         public Option<TResult> Cast<TResult>()
-            => AndThen(v => DynamicCast<TResult>.TryFrom(v).Run().OrNone());
+            => AndThen(v => DynamicCast<TResult>.TryFrom(v).Run().OkayOrNone());
 
         public Option<TResult> As<TResult>()
             where TResult : class

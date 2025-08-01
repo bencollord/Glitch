@@ -2,21 +2,21 @@ using System.Collections.Immutable;
 
 namespace Glitch.Functional
 {
-    public abstract partial record Result<TOkay, TError>
+    public abstract partial record Result<T, E>
     {
         private protected Result() { }
 
-        public static Result<TOkay, TError> Okay(TOkay value) => new Result.Success<TOkay, TError>(value);
+        public static Result<T, E> Okay(T value) => new Result.Success<T, E>(value);
 
-        public static Result<TOkay, TError> Fail(TError error) => new Result.Failure<TOkay, TError>(error);
+        public static Result<T, E> Fail(E error) => new Result.Failure<T, E>(error);
 
         public abstract bool IsOkay { get; }
 
         public abstract bool IsFail { get; }
 
-        public abstract bool IsOkayAnd(Func<TOkay, bool> predicate);
+        public bool IsOkayAnd(Func<T, bool> predicate) => Match(predicate, false);
 
-        public abstract bool IsFailAnd(Func<TError, bool> predicate);
+        public bool IsErrorOr(Func<T, bool> predicate) => Match(predicate, true);
 
         /// <summary>
         /// If the result is <see cref="Result.Success{T}" />, applies
@@ -27,14 +27,14 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <param name="map"></param>
         /// <returns></returns>
-        public abstract Result<TResult, TError> Map<TResult>(Func<TOkay, TResult> map);
+        public abstract Result<TResult, E> Map<TResult>(Func<T, TResult> map);
 
-        public Result<Func<T2, TResult>, TError> PartialMap<T2, TResult>(Func<TOkay, T2, TResult> map)
+        public Result<Func<T2, TResult>, E> PartialMap<T2, TResult>(Func<T, T2, TResult> map)
             => Map(map.Curry());
 
-        public abstract Result<TResult, TError> MapOr<TResult>(Func<TOkay, TResult> map, TError ifFail);
+        public abstract Result<TResult, E> MapOr<TResult>(Func<T, TResult> map, E ifFail);
 
-        public abstract Result<TResult, TError> MapOrElse<TResult>(Func<TOkay, TResult> map, Func<TError, TError> ifFail);
+        public abstract Result<TResult, E> MapOrElse<TResult>(Func<T, TResult> map, Func<E, E> ifFail);
 
         /// <summary>
         /// If the result is a failure, returns a new result with the mapping function
@@ -42,7 +42,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="map"></param>
         /// <returns></returns>
-        public abstract Result<TOkay, TNewError> MapError<TNewError>(Func<TError, TNewError> map);
+        public abstract Result<T, TNewError> MapError<TNewError>(Func<E, TNewError> map);
 
         /// <summary>
         /// Applies a wrapped function to the wrapped value if both exist.
@@ -52,7 +52,7 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <param name="function"></param>
         /// <returns></returns>
-        public Result<TResult, TError> Apply<TResult>(Result<Func<TOkay, TResult>, TError> function)
+        public Result<TResult, E> Apply<TResult>(Result<Func<T, TResult>, E> function)
             => AndThen(v => function.Map(fn => fn(v)));
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <param name="other"></param>
         /// <returns></returns>
-        public abstract Result<TResult, TError> And<TResult>(Result<TResult, TError> other);
+        public abstract Result<TResult, E> And<TResult>(Result<TResult, E> other);
 
         /// <summary>
         /// If Okay, applies the function to the wrapped value. Otherwise, returns
@@ -71,7 +71,7 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <param name="bind"></param>
         /// <returns></returns>
-        public abstract Result<TResult, TError> AndThen<TResult>(Func<TOkay, Result<TResult, TError>> bind);
+        public abstract Result<TResult, E> AndThen<TResult>(Func<T, Result<TResult, E>> bind);
 
         /// <summary>
         /// BindMap operation, similar to the two arg overload of SelectMany.
@@ -81,7 +81,7 @@ namespace Glitch.Functional
         /// <param name="bind"></param>
         /// <param name="project"></param>
         /// <returns></returns>
-        public Result<TResult, TError> AndThen<TElement, TResult>(Func<TOkay, Result<TElement, TError>> bind, Func<TOkay, TElement, TResult> project)
+        public Result<TResult, E> AndThen<TElement, TResult>(Func<T, Result<TElement, E>> bind, Func<T, TElement, TResult> project)
             => AndThen(x => bind(x).Map(y => project(x, y)));
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public abstract Result<TOkay, TError> Or(Result<TOkay, TError> other);
+        public abstract Result<T, E> Or(Result<T, E> other);
 
         /// <summary>
         /// Returns the current result if Ok, otherwise applies the provided
@@ -97,7 +97,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public abstract Result<TOkay, TError> OrElse(Func<TError, Result<TOkay, TError>> other);
+        public abstract Result<T, E> OrElse(Func<E, Result<T, E>> other);
 
         /// <summary>
         /// BiBind operation
@@ -106,7 +106,7 @@ namespace Glitch.Functional
         /// <param name="ifOkay"></param>
         /// <param name="ifFail"></param>
         /// <returns></returns>
-        public abstract Result<TResult, TError> Choose<TResult>(Func<TOkay, Result<TResult, TError>> ifOkay, Func<TError, Result<TResult, TError>> ifFail);
+        public abstract Result<TResult, E> Choose<TResult>(Func<T, Result<TResult, E>> ifOkay, Func<E, Result<TResult, E>> ifFail);
 
         /// <summary>
         /// Executes an impure action against the value if Ok.
@@ -114,7 +114,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public abstract Result<TOkay, TError> Do(Action<TOkay> action);
+        public abstract Result<T, E> Do(Action<T> action);
 
         /// <summary>
         /// Executes an impure action against the value if Ok.
@@ -122,7 +122,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Result<TOkay, TError> Do(Func<TOkay, Unit> action) => Do(v => action(v));
+        public Result<T, E> Do(Func<T, Unit> action) => Do(v => action(v));
 
         /// <summary>
         /// Executes an impure action if failed.
@@ -130,7 +130,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Result<TOkay, TError> IfFail(Action action) => IfFail(_ => action());
+        public Result<T, E> IfFail(Action action) => IfFail(_ => action());
 
         /// <summary>
         /// Executes an impure action if failed.
@@ -138,7 +138,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public abstract Result<TOkay, TError> IfFail(Action<TError> action);
+        public abstract Result<T, E> IfFail(Action<E> action);
 
         /// <summary>
         /// Executes an impure action if failed and the error matches the provided type.
@@ -146,9 +146,9 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Result<TOkay, TError> IfError<TDerivedError>(Action action)
-            where TDerivedError : TError
-            => IfError<TError>(_ => action());
+        public Result<T, E> IfError<TDerivedError>(Action action)
+            where TDerivedError : E
+            => IfError<E>(_ => action());
 
         /// <summary>
         /// Executes an impure action if failed and the error matches the provided type.
@@ -156,13 +156,13 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public abstract Result<TOkay, TError> IfError<TDerivedError>(Action<TDerivedError> action)
-            where TDerivedError : TError;
+        public abstract Result<T, E> IfError<TDerivedError>(Action<TDerivedError> action)
+            where TDerivedError : E;
 
-        public TResult Match<TResult>(Func<TOkay, TResult> ifOkay, TResult ifFail)
+        public TResult Match<TResult>(Func<T, TResult> ifOkay, TResult ifFail)
             => Map(ifOkay).IfFail(ifFail);
 
-        public TResult Match<TResult>(Func<TOkay, TResult> ifOkay, Func<TResult> ifFail)
+        public TResult Match<TResult>(Func<T, TResult> ifOkay, Func<TResult> ifFail)
             => Match(ifOkay, _ => ifFail());
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace Glitch.Functional
         /// <param name="ifOkay"></param>
         /// <param name="ifFail"></param>
         /// <returns></returns>
-        public abstract TResult Match<TResult>(Func<TOkay, TResult> ifOkay, Func<TError, TResult> ifFail);
+        public abstract TResult Match<TResult>(Func<T, TResult> ifOkay, Func<E, TResult> ifFail);
 
         /// <summary>
         /// Casts the wrapped value to <typeparamref name="TResult"/> if Ok,
@@ -185,7 +185,7 @@ namespace Glitch.Functional
         /// lift the result into the <see cref="Fallible{T}"/> type.
         /// </exception>
         /// <returns></returns>
-        public abstract Result<TResult, TError> Cast<TResult>();
+        public abstract Result<TResult, E> Cast<TResult>();
 
         /// <summary>
         /// Casts the result, or returns the provided error
@@ -194,9 +194,9 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <param name="error"></param>
         /// <returns></returns>
-        public abstract Result<TResult, TError> CastOr<TResult>(TError error);
+        public abstract Result<TResult, E> CastOr<TResult>(E error);
 
-        public abstract Result<TResult, TError> CastOrElse<TResult>(Func<TOkay, TError> error);
+        public abstract Result<TResult, E> CastOrElse<TResult>(Func<T, E> error);
 
         /// <summary>
         /// For a successful result, checks the value against a predicate
@@ -205,26 +205,26 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        public abstract Result<TOkay, TError> Guard(Func<TOkay, bool> predicate, TError error);
+        public abstract Result<T, E> Guard(Func<T, bool> predicate, E error);
 
-        public abstract Result<TOkay, TError> Guard(Func<TOkay, bool> predicate, Func<TOkay, TError> error);
+        public abstract Result<T, E> Guard(Func<T, bool> predicate, Func<T, E> error);
 
-        public Result<TOkay, TError> GuardNot(Func<TOkay, bool> predicate, TError error)
+        public Result<T, E> GuardNot(Func<T, bool> predicate, E error)
             => Guard(predicate.Not(), error);
 
-        public Result<TOkay, TError> GuardNot(Func<TOkay, bool> predicate, Func<TOkay, TError> error)
+        public Result<T, E> GuardNot(Func<T, bool> predicate, Func<T, E> error)
             => Guard(predicate.Not(), error);
 
-        public Result<TOkay, TError> Guard(bool condition, TError error)
+        public Result<T, E> Guard(bool condition, E error)
             => Guard(_ => condition, error);
 
-        public Result<TOkay, TError> Guard(bool condition, Func<TOkay, TError> error)
+        public Result<T, E> Guard(bool condition, Func<T, E> error)
             => Guard(_ => condition, error);
 
-        public Result<TOkay, TError> GuardNot(bool condition, TError error)
+        public Result<T, E> GuardNot(bool condition, E error)
             => Guard(!condition, error);
 
-        public Result<TOkay, TError> GuardNot(bool condition, Func<TOkay, TError> error)
+        public Result<T, E> GuardNot(bool condition, Func<T, E> error)
             => Guard(!condition, error);
 
         /// <summary>
@@ -232,20 +232,20 @@ namespace Glitch.Functional
         /// as an exception.
         /// </summary>
         /// <returns></returns>
-        public abstract TOkay Unwrap();
+        public abstract T Unwrap();
 
-        public TOkay UnwrapOr(TOkay fallback) => IfFail(fallback);
+        public T UnwrapOr(T fallback) => IfFail(fallback);
 
-        public abstract bool TryUnwrap(out TOkay result);
+        public abstract bool TryUnwrap(out T result);
 
-        public abstract bool TryUnwrapError(out TError result);
+        public abstract bool TryUnwrapError(out E result);
 
         /// <summary>
         /// Returns the wrapped value if Ok, otherwise returns the fallback value.
         /// </summary>
         /// <param name="fallback"></param>
         /// <returns></returns>
-        public abstract TOkay IfFail(TOkay fallback);
+        public abstract T IfFail(T fallback);
 
         /// <summary>
         /// Returns the wrapped value if Ok. Otherwise, returns the result
@@ -253,7 +253,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="fallback"></param>
         /// <returns></returns>
-        public abstract TOkay IfFail(Func<TOkay> fallback);
+        public abstract T IfFail(Func<T> fallback);
 
         /// <summary>
         /// Returns the wrapped value if Ok. Otherwise, returns the result
@@ -261,20 +261,20 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="fallback"></param>
         /// <returns></returns>
-        public abstract TOkay IfFail(Func<TError, TOkay> fallback);
+        public abstract T IfFail(Func<E, T> fallback);
 
         /// <summary>
         /// Returns Some(<typeparamref name="T" />) if Ok. Otherwise, returns
         /// an empty <see cref="Option{T}" />.
         /// </summary>
         /// <returns></returns>
-        public abstract Option<TOkay> OrNone();
+        public abstract Option<T> OkayOrNone();
 
         /// <summary>
         /// Returns the wrapped error if faulted. Otherwise throws an <see cref="InvalidOperationException"/>.
         /// </summary>
         /// <returns></returns>
-        public TError UnwrapError()
+        public E UnwrapError()
             => UnwrapErrorOrElse(() => throw new InvalidOperationException("Cannot unwrap error of successful result"));
 
         /// <summary>
@@ -282,7 +282,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="fallback"></param>
         /// <returns></returns>
-        public abstract TError UnwrapErrorOr(TError fallback);
+        public abstract E UnwrapErrorOr(E fallback);
 
         /// <summary>
         /// Returns the wrapped error if faulted. Otherwise, returns the error
@@ -290,7 +290,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="fallback"></param>
         /// <returns></returns>
-        public TError UnwrapErrorOrElse(Func<TError> fallback)
+        public E UnwrapErrorOrElse(Func<E> fallback)
             => UnwrapErrorOrElse(_ => fallback());
 
         /// <summary>
@@ -299,55 +299,55 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="fallback"></param>
         /// <returns></returns>
-        public abstract TError UnwrapErrorOrElse(Func<TOkay, TError> fallback);
+        public abstract E UnwrapErrorOrElse(Func<T, E> fallback);
 
         /// <summary>
         /// Returns Some(<see cref="Error"/>) if faulted. Otherwise, returns
         /// an empty <see cref="Option{Error}"/>.
         /// </summary>
         /// <returns></returns>
-        public abstract Option<TError> ErrorOrNone();
+        public abstract Option<E> ErrorOrNone();
 
         /// <summary>
         /// Returns a singleton <see cref="IEnumerable{T}" /> if Ok.
         /// Otherwise, yields and empty <see cref="IEnumerable{T}" .
         /// </summary>
         /// <returns></returns>
-        public abstract IEnumerable<TOkay> Iterate();
+        public abstract IEnumerable<T> Iterate();
 
         public abstract override string ToString();
 
-        public static bool operator true(Result<TOkay, TError> result) => result.IsOkay;
+        public static bool operator true(Result<T, E> result) => result.IsOkay;
 
-        public static bool operator false(Result<TOkay, TError> result) => result.IsFail;
+        public static bool operator false(Result<T, E> result) => result.IsFail;
 
-        public static Result<TOkay, TError> operator &(Result<TOkay, TError> x, Result<TOkay, TError> y) => x.And(y);
+        public static Result<T, E> operator &(Result<T, E> x, Result<T, E> y) => x.And(y);
 
-        public static Result<TOkay, TError> operator |(Result<TOkay, TError> x, Result<TOkay, TError> y) => x.Or(y);
+        public static Result<T, E> operator |(Result<T, E> x, Result<T, E> y) => x.Or(y);
 
-        public static implicit operator bool(Result<TOkay, TError> result) => result.IsOkay;
+        public static implicit operator bool(Result<T, E> result) => result.IsOkay;
 
-        public static implicit operator Result<TOkay, TError>(TOkay value) => Okay(value);
+        public static implicit operator Result<T, E>(T value) => Okay(value);
 
-        public static implicit operator Result<TOkay, TError>(Success<TOkay> success) => Okay(success.Value);
+        public static implicit operator Result<T, E>(Success<T> success) => Okay(success.Value);
 
-        public static implicit operator Result<TOkay, TError>(TError error) => Fail(error);
+        public static implicit operator Result<T, E>(E error) => Fail(error);
 
-        public static implicit operator Result<TOkay, TError>(Failure<TError> failure) => Fail(failure.Error);
+        public static implicit operator Result<T, E>(Failure<E> failure) => Fail(failure.Error);
 
-        public static explicit operator TOkay(Result<TOkay, TError> result)
+        public static explicit operator T(Result<T, E> result)
             => Try(result.Unwrap)
-                   .MapError(err => new InvalidCastException($"Cannot cast a faulted result to {typeof(TOkay)}", err.AsException()))
+                   .MapError(err => new InvalidCastException($"Cannot cast a faulted result to {typeof(T)}", err.AsException()))
                    .Unwrap();
 
-        public static explicit operator TError(Result<TOkay, TError> result)
-            => result is Result.Failure<TOkay, TError>(var err)
+        public static explicit operator E(Result<T, E> result)
+            => result is Result.Failure<T, E>(var err)
                    ? err : throw new InvalidCastException("Cannot cast a successful result to an error");
 
         // UNDONE Needs more comprehensive functionality
-        public FluentActionContext IfOkay(Func<TOkay, Unit> ifOkay) => IfOkay(new Action<TOkay>(t => ifOkay(t)));
+        public FluentActionContext IfOkay(Func<T, Unit> ifOkay) => IfOkay(new Action<T>(t => ifOkay(t)));
 
-        public FluentActionContext IfOkay(Action<TOkay> ifOkay) => new FluentActionContext(this, ifOkay);
+        public FluentActionContext IfOkay(Action<T> ifOkay) => new FluentActionContext(this, ifOkay);
 
         /// <summary>
         /// Fluent context for chaining actions against a result.
@@ -362,40 +362,40 @@ namespace Glitch.Functional
         /// </remarks>
         public readonly struct FluentActionContext
         {
-            private readonly Result<TOkay, TError> result;
-            private readonly Action<TOkay> ifOkay;
-            private readonly ImmutableDictionary<Type, Action<TError>> errorHandlers;
+            private readonly Result<T, E> result;
+            private readonly Action<T> ifOkay;
+            private readonly ImmutableDictionary<Type, Action<E>> errorHandlers;
 
-            internal FluentActionContext(Result<TOkay, TError> result, Action<TOkay> ifOkay)
-                : this(result, ifOkay, ImmutableDictionary<Type, Action<TError>>.Empty) { }
+            internal FluentActionContext(Result<T, E> result, Action<T> ifOkay)
+                : this(result, ifOkay, ImmutableDictionary<Type, Action<E>>.Empty) { }
 
-            internal FluentActionContext(Result<TOkay, TError> result, Action<TOkay> ifOkay, ImmutableDictionary<Type, Action<TError>> errorHandlers)
+            internal FluentActionContext(Result<T, E> result, Action<T> ifOkay, ImmutableDictionary<Type, Action<E>> errorHandlers)
             {
                 this.result = result;
                 this.ifOkay = ifOkay;
                 this.errorHandlers = errorHandlers;
             }
 
-            public FluentActionContext Then(Action<TOkay> ifOkay) => new(result, this.ifOkay + ifOkay, errorHandlers);
+            public FluentActionContext Then(Action<T> ifOkay) => new(result, this.ifOkay + ifOkay, errorHandlers);
 
-            public FluentActionContext Then(Func<TOkay, Unit> ifOkay) => Then(new Action<TOkay>(v => ifOkay(v)));
+            public FluentActionContext Then(Func<T, Unit> ifOkay) => Then(new Action<T>(v => ifOkay(v)));
 
-            public Unit Otherwise(Func<TError, Unit> ifFail) => Otherwise(new Action<TError>(v => ifFail(v)));
+            public Unit Otherwise(Func<E, Unit> ifFail) => Otherwise(new Action<E>(v => ifFail(v)));
 
-            public Unit Otherwise(Action<TError> ifFail)
+            public Unit Otherwise(Action<E> ifFail)
             {
                 switch (result)
                 {
-                    case Result.Success<TOkay, TError>(TOkay value):
+                    case Result.Success<T, E>(T value):
                         ifOkay(value);
                         break;
 
-                    case Result.Failure<TOkay, TError>(TError err)
+                    case Result.Failure<T, E>(E err)
                         when errorHandlers.TryGetValue(err.GetType(), out var handler):
                         handler(err);
                         break;
 
-                    case Result.Failure<TOkay, TError>(TError err):
+                    case Result.Failure<T, E>(E err):
                         ifFail(err);
                         break;
 
@@ -408,7 +408,7 @@ namespace Glitch.Functional
 
             public Unit OtherwiseDoNothing() => Otherwise(_ => { /* Nop */ });
 
-            public Result<TOkay, TError> OtherwiseContinue() => Otherwise(_ => { /* Nop */ }).Return(result);
+            public Result<T, E> OtherwiseContinue() => Otherwise(_ => { /* Nop */ }).Return(result);
         }
     }
 }
