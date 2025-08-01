@@ -37,7 +37,7 @@ namespace Glitch.Functional.Parsing
             var result = parser(input);
 
             return result.WasSuccessful
-                 ? ParseResult.Fail<TToken, Unit>("Negated parser was successful", input)
+                 ? ParseResult.Error<TToken, Unit>("Negated parser was successful", input)
                  : ParseResult.Okay(Unit.Value, result.Remaining);
         });
 
@@ -79,7 +79,7 @@ namespace Glitch.Functional.Parsing
 
         public virtual Parser<TToken, T> Except<TOther>(Parser<TToken, TOther> other)
             => new(input => other.parser(input) is ParseSuccess<TToken, TOther>(var result, _)
-                          ? ParseResult.Fail<TToken, T>($"Excluded parser succeeded with {result}", input)
+                          ? ParseResult.Error<TToken, T>($"Excluded parser succeeded with {result}", input)
                           : parser(input));
 
         // TODO Move regions to separate partial class files

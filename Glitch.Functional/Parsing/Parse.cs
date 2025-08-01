@@ -8,7 +8,7 @@ namespace Glitch.Functional.Parsing
         public static Parser<TToken, TToken> Satisfy<TToken>(Func<TToken, bool> predicate)
             => new Parser<TToken, TToken>(input =>
                 input.IsEnd
-                    ? ParseResult.Fail<TToken, TToken>("End of input reached")
+                    ? ParseResult.Error<TToken, TToken>("End of input reached")
                     : ParseResult.Okay(input.Current, input.Advance())
                                  .Guard(predicate, Expectation.Unexpected(input.Current))
             );
