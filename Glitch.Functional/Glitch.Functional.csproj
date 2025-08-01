@@ -18,7 +18,6 @@
   <ItemGroup>
     <Compile Remove="FN\FN.Parse.cs" />
     <Compile Remove="Parsing\ParseError - Copy.cs" />
-    <Compile Remove="Parsing\Parser - Copy.cs" />
   </ItemGroup>
 
   <ItemGroup>
