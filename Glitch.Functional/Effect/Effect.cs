@@ -14,11 +14,11 @@ namespace Glitch.Functional
 
         public static Effect<T> Fail(Error error) => new(Effect<Unit, T>.Fail(error));
 
-        public static Effect<T> FromResult(Result<T> result) => new(Effect<Unit, T>.FromResult(result));
+        public static Effect<T> FromResult(IResult<T, Error> result) => new(Effect<Unit, T>.FromResult(result));
 
-        public static Effect<T> Lift(Func<Result<T>> function) => new(Effect<Unit, T>.Lift(_ => function()));
+        public static Effect<T> Lift(Func<IResult<T, Error>> function) => new(Effect<Unit, T>.Lift(_ => function()));
 
-        public static Effect<T> Lift(Func<T> function) => new(Effect<Unit, T>.Lift((Func<Unit, Result<T>>)(_ => function())));
+        public static Effect<T> Lift(Func<T> function) => new(Effect<Unit, T>.Lift(_ => function()));
 
         /// <summary>
         /// <inheritdoc cref="Effect{Unit, T}.Map{TResult}(Func{T, TResult})"/>.
@@ -250,9 +250,7 @@ namespace Glitch.Functional
         /// <inheritdoc cref="Effect{Unit, T}.Run(Unit)"/>
         /// </summary>
         /// <returns></returns>
-        public Result<T> Run() => inner.Run(Unit.Value);
-
-        public T Unwrap() => Run().Unwrap();
+        public IResult<T, Error> Run() => inner.Run(Unit.Value);
 
         public static implicit operator Effect<T>(Result<T> result) => FromResult(result);
 
@@ -261,10 +259,6 @@ namespace Glitch.Functional
         public static implicit operator Effect<T>(Error error) => Fail(error);
 
         public static implicit operator Effect<T>(Effect<Unit, T> effect) => new(effect);
-
-        public static explicit operator Result<T>(Effect<T> effect) => effect.Run();
-
-        public static explicit operator T(Effect<T> effect) => effect.Run().Unwrap();
 
         public static Effect<T> operator |(Effect<T> x, Effect<T> y) => x.Or(y);
 

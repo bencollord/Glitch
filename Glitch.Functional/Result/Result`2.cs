@@ -1,5 +1,3 @@
-using System.Collections.Immutable;
-
 namespace Glitch.Functional
 {
     public abstract partial record Result<T, E>
@@ -333,8 +331,8 @@ namespace Glitch.Functional
 
         public static explicit operator T(Result<T, E> result)
             => Try(result.Unwrap)
-                   .MapError(err => new InvalidCastException($"Cannot cast a faulted result to {typeof(T)}", err.AsException()))
-                   .Unwrap();
+                   .Run()
+                   .IfFail(err => throw new InvalidCastException($"Cannot cast a faulted result to {typeof(T)}", err.AsException()));
 
         public static explicit operator E(Result<T, E> result)
             => result is Result.Failure<T, E>(var err)

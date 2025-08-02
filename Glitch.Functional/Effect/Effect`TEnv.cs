@@ -10,24 +10,24 @@ namespace Glitch.Functional
     /// <typeparam name="T"></typeparam>
     public partial class Effect<TInput, T>
     {
-        private Func<TInput, Result<T>> thunk;
+        private Func<TInput, IResult<T, Error>> thunk;
 
-        public Effect(Func<TInput, Result<T>> thunk)
+        public Effect(Func<TInput, IResult<T, Error>> thunk)
         {
             this.thunk = thunk;
         }
 
-        public static Effect<TInput, T> Okay(T value) => new(_ => value);
+        public static Effect<TInput, T> Okay(T value) => new(_ => Result.Okay(value));
 
-        public static Effect<TInput, T> Fail(Error error) => new(_ => error);
+        public static Effect<TInput, T> Fail(Error error) => new(_ => Result.Fail<T>(error));
 
-        public static Effect<TInput, T> FromResult(Result<T> result) => new(_ => result);
+        public static Effect<TInput, T> FromResult(IResult<T, Error> result) => new(_ => result);
 
         public static Effect<TInput, T> Lift(Effect<T> fallible) => new(_ => fallible.Run());
 
-        public static Effect<TInput, T> Lift(Func<TInput, Result<T>> function) => new(function);
+        public static Effect<TInput, T> Lift(Func<TInput, IResult<T, Error>> function) => new(function);
 
-        public static Effect<TInput, T> Lift(Func<TInput, T> function) => new(i => function(i));
+        public static Effect<TInput, T> Lift(Func<TInput, T> function) => new(i => Result.Okay(function(i)));
 
         public Effect<TNewInput, T> With<TNewInput>(Func<TNewInput, TInput> map)
             => new(newInput => thunk(map(newInput)));
@@ -179,16 +179,16 @@ namespace Glitch.Functional
 
 
         public Effect<TInput, T> Guard(Func<T, bool> predicate, Error error)
-            => new(i => thunk(i).Guard(predicate, error));
+            => new(i => thunk(i).Guard(predicate, _ => error));
 
         public Effect<TInput, T> Guard(Func<T, bool> predicate, Func<T, Error> error)
             => new(i => thunk(i).Guard(predicate, error));
 
         public Effect<TInput, T> Guard(bool condition, Error error)
-            => new(i => thunk(i).Guard(condition, error));
+            => new(i => thunk(i).Guard(_ => condition, _ => error));
 
         public Effect<TInput, T> Guard(bool condition, Func<T, Error> error)
-            => new(i => thunk(i).Guard(condition, error));
+            => new(i => thunk(i).Guard(_ => condition, error));
 
         /// <summary>
         /// Returns the current <see cref="Effect{T}"/> if Ok, otherwise returns other.
@@ -218,7 +218,7 @@ namespace Glitch.Functional
             });
 
         public Effect<TInput, T> Filter(Func<T, bool> predicate)
-            => new(i => thunk(i).Filter(predicate));
+            => Guard(predicate, _ => Error.Empty);
 
         /// <summary>
         /// Executes an impure action against the value if Ok.
@@ -242,7 +242,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Effect<TInput, T> IfFail(Action action) => new(i => thunk(i).IfFail(action));
+        public Effect<TInput, T> IfFail(Action action) => IfFail(_ => action());
 
         /// <summary>
         /// Executes an impure action if failed.
@@ -250,7 +250,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Effect<TInput, T> IfFail(Action<Error> action) => new(i => thunk(i).IfFail(action));
+        public Effect<TInput, T> IfFail(Action<Error> action) => Match(Nop, action);
 
         /// <summary>
         /// Casts the wrapped value to <typeparamref name="TResult"/> if Ok,
@@ -267,7 +267,7 @@ namespace Glitch.Functional
         public Effect<TInput, TResult> CastOrElse<TResult>(Func<T, Error> error)
             => from val in this
                let cast = Effect<TInput, TResult>.Lift(_ => DynamicCast<T, TResult>(val))
-               let err = Effect<TInput, TResult>.FromResult(error(val))
+               let err = Effect<TInput, TResult>.Fail(error(val))
                from res in cast | err
                select res;
 
@@ -313,7 +313,7 @@ namespace Glitch.Functional
         /// <param name="error"></param>
         /// <returns></returns>
         public Effect<TInput, TResult> Match<TResult>(Func<T, TResult> okay, Func<TResult> error)
-            => new(input => thunk(input).Match(okay, error));
+            => Match(okay, _ = error());
 
         /// <summary>
         /// If Ok, returns the result of the first function to the wrapped value.
@@ -324,7 +324,34 @@ namespace Glitch.Functional
         /// <param name="error"></param>
         /// <returns></returns>
         public Effect<TInput, TResult> Match<TResult>(Func<T, TResult> okay, Func<Error, TResult> error) 
-            => new(input => thunk(input).Match(okay, error));
+            => new(input => Result.Okay(thunk(input).Match(okay, error)));
+
+        /// <summary>
+        /// Chooses one of two impure actions to run depending on the success or failure
+        /// of the <see cref="Effect{TInput, T}"/> and returns a new effect with the action
+        /// applied.
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="okay"></param>
+        /// <param name="error"></param>
+        /// <returns></returns>
+        public Effect<TInput, T> Match(Action<T> okay, Action<Error> error)
+            => new(input =>
+            {
+                var result = thunk(input);
+
+                return result.Match(
+                    okay: val =>
+                    {
+                        okay(val);
+                        return result;
+                    },
+                    error: e =>
+                    {
+                        error(e);
+                        return result;
+                    });
+            });
 
         /// <summary>
         /// Executes the provided function, catching any exception
@@ -335,11 +362,11 @@ namespace Glitch.Functional
         {
             try
             {
-                return thunk(input);
+                return thunk(input).ToResult();
             }
             catch (Exception ex)
             {
-                return Result<T>.Fail(ex);
+                return Result.Fail<T>(ex);
             }
         }
 
@@ -347,9 +374,11 @@ namespace Glitch.Functional
 
         public static implicit operator Effect<TInput, T>(Result<T> result) => new(_ => result);
 
-        public static implicit operator Effect<TInput, T>(T value) => new(_ => value);
+        public static implicit operator Effect<TInput, T>(Result<T, Error> result) => new(_ => result);
 
-        public static implicit operator Effect<TInput, T>(Error error) => new(_ => error);
+        public static implicit operator Effect<TInput, T>(T value) => Okay(value);
+
+        public static implicit operator Effect<TInput, T>(Error error) => Fail(error);
 
         public static Effect<TInput, T> operator |(Effect<TInput, T> x, Effect<TInput, T> y) => x.Or(y);
 
@@ -366,7 +395,7 @@ namespace Glitch.Functional
             => x.AndThen(v => Lift(y.Map(_ => v)));
 
 
-        public static Effect<TInput, T> operator >>(Effect<TInput, T> x, Func<TInput, Result<T>> y)
+        public static Effect<TInput, T> operator >>(Effect<TInput, T> x, Func<TInput, IResult<T, Error>> y)
             => new(i =>
             {
                 _ = x.thunk(i);
@@ -377,7 +406,7 @@ namespace Glitch.Functional
             => new(i =>
             {
                 _ = x.thunk(i);
-                return y();
+                return Result.Okay(y());
             });
     }
 }
