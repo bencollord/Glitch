@@ -12,7 +12,7 @@ namespace Glitch.Functional
 
         public abstract bool IsOkay { get; }
 
-        public abstract bool IsFail { get; }
+        public abstract bool IsError { get; }
 
         public bool IsOkayAnd(Func<T, bool> predicate) => Match(predicate, false);
 
@@ -31,10 +31,6 @@ namespace Glitch.Functional
 
         public Result<Func<T2, TResult>, E> PartialMap<T2, TResult>(Func<T, T2, TResult> map)
             => Map(map.Curry());
-
-        public abstract Result<TResult, E> MapOr<TResult>(Func<T, TResult> map, E ifFail);
-
-        public abstract Result<TResult, E> MapOrElse<TResult>(Func<T, TResult> map, Func<E, E> ifFail);
 
         /// <summary>
         /// If the result is a failure, returns a new result with the mapping function
@@ -103,10 +99,10 @@ namespace Glitch.Functional
         /// BiBind operation
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
-        /// <param name="ifOkay"></param>
-        /// <param name="ifFail"></param>
+        /// <param name="okay"></param>
+        /// <param name="error"></param>
         /// <returns></returns>
-        public abstract Result<TResult, E> Choose<TResult>(Func<T, Result<TResult, E>> ifOkay, Func<E, Result<TResult, E>> ifFail);
+        public abstract Result<TResult, E> Choose<TResult>(Func<T, Result<TResult, E>> okay, Func<E, Result<TResult, E>> error);
 
         /// <summary>
         /// Executes an impure action against the value if Ok.
@@ -159,21 +155,21 @@ namespace Glitch.Functional
         public abstract Result<T, E> IfError<TDerivedError>(Action<TDerivedError> action)
             where TDerivedError : E;
 
-        public TResult Match<TResult>(Func<T, TResult> ifOkay, TResult ifFail)
-            => Map(ifOkay).IfFail(ifFail);
+        public TResult Match<TResult>(Func<T, TResult> okay, TResult error)
+            => Map(okay).IfFail(error);
 
-        public TResult Match<TResult>(Func<T, TResult> ifOkay, Func<TResult> ifFail)
-            => Match(ifOkay, _ => ifFail());
+        public TResult Match<TResult>(Func<T, TResult> okay, Func<TResult> error)
+            => Match(okay, _ => error());
 
         /// <summary>
         /// If Ok, returns the result of the first function to the wrapped value.
         /// Otherwise, returns the result of the second function to the wrapped error.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
-        /// <param name="ifOkay"></param>
-        /// <param name="ifFail"></param>
+        /// <param name="okay"></param>
+        /// <param name="error"></param>
         /// <returns></returns>
-        public abstract TResult Match<TResult>(Func<T, TResult> ifOkay, Func<E, TResult> ifFail);
+        public abstract TResult Match<TResult>(Func<T, TResult> okay, Func<E, TResult> error);
 
         /// <summary>
         /// Casts the wrapped value to <typeparamref name="TResult"/> if Ok,
@@ -182,7 +178,7 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <exception cref="InvalidCastException">
         /// If the cast is not valid. If you need safe casting,
-        /// lift the result into the <see cref="Fallible{T}"/> type.
+        /// lift the result into the <see cref="Effect{T}"/> type.
         /// </exception>
         /// <returns></returns>
         public abstract Result<TResult, E> Cast<TResult>();
@@ -319,7 +315,7 @@ namespace Glitch.Functional
 
         public static bool operator true(Result<T, E> result) => result.IsOkay;
 
-        public static bool operator false(Result<T, E> result) => result.IsFail;
+        public static bool operator false(Result<T, E> result) => result.IsError;
 
         public static Result<T, E> operator &(Result<T, E> x, Result<T, E> y) => x.And(y);
 
@@ -343,72 +339,5 @@ namespace Glitch.Functional
         public static explicit operator E(Result<T, E> result)
             => result is Result.Failure<T, E>(var err)
                    ? err : throw new InvalidCastException("Cannot cast a successful result to an error");
-
-        // UNDONE Needs more comprehensive functionality
-        public FluentActionContext IfOkay(Func<T, Unit> ifOkay) => IfOkay(new Action<T>(t => ifOkay(t)));
-
-        public FluentActionContext IfOkay(Action<T> ifOkay) => new FluentActionContext(this, ifOkay);
-
-        /// <summary>
-        /// Fluent context for chaining actions against a result.
-        /// 
-        /// Experimental API and may be removed.
-        /// </summary>
-        /// <remarks>
-        /// Might remove because this is really stretching the responsibility
-        /// of a Result type and kind of turning it more into an effect.
-        /// Right now, I'll keep it for convenience, but I'll come back and 
-        /// clean this up later.
-        /// </remarks>
-        public readonly struct FluentActionContext
-        {
-            private readonly Result<T, E> result;
-            private readonly Action<T> ifOkay;
-            private readonly ImmutableDictionary<Type, Action<E>> errorHandlers;
-
-            internal FluentActionContext(Result<T, E> result, Action<T> ifOkay)
-                : this(result, ifOkay, ImmutableDictionary<Type, Action<E>>.Empty) { }
-
-            internal FluentActionContext(Result<T, E> result, Action<T> ifOkay, ImmutableDictionary<Type, Action<E>> errorHandlers)
-            {
-                this.result = result;
-                this.ifOkay = ifOkay;
-                this.errorHandlers = errorHandlers;
-            }
-
-            public FluentActionContext Then(Action<T> ifOkay) => new(result, this.ifOkay + ifOkay, errorHandlers);
-
-            public FluentActionContext Then(Func<T, Unit> ifOkay) => Then(new Action<T>(v => ifOkay(v)));
-
-            public Unit Otherwise(Func<E, Unit> ifFail) => Otherwise(new Action<E>(v => ifFail(v)));
-
-            public Unit Otherwise(Action<E> ifFail)
-            {
-                switch (result)
-                {
-                    case Result.Success<T, E>(T value):
-                        ifOkay(value);
-                        break;
-
-                    case Result.Failure<T, E>(E err)
-                        when errorHandlers.TryGetValue(err.GetType(), out var handler):
-                        handler(err);
-                        break;
-
-                    case Result.Failure<T, E>(E err):
-                        ifFail(err);
-                        break;
-
-                    default:
-                        throw BadMatchException();
-                }
-
-                return Unit.Value;
-            }
-
-            public Unit OtherwiseDoNothing() => Otherwise(_ => { /* Nop */ });
-
-            public Result<T, E> OtherwiseContinue() => Otherwise(_ => { /* Nop */ }).Return(result);
-        }
     }
 }

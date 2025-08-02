@@ -214,29 +214,29 @@ namespace Glitch.Functional
         /// Otherwise, returns the fallback value.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
-        /// <param name="ifSome"></param>
-        /// <param name="ifNone"></param>
+        /// <param name="some"></param>
+        /// <param name="none"></param>
         /// <returns></returns>
-        public TResult Match<TResult>(Func<T, TResult> ifSome, TResult ifNone)
-            => Map(ifSome).IfNone(ifNone);
+        public TResult Match<TResult>(Func<T, TResult> some, TResult none)
+            => Map(some).IfNone(none);
 
-        public Unit Match(Action<T> ifSome, Action ifNone) => Match(ifSome.Return(), ifNone.Return());
+        public Unit Match(Action<T> some, Action none) => Match(some.Return(), none.Return());
 
-        public Unit Match(Action<T> ifSome, Action<Unit> ifNone) => Match(ifSome, () => ifNone(default));
+        public Unit Match(Action<T> some, Action<Unit> none) => Match(some, () => none(default));
 
         /// <summary>
         /// If this <see cref="Option{T}"/> contains a value, returns the result of the first function 
         /// applied to the wrapped value.Otherwise, returns the result of the second function.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
-        /// <param name="ifSome"></param>
-        /// <param name="ifNone"></param>
+        /// <param name="some"></param>
+        /// <param name="none"></param>
         /// <returns></returns>
-        public TResult Match<TResult>(Func<T, TResult> ifSome, Func<TResult> ifNone)
-            => IsSome ? ifSome(value!) : ifNone();
+        public TResult Match<TResult>(Func<T, TResult> some, Func<TResult> none)
+            => IsSome ? some(value!) : none();
 
-        public TResult Match<TResult>(Func<T, TResult> ifSome, Func<Unit, TResult> ifNone)
-            => Match(ifSome, () => ifNone(default));
+        public TResult Match<TResult>(Func<T, TResult> some, Func<Unit, TResult> none)
+            => Match(some, () => none(default));
 
         /// <summary>
         /// If the current <see cref="Option{T}"/> contains a value, casts it to 

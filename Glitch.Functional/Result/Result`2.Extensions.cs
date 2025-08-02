@@ -4,24 +4,23 @@ namespace Glitch.Functional
 {
     public static partial class Result
     {
-        public static Result<IEnumerable<TOkay>, TError> Traverse<TOkay, TError>(this IEnumerable<Result<TOkay, TError>> source)
+        public static Result<IEnumerable<T>, E> Traverse<T, E>(this IEnumerable<Result<T, E>> source)
             => source.Traverse(Identity);
 
-        public static Result<IEnumerable<TResult>, TError> Traverse<TOkay, TError, TResult>(this IEnumerable<Result<TOkay, TError>> source, Func<TOkay, TResult> traverse)
+        public static Result<IEnumerable<TResult>, E> Traverse<T, E, TResult>(this IEnumerable<Result<T, E>> source, Func<T, TResult> traverse)
             => source.Traverse(opt => opt.Map(traverse));
 
-        public static Result<IEnumerable<TResult>, TError> Traverse<TOkay, TError, TResult>(this IEnumerable<Result<TOkay, TError>> source, Func<TOkay, int, TResult> traverse)
+        public static Result<IEnumerable<TResult>, E> Traverse<T, E, TResult>(this IEnumerable<Result<T, E>> source, Func<T, int, TResult> traverse)
             => source.Select((s, i) => s.PartialMap(traverse).Apply(i))
                      .Traverse();
 
-        public static Result<IEnumerable<TResult>, TError> Traverse<TOkay, TError, TResult>(this IEnumerable<TOkay> source, Func<TOkay, int, Result<TResult, TError>> traverse)
+        public static Result<IEnumerable<TResult>, E> Traverse<T, E, TResult>(this IEnumerable<T> source, Func<T, int, Result<TResult, E>> traverse)
             => source.Select((s, i) => traverse(s, i))
                      .Traverse();
 
-        // TODO Clean up syntax
-        public static Result<IEnumerable<TResult>, TError> Traverse<TOkay, TError, TResult>(this IEnumerable<TOkay> source, Func<TOkay, Result<TResult, TError>> traverse)
+        public static Result<IEnumerable<TResult>, E> Traverse<T, E, TResult>(this IEnumerable<T> source, Func<T, Result<TResult, E>> traverse)
             => source.Aggregate(
-                Result<ImmutableList<TResult>, TError>.Okay(ImmutableList<TResult>.Empty),
+                Result<ImmutableList<TResult>, E>.Okay(ImmutableList<TResult>.Empty),
                 (list, item) => list.AndThen(_ => traverse(item), (lst, i) => lst.Add(i)),
                 list => list.Map(l => l.AsEnumerable()));
 
@@ -31,8 +30,8 @@ namespace Glitch.Functional
         /// <typeparam name="T"></typeparam>
         /// <param name="results"></param>
         /// <returns></returns>
-        public static IEnumerable<TOkay> Successes<TOkay, TError>(this IEnumerable<Result<TOkay, TError>> results)
-            => results.Where(IsOkay).Select(r => (TOkay)r);
+        public static IEnumerable<T> Successes<T, E>(this IEnumerable<Result<T, E>> results)
+            => results.Where(IsOkay).Select(r => (T)r);
 
         /// <summary>
         /// Returns a the unwrapped errors of all the faulted results.
@@ -40,13 +39,13 @@ namespace Glitch.Functional
         /// <typeparam name="T"></typeparam>
         /// <param name="results"></param>
         /// <returns></returns>
-        public static IEnumerable<TError> Errors<TOkay, TError>(this IEnumerable<Result<TOkay, TError>> results)
-            => results.Where(IsFail).Select(r => (TError)r);
+        public static IEnumerable<E> Errors<T, E>(this IEnumerable<Result<T, E>> results)
+            => results.Where(IsFail).Select(r => (E)r);
 
-        public static (IEnumerable<TOkay> Successes, IEnumerable<TError> Errors) Partition<TOkay, TError>(this IEnumerable<Result<TOkay, TError>> results)
+        public static (IEnumerable<T> Successes, IEnumerable<E> Errors) Partition<T, E>(this IEnumerable<Result<T, E>> results)
             => (results.Successes(), results.Errors());
 
-        public static Result<TResult, TError> Apply<TOkay, TError, TResult>(this Result<Func<TOkay, TResult>, TError> function, Result<TOkay, TError> value)
+        public static Result<TResult, E> Apply<T, E, TResult>(this Result<Func<T, TResult>, E> function, Result<T, E> value)
             => value.Apply(function);
 
     }

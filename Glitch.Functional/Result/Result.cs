@@ -17,11 +17,11 @@ namespace Glitch.Functional
 
         public bool IsOkay => inner.IsOkay;
 
-        public bool IsFail => inner.IsFail;
+        public bool IsError => inner.IsError;
 
         public bool IsOkayAnd(Func<T, bool> predicate) => inner.IsOkayAnd(predicate);
 
-        public bool IsFailOr(Func<T, bool> predicate) => inner.IsErrorOr(predicate);
+        public bool IsErrorOr(Func<T, bool> predicate) => inner.IsErrorOr(predicate);
 
         /// <summary>
         /// If the result is <see cref="Result.Success{T}" />, applies
@@ -166,10 +166,10 @@ namespace Glitch.Functional
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="okay"></param>
-        /// <param name="fail"></param>
+        /// <param name="error"></param>
         /// <returns></returns>
-        public TResult Match<TResult>(Func<T, TResult> okay, Func<Error, TResult> fail)
-            => inner.Match(okay, fail);
+        public TResult Match<TResult>(Func<T, TResult> okay, Func<Error, TResult> error)
+            => inner.Match(okay, error);
 
         /// <summary>
         /// Casts the wrapped value to <typeparamref name="TResult"/> if Ok,
@@ -178,7 +178,7 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <exception cref="InvalidCastException">
         /// If the cast is not valid. If you need safe casting,
-        /// lift the result into the <see cref="Fallible{T}"/> type.
+        /// lift the result into the <see cref="Effect{T}"/> type.
         /// </exception>
         /// <returns></returns>
         public Result<TResult> Cast<TResult>() => inner.Cast<TResult>();
@@ -334,15 +334,15 @@ namespace Glitch.Functional
         /// <returns></returns>
         public IEnumerable<T> Iterate() => inner.Iterate();
 
-        public Fallible<T> AsFallible() => Fallible.Lift(this);
+        public Effect<T> AsFallible() => Effect.FromResult(this);
 
-        public Effect<TInput, T> AsEffect<TInput>() => Effect<TInput, T>.Lift(this);
+        public Effect<TInput, T> AsEffect<TInput>() => Effect<TInput, T>.FromResult(this);
 
         public override string ToString() => inner.ToString();
 
         public static bool operator true(Result<T> result) => result.IsOkay;
 
-        public static bool operator false(Result<T> result) => result.IsFail;
+        public static bool operator false(Result<T> result) => result.IsError;
 
         public static Result<T> operator &(Result<T> x, Result<T> y) => x.And(y);
 

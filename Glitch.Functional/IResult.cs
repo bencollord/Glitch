@@ -7,7 +7,7 @@ namespace Glitch.Functional
     public interface IResult<TSuccess, TError>
     {
         bool IsOkay { get; }
-        bool IsFail { get; }
+        bool IsError { get; }
 
         IResult<TResult, TError> Map<TResult>(Func<TSuccess, TResult> map);
 

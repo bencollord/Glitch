@@ -34,21 +34,21 @@ namespace Glitch.Functional
 
         public static Failure<T> Fail<T>(T error) => new(error);
 
-        public static Fallible<T> Try<T>(Func<Result<T>> function) => Fallible<T>.New(function);
+        public static Effect<T> Try<T>(Func<Result<T>> function) => Effect<T>.Lift(function);
 
-        public static Fallible<T> Try<T>(Func<Unit, Result<T>> function) => Fallible<T>.New(() => function(End));
+        public static Effect<T> Try<T>(Func<Unit, Result<T>> function) => Effect<T>.Lift(() => function(End));
 
-        public static Fallible<T> Try<T>(Func<T> function) => Fallible<T>.New(function);
+        public static Effect<T> Try<T>(Func<T> function) => Effect<T>.Lift(function);
 
-        public static Fallible<T> Try<T>(Func<Unit, T> function) => Fallible<T>.New(() => function(End));
+        public static Effect<T> Try<T>(Func<Unit, T> function) => Effect<T>.Lift(() => function(End));
 
-        public static Fallible<Unit> Try(Action action) => Fallible<Unit>.New(action.Return());
+        public static Effect<Unit> Try(Action action) => Effect<Unit>.Lift(action.Return());
 
-        public static Fallible<Unit> Try(Action<Unit> action) => Try(action.Return());
+        public static Effect<Unit> Try(Action<Unit> action) => Try(action.Return());
 
-        public static Fallible<T> Try<T>(T value) => Fallible<T>.Okay(value);
+        public static Effect<T> Try<T>(T value) => Effect<T>.Okay(value);
 
-        public static Fallible<T> Try<T>(Result<T> result) => Fallible<T>.New(result);
+        public static Effect<T> Try<T>(Result<T> result) => Effect<T>.FromResult(result);
 
         public static Effect<TInput, Unit> TryWith<TInput>(Action<TInput> function)
             => TryWith(function.Return());
@@ -57,14 +57,14 @@ namespace Glitch.Functional
             => TryWith<TInput, Unit>(function);
 
         public static Effect<TInput, TOutput> TryWith<TInput, TOutput>(Func<TInput, TOutput> function)
-            => Effect.TryWith(function);
+            => Effect.Lift(function);
 
         public static Effect<TInput, TOutput> TryWith<TInput, TOutput>(Func<TInput, Result<TOutput>> function)
-            => Effect.TryWith(function);
+            => Effect.Lift(function);
 
         public static Effect<T, T> Ask<T>() => Effect.Ask<T>();
 
-        public static Fallible<T> TryCast<T>(object obj) => Try(() => (T)(dynamic)obj);
+        public static Effect<T> TryCast<T>(object obj) => Try(() => (T)(dynamic)obj);
 
         public static Sequence<T> Sequence<T>(T item) => Sequence([item]);
 

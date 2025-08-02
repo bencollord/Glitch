@@ -2,17 +2,17 @@
 {
     public static partial class Sequence
     {
-        public static Fallible<Sequence<T>> Traverse<T>(this Sequence<Fallible<T>> source)
+        public static Effect<Sequence<T>> Traverse<T>(this Sequence<Effect<T>> source)
             => source.Traverse(Identity);
 
-        public static Fallible<Sequence<TResult>> Traverse<T, TResult>(this Sequence<Fallible<T>> source, Func<T, TResult> traverse)
+        public static Effect<Sequence<TResult>> Traverse<T, TResult>(this Sequence<Effect<T>> source, Func<T, TResult> traverse)
             => source.Traverse(opt => opt.Map(traverse));
 
-        public static Fallible<Sequence<TResult>> Traverse<T, TResult>(this Sequence<Fallible<T>> source, Func<T, int, TResult> traverse)
+        public static Effect<Sequence<TResult>> Traverse<T, TResult>(this Sequence<Effect<T>> source, Func<T, int, TResult> traverse)
             => source.Map((s, i) => s.PartialMap(traverse).Apply(i))
                      .Traverse();
 
-        public static Fallible<Sequence<TResult>> Traverse<T, TResult>(this Sequence<T> source, Func<T, int, Fallible<TResult>> traverse)
+        public static Effect<Sequence<TResult>> Traverse<T, TResult>(this Sequence<T> source, Func<T, int, Effect<TResult>> traverse)
             => source.Map((s, i) => traverse(s, i))
                      .Traverse();
 

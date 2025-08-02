@@ -11,16 +11,16 @@
         public static T From<TOther>(TOther obj)
             => (T)(dynamic)obj!;
 
-        public static Fallible<T> TryFrom<TOther>(TOther obj)
+        public static Effect<T> TryFrom<TOther>(TOther obj)
             => Try(() => From(obj));
 
-        public static Fallible<T> TryFrom<TOther>(TOther obj, Error ifFail)
+        public static Effect<T> TryFrom<TOther>(TOther obj, Error ifFail)
             => TryFrom(obj).MapError(_ => ifFail);
 
-        public static Fallible<T> TryFrom<TOther>(TOther obj, Func<Error> ifFail)
+        public static Effect<T> TryFrom<TOther>(TOther obj, Func<Error> ifFail)
             => TryFrom(obj).MapError(_ => ifFail());
 
-        public static Fallible<T> TryFrom<TOther>(TOther obj, Func<TOther, Error> ifFail)
+        public static Effect<T> TryFrom<TOther>(TOther obj, Func<TOther, Error> ifFail)
             => TryFrom(obj).MapError(_ => ifFail(obj));
     }
 }

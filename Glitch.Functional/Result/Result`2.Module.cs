@@ -9,7 +9,7 @@ namespace Glitch.Functional
 
         public static bool IsOkay<T, E>(Result<T, E> result) => result.IsOkay;
 
-        public static bool IsFail<T, E>(Result<T, E> result) => result.IsFail;
+        public static bool IsFail<T, E>(Result<T, E> result) => result.IsError;
 
         public static Result<T, E> Guard<T, E>(bool condition, T value, E error)
             => condition ? new Success<T, E>(value) : new Failure<T, E>(error);

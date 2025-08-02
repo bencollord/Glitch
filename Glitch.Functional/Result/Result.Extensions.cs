@@ -51,12 +51,6 @@ namespace Glitch.Functional
         public static Result<T> Flatten<T>(this Result<Result<T>> nested)
             => nested.AndThen(n => n);
 
-        public static Option<Result<T>> Invert<T>(this Result<Option<T>> nested)
-            => nested.Match(
-                    opt => opt.Map(Okay),
-                    err => Some(Fail<T>(err))
-                );
-
         public static Result<T> Map<T>(this Result<bool> result, Func<Unit, T> ifTrue, Func<Unit, T> ifFalse)
             => result.Map(flag => flag ? ifTrue(default) : ifFalse(default));
 

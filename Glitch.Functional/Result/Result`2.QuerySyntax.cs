@@ -1,14 +1,19 @@
+using System.Numerics;
+
 namespace Glitch.Functional
 {
     public static class Result2Extensions
     {
-        public static Result<TResult, TError> Select<TOkay, TError, TResult>(this Result<TOkay, TError> source, Func<TOkay, TResult> mapper)
-        => source.Map(mapper);
+        public static Result<TResult, E> Select<T, E, TResult>(this Result<T, E> source, Func<T, TResult> mapper)
+            => source.Map(mapper);
 
-        public static Result<TResult, TError> SelectMany<TOkay, TError, TResult>(this Result<TOkay, TError> source, Func<TOkay, Result<TResult, TError>> bind)
-            => source.AndThen(bind);
-
-        public static Result<TResult, TError> SelectMany<TOkay, TError, TElement, TResult>(this Result<TOkay, TError> source, Func<TOkay, Result<TElement, TError>> bind, Func<TOkay, TElement, TResult> bindMap)
+        public static Result<TResult, E> SelectMany<T, E, TElement, TResult>(this Result<T, E> source, Func<T, Result<TElement, E>> bind, Func<T, TElement, TResult> bindMap)
             => source.AndThen(s => bind(s).Map(e => bindMap(s, e)));
+
+        public static Result<TResult, E> SelectMany<T, E, TElement, TResult>(this Result<T, E> source, Func<T, Success<TElement>> bind, Func<T, TElement, TResult> bindMap)
+            => source.AndThen(s => (Result<TResult, E>)bind(s).Map(e => bindMap(s, e)));
+
+        public static Result<TResult, E> SelectMany<T, E, TElement, TResult>(this Result<T, E> source, Func<T, Failure<E>> bind, Func<T, TElement, TResult> bindMap)
+            => source.AndThen(s => Result<TResult, E>.Fail(bind(s).Error));
     }
 }

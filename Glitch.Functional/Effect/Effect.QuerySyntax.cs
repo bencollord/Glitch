@@ -1,29 +1,23 @@
 namespace Glitch.Functional
 {
-    public static class EffectExtensions
+    public static partial class EffectExtensions
     {
-        public static Effect<TInput, TResult> Select<TInput, TOutput, TResult>(this Effect<TInput, TOutput> source, Func<TOutput, TResult> mapper)
+        public static Effect<TResult> Select<T, TResult>(this Effect<T> source, Func<T, TResult> mapper)
             => source.Map(mapper);
 
-        public static Effect<TInput, TResult> SelectMany<TInput, TOutput, TResult>(this Effect<TInput, TOutput> source, Func<TOutput, Effect<TInput, TResult>> bind)
+        public static Effect<TResult> SelectMany<T, TResult>(this Effect<T> source, Func<T, Effect<TResult>> bind)
             => source.AndThen(bind);
 
-        public static Effect<TInput, TResult> SelectMany<TInput, TOutput, TElement, TResult>(this Effect<TInput, TOutput> source, Func<TOutput, Effect<TInput, TElement>> bind, Func<TOutput, TElement, TResult> bindMap)
+        public static Effect<TResult> SelectMany<T, TElement, TResult>(this Effect<T> source, Func<T, Effect<TElement>> bind, Func<T, TElement, TResult> bindMap)
             => source.AndThen(s => bind(s).Map(e => bindMap(s, e)));
 
-        public static Effect<TInput, TResult> SelectMany<TInput, TOutput, TResult>(this Effect<TInput, TOutput> source, Func<TOutput, Result<TResult>> bind)
+        public static Effect<TResult> SelectMany<T, TResult>(this Effect<T> source, Func<T, Result<TResult>> bind)
             => source.AndThen(bind);
 
-        public static Effect<TInput, TResult> SelectMany<TInput, TOutput, TElement, TResult>(this Effect<TInput, TOutput> source, Func<TOutput, Result<TElement>> bind, Func<TOutput, TElement, TResult> bindMap)
+        public static Effect<TResult> SelectMany<T, TElement, TResult>(this Effect<T> source, Func<T, Result<TElement>> bind, Func<T, TElement, TResult> bindMap)
             => source.AndThen(s => bind(s).Map(e => bindMap(s, e)));
 
-        public static Effect<TInput, TResult> SelectMany<TInput, TOutput, TResult>(this Effect<TInput, TOutput> source, Func<TOutput, Fallible<TResult>> bind)
-           => source.AndThen(bind);
-
-        public static Effect<TInput, TResult> SelectMany<TInput, TOutput, TElement, TResult>(this Effect<TInput, TOutput> source, Func<TOutput, Fallible<TElement>> bind, Func<TOutput, TElement, TResult> bindMap)
-            => source.AndThen(s => bind(s).Map(e => bindMap(s, e)));
-
-        public static Effect<TInput, TOutput> Where<TInput, TOutput>(this Effect<TInput, TOutput> source, Func<TOutput, bool> predicate)
+        public static Effect<T> Where<T>(this Effect<T> source, Func<T, bool> predicate)
             => source.Filter(predicate);
     }
 }

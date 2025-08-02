@@ -6,7 +6,7 @@ namespace Glitch.Functional
         {
             public override bool IsOkay => true;
 
-            public override bool IsFail => false;
+            public override bool IsError => false;
 
             /// <inheritdoc />
             public override Result<TResult, TError> And<TResult>(Result<TResult, TError> other)
@@ -49,12 +49,6 @@ namespace Glitch.Functional
             /// <inheritdoc />
             public override Result<TResult, TError> Map<TResult>(Func<TOkay, TResult> mapper)
                 => new Success<TResult, TError>(mapper(Value));
-
-            public override Result<TResult, TError> MapOr<TResult>(Func<TOkay, TResult> mapper, TError _)
-                => Map(mapper);
-
-            public override Result<TResult, TError> MapOrElse<TResult>(Func<TOkay, TResult> ifOkay, Func<TError, TError> _)
-                => Map(ifOkay);
 
             /// <inheritdoc />
             public override Result<TOkay, TNewError> MapError<TNewError>(Func<TError, TNewError> _) => Result<TOkay, TNewError>.Okay(Value);

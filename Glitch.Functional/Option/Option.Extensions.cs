@@ -90,11 +90,5 @@ namespace Glitch.Functional
         /// <returns></returns>
         public static Option<T> Flatten<T>(this Option<Option<T>> nested)
             => nested.AndThen(o => o);
-
-        public static Result<Option<T>> Invert<T>(this Option<Result<T>> nested)
-            => nested.Match(
-                    res => res.Map(Some),
-                    () => Okay(Option<T>.None)
-                );
     }
 }

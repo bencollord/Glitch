@@ -9,7 +9,7 @@
 
         public static bool IsOkay<T>(Result<T> result) => result.IsOkay;
 
-        public static bool IsFail<T>(Result<T> result) => result.IsFail;
+        public static bool IsFail<T>(Result<T> result) => result.IsError;
 
         public static Result<Unit> Guard(bool condition, Error error)
             => Guard(condition, Unit.Value, error);
