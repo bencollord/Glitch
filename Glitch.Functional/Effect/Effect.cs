@@ -250,7 +250,7 @@ namespace Glitch.Functional
         /// <inheritdoc cref="Effect{Unit, T}.Run(Unit)"/>
         /// </summary>
         /// <returns></returns>
-        public IResult<T, Error> Run() => inner.Run(Nothing.Value);
+        public Result<T> Run() => inner.Run(Nothing.Value);
 
         public static implicit operator Effect<T>(Result<T> result) => FromResult(result);
 
