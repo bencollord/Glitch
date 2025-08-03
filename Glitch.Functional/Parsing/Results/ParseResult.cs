@@ -12,9 +12,9 @@ namespace Glitch.Functional.Parsing.Results
 
         public static ParseResult<TToken, T> Okay<TToken, T>(T value, TokenSequence<TToken> remaining) => ParseResult<TToken>.Okay(value, remaining);
 
-        public static ParseResult<TToken, T> Error<TToken, T>(string message) => ParseResult<TToken>.Error<T>(message);
+        public static ParseResult<TToken, T> Error<TToken, T>(Expectation<TToken> expectation) => ParseResult<TToken>.Error<T>(expectation);
 
-        public static ParseResult<TToken, T> Error<TToken, T>(string message, TokenSequence<TToken> remaining) => ParseResult<TToken>.Error<T>(message, remaining);
+        public static ParseResult<TToken, T> Error<TToken, T>(Expectation<TToken> expectation, TokenSequence<TToken> remaining) => ParseResult<TToken>.Error<T>(expectation, remaining);
     }
 
     public static class ParseResult<TToken>
@@ -27,9 +27,9 @@ namespace Glitch.Functional.Parsing.Results
 
         public static ParseResult<TToken, T> Okay<T>(T value, TokenSequence<TToken> remaining) => new ParseSuccess<TToken, T>(value, remaining);
 
-        public static ParseResult<TToken, T> Error<T>(string message) => Error<T>(message, TokenSequence<TToken>.Empty);
+        public static ParseResult<TToken, T> Error<T>(Expectation<TToken> expectation) => Error<T>(expectation, TokenSequence<TToken>.Empty);
 
-        public static ParseResult<TToken, T> Error<T>(string message, TokenSequence<TToken> remaining) => new ParseError<TToken, T>(message, remaining);
+        public static ParseResult<TToken, T> Error<T>(Expectation<TToken> expectation, TokenSequence<TToken> remaining) => new ParseError<TToken, T>(expectation, remaining);
     }
 
     public abstract record ParseResult<TToken, T>
@@ -45,14 +45,21 @@ namespace Glitch.Functional.Parsing.Results
 
         public abstract bool WasSuccessful { get; }
 
+        // TODO Replace these two fields with ParseState
         public TokenSequence<TToken> Remaining { get; init; }
 
         public Expectation<TToken> Expectation { get; init; }
 
+        public static ParseResult<TToken, T> Okay(T value)
+            => Okay(value, TokenSequence<TToken>.Empty);
+
         public static ParseResult<TToken, T> Okay(T value, TokenSequence<TToken> remaining)
             => new ParseSuccess<TToken, T>(value, remaining);
 
-        public static ParseResult<TToken, T> Fail(Expectation<TToken> error, TokenSequence<TToken> remaining)
+        public static ParseResult<TToken, T> Error(Expectation<TToken> error)
+            => Error(error, TokenSequence<TToken>.Empty); 
+
+        public static ParseResult<TToken, T> Error(Expectation<TToken> error, TokenSequence<TToken> remaining)
             => new ParseError<TToken, T>(error, remaining);
 
         public abstract ParseResult<TToken, TResult> Map<TResult>(Func<T, TResult> map);
@@ -86,9 +93,9 @@ namespace Glitch.Functional.Parsing.Results
             => Guard(predicate, _ => error);
 
         public ParseResult<TToken, T> Guard(Func<T, bool> predicate, Func<T, Expectation<TToken>> ifFail)
-            => AndThen(v => predicate(v) ? this : Fail(ifFail(v), Remaining));
+            => AndThen(v => predicate(v) ? this : Error(ifFail(v), Remaining));
 
-        public abstract TResult Match<TResult>(Func<ParseSuccess<TToken, T>, TResult> ifOkay, Func<ParseError<TToken, T>, TResult> ifFail);
+        public abstract TResult Match<TResult>(Func<ParseSuccess<TToken, T>, TResult> okay, Func<ParseError<TToken, T>, TResult> error);
 
         public static implicit operator ParseResult<TToken, T>(T value) => Okay(value, TokenSequence<TToken>.Empty);
 

@@ -7,19 +7,14 @@ namespace Glitch.Functional.Parsing.Results
     /// </summary>
     public static class Expectation
     {
-        public static Expectation<TToken> Unexpected<TToken>(TToken token) => new(unexpected: token);
+        public static Expectation<TToken> Labeled<TToken>(string message) => new() { Label = message };
+        public static Expectation<TToken> Unexpected<TToken>(TToken token) => new() { Unexpected = token };
+        public static Expectation<TToken> Expected<TToken>(params IEnumerable<TToken> tokens) => new() { Expected = tokens };
     }
 
     public record Expectation<TToken>
     {
-        public static readonly Expectation<TToken> None = new(Option<string>.None, Option<TToken>.None, Option<IEnumerable<TToken>>.None);
-
-        public Expectation(Option<string> label = default, Option<TToken> unexpected = default, Option<IEnumerable<TToken>> expected = default)
-        {
-            Label = label;
-            Unexpected = unexpected;
-            Expected = expected.IfNone([]);
-        }
+        public static readonly Expectation<TToken> None = new();
 
         public Option<string> Label { get; init; }
 
@@ -53,5 +48,7 @@ namespace Glitch.Functional.Parsing.Results
                    let idx = msg.LastIndexOf(',') + 1
                    select msg.Insert(idx, " or");
         }
+
+        public static implicit operator Expectation<TToken>(string message) => new() { Label = message };
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Glitch.Functional.Parsing.Input;
+using Glitch.Functional.Parsing.Parsers;
 using Glitch.Functional.Parsing.Results;
 
 namespace Glitch.Functional.Parsing
@@ -60,10 +61,13 @@ namespace Glitch.Functional.Parsing
     public partial class Parser<TToken, T>
     {
         public static Parser<TToken, T> Return(T value)
-            => new(input => ParseResult.Okay(value, input));
+            => Return(ParseResult<TToken>.Okay(value));
 
         public static Parser<TToken, T> Return(T value, TokenSequence<TToken> remaining)
-            => new(input => ParseResult.Okay(value, remaining));
+            => Return(ParseResult.Okay(value, remaining));
+
+        public static Parser<TToken, T> Return(ParseResult<TToken, T> result)
+            => new ReturnParser<TToken, T>(result);
 
         public static Parser<TToken, T> Error(Expectation<TToken> expectation)
             => Error(new ParseError<TToken, T>(expectation));
@@ -78,9 +82,9 @@ namespace Glitch.Functional.Parsing
             => Error(new ParseError<TToken, T>(message), remaining);
 
         public static Parser<TToken, T> Error(ParseError<TToken, T> error)
-            => new(input => error);
+            => Return(error);
 
         public static Parser<TToken, T> Error(ParseError<TToken, T> error, TokenSequence<TToken> remaining)
-            => Error(error).WithRemaining(remaining);
+            => Return(error with { Remaining = remaining });
     }
 }

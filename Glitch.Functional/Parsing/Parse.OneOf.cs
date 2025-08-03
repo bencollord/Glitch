@@ -1,5 +1,4 @@
-﻿using Glitch.Functional.Parsing.Results;
-using System.Collections.Immutable;
+﻿using Glitch.Functional.Parsing.Parsers;
 
 namespace Glitch.Functional.Parsing
 {
@@ -9,11 +8,6 @@ namespace Glitch.Functional.Parsing
             => OneOf(tokens.Select(Token));
 
         public static Parser<TToken, T> OneOf<TToken, T>(params IEnumerable<Parser<TToken, T>> parsers)
-            => new(input =>
-            {
-                var results = parsers.Select(p => p.Execute(input));
-
-                return results.FirstOrNone(p => p.WasSuccessful).IfNone(results.First());
-            });
+            => new OneOfParser<TToken, T>(parsers);
     }
 }
