@@ -50,7 +50,7 @@ namespace Glitch.Functional
         public static IEnumerable<T> Somes<T>(this IEnumerable<Option<T>> options)
             => options.Where(o => o.IsSome).Select(o => o.Unwrap());
 
-        public static Option<T> Map<T>(this Option<bool> result, Func<Unit, T> ifTrue, Func<Unit, T> ifFalse)
+        public static Option<T> Map<T>(this Option<bool> result, Func<Nothing, T> ifTrue, Func<Nothing, T> ifFalse)
             => result.Map(flag => flag ? ifTrue(default) : ifFalse(default));
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Glitch.Functional
             => booleanOption.Match(v => v ? ifTrue() : ifFalse(), ifNone);
 
 
-        public static Unit Match(this Option<bool> result, Action ifTrue, Action ifFalse, Action ifNone)
+        public static Nothing Match(this Option<bool> result, Action ifTrue, Action ifFalse, Action ifNone)
             => result.Match(flag => flag ? ifTrue.Return()() : ifFalse.Return()(), ifNone.Return());
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace Glitch.Functional
         /// <returns></returns>
         public static Result<TValue> FailOr<TError, TValue>(this Option<TError> opt, TValue value)
             where TError : Error
-            => opt.Match(Fail<TValue>, _ => Okay(value));
+            => opt.Match(Result.Fail<TValue>, () => Result.Okay(value));
 
         /// <summary>
         /// Wraps the error in a failed <see cref="Result{T}" /> if it exists,
@@ -88,7 +88,7 @@ namespace Glitch.Functional
         /// <param name="function"></param>
         public static Result<TValue> FailOrElse<TError, TValue>(this Option<TError> opt, Func<TValue> function)
             where TError : Error
-            => opt.Match(Fail<TValue>, function.Then(Okay));
+            => opt.Match(Result.Fail<TValue>, function.Then(Result.Okay));
 
         /// <summary>
         /// Wraps the error in a failed <see cref="Result{T}" /> if it exists,
@@ -96,9 +96,9 @@ namespace Glitch.Functional
         /// the result of the provided function.
         /// </summary>
         /// <param name="function"></param>
-        public static Result<TValue> FailOrElse<TError, TValue>(this Option<TError> opt, Func<Unit, TValue> function)
+        public static Result<TValue> FailOrElse<TError, TValue>(this Option<TError> opt, Func<Nothing, TValue> function)
             where TError : Error
-            => opt.Match(Fail<TValue>, function.Then(Okay));
+            => opt.Match(Result.Fail<TValue>, function.Then(Result.Okay));
 
         /// <summary>
         /// Unzips an option of a tuple into a tuple of two options.
@@ -121,11 +121,5 @@ namespace Glitch.Functional
         /// <returns></returns>
         public static Option<T> Flatten<T>(this Option<Option<T>> nested)
             => nested.AndThen(o => o);
-
-        public static Result<Option<T>> Invert<T>(this Option<Result<T>> nested)
-            => nested.Match(
-                    res => res.Map(Some),
-                    () => Okay(Option<T>.None)
-                );
     }
 }

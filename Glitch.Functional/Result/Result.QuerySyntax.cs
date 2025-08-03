@@ -1,6 +1,6 @@
 namespace Glitch.Functional
 {
-    public static class ResultExtensions
+    public static class ResultQuerySyntax
     {
         public static Result<TResult> Select<T, TResult>(this Result<T> source, Func<T, TResult> mapper)
             => source.Map(mapper);

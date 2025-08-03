@@ -131,7 +131,7 @@ namespace Glitch.Functional
             => HashCode.Combine(items.Select(i => i?.GetHashCode() ?? 0));
 
         public override string ToString()
-            => items.Select(i => i?.ToString() ?? "null").DefaultIfEmpty("Empty")!.Join(", ");
+            => string.Join(", ", items.Select(i => i?.ToString() ?? "null").DefaultIfEmpty("Empty"));
 
         public static Sequence<T> operator +(Sequence<T> x, Sequence<T> y) => x.Concat(y);
         public static Sequence<T> operator +(Sequence<T> seq, T item) => seq.Append(item);

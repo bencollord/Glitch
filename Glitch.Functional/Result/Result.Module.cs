@@ -3,12 +3,16 @@
     // TODO Incomplete
     public static partial class Result
     {
+        public static Result<T> Okay<T>(T value) => new Success<T>(value);
+
+        public static Result<T> Fail<T>(Error error) => new Failure<T>(error);
+
         public static bool IsOkay<T>(Result<T> result) => result.IsOkay;
 
-        public static bool IsFail<T>(Result<T> result) => result.IsFail;
+        public static bool IsFail<T>(Result<T> result) => result.IsError;
 
-        public static Result<Unit> Guard(bool condition, Error error)
-            => Guard(condition, Unit.Value, error);
+        public static Result<Nothing> Guard(bool condition, Error error)
+            => Guard(condition, Nothing.Value, error);
 
         public static Result<T> Guard<T>(bool condition, T value, Error error)
             => condition ? Okay(value) : Fail<T>(error);

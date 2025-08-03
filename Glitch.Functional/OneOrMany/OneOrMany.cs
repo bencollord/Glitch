@@ -1,4 +1,3 @@
-using Glitch.Linq;
 using System.Collections;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -115,7 +114,12 @@ namespace Glitch.Functional
         public OneOrMany<T> Do(Action<T> action)
         {
             one.Do(action);
-            many.ForEach(action);
+            
+            foreach (var item in many)
+            {
+                action(item);
+            }
+
             return this;
         }
 
@@ -134,7 +138,7 @@ namespace Glitch.Functional
             return one.Match(ifOne, _ => ifMany(self.many));
         }
 
-        public Unit Match(Action<T> ifOne, Action<IEnumerable<T>> ifMany) => Match(ifOne.Return(), ifMany.Return());
+        public Nothing Match(Action<T> ifOne, Action<IEnumerable<T>> ifMany) => Match(ifOne.Return(), ifMany.Return());
 
         public OneOrMany<TResult> Cast<TResult>()
             => Map(DynamicCast<TResult>.From);
@@ -167,7 +171,7 @@ namespace Glitch.Functional
             => Match(o => HashCode.Combine(o), m => HashCode.Combine(m));
 
         public override string ToString()
-            => Match(v => v!.ToString()!, m => m.Join(", "));
+            => Match(v => v!.ToString()!, m => string.Join(", ", m));
 
         // Since this class implements IEnumerable, we'll put the query syntax methods
         // in with its type so we can override some of the behavior
