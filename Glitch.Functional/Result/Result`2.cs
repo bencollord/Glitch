@@ -83,7 +83,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public abstract Result<T, E> Or(Result<T, E> other);
+        public abstract Result<T, EResult> Or<EResult>(Result<T, EResult> other);
 
         /// <summary>
         /// Returns the current result if Ok, otherwise applies the provided
@@ -91,7 +91,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public abstract Result<T, E> OrElse(Func<E, Result<T, E>> other);
+        public abstract Result<T, EResult> OrElse<EResult>(Func<E, Result<T, EResult>> other);
 
         /// <summary>
         /// BiBind operation
@@ -100,7 +100,7 @@ namespace Glitch.Functional
         /// <param name="okay"></param>
         /// <param name="error"></param>
         /// <returns></returns>
-        public abstract Result<TResult, E> Choose<TResult>(Func<T, Result<TResult, E>> okay, Func<E, Result<TResult, E>> error);
+        public Result<TResult, E> Choose<TResult>(Func<T, Result<TResult, E>> okay, Func<E, Result<TResult, E>> error) => Match(okay, error);
 
         /// <summary>
         /// Executes an impure action against the value if Ok.
@@ -108,7 +108,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public abstract Result<T, E> Do(Action<T> action);
+        public Result<T, E> Do(Action<T> action) => Do(action.Return());
 
         /// <summary>
         /// Executes an impure action against the value if Ok.
@@ -116,7 +116,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Result<T, E> Do(Func<T, Nothing> action) => Do(v => action(v));
+        public Result<T, E> Do(Func<T, Nothing> action) => Map(x => action(x).Return(x));
 
         /// <summary>
         /// Executes an impure action if failed.
@@ -134,27 +134,8 @@ namespace Glitch.Functional
         /// <returns></returns>
         public abstract Result<T, E> IfFail(Action<E> action);
 
-        /// <summary>
-        /// Executes an impure action if failed and the error matches the provided type.
-        /// No op if Okay or a different error type.
-        /// </summary>
-        /// <param name="action"></param>
-        /// <returns></returns>
-        public Result<T, E> IfError<TDerivedError>(Action action)
-            where TDerivedError : E
-            => IfError<E>(_ => action());
-
-        /// <summary>
-        /// Executes an impure action if failed and the error matches the provided type.
-        /// No op if Okay or a different error type.
-        /// </summary>
-        /// <param name="action"></param>
-        /// <returns></returns>
-        public abstract Result<T, E> IfError<TDerivedError>(Action<TDerivedError> action)
-            where TDerivedError : E;
-
         public TResult Match<TResult>(Func<T, TResult> okay, TResult error)
-            => Map(okay).IfFail(error);
+            => Match(okay, _ => error);
 
         public TResult Match<TResult>(Func<T, TResult> okay, Func<TResult> error)
             => Match(okay, _ => error());
@@ -170,27 +151,18 @@ namespace Glitch.Functional
         public abstract TResult Match<TResult>(Func<T, TResult> okay, Func<E, TResult> error);
 
         /// <summary>
-        /// Casts the wrapped value to <typeparamref name="TResult"/> if Ok,
+        /// If Okay, casts the wrapped value to <typeparamref name="TResult"/>,
         /// otherwise returns the current error wrapped in a new result type.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <exception cref="InvalidCastException">
         /// If the cast is not valid. If you need safe casting,
         /// lift the result into the <see cref="Effect{T}"/> type.
+        /// 
+        /// This method is guaranteed not to throw on a failed result.
         /// </exception>
         /// <returns></returns>
-        public abstract Result<TResult, E> Cast<TResult>();
-
-        /// <summary>
-        /// Casts the result, or returns the provided error
-        /// if the cast fails.
-        /// </summary>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="error"></param>
-        /// <returns></returns>
-        public abstract Result<TResult, E> CastOr<TResult>(E error);
-
-        public abstract Result<TResult, E> CastOrElse<TResult>(Func<T, E> error);
+        public Result<TResult, E> Cast<TResult>() => Map(DynamicCast<TResult>.From);
 
         /// <summary>
         /// For a successful result, checks the value against a predicate
@@ -247,7 +219,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="fallback"></param>
         /// <returns></returns>
-        public abstract T IfFail(Func<T> fallback);
+        public T IfFail(Func<T> fallback) => IfFail(_ => fallback());
 
         /// <summary>
         /// Returns the wrapped value if Ok. Otherwise, returns the result

@@ -8,7 +8,9 @@
 
         public static Effect<TInput, T> Fail<TInput, T>(Error error) => Effect<T>.Fail(error);
 
-        public static Effect<TInput, T> FromResult<TInput, T>(Result<T> result) => Effect<TInput, T>.Lift(result);
+        public static Effect<TInput, T> Return<TInput, T>(Result<T> result) => Effect<TInput, T>.Return(result);
+        public static Effect<TInput, T> Return<TInput, T>(Result<T, Error> result) => Effect<TInput, T>.Return(result);
+        public static Effect<TInput, T> Return<TInput, T>(IResult<T, Error> result) => Effect<TInput, T>.Return(result);
 
         public static Effect<TInput, T> Lift<TInput, T>(Func<TInput, Result<T>> function) => Effect<TInput, T>.Lift(function);
 

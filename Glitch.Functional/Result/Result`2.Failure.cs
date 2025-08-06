@@ -3,112 +3,86 @@ namespace Glitch.Functional
 {
     public static partial class Result
     {
-        public sealed record Failure<TOkay, TError>(TError Error) : Result<TOkay, TError>
+        public sealed record Failure<T, E>(E Error) : Result<T, E>
         {
             public override bool IsOkay => false;
 
             public override bool IsError => true;
 
             /// <inheritdoc />
-            public override Result<TResult, TError> And<TResult>(Result<TResult, TError> other)
-                => new Failure<TResult, TError>(Error);
+            public override Result<TResult, E> And<TResult>(Result<TResult, E> other)
+                => new Failure<TResult, E>(Error);
 
             /// <inheritdoc />
-            public override Result<TResult, TError> AndThen<TResult>(Func<TOkay, Result<TResult, TError>> mapper)
-                => new Failure<TResult, TError>(Error);
+            public override Result<TResult, E> AndThen<TResult>(Func<T, Result<TResult, E>> mapper)
+                => new Failure<TResult, E>(Error);
 
             /// <inheritdoc />
-            public override Result<TResult, TError> Cast<TResult>() => new Failure<TResult, TError>(Error);
-
-            public override Result<TResult, TError> CastOr<TResult>(TError _) => Cast<TResult>();
-
-            public override Result<TResult, TError> CastOrElse<TResult>(Func<TOkay, TError> _) => Cast<TResult>();
-
-            /// <inheritdoc />
-            public override Result<TOkay, TError> Do(Action<TOkay> _) => this;
-
-            /// <inheritdoc />
-            public override Result<TOkay, TError> IfFail(Action<TError> action)
+            public override Result<T, E> IfFail(Action<E> action)
             {
                 action(Error);
                 return this;
             }
 
             /// <inheritdoc />
-            public override Result<TOkay, TError> IfError<TDerivedError>(Action<TDerivedError> action)
-            {
-                if (Error is TDerivedError derived)
-                {
-                    action(derived);
-                }
-
-                return this;
-            }
+            public override IEnumerable<T> Iterate() => Enumerable.Empty<T>();
 
             /// <inheritdoc />
-            public override IEnumerable<TOkay> Iterate() => Enumerable.Empty<TOkay>();
+            public override Result<TResult, E> Map<TResult>(Func<T, TResult> mapper)
+                => new Failure<TResult, E>(Error);
 
             /// <inheritdoc />
-            public override Result<TResult, TError> Map<TResult>(Func<TOkay, TResult> mapper)
-                => new Failure<TResult, TError>(Error);
+            public override Result<T, TNewError> MapError<TNewError>(Func<E, TNewError> mapper) => mapper(Error);
 
             /// <inheritdoc />
-            public override Result<TOkay, TNewError> MapError<TNewError>(Func<TError, TNewError> mapper) => mapper(Error);
-
-            /// <inheritdoc />
-            public override TResult Match<TResult>(Func<TOkay, TResult> _, Func<TError, TResult> ifFail)
+            public override TResult Match<TResult>(Func<T, TResult> _, Func<E, TResult> ifFail)
                 => ifFail(Error);
 
             /// <inheritdoc />
-            public override Result<TOkay, TError> Or(Result<TOkay, TError> other) => other;
+            public override Result<T, EResult> Or<EResult>(Result<T, EResult> other) => other;
 
             /// <inheritdoc />
-            public override Result<TOkay, TError> OrElse(Func<TError, Result<TOkay, TError>> bindFail) => bindFail(Error);
+            public override Result<T, EResult> OrElse<EResult>(Func<E, Result<T, EResult>> bindFail) => bindFail(Error);
 
             /// <inheritdoc />
-            public override Option<TOkay> OkayOrNone() => None;
+            public override Option<T> OkayOrNone() => None;
 
             /// <inheritdoc />
-            public override Result<TOkay, TError> Guard(Func<TOkay, bool> predicate, TError _) => this;
+            public override Result<T, E> Guard(Func<T, bool> predicate, E _) => this;
 
-            public override Result<TOkay, TError> Guard(Func<TOkay, bool> predicate, Func<TOkay, TError> _) => this;
+            public override Result<T, E> Guard(Func<T, bool> predicate, Func<T, E> _) => this;
 
             public override string ToString() => $"Error: {Error}";
 
             /// <inheritdoc />
-            public override TOkay Unwrap() => throw new InvalidOperationException($"Attempted to unwrap a faulted result. Error value: {Error}");
+            public override T Unwrap() => throw new InvalidOperationException($"Attempted to unwrap a faulted result. Error value: {Error}");
 
-            public override bool TryUnwrap(out TOkay result)
+            public override bool TryUnwrap(out T result)
             {
                 result = default!;
                 return false;
             }
 
-            public override bool TryUnwrapError(out TError result)
+            public override bool TryUnwrapError(out E result)
             {
                 result = Error;
                 return true;
             }
 
             /// <inheritdoc />
-            public override TOkay IfFail(TOkay fallback) => fallback;
+            public override T IfFail(T fallback) => fallback;
 
             /// <inheritdoc />
-            public override TOkay IfFail(Func<TOkay> fallback) => fallback();
+            public override T IfFail(Func<E, T> fallback) => fallback(Error);
 
             /// <inheritdoc />
-            public override TOkay IfFail(Func<TError, TOkay> fallback) => fallback(Error);
+            public override E UnwrapErrorOr(E _) => Error;
 
             /// <inheritdoc />
-            public override TError UnwrapErrorOr(TError _) => Error;
+            public override E UnwrapErrorOrElse(Func<T, E> _) => Error;
 
             /// <inheritdoc />
-            public override TError UnwrapErrorOrElse(Func<TOkay, TError> _) => Error;
-
-            /// <inheritdoc />
-            public override Option<TError> ErrorOrNone() => Some(Error);
-
-            public override Result<TResult, TError> Choose<TResult>(Func<TOkay, Result<TResult, TError>> _, Func<TError, Result<TResult, TError>> ifFail) => ifFail(Error);
+            public override Option<E> ErrorOrNone() => Some(Error);
         }
     }
 }

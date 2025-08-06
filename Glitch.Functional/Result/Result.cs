@@ -101,7 +101,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public Result<T> Or(Result<T> other) => IsOkay ? this : other;
+        public Result<T> Or(Result<T> other) => new(inner.Or(other.inner));
 
         /// <summary>
         /// Returns the current result if Ok, otherwise applies the provided
@@ -111,6 +111,11 @@ namespace Glitch.Functional
         /// <returns></returns>
         public Result<T> OrElse(Func<Error, Result<T>> bind)
             => inner.OrElse(x => bind(x).inner);
+
+        public Result<T, E> Or<E>(Result<T, E> other) => inner.Or(other);
+
+        public Result<T, E> OrElse<E>(Func<Error, Result<T, E>> bind)
+            => inner.OrElse(x => bind(x));
 
         /// <summary>
         /// BiBind operation
@@ -182,17 +187,6 @@ namespace Glitch.Functional
         /// </exception>
         /// <returns></returns>
         public Result<TResult> Cast<TResult>() => inner.Cast<TResult>();
-
-        /// <summary>
-        /// Casts the result, or returns the provided error
-        /// if the cast fails.
-        /// </summary>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="error"></param>
-        /// <returns></returns>
-        public Result<TResult> CastOr<TResult>(Error error) => inner.CastOr<TResult>(error);
-
-        public Result<TResult> CastOrElse<TResult>(Func<T, Error> error) => inner.CastOrElse<TResult>(error);
 
         public Result<T> Filter(Func<T, bool> predicate)
             => Guard(predicate, Error.Empty);
@@ -340,9 +334,9 @@ namespace Glitch.Functional
         /// <returns></returns>
         public IEnumerable<T> Iterate() => inner.Iterate();
 
-        public Effect<T> AsFallible() => Effect.FromResult(this);
+        public Effect<T> AsFallible() => Effect.Return(this);
 
-        public Effect<TInput, T> AsEffect<TInput>() => Effect<TInput, T>.FromResult(this);
+        public Effect<TInput, T> AsEffect<TInput>() => Effect<TInput, T>.Return(this);
 
         public override string ToString() => inner.ToString();
 
@@ -375,83 +369,5 @@ namespace Glitch.Functional
         public static explicit operator Error(Result<T> result)
             => result is Result.Failure<T>(var err)
                    ? err : throw new InvalidCastException("Cannot cast a successful result to an error");
-
-        // UNDONE Needs more comprehensive functionality
-        public FluentActionContext IfOkay(Func<T, Nothing> ifOkay) => IfOkay(new Action<T>(t => ifOkay(t)));
-
-        public FluentActionContext IfOkay(Action<T> ifOkay) => new FluentActionContext(this, ifOkay);
-
-        // UNDONE Naming inconsistency
-        public FluentActionContext ForError<TError>(Action<TError> ifError)
-            where TError : Error
-            => IfOkay(_ => { /* Nop */ }).Catch(ifError);
-
-        /// <summary>
-        /// Fluent context for chaining actions against a result.
-        /// 
-        /// Experimental API and may be removed.
-        /// </summary>
-        /// <remarks>
-        /// Might remove because this is really stretching the responsibility
-        /// of a Result type and kind of turning it more into an effect.
-        /// Right now, I'll keep it for convenience, but I'll come back and 
-        /// clean this up later.
-        /// </remarks>
-        public readonly struct FluentActionContext
-        {
-            private readonly Result<T> result;
-            private readonly Action<T> ifOkay;
-            private readonly ImmutableDictionary<Type, Action<Error>> errorHandlers;
-
-            internal FluentActionContext(Result<T> result, Action<T> ifOkay) 
-                : this(result, ifOkay, ImmutableDictionary<Type, Action<Error>>.Empty) { }
-
-            internal FluentActionContext(Result<T> result, Action<T> ifOkay, ImmutableDictionary<Type, Action<Error>> errorHandlers)
-            {
-                this.result = result;
-                this.ifOkay = ifOkay;
-                this.errorHandlers = errorHandlers;
-            }
-
-            public FluentActionContext Then(Action<T> ifOkay) => new(result, this.ifOkay + ifOkay, errorHandlers);
-
-            public FluentActionContext Then(Func<T, Nothing> ifOkay) => Then(new Action<T>(v => ifOkay(v)));
-
-            public FluentActionContext Catch<TError>(Action<TError> ifError)
-                where TError : Error
-                => new(result, ifOkay, errorHandlers.Add(typeof(TError), err => ifError((TError)err)));
-
-            public Nothing Otherwise(Func<Error, Nothing> ifFail) => Otherwise(new Action<Error>(v => ifFail(v)));
-
-            public Nothing Otherwise(Action<Error> ifFail)
-            {
-                switch (result)
-                {
-                    case Result.Success<T>(T value):
-                        ifOkay(value);
-                        break;
-
-                    case Result.Failure<T>(Error err)
-                        when errorHandlers.TryGetValue(err.GetType(), out var handler):
-                        handler(err);
-                        break;
-
-                    case Result.Failure<T>(Error err):
-                        ifFail(err);
-                        break;
-
-                    default:
-                        throw BadMatchException();
-                }
-
-                return Nothing.Value;
-            }
-
-            public Nothing OtherwiseThrow() => Otherwise(err => err.Throw());
-
-            public Nothing OtherwiseDoNothing() => Otherwise(_ => { /* Nop */ });
-
-            public Result<T> OtherwiseContinue() => Otherwise(_ => { /* Nop */ }).Return(result);
-        }
     }
 }

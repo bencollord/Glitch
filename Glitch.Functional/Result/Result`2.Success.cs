@@ -2,113 +2,84 @@ namespace Glitch.Functional
 {
     public static partial class Result
     {
-        public sealed record Success<TOkay, TError>(TOkay Value) : Result<TOkay, TError>
+        public sealed record Success<T, E>(T Value) : Result<T, E>
         {
             public override bool IsOkay => true;
 
             public override bool IsError => false;
 
             /// <inheritdoc />
-            public override Result<TResult, TError> And<TResult>(Result<TResult, TError> other)
+            public override Result<TResult, E> And<TResult>(Result<TResult, E> other)
                 => other;
 
             /// <inheritdoc />
-            public override Result<TResult, TError> AndThen<TResult>(Func<TOkay, Result<TResult, TError>> mapper)
+            public override Result<TResult, E> AndThen<TResult>(Func<T, Result<TResult, E>> mapper)
                 => mapper(Value);
 
             /// <inheritdoc />
-            public override Result<TResult, TError> Cast<TResult>()
-                => CastOrElse<TResult>(x => throw new InvalidCastException($"Cannot cast value {x} to {typeof(TResult)}"));
-
-            public override Result<TResult, TError> CastOr<TResult>(TError err)
-                => CastOrElse<TResult>(_ => err);
-
-            // TODO Clean up syntax here
-            public override Result<TResult, TError> CastOrElse<TResult>(Func<TOkay, TError> error)
-                => AndThen(v => DynamicCast<TResult>.TryFrom(v).Match<Result<TResult, TError>>(r => new Success<TResult, TError>(r), _ => new Failure<TResult, TError>(error(v))));
+            public override Result<T, E> IfFail(Action<E> _) => this;
 
             /// <inheritdoc />
-            public override Result<TOkay, TError> Do(Action<TOkay> action)
-            {
-                action(Value);
-                return this;
-            }
-
-            /// <inheritdoc />
-            public override Result<TOkay, TError> IfFail(Action<TError> _) => this;
-
-            /// <inheritdoc />
-            public override Result<TOkay, TError> IfError<TDerivedError>(Action<TDerivedError> _) => this;
-
-            /// <inheritdoc />
-            public override IEnumerable<TOkay> Iterate()
+            public override IEnumerable<T> Iterate()
             {
                 yield return Value;
             }
 
             /// <inheritdoc />
-            public override Result<TResult, TError> Map<TResult>(Func<TOkay, TResult> mapper)
-                => new Success<TResult, TError>(mapper(Value));
+            public override Result<TResult, E> Map<TResult>(Func<T, TResult> mapper)
+                => new Success<TResult, E>(mapper(Value));
 
             /// <inheritdoc />
-            public override Result<TOkay, TNewError> MapError<TNewError>(Func<TError, TNewError> _) => Result<TOkay, TNewError>.Okay(Value);
+            public override Result<T, TNewError> MapError<TNewError>(Func<E, TNewError> _) => Result<T, TNewError>.Okay(Value);
 
             /// <inheritdoc />
-            public override TResult Match<TResult>(Func<TOkay, TResult> ifOkay, Func<TError, TResult> _)
+            public override TResult Match<TResult>(Func<T, TResult> ifOkay, Func<E, TResult> _)
                 => ifOkay(Value);
 
             /// <inheritdoc />
-            public override Result<TOkay, TError> Or(Result<TOkay, TError> other) => this;
+            public override Result<T, EResult> Or<EResult>(Result<T, EResult> other) => Okay<T, EResult>(Value);
 
             /// <inheritdoc />
-            public override Result<TOkay, TError> OrElse(Func<TError, Result<TOkay, TError>> _) => this;
+            public override Result<T, EResult> OrElse<EResult>(Func<E, Result<T, EResult>> _) => Okay<T, EResult>(Value);
 
             /// <inheritdoc />
-            public override Result<TOkay, TError> Guard(Func<TOkay, bool> predicate, TError error)
+            public override Result<T, E> Guard(Func<T, bool> predicate, E error)
                 => predicate(Value) ? this : error;
 
-            public override Result<TOkay, TError> Guard(Func<TOkay, bool> predicate, Func<TOkay, TError> error)
+            public override Result<T, E> Guard(Func<T, bool> predicate, Func<T, E> error)
                 => predicate(Value) ? this : error(Value);
 
             /// <inheritdoc />
-            public override Option<TOkay> OkayOrNone() => Some(Value);
+            public override Option<T> OkayOrNone() => Some(Value);
 
             public override string ToString() => $"Ok: {Value}";
 
             /// <inheritdoc />
-            public override TOkay Unwrap() => Value;
+            public override T Unwrap() => Value;
 
             /// <inheritdoc />
-            public override TOkay IfFail(TOkay _) => Value;
+            public override T IfFail(T _) => Value;
 
             /// <inheritdoc />
-            public override TOkay IfFail(Func<TOkay> _) => Value;
+            public override T IfFail(Func<E, T> _) => Value;
 
-            /// <inheritdoc />
-            public override TOkay IfFail(Func<TError, TOkay> _) => Value;
+            public override E UnwrapErrorOr(E fallback) => fallback;
 
-            public override TError UnwrapErrorOr(TError fallback) => fallback;
-
-            public override Result<TResult, TError> Choose<TResult>(Func<TOkay, Result<TResult, TError>> ifOkay, Func<TError, Result<TResult, TError>> _)
-            {
-                return ifOkay(Value);
-            }
-
-            public override bool TryUnwrap(out TOkay result)
+            public override bool TryUnwrap(out T result)
             {
                 result = Value;
                 return true;
             }
 
-            public override bool TryUnwrapError(out TError result)
+            public override bool TryUnwrapError(out E result)
             {
                 result = default!;
                 return false;
             }
 
-            public override TError UnwrapErrorOrElse(Func<TOkay, TError> fallback) => fallback(Value);
+            public override E UnwrapErrorOrElse(Func<T, E> fallback) => fallback(Value);
 
-            public override Option<TError> ErrorOrNone() => None;
+            public override Option<E> ErrorOrNone() => None;
         }
     }
 }

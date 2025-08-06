@@ -52,7 +52,7 @@ namespace Glitch.Functional
 
         public static Effect<T> Try<T>(T value) => Effect<T>.Okay(value);
 
-        public static Effect<T> Try<T>(Result<T> result) => Effect<T>.FromResult(result);
+        public static Effect<T> Try<T>(Result<T> result) => Effect<T>.Return(result);
 
         public static Effect<TInput, Nothing> TryWith<TInput>(Action<TInput> function)
             => TryWith(function.Return());

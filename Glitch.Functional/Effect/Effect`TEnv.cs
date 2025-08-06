@@ -21,9 +21,9 @@ namespace Glitch.Functional
 
         public static Effect<TInput, T> Fail(Error error) => new(_ => Result.Fail<T>(error));
 
-        public static Effect<TInput, T> FromResult(IResult<T, Error> result) => new(_ => result);
+        public static Effect<TInput, T> Return(IResult<T, Error> result) => new(_ => result);
 
-        public static Effect<TInput, T> Lift(Effect<T> fallible) => new(_ => fallible.Run());
+        public static Effect<TInput, T> Lift(Effect<T> effect) => new(_ => effect.Run());
 
         public static Effect<TInput, T> Lift(Func<TInput, IResult<T, Error>> function) => new(function);
 
@@ -138,7 +138,7 @@ namespace Glitch.Functional
         /// <param name="bind"></param>
         /// <returns></returns>
         public Effect<TInput, TResult> AndThen<TResult>(Func<T, Result<TResult>> bind)
-            => AndThen(e => Effect<TInput, TResult>.FromResult(bind(e)));
+            => AndThen(e => Effect<TInput, TResult>.Return(bind(e)));
 
         /// <summary>
         /// Implements a bind-map operation, similar to

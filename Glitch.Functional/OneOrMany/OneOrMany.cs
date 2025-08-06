@@ -173,8 +173,6 @@ namespace Glitch.Functional
         public override string ToString()
             => Match(v => v!.ToString()!, m => string.Join(", ", m));
 
-        // Since this class implements IEnumerable, we'll put the query syntax methods
-        // in with its type so we can override some of the behavior
         public OneOrMany<TResult> Select<TResult>(Func<T, TResult> map) => Map(map);
         public OneOrMany<TResult> SelectMany<TResult>(Func<T, OneOrMany<TResult>> bind) => AndThen(bind);
         public OneOrMany<TResult> SelectMany<TElement, TResult>(Func<T, OneOrMany<TElement>> bind, Func<T, TElement, TResult> project) 

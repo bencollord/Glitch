@@ -14,7 +14,7 @@ namespace Glitch.Functional
 
         public static Effect<T> Fail(Error error) => new(Effect<Nothing, T>.Fail(error));
 
-        public static Effect<T> FromResult(IResult<T, Error> result) => new(Effect<Nothing, T>.FromResult(result));
+        public static Effect<T> Return(IResult<T, Error> result) => new(Effect<Nothing, T>.Return(result));
 
         public static Effect<T> Lift(Func<IResult<T, Error>> function) => new(Effect<Nothing, T>.Lift(_ => function()));
 
@@ -108,7 +108,7 @@ namespace Glitch.Functional
         /// <param name="bind"></param>
         /// <returns></returns>
         public Effect<TResult> AndThen<TResult>(Func<T, Result<TResult>> bind)
-            => AndThen(e => Effect<TResult>.FromResult(bind(e)));
+            => AndThen(e => Effect<TResult>.Return(bind(e)));
 
         /// <summary>
         /// <inheritdoc cref="Effect{Unit, T}.AndThen{TElement, TResult}(Func{T, Result{TElement}}, Func{T, TElement, TResult})"/>
@@ -252,7 +252,7 @@ namespace Glitch.Functional
         /// <returns></returns>
         public Result<T> Run() => inner.Run(Nothing.Value);
 
-        public static implicit operator Effect<T>(Result<T> result) => FromResult(result);
+        public static implicit operator Effect<T>(Result<T> result) => Return(result);
 
         public static implicit operator Effect<T>(T value) => Okay(value);
 

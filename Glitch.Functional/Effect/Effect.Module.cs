@@ -8,7 +8,11 @@
 
         public static Effect<Nothing> Fail(Error value) => Fail<Nothing, Nothing>(value);
 
-        public static Effect<T> FromResult<T>(Result<T> result) => FromResult<Nothing, T>(result);
+        public static Effect<T> Return<T>(Result<T> result) => Return<Nothing, T>(result);
+        
+        public static Effect<T> Return<T>(Result<T, Error> result) => Return<Nothing, T>(result);
+
+        public static Effect<T> Return<T>(IResult<T, Error> result) => Return<Nothing, T>(result);
 
         public static Effect<T> Lift<T>(Func<Result<T>> function) => Lift<Nothing, T>(_ => function());
 
