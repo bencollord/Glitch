@@ -32,17 +32,13 @@
             yield return Value;
         }
 
-        public Result<T> Okay() => new Result.Okay<T>(Value);
+        public Result<T> Okay() => new Result.Success<T>(Value);
 
         public Option<T> Maybe() => Option<T>.Maybe(Value);
 
         public Option<T> Filter(Func<T, bool> predicate) => predicate(Value) ? Some(Value) : None;
 
-        public Fallible<TResult> Try<TResult>(Func<T, TResult> func) => Fallible.Okay(Value).Map(func);
-
-        public OneOf<T, TRight> LeftOf<TRight>() => Left(Value!);
-
-        public OneOf<TLeft, T> RightOf<TLeft>() => Right(Value!);
+        public Effect<TResult> Try<TResult>(Func<T, TResult> func) => Effect.Okay(Value).Map(func);
 
         public override string ToString() 
             => $"Id({Value})";
@@ -51,7 +47,7 @@
 
         public static implicit operator Result<T>(Identity<T> identity) => identity.Okay();
 
-        public static implicit operator Fallible<T>(Identity<T> identity) => identity.Try(i => i);
+        public static implicit operator Effect<T>(Identity<T> identity) => identity.Try(i => i);
 
         public static implicit operator Sequence<T>(Identity<T> identity) => identity.Iterate().AsSequence();
 

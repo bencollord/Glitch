@@ -32,7 +32,7 @@ namespace Glitch.Functional.Parsing.Results
 
         public string Message => message.IfNone(DefaultMessage);
 
-        public override bool WasSuccessful => false;
+        public override bool IsOkay => false;
 
         public override ParseResult<TToken, TResult> AndThen<TResult>(Func<T, ParseResult<TToken, TResult>> bind) => Cast<TResult>();
 

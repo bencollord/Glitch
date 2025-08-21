@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Glitch.Functional
 {
@@ -29,9 +31,11 @@ namespace Glitch.Functional
 
         public bool IsNone => !hasValue;
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsSomeAnd(Func<T, bool> predicate)
             => Map(predicate).IfNone(false);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsNoneOr(Func<T, bool> predicate)
             => Map(predicate).IfNone(true);
 
@@ -43,6 +47,7 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <param name="map"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> Map<TResult>(Func<T, TResult> map)
             => IsSome ? new Option<TResult>(map(value!)) : new Option<TResult>();
 
@@ -54,6 +59,7 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <param name="map"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<Func<T2, TResult>> PartialMap<T2, TResult>(Func<T, T2, TResult> map)
             => Map(map.Curry());
 
@@ -64,6 +70,7 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <param name="function"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> Apply<TResult>(Option<Func<T, TResult>> function)
             => AndThen(v => function.Map(fn => fn(v)));
 
@@ -73,6 +80,7 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <param name="other"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> And<TResult>(TResult other) => And(Option<TResult>.Some(other));
 
         /// <summary>
@@ -81,6 +89,7 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <param name="other"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> And<TResult>(Option<TResult> other)
             => IsSome ? other : new Option<TResult>();
 
@@ -91,6 +100,7 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <param name="bind"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> AndThen<TResult>(Func<T, Option<TResult>> bind)
             => IsSome ? bind(value!) : new Option<TResult>();
 
@@ -107,13 +117,16 @@ namespace Glitch.Functional
         /// <param name="bind"></param>
         /// <param name="project"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> AndThen<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project)
             => AndThen(x => bind(x).Map(y => project(x, y)));
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> Choose<TResult>(Func<T, Option<TResult>> bindSome, Func<Option<TResult>> bindNone)
             => Match(bindSome, bindNone);
 
-        public Option<TResult> Choose<TResult>(Func<T, Option<TResult>> bindSome, Func<Unit, Option<TResult>> bindNone)
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Option<TResult> Choose<TResult>(Func<T, Option<TResult>> bindSome, Func<Nothing, Option<TResult>> bindNone)
             => Match(bindSome, bindNone);
 
         /// <summary>
@@ -122,6 +135,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<T> Or(Option<T> other) => IsSome ? this : other;
 
         /// <summary>
@@ -131,6 +145,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<T> Xor(Option<T> other)
         {
             if (IsSome && other.IsNone)
@@ -152,6 +167,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<T> OrElse(Func<Option<T>> other)
             => IsSome ? this : other();
 
@@ -161,7 +177,8 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public Option<T> OrElse(Func<Unit, Option<T>> other)
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Option<T> OrElse(Func<Nothing, Option<T>> other)
             => IsSome ? this : other(default);
 
         /// <summary>
@@ -171,6 +188,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<T> Filter(Func<T, bool> predicate)
         {
             if (IsSomeAnd(predicate))
@@ -187,6 +205,7 @@ namespace Glitch.Functional
         /// <typeparam name="TOther"></typeparam>
         /// <param name="other"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<(T, TOther)> Zip<TOther>(Option<TOther> other)
             => Zip(other, (x, y) => (x, y));
 
@@ -198,6 +217,7 @@ namespace Glitch.Functional
         /// <param name="other"></param>
         /// <param name="zipper"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> Zip<TOther, TResult>(Option<TOther> other, Func<T, TOther, TResult> zipper)
             => AndThen(x => other.Map(y => zipper(x, y)));
 
@@ -207,6 +227,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<T> Do(Action<T> action)
         {
             if (IsSome)
@@ -222,29 +243,34 @@ namespace Glitch.Functional
         /// Otherwise, returns the fallback value.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
-        /// <param name="ifSome"></param>
-        /// <param name="ifNone"></param>
+        /// <param name="some"></param>
+        /// <param name="none"></param>
         /// <returns></returns>
-        public TResult Match<TResult>(Func<T, TResult> ifSome, TResult ifNone)
-            => Map(ifSome).IfNone(ifNone);
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public TResult Match<TResult>(Func<T, TResult> some, TResult none)
+            => Map(some).IfNone(none);
 
-        public Unit Match(Action<T> ifSome, Action ifNone) => Match(ifSome.Return(), ifNone.Return());
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Nothing Match(Action<T> some, Action none) => Match(some.Return(), none.Return());
 
-        public Unit Match(Action<T> ifSome, Action<Unit> ifNone) => Match(ifSome, () => ifNone(default));
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Nothing Match(Action<T> some, Action<Nothing> none) => Match(some, () => none(default));
 
         /// <summary>
         /// If this <see cref="Option{T}"/> contains a value, returns the result of the first function 
         /// applied to the wrapped value.Otherwise, returns the result of the second function.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
-        /// <param name="ifSome"></param>
-        /// <param name="ifNone"></param>
+        /// <param name="some"></param>
+        /// <param name="none"></param>
         /// <returns></returns>
-        public TResult Match<TResult>(Func<T, TResult> ifSome, Func<TResult> ifNone)
-            => IsSome ? ifSome(value!) : ifNone();
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public TResult Match<TResult>(Func<T, TResult> some, Func<TResult> none)
+            => IsSome ? some(value!) : none();
 
-        public TResult Match<TResult>(Func<T, TResult> ifSome, Func<Unit, TResult> ifNone)
-            => Match(ifSome, () => ifNone(default));
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public TResult Match<TResult>(Func<T, TResult> some, Func<Nothing, TResult> none)
+            => Match(some, () => none(default));
 
         /// <summary>
         /// If the current <see cref="Option{T}"/> contains a value, casts it to 
@@ -253,13 +279,11 @@ namespace Glitch.Functional
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> Cast<TResult>()
-            => AndThen(v => DynamicCast<TResult>.TryFrom(v).Run().OrNone());
+            => AndThen(v => DynamicCast<TResult>.Try(v).OkayOrNone());
 
-        public Option<TResult> As<TResult>()
-            where TResult : class
-            => AndThen(v => FN.Maybe(v as TResult));
-
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> OfType<TResult>()
             where TResult : T
             => Filter(val => val is TResult).Map(val => (TResult)val!);
@@ -268,6 +292,7 @@ namespace Glitch.Functional
         /// Returns the wrapped value if it exists. Otherwise throws an exception.
         /// </summary>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Unwrap() => IsSome ? value! : throw new InvalidOperationException("Attempted to unwrap an empty option");
 
         /// <summary>
@@ -275,6 +300,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="fallback"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T UnwrapOr(T fallback) => Match(val => val, () => fallback);
 
         /// <summary>
@@ -283,6 +309,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="fallback"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T UnwrapOrElse(Func<T> fallback) => Match(val => val, fallback);
 
         /// <summary>
@@ -291,15 +318,18 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="fallback"></param>
         /// <returns></returns>
-        public T UnwrapOrElse(Func<Unit, T> fallback) => Match(val => val, fallback);
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T UnwrapOrElse(Func<Nothing, T> fallback) => Match(val => val, fallback);
 
         /// <summary>
         /// Returns the wrapped value if exists. Otherwise, returns the default value
         /// of <typeparamref name="T"/>.
         /// </summary>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T? UnwrapOrDefault() => IsSome ? value : default;
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryUnwrap(out T result)
         {
             result = value!;
@@ -311,6 +341,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="fallback"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T IfNone(T fallback) => Match(val => val, () => fallback);
 
         /// <summary>
@@ -319,6 +350,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="fallback"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T IfNone(Func<T> fallback) => Match(val => val, fallback);
 
         /// <summary>
@@ -327,7 +359,8 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="fallback"></param>
         /// <returns></returns>
-        public T IfNone(Func<Unit, T> fallback) => Match(val => val, fallback);
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T IfNone(Func<Nothing, T> fallback) => Match(val => val, fallback);
 
         /// <summary>
         /// Executes an impure action if empty.
@@ -335,6 +368,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<T> IfNone(Action action)
         {
             if (IsNone)
@@ -351,13 +385,15 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Option<T> IfNone(Action<Unit> action) => IfNone(() => action(Unit.Value));
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Option<T> IfNone(Action<Nothing> action) => IfNone(() => action(Nothing.Value));
 
         /// <summary>
         /// Returns the wrapped value if exists. Otherwise, returns the default value
         /// of <typeparamref name="T"/>.
         /// </summary>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T? DefaultIfNone() => IsSome ? value : default;
 
         /// <summary>
@@ -368,6 +404,7 @@ namespace Glitch.Functional
         /// </remarks>
         /// <param name="fallback"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T? DefaultIfNone(T? fallback) => IsSome ? value : fallback;
 
         /// <summary>
@@ -379,20 +416,14 @@ namespace Glitch.Functional
         /// </remarks>
         /// <param name="fallback"></param>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T? DefaultIfNone(Func<T?> fallback) => IsSome ? value : fallback();
-
-        public IfSomeFluent<TResult> IfSome<TResult>(TResult value) => new(this, _ => value);
-
-        public IfSomeFluent<TResult> IfSome<TResult>(Func<T, TResult> map) => new(this, map);
-
-        public IfSomeActionFluent IfSome<TResult>(Func<T, Unit> action) => new(this, action);
-
-        public IfSomeActionFluent IfSome(Action<T> action) => new(this, action);
 
         /// <summary>
         /// Yields a singleton sequence if some, otherwise an empty sequence.
         /// </summary>
         /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<T> Iterate()
         {
             if (IsSome)
@@ -408,7 +439,8 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="error"></param>
         /// <returns></returns>
-        public Result<T> OkayOr(Error error) => IsSome ? Okay(value!) : Fail<T>(error);
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Result<T> OkayOr(Error error) => IsSome ? Okay(value!) : Fail(error);
 
         /// <summary>
         /// Wraps the value in a <see cref="Result{T}" /> if it exists,
@@ -416,7 +448,8 @@ namespace Glitch.Functional
         /// the result of the provided error function.
         /// </summary>
         /// <param name="error"></param>
-        public Result<T> OkayOrElse(Func<Error> function) => IsSome ? Okay(value!) : Fail<T>(function());
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Result<T> OkayOrElse(Func<Error> function) => IsSome ? Okay(value!) : Fail(function());
 
         /// <summary>
         /// Wraps the value in a <see cref="Result{T}" /> if it exists,
@@ -424,34 +457,8 @@ namespace Glitch.Functional
         /// the result of the provided error function.
         /// </summary>
         /// <param name="error"></param>
-        public Result<T> OkayOrElse(Func<Unit, Error> function) => IsSome ? Okay(value!) : Fail<T>(function(default));
-
-        /// <summary>
-        /// Wraps the value in a <see cref="Fallible{T}" /> if it exists,
-        /// otherwise returns an errored <see cref="Fallible{T}" /> containing 
-        /// the provided error.
-        /// </summary>
-        /// <param name="error"></param>
-        /// <returns></returns>
-        public Fallible<T> TryOr(Error error) => IsSome ? Okay(value!) : Fail<T>(error);
-
-        /// <summary>
-        /// Wraps the value in a <see cref="Fallible{T}" /> if it exists,
-        /// otherwise returns an errored <see cref="Fallible{T}" /> containing 
-        /// the result of the provided error function.
-        /// </summary>
-        /// <param name="error"></param>
-        public Fallible<T> TryOrElse(Func<Error> function) => IsSome ? Okay(value!) : Fail<T>(function());
-
-        public OneOf<T, TRight> LeftOr<TRight>(TRight value) => IsSome ? Left(this.value!) : Right(value);
-
-        public OneOf<T, TRight> LeftOrElse<TRight>(Func<TRight> func)
-            => Match(OneOf<T, TRight>.Left, func.Then(OneOf<T, TRight>.Right));
-
-        public OneOf<TLeft, T> RightOr<TLeft>(TLeft value) => IsSome ? Right(this.value!) : Left(value);
-
-        public OneOf<TLeft, T> RightOrElse<TLeft>(Func<TLeft> func)
-            => Match(OneOf<TLeft, T>.Right, func.Then(OneOf<TLeft, T>.Left));
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Result<T> OkayOrElse(Func<Nothing, Error> function) => IsSome ? Okay(value!) : Fail(function(default));
 
         public bool Equals(Option<T> other)
         {
@@ -471,88 +478,41 @@ namespace Glitch.Functional
         public override string ToString()
             => Match(v => $"Some({v})", () => "None");
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator true(Option<T> option) => option.IsSome;
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator false(Option<T> option) => option.IsNone;
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<T> operator &(Option<T> x, Option<T> y) => x.And(y);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<T> operator ^(Option<T> x, Option<T> y) => x.Xor(y);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<T> operator |(Option<T> x, Option<T> y) => x.Or(y);
         
         // Coalescing operators
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T operator |(Option<T> x, T y) => x.IfNone(y);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Result<T> operator |(Option<T> x, Error y) => x.OkayOr(y);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator bool(Option<T> option) => option.IsSome;
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Option<T>(T? value) => Maybe(value);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Option<T>(OptionNone _) => new();
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Option<T> x, Option<T> y) => x.Equals(y);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Option<T> x, Option<T> y) => !(x == y);
-
-        public class IfSomeFluent<TResult>
-        {
-            private readonly Option<T> option;
-            private readonly Func<T, TResult> ifSome;
-
-            internal IfSomeFluent(Option<T> option, Func<T, TResult> ifSome)
-            {
-                this.option = option;
-                this.ifSome = ifSome;
-            }
-
-            public TResult IfNone(TResult ifNone) => option.Match(ifSome, ifNone);
-
-            public TResult IfNone(Func<TResult> ifNone) => option.Match(ifSome, ifNone);
-
-            public TResult IfNone(Func<Unit, TResult> ifNone) => option.Match(ifSome, ifNone);
-
-            public TResult? DefaultIfNone() => default;
-
-            public Option<TResult> OtherwiseContinue() => option.Map(ifSome);
-        }
-
-        public class IfSomeActionFluent
-        {
-            private readonly Option<T> option;
-            private readonly Action<T> ifSome;
-
-            internal IfSomeActionFluent(Option<T> option, Func<T, Unit> ifSome)
-                : this(option, new Action<T>(t => ifSome(t))) { }
-
-            internal IfSomeActionFluent(Option<T> option, Action<T> ifSome)
-            {
-                this.option = option;
-                this.ifSome = ifSome;
-            }
-
-            public IfSomeActionFluent Then(Action<T> action) => new(option, ifSome + action);
-
-            public IfSomeActionFluent Then(Func<T, Unit> action) => Then(new Action<T>(t => action(t)));
-
-            public Unit OtherwiseDoNothing() => Otherwise(_ => { /* Nop */ });
-
-            public Unit Otherwise(Action<Unit> ifNone) => Otherwise(() => ifNone(default));
-
-            public Unit Otherwise(Action ifNone)
-            {
-                if (option.IsSome)
-                {
-                    ifSome(option.value!);
-                }
-                else
-                {
-                    ifNone();
-                }
-
-                return End;
-            }
-        }
     }
 }

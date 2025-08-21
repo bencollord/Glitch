@@ -1882,10 +1882,6 @@ namespace Glitch.CodeAnalysis
             where TNode : SyntaxNode
             => SyntaxFactory.SeparatedList<TNode>(nodesAndTokens);
 
-        public static SeparatedSyntaxList<TNode> SeparatedList<TNode>(IEnumerable<TNode> nodes, SyntaxToken separator)
-            where TNode : SyntaxNode
-            => SeparatedList(nodes, Enumerable.Repeat(separator, nodes.Count() - 1));
-
         public static SeparatedSyntaxList<TNode> SeparatedList<TNode>(IEnumerable<TNode> nodes, IEnumerable<SyntaxToken> separators)
             where TNode : SyntaxNode
             => SyntaxFactory.SeparatedList(nodes, separators);

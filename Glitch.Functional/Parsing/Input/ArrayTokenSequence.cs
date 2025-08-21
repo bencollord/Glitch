@@ -1,13 +1,11 @@
-﻿using System.Collections.Immutable;
-
-namespace Glitch.Functional.Parsing.Input
+﻿namespace Glitch.Functional.Parsing.Input
 {
-    internal record ArrayTokenSequence<TToken> : TokenSequence<TToken>
+    public record ArrayTokenSequence<TToken> : TokenSequence<TToken>
     {
         private TToken[] tokens;
         private int cursor;
 
-        internal ArrayTokenSequence(IEnumerable<TToken> tokens)
+        public ArrayTokenSequence(IEnumerable<TToken> tokens)
         {
             this.tokens = tokens.ToArray();
             cursor = 0;
@@ -33,6 +31,8 @@ namespace Glitch.Functional.Parsing.Input
 
             return this with { cursor = Math.Min(nextPosition, tokens.Length) };
         }
+
+        public override IEnumerable<TToken> ReadToEnd() => tokens[cursor..];
 
         protected override string DisplayRemainder() => string.Join(", ", tokens[(cursor + 1)..]);
     }

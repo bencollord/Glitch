@@ -6,7 +6,7 @@
         internal const int Aggregate          = -0xBC00001;
         internal const int NoElements         = -0xBC00002;
         internal const int MoreThanOneElement = -0xBC00003;
-        internal const int FormatError         = -0xBC00004;
+        internal const int ParseError         = -0xBC00004;
     }
 
     internal static class Errors

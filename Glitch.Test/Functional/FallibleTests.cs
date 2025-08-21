@@ -6,13 +6,13 @@ using static Glitch.Functional.Result;
 
 namespace Glitch.Test.Functional
 {
-    public class FallibleTests
+    public class EffectTests
     {
         [Fact]
         public void Map_ShouldNotRun_UntilRunMethodIsCalled()
         {
             // Arrange
-            var item = Fallible<string>.Okay("Good afternoon");
+            var item = Effect<string>.Okay("Good afternoon");
             bool funcHasExecuted = false;
             var func = (string s) =>
             {
@@ -36,7 +36,7 @@ namespace Glitch.Test.Functional
         public void Map_FuncThrowsException_ReturnsFailedResult()
         {
             // Arrange
-            var item = Fallible<string>.Okay("Test");
+            var item = Effect<string>.Okay("Test");
             var func = Func<string, string>(s => throw new Exception("Failure"));
 
             // Act
@@ -44,7 +44,7 @@ namespace Glitch.Test.Functional
             var result = mapped.Run();
 
             // Assert
-            Assert.True(result.IsFail);
+            Assert.True(result.IsError);
             Assert.Equal("Failure", result.UnwrapError().Message);
         }
 
@@ -52,12 +52,12 @@ namespace Glitch.Test.Functional
         public void AndThen_ShouldNotRun_UntilRunMethodIsCalled()
         {
             // Arrange
-            var item = Fallible<string>.Okay("Good afternoon");
+            var item = Effect<string>.Okay("Good afternoon");
             bool funcHasExecuted = false;
             var func = (string s) =>
             {
                 funcHasExecuted = true;
-                return Fallible.Okay(s.ToUpper());
+                return Effect.Okay(s.ToUpper());
             };
 
             // Act
@@ -76,15 +76,15 @@ namespace Glitch.Test.Functional
         public void AndThen_FuncThrowsException_ReturnsFailedResult()
         {
             // Arrange
-            var item = Fallible<string>.Okay("Test");
-            var func = Func<string, Fallible<string>>(s => throw new Exception("Failure"));
+            var item = Effect<string>.Okay("Test");
+            var func = Func<string, Effect<string>>(s => throw new Exception("Failure"));
 
             // Act
             var mapped = item.AndThen(func);
             var result = mapped.Run();
 
             // Assert
-            Assert.True(result.IsFail);
+            Assert.True(result.IsError);
             Assert.Equal("Failure", result.UnwrapError().Message);
         }
 
@@ -92,8 +92,8 @@ namespace Glitch.Test.Functional
         public void Apply_ShouldApplyFunction_WhenBothAreSuccess()
         {
             // Arrange
-            var item = Fallible.Okay("Test");
-            var func = Fallible.Okay((string s) => s.ToUpper());
+            var item = Effect.Okay("Test");
+            var func = Effect.Okay((string s) => s.ToUpper());
 
             // Act
             var mapped = item.Apply(func);
@@ -108,15 +108,15 @@ namespace Glitch.Test.Functional
         public void Apply_ShouldReturnFunctionError_WhenFunctionIsFail_AndValueIsSuccess()
         {
             // Arrange
-            var item = Fallible.Okay("Test");
-            var func = Fallible.Fail<Func<string, string>>("Function failed");
+            var item = Effect.Okay("Test");
+            var func = Effect.Fail<Func<string, string>>("Function failed");
 
             // Act
             var mapped = item.Apply(func);
             var result = mapped.Run();
 
             // Assert
-            Assert.True(result.IsFail);
+            Assert.True(result.IsError);
             Assert.Equal("Function failed", result.UnwrapError().Message);
         }
 
@@ -124,15 +124,15 @@ namespace Glitch.Test.Functional
         public void Apply_ShouldReturnValueError_WhenFunctionIsOkay_AndValueIsFail()
         {
             // Arrange
-            var item = Fallible.Fail<string>("Value failed");
-            var func = Fallible.Okay((string s) => s.ToUpper());
+            var item = Effect.Fail<string>("Value failed");
+            var func = Effect.Okay((string s) => s.ToUpper());
 
             // Act
             var mapped = item.Apply(func);
             var result = mapped.Run();
 
             // Assert
-            Assert.True(result.IsFail);
+            Assert.True(result.IsError);
             Assert.Equal("Value failed", result.UnwrapError().Message);
         }
 
@@ -140,15 +140,15 @@ namespace Glitch.Test.Functional
         public void Apply_ShouldReturnValueError_WhenBothAreFailed()
         {
             // Arrange
-            var item = Fallible.Fail<string>("Value failed");
-            var func = Fallible.Fail<Func<string, string>>("Function failed");
+            var item = Effect.Fail<string>("Value failed");
+            var func = Effect.Fail<Func<string, string>>("Function failed");
 
             // Act
             var mapped = item.Apply(func);
             var result = mapped.Run();
 
             // Assert
-            Assert.True(result.IsFail);
+            Assert.True(result.IsError);
             Assert.Equal("Value failed", result.UnwrapError().Message);
         }
 
@@ -156,40 +156,34 @@ namespace Glitch.Test.Functional
         public void AllLazyMethods_ShouldReturnErrorResults_WhenFunctionThrows()
         {
             // Arrange
-            var okayItem           = Fallible.Okay(10);
+            var okayItem           = Effect.Okay(10);
             var mapFunc            = (int _) => Throw<int>();
-            var bindFunc           = (int _) => Throw<Fallible<int>>();
+            var bindFunc           = (int _) => Throw<Effect<int>>();
             var bindResultFunc     = (int _) => Throw<Result<int>>();
             var bindProjectionFunc = (int _, int _) => Throw<int>();
             var mapErrFunc         = (Error _) => Throw<Error>();
-            var bindErrFunc        = (Error _) => Throw<Fallible<int>>();
+            var bindErrFunc        = (Error _) => Throw<Effect<int>>();
             var filterFunc         = (int _) => Throw<bool>();
             var inlineError        = Error.New("Inline error");
 
             // Act
-            Fallible<int> map            = okayItem.Map(mapFunc);
-            Fallible<int> mapOrElse      = okayItem.MapOrElse(mapFunc, mapErrFunc);
-            Fallible<int> mapOrError     = okayItem.MapOr(mapFunc, inlineError);
-            Fallible<int> mapOrElseError = okayItem.MapOrElse(mapFunc, mapErrFunc);
-            Fallible<int> andThen        = okayItem.AndThen(bindFunc);
-            Fallible<int> andThen2       = okayItem.AndThen(bindFunc, bindProjectionFunc);
-            Fallible<int> andThenResult  = okayItem.AndThen(bindResultFunc);
-            Fallible<int> andThenResult2 = okayItem.AndThen(bindResultFunc, bindProjectionFunc);
-            Fallible<int> andThenBiBind  = okayItem.Choose(bindFunc, bindErrFunc);
-            Fallible<int> filter         = okayItem.Filter(filterFunc);
-            Fallible<int> zipWith        = okayItem.Zip(Fallible.Okay(1), bindProjectionFunc);
+            Effect<int> map            = okayItem.Map(mapFunc);
+            Effect<int> andThen        = okayItem.AndThen(bindFunc);
+            Effect<int> andThen2       = okayItem.AndThen(bindFunc, bindProjectionFunc);
+            Effect<int> andThenResult  = okayItem.AndThen(bindResultFunc);
+            Effect<int> andThenResult2 = okayItem.AndThen(bindResultFunc, bindProjectionFunc);
+            Effect<int> andThenBiBind  = okayItem.Choose(bindFunc, bindErrFunc);
+            Effect<int> filter         = okayItem.Filter(filterFunc);
+            Effect<int> zipWith        = okayItem.Zip(Effect.Okay(1), bindProjectionFunc);
 
             // These two items will only run for faulted items
-            var failItem           = Fallible.Fail<int>("Should be an error");
-            Fallible<int> orElse   = failItem.OrElse(bindErrFunc);
-            Fallible<int> mapError = failItem.MapError(mapErrFunc);
+            var failItem           = Effect.Fail<int>("Should be an error");
+            Effect<int> orElse   = failItem.OrElse(bindErrFunc);
+            Effect<int> mapError = failItem.MapError(mapErrFunc);
 
-            var fallibleItems = new Dictionary<string, Fallible<int>>
+            var fallibleItems = new Dictionary<string, Effect<int>>
             {
                 [nameof(map)]            = map,
-                [nameof(mapOrElse)]      = mapOrElse,
-                [nameof(mapOrError)]     = mapOrError,
-                [nameof(mapOrElseError)] = mapOrElseError,
                 [nameof(mapError)]       = mapError,
                 [nameof(andThen)]        = andThen,
                 [nameof(andThen2)]       = andThen2,
@@ -205,7 +199,7 @@ namespace Glitch.Test.Functional
             Assert.All(fallibleItems, pair =>
             {
                 var r = pair.Value.Run();
-                Assert.True(r.IsFail, $"{pair.Key} did not fail");
+                Assert.True(r.IsError, $"{pair.Key} did not fail");
                 Assert.Equal("Failure", r.UnwrapError().Message);
             });
         }
@@ -225,45 +219,39 @@ namespace Glitch.Test.Functional
             int resultValue = 20;
             var errorValue  = Error.New("Default error");
 
-            // Wrap the above assertion into delegates that can be passed to Fallible's higher order functions.
+            // Wrap the above assertion into delegates that can be passed to Effect's higher order functions.
             // The delegates are curried so we can pass the name of the case in to know which one failed.
             var mapFunc            = (string caseName) => (int _) => MarkCaseRun(caseName, resultValue);
-            var bindFunc           = (string caseName) => (int _) => MarkCaseRun(caseName, Fallible.Okay(resultValue));
-            var bindResultFunc     = (string caseName) => (int _) => MarkCaseRun(caseName, Okay(resultValue));
+            var bindFunc           = (string caseName) => (int _) => MarkCaseRun(caseName, Effect.Okay(resultValue));
+            var bindResultFunc     = (string caseName) => (int _) => MarkCaseRun(caseName, Result.Okay(resultValue));
             var bindProjectionFunc = (string caseName) => (int _, int _) => MarkCaseRun(caseName, resultValue);
             var mapErrFunc         = (string caseName) => (Error _) => MarkCaseRun(caseName, errorValue);
             var mapErrToResultFunc = (string caseName) => (Error _) => MarkCaseRun(caseName, resultValue);
-            var bindErrFunc        = (string caseName) => (Error _) => MarkCaseRun(caseName, Fallible.Okay(resultValue));
+            var bindErrFunc        = (string caseName) => (Error _) => MarkCaseRun(caseName, Effect.Okay(resultValue));
             var filterFunc         = (string caseName) => (int _) => MarkCaseRun(caseName, true);
-            var okayItem           = Fallible.Okay(10);
+            var okayItem           = Effect.Okay(10);
 
             // Act
-            Fallible<int> map            = okayItem.Map(mapFunc(nameof(map)));
-            Fallible<int> mapOrError     = okayItem.MapOr(mapFunc(nameof(mapOrError)), errorValue);
-            Fallible<int> andThen        = okayItem.AndThen(bindFunc(nameof(andThen)));
-            Fallible<int> andThen2       = okayItem.AndThen(bindFunc(nameof(andThen2)), bindProjectionFunc(nameof(andThen2)));
-            Fallible<int> andThenResult  = okayItem.AndThen(bindResultFunc(nameof(andThenResult)));
-            Fallible<int> andThenResult2 = okayItem.AndThen(bindResultFunc(nameof(andThenResult2)), bindProjectionFunc(nameof(andThenResult2)));
-            Fallible<int> filter         = okayItem.Filter(filterFunc(nameof(filter)));
-            Fallible<int> zipWith        = okayItem.Zip(Fallible.Okay(1), bindProjectionFunc(nameof(zipWith)));
+            Effect<int> map            = okayItem.Map(mapFunc(nameof(map)));
+            Effect<int> andThen        = okayItem.AndThen(bindFunc(nameof(andThen)));
+            Effect<int> andThen2       = okayItem.AndThen(bindFunc(nameof(andThen2)), bindProjectionFunc(nameof(andThen2)));
+            Effect<int> andThenResult  = okayItem.AndThen(bindResultFunc(nameof(andThenResult)));
+            Effect<int> andThenResult2 = okayItem.AndThen(bindResultFunc(nameof(andThenResult2)), bindProjectionFunc(nameof(andThenResult2)));
+            Effect<int> filter         = okayItem.Filter(filterFunc(nameof(filter)));
+            Effect<int> zipWith        = okayItem.Zip(Effect.Okay(1), bindProjectionFunc(nameof(zipWith)));
 
              // These two items will only run for faulted items
-            var failItem           = Fallible.Fail<int>("Should be an error");
-            Fallible<int> orElse   = failItem.OrElse(bindErrFunc(nameof(orElse)));
-            Fallible<int> mapError = failItem.MapError(mapErrFunc(nameof(mapError)));
+            var failItem           = Effect.Fail<int>("Should be an error");
+            Effect<int> orElse   = failItem.OrElse(bindErrFunc(nameof(orElse)));
+            Effect<int> mapError = failItem.MapError(mapErrFunc(nameof(mapError)));
 
             // These items should be run for both Okay and Fail
-            Fallible<int> mapOrElseErrorOkay = okayItem.MapOrElse(mapFunc(nameof(mapOrElseErrorOkay)), _ => AssertNotCalled<Error>());
-            Fallible<int> mapOrElseErrorFail = failItem.MapOrElse(_ => AssertNotCalled<int>(), mapErrFunc(nameof(mapOrElseErrorFail)));
-            Fallible<int> andThenBiBindOkay  = okayItem.Choose(bindFunc(nameof(andThenBiBindOkay)), err => AssertNotCalled<Fallible<int>>());
-            Fallible<int> andThenBiBindFail  = failItem.Choose(_ => AssertNotCalled<Fallible<int>>(), bindErrFunc(nameof(andThenBiBindFail)));
+            Effect<int> andThenBiBindOkay  = okayItem.Choose(bindFunc(nameof(andThenBiBindOkay)), err => AssertNotCalled<Effect<int>>());
+            Effect<int> andThenBiBindFail  = failItem.Choose(_ => AssertNotCalled<Effect<int>>(), bindErrFunc(nameof(andThenBiBindFail)));
             
-            var fallibles = new Dictionary<string, Fallible<int>>
+            var fallibles = new Dictionary<string, Effect<int>>
             {
                 [nameof(map)]                = map,
-                [nameof(mapOrError)]         = mapOrError,
-                [nameof(mapOrElseErrorOkay)] = mapOrElseErrorOkay,
-                [nameof(mapOrElseErrorFail)] = mapOrElseErrorFail,
                 [nameof(mapError)]           = mapError,
                 [nameof(andThen)]            = andThen,
                 [nameof(andThen2)]           = andThen2,
@@ -290,8 +278,8 @@ namespace Glitch.Test.Functional
         public void ZipWith_BothOkay_ShouldApplyFunction()
         {
             // Arrange
-            var left  = Fallible<int>.Okay(10);
-            var right = Fallible<int>.Okay(20);
+            var left  = Effect<int>.Okay(10);
+            var right = Effect<int>.Okay(20);
 
             // Act
             var result = left.Zip(right, (x, y) => x + y).Run();
@@ -305,9 +293,9 @@ namespace Glitch.Test.Functional
         public void ZipWith_OneResultFailed_ShouldReturnErroredResult()
         {
             // Arrange
-            var okay = Fallible<int>.Okay(10);
-            var leftError = Fallible<int>.Fail("Left failed");
-            var rightError = Fallible<int>.Fail("Right failed");
+            var okay = Effect<int>.Okay(10);
+            var leftError = Effect<int>.Fail("Left failed");
+            var rightError = Effect<int>.Fail("Right failed");
 
             // Act
             var leftResult = leftError.Zip(okay, (x, y) => x + y).Run();
@@ -324,8 +312,8 @@ namespace Glitch.Test.Functional
         public void ZipWith_BothResultsFailed_AggregateError()
         {
             // Arrange
-            var left = Fallible.Fail<int>("Left failed");
-            var right = Fallible<int>.Fail("Right failed");
+            var left = Effect.Fail<int>("Left failed");
+            var right = Effect<int>.Fail("Right failed");
 
             // Act
             var result = left.Zip(right, (x, y) => x + y).Run();

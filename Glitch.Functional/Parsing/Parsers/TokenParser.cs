@@ -8,7 +8,10 @@ namespace Glitch.Functional.Parsing.Parsers
         private Func<TToken, bool> predicate;
         private Expectation<TToken> expectation;
 
-        public TokenParser(Func<TToken, bool> predicate, Expectation<TToken> expectation)
+        internal TokenParser(TToken token)
+            : this(t => t!.Equals(token), Expectation.Expected(token)) { }
+
+        internal TokenParser(Func<TToken, bool> predicate, Expectation<TToken> expectation)
         {
             this.predicate = predicate;
             this.expectation = expectation;
@@ -18,7 +21,7 @@ namespace Glitch.Functional.Parsing.Parsers
         {
             return predicate(input.Current)
                  ? ParseResult.Okay(input.Current, input.Advance())
-                 : ParseResult.Error<TToken, TToken>(expectation, input);
+                 : ParseResult.Error<TToken, TToken>(expectation with { Unexpected = input.Current }, input);
         }
     }
 }

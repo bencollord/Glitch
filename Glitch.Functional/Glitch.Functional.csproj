@@ -16,8 +16,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="FN\FN.Parse.cs" />
+    <Compile Remove="IO - Copy.cs" />
     <Compile Remove="Parsing\ParseError - Copy.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Glitch\Glitch.csproj" />
   </ItemGroup>
 
   <ItemGroup>

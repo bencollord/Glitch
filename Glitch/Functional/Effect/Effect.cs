@@ -1,340 +1,279 @@
 ﻿
 namespace Glitch.Functional
 {
-    /// <summary>
-    /// Represents a monadic effect that takes an input and returns a result.
-    /// 
-    /// Basically like a <see cref="Fallible{TOutput}"/> that takes an input parameter.
-    /// </summary>
-    /// <typeparam name="TInput"></typeparam>
-    /// <typeparam name="TOutput"></typeparam>
-    public partial class Effect<TInput, TOutput>
+    public partial class Effect<T>
     {
-        private Func<TInput, Result<TOutput>> thunk;
+        private Effect<Nothing, T> inner;
 
-        public Effect(Func<TInput, Result<TOutput>> thunk)
+        internal Effect(Effect<Nothing, T> inner)
         {
-            this.thunk = thunk;
+            this.inner = inner;
         }
 
-        public static Effect<TInput, TOutput> Okay(TOutput value) => new(_ => value);
+        public static Effect<T> Okay(T value) => new(Effect<Nothing, T>.Okay(value));
 
-        public static Effect<TInput, TOutput> Fail(Error error) => new(_ => error);
+        public static Effect<T> Fail(Error error) => new(Effect<Nothing, T>.Fail(error));
 
-        public static Effect<TInput, TOutput> Lift(Result<TOutput> result) => new(_ => result);
+        public static Effect<T> Return(Result<T, Error> result) => new(Effect<Nothing, T>.Return(result));
 
-        public static Effect<TInput, TOutput> New(Fallible<TOutput> fallible) => new(_ => fallible.Run());
+        public static Effect<T> Lift(Func<Result<T>> function) => new(Effect<Nothing, T>.Lift(_ => function()));
 
-        public static Effect<TInput, TOutput> New(Func<TInput, Result<TOutput>> function) => new(function);
+        public static Effect<T> Lift(Func<Result<T, Error>> function) => new(Effect<Nothing, T>.Lift(_ => function()));
 
-        public static Effect<TInput, TOutput> New(Func<TInput, TOutput> function) => new(i => function(i));
+        public static Effect<T> Lift(Func<T> function) => new(Effect<Nothing, T>.Lift(_ => function()));
 
         /// <summary>
-        /// Applies the supplied function to the wrapped value.
+        /// <inheritdoc cref="Effect{Unit, T}.Map{TResult}(Func{T, TResult})"/>.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="map"></param>
         /// <returns></returns>
-        public Effect<TInput, TResult> Map<TResult>(Func<TOutput, TResult> map)
-            => new(i => thunk(i).Map(map));
+        public Effect<TResult> Map<TResult>(Func<T, TResult> map)
+            => new(inner.Map(map));
 
-        public Effect<TInput, Func<T2, TResult>> PartialMap<T2, TResult>(Func<TOutput, T2, TResult> map)
-            => Map(map.Curry());
-
-        public Effect<TInput, TResult> MapOr<TResult>(Func<TOutput, TResult> map, Error ifFail)
-            => new(i => thunk(i).MapOr(map, ifFail));
-
-        public Effect<TInput, TResult> MapOrElse<TResult>(Func<TOutput, TResult> map, Func<Error, Error> ifFail)
-            => new(i => thunk(i).MapOrElse(map, ifFail));
+        public Effect<Func<T2, TResult>> PartialMap<T2, TResult>(Func<T, T2, TResult> map)
+            => new(inner.PartialMap(map));
 
         /// <summary>
-        /// If the result is a failure, returns a new result with the mapping function
-        /// applied to the wrapped error. Otherwise, returns self.
+        /// <inheritdoc cref="Effect{Unit, T}.MapError(Func{Error, Error})"/>.
         /// </summary>
         /// <param name="map"></param>
         /// <returns></returns>
-        public Effect<TInput, TOutput> MapError(Func<Error, Error> map)
-            => new(i => thunk(i).MapError(map));
+        public Effect<T> MapError(Func<Error, Error> map)
+            => new(inner.MapError(map));
 
-        public Effect<TInput, TOutput> MapError<TError>(Func<TError, Error> map)
+        public Effect<T> MapError<TError>(Func<TError, Error> map)
             where TError : Error
-            => MapError(err => err is TError e ? map(e) : err);
+            => new(inner.MapError(map));
 
-        public Effect<TInput, TOutput> Catch<TException>(Func<TException, TOutput> map)
+        public Effect<T> Catch<TException>(Func<TException, T> map)
             where TException : Exception
-            => OrElse(err => err.IsException<TException>() ? map((TException)err.AsException()) : err);
+            => new(inner.Catch(map));
 
-        public Effect<TInput, TOutput> Catch<TException>(Func<TException, Error> map)
+        public Effect<T> Catch<TException>(Func<TException, Error> map)
             where TException : Exception
-            => MapError(err => err.IsException<TException>() ? map((TException)err.AsException()) : err);
+            => new(inner.Catch(map));
 
         /// <summary>
-        /// Applies a wrapped function to the wrapped value if both are successful.
+        /// <inheritdoc cref="Effect{Unit, T}.Apply{TResult}(Effect{Unit, Func{T, TResult}})"/>
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="function"></param>
         /// <returns></returns>
-        public Effect<TInput, TResult> Apply<TResult>(Effect<TInput, Func<TOutput, TResult>> function)
-            => AndThen(v => function.Map(fn => fn(v)));
+        public Effect<TResult> Apply<TResult>(Effect<Func<T, TResult>> function)
+            => new(inner.Apply(function.inner));
 
         /// <summary>
-        /// Returns other if Ok, otherwise returns the current error wrapped
-        /// in a new result type.
+        /// <inheritdoc cref="Effect{Unit, T}.Then{TResult}(Effect{Unit, TResult})"/>
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="other"></param>
         /// <returns></returns>
-        public Effect<TInput, TResult> And<TResult>(Effect<TInput, TResult> other)
-            => new(i =>
-            {
-                var result = thunk(i);
-
-                return result.IsOkay ? other.thunk(i) : result.Cast<TResult>();
-            });
+        public Effect<TResult> Then<TResult>(Effect<TResult> other)
+            => new(inner.Then(other.inner));
 
         /// <summary>
-        /// If Okay, applies the function to the wrapped value. Otherwise, returns
-        /// the current error wrapped in a new <see cref="Fallible{TResult}" /> type.
+        /// <inheritdoc cref="Effect{Unit, T}.Then{TOther, TResult}(Effect{Unit, TOther}, Func{T, TOther, TResult})"/>
+        /// </summary>
+        /// <typeparam name="TOther"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="other"></param>
+        /// <param name="project"></param>
+        /// <returns></returns>
+        public Effect<TResult> Then<TOther, TResult>(Effect<TOther> other, Func<T, TOther, TResult> project)
+            => new(inner.Then(other.inner, project));
+
+        /// <summary>
+        /// <inheritdoc cref="Effect{Unit, T}.AndThen{TResult}(Func{T, Effect{Unit, TResult}})"/>
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="bind"></param>
         /// <returns></returns>
-        public Effect<TInput, TResult> AndThen<TResult>(Func<TOutput, Effect<TInput, TResult>> bind)
-            => new(i =>
-            {
-                var result = thunk(i);
-
-                return result is Result.Okay<TOutput> ok
-                     ? bind(ok.Value).thunk(i)
-                     : result.Cast<TResult>();
-            });
+        public Effect<TResult> AndThen<TResult>(Func<T, Effect<TResult>> bind)
+            => new(inner.AndThen(v => bind(v).inner));
 
         /// <summary>
-        /// Implements a bind-map operation, similar to
-        /// <see cref="Enumerable.SelectMany"/>.
+        /// <inheritdoc cref="Effect{Unit, T}.AndThen{TElement, TResult}(Func{T, Effect{TElement}}, Func{T, TElement, TResult})"/>
         /// </summary>
         /// <typeparam name="TElement"></typeparam>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="bind"></param>
         /// <param name="project"></param>
         /// <returns></returns>
-        public Effect<TInput, TResult> AndThen<TElement, TResult>(Func<TOutput, Effect<TInput, TElement>> bind, Func<TOutput, TElement, TResult> project)
-            => AndThen(x => bind(x).Map(y => project(x, y)));
+        public Effect<TResult> AndThen<TElement, TResult>(Func<T, Effect<TElement>> bind, Func<T, TElement, TResult> project)
+            => new(inner.AndThen(v => bind(v).inner, project));
 
         /// <summary>
-        /// Convenience method that allows bind operations to work
-        /// with <see cref="Result"/> types.
+        /// <inheritdoc cref="Effect{Unit, T}.AndThen{TResult}(Func{T, Result{TResult}})"/>
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="bind"></param>
         /// <returns></returns>
-        public Effect<TInput, TResult> AndThen<TResult>(Func<TOutput, Result<TResult>> bind)
-            => AndThen(e => Effect<TInput, TResult>.Lift(bind(e)));
+        public Effect<TResult> AndThen<TResult>(Func<T, Result<TResult>> bind)
+            => AndThen(e => Effect<TResult>.Return(bind(e)));
 
         /// <summary>
-        /// Implements a bind-map operation, similar to
-        /// <see cref="Enumerable.SelectMany"/> for results.
+        /// <inheritdoc cref="Effect{Unit, T}.AndThen{TElement, TResult}(Func{T, Result{TElement}}, Func{T, TElement, TResult})"/>
         /// </summary>
         /// <typeparam name="TElement"></typeparam>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="bind"></param>
         /// <param name="project"></param>
         /// <returns></returns>
-        public Effect<TInput, TResult> AndThen<TElement, TResult>(Func<TOutput, Result<TElement>> bind, Func<TOutput, TElement, TResult> project)
+        public Effect<TResult> AndThen<TElement, TResult>(Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project)
             => AndThen(x => bind(x).Map(y => project(x, y)));
 
-        public Effect<TInput, TResult> Choose<TResult>(Func<TOutput, Effect<TInput, TResult>> ifOkay, Func<Error, Effect<TInput, TResult>> ifFail)
-            => new(i => thunk(i).Match(ifOkay, ifFail).Run(i));
+        public Effect<TResult> Choose<TResult>(Func<T, Effect<TResult>> okay, Func<Error, Effect<TResult>> error)
+            => new(inner.Choose(okay: v => okay(v).inner, error: e => error(e).inner));
+
+        public Effect<T> Guard(Func<T, bool> predicate, Error error)
+            => new(inner.Guard(predicate, error));
+
+        public Effect<T> Guard(Func<T, bool> predicate, Func<T, Error> error)
+            => new(inner.Guard(predicate, error));
+
+        public Effect<T> Guard(bool condition, Error error)
+            => new(inner.Guard(condition, error));
+
+        public Effect<T> Guard(bool condition, Func<T, Error> error)
+            => new(inner.Guard(condition, error));
 
         /// <summary>
-        /// Convenience method that allows bind operations to work
-        /// with <see cref="Fallible"/> types.
-        /// </summary>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="bind"></param>
-        /// <returns></returns>
-        public Effect<TInput, TResult> AndThen<TResult>(Func<TOutput, Fallible<TResult>> bind)
-            => AndThen(e => Effect<TInput, TResult>.New(bind(e)));
-
-        /// <summary>
-        /// Implements a bind-map operation, similar to
-        /// <see cref="Enumerable.SelectMany"/> for results.
-        /// </summary>
-        /// <typeparam name="TElement"></typeparam>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="bind"></param>
-        /// <param name="project"></param>
-        /// <returns></returns>
-        public Effect<TInput, TResult> AndThen<TElement, TResult>(Func<TOutput, Fallible<TElement>> bind, Func<TOutput, TElement, TResult> project)
-            => AndThen(x => bind(x).Map(y => project(x, y)));
-
-
-        public Effect<TInput, TOutput> Guard(Func<TOutput, bool> predicate, Error error)
-            => new(i => thunk(i).Guard(predicate, error));
-
-        public Effect<TInput, TOutput> Guard(Func<TOutput, bool> predicate, Func<TOutput, Error> error)
-            => new(i => thunk(i).Guard(predicate, error));
-
-        public Effect<TInput, TOutput> Guard(bool condition, Error error)
-            => new(i => thunk(i).Guard(condition, error));
-
-        public Effect<TInput, TOutput> Guard(bool condition, Func<TOutput, Error> error)
-            => new(i => thunk(i).Guard(condition, error));
-
-        /// <summary>
-        /// Returns the current <see cref="Fallible{T}"/> if Ok, otherwise returns other.
+        /// <inheritdoc cref="Effect{Unit, T}.Or(Effect{Unit, T})"/>
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public Effect<TInput, TOutput> Or(Effect<TInput, TOutput> other)
-            => new(i =>
-            {
-                var result = thunk(i);
-
-                return result.IsOkay ? result : other.thunk(i);
-            });
+        public Effect<T> Or(Effect<T> other)
+            => new(inner.Or(other.inner));
 
         /// <summary>
-        /// Returns the current instance if Ok, otherwise applies the provided
-        /// function to the current error and returns the result.
+        /// <inheritdoc cref="Effect{Unit, T}.OrElse(Func{Error, Effect{Unit, T}})"/>
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public Effect<TInput, TOutput> OrElse(Func<Error, Effect<TInput, TOutput>> other)
-            => new(i =>
-            {
-                var result = thunk(i);
+        public Effect<T> OrElse(Func<Error, Effect<T>> other)
+            => new(inner.OrElse(err => other(err).inner));
 
-                return result is Result.Fail<TOutput> fail ? other(fail.Error).thunk(i) : result;
-            });
-
-        public Effect<TInput, TOutput> Filter(Func<TOutput, bool> predicate)
-            => new(i => thunk(i).Filter(predicate));
+        public Effect<T> Filter(Func<T, bool> predicate)
+            => new(inner.Filter(predicate));
 
         /// <summary>
-        /// Executes an impure action against the value if Ok.
-        /// No op if fail.
+        /// <inheritdoc cref="Effect{Unit, T}.Do(Action{T})"/>
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Effect<TInput, TOutput> Do(Action<TOutput> action) => IfOkay(action); // TODO Not sure how I feel about just aliasing methods like this.
+        public Effect<T> Do(Action<T> action) => new(inner.Do(action));
 
         /// <summary>
-        /// Executes an impure action against the value if Ok.
-        /// No op if fail.
+        /// <inheritdoc cref="Effect{Unit, T}.IfOkay(Action{T})"/>
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Effect<TInput, TOutput> IfOkay(Action<TOutput> action) => new(i => thunk(i).Do(action));
+        public Effect<T> IfOkay(Action<T> action) => new(inner.IfOkay(action));
 
         /// <summary>
-        /// Executes an impure action if failed.
-        /// No op if Ok.
+        /// <inheritdoc cref="Effect{Unit, T}.IfFail(Action)"/>
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Effect<TInput, TOutput> IfFail(Action action) => new(i => thunk(i).IfFail(action));
+        public Effect<T> IfFail(Action action) => new(inner.IfFail(action));
 
         /// <summary>
-        /// Executes an impure action if failed.
-        /// No op if Ok.
+        /// <inheritdoc cref="Effect{Unit, T}.IfFail(Action{Error})"/>
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Effect<TInput, TOutput> IfFail(Action<Error> action) => new(i => thunk(i).IfFail(action));
+        public Effect<T> IfFail(Action<Error> action) => new(inner.IfFail(action));
 
         /// <summary>
-        /// Casts the wrapped value to <typeparamref name="TResult"/> if Ok,
-        /// otherwise returns the current error wrapped in a new result type.
+        /// <inheritdoc cref="Effect{Unit, T}.Match{TResult}(Func{T, TResult}, TResult)"/>
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="okay"></param>
+        /// <param name="error"></param>
+        /// <returns></returns>
+        public Effect<TResult> Match<TResult>(Func<T, TResult> okay, TResult error)
+            => new(inner.Match(okay, error));
+
+        /// <summary>
+        /// <inheritdoc cref="Effect{Unit, T}.Match{TResult}(Func{T, TResult}, Func{TResult})"/>
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="okay"></param>
+        /// <param name="error"></param>
+        /// <returns></returns>
+        public Effect<TResult> Match<TResult>(Func<T, TResult> okay, Func<TResult> error)
+            => new(inner.Match(okay, error));
+
+        /// <summary>
+        /// <inheritdoc cref="Effect{Unit, T}.Match{TResult}(Func{T, TResult}, Func{Error, TResult})"/>
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="okay"></param>
+        /// <param name="error"></param>
+        /// <returns></returns>
+        public TResult Match<TResult>(Func<T, TResult> okay, Func<Error, TResult> error)
+            => Run().Match(okay, error);
+
+        /// <summary>
+        /// <inheritdoc cref="Effect{Unit, T}.Cast{TResult}"/>
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <returns></returns>
-        public Effect<TInput, TResult> Cast<TResult>()
-            => CastOrElse<TResult>(v => new InvalidCastException($"Cannot cast a value of type {v!.GetType()} to {typeof(TResult)}"));
+        public Effect<TResult> Cast<TResult>() => new(inner.Cast<TResult>());
 
-        public Effect<TInput, TResult> CastOr<TResult>(Error error)
-            => MapOr(v => (TResult)(dynamic)v!, error);
+        public Effect<TResult> CastOr<TResult>(Error error) => new(inner.CastOr<TResult>(error));
 
-        public Effect<TInput, TResult> CastOrElse<TResult>(Func<TOutput, Error> error)
-            => from val in this
-               let cast = Effect<TInput, TResult>.New(_ => DynamicCast<TOutput, TResult>(val))
-               let err = Effect<TInput, TResult>.Lift(error(val))
-               from res in cast | err
-               select res;
+        public Effect<TResult> CastOrElse<TResult>(Func<T, Error> error) => new(inner.CastOrElse<TResult>(error));
 
         /// <summary>
-        /// Combines another try into a try of a tuple.
+        /// <inheritdoc cref="Effect{Unit, T}.Zip{TOther}(Effect{Unit, TOther})"/>
         /// </summary>
         /// <typeparam name="TOther"></typeparam>
         /// <param name="other"></param>
         /// <returns></returns>
-        public Effect<TInput, (TOutput, TOther)> Zip<TOther>(Effect<TInput, TOther> other)
-            => Zip(other, (x, y) => (x, y));
+        public Effect<(T, TOther)> Zip<TOther>(Effect<TOther> other)
+            => new(inner.Zip(other.inner));
 
         /// <summary>
-        /// Combines two tries using a provided function.
+        /// <inheritdoc cref="Effect{Unit, T}.Zip{TOther, TResult}(Effect{Unit, TOther}, Func{T, TOther, TResult})"/>
         /// </summary>
         /// <typeparam name="TOther"></typeparam>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="other"></param>
         /// <param name="zipper"></param>
         /// <returns></returns>
-        public Effect<TInput, TResult> Zip<TOther, TResult>(Effect<TInput, TOther> other, Func<TOutput, TOther, TResult> zipper)
-            => new(i => thunk(i).Zip(other.thunk(i), zipper));
+        public Effect<TResult> Zip<TOther, TResult>(Effect<TOther> other, Func<T, TOther, TResult> zipper)
+            => new(inner.Zip(other.inner, zipper));
 
-        public Fallible<TOutput> Apply(TInput input) => Fallible<TOutput>.New(() => Run(input));
+        public Effect<TInput, T> WithInput<TInput>() => inner.With<TInput>(input => Nothing.Value);
 
         /// <summary>
-        /// Executes the provided function, catching any exception
-        /// thrown and wrapping it in a <see cref="Result{T}"/>
+        /// <inheritdoc cref="Effect{Unit, T}.Run(Unit)"/>
         /// </summary>
         /// <returns></returns>
-        public Result<TOutput> Run(TInput input)
-        {
-            try
-            {
-                return thunk(input);
-            }
-            catch (Exception ex)
-            {
-                return Result<TOutput>.Fail(ex);
-            }
-        }
+        public Result<T> Run() => inner.Run(Nothing.Value);
 
-        public static implicit operator Effect<TInput, TOutput>(Result<TOutput> result) => new(_ => result);
+        public static implicit operator Effect<T>(Result<T> result) => Return(result);
 
-        public static implicit operator Effect<TInput, TOutput>(TOutput value) => new(_ => value);
+        public static implicit operator Effect<T>(T value) => Okay(value);
 
-        public static implicit operator Effect<TInput, TOutput>(Error error) => new(_ => error);
+        public static implicit operator Effect<T>(Error error) => Fail(error);
 
-        public static Effect<TInput, TOutput> operator &(Effect<TInput, TOutput> x, Effect<TInput, TOutput> y) => x.And(y);
+        public static implicit operator Effect<T>(Effect<Nothing, T> effect) => new(effect);
 
-        public static Effect<TInput, TOutput> operator |(Effect<TInput, TOutput> x, Effect<TInput, TOutput> y) => x.Or(y);
+        public static Effect<T> operator |(Effect<T> x, Effect<T> y) => x.Or(y);
 
-        public static Effect<TInput, TOutput> operator >>(Effect<TInput, TOutput> x, Effect<TInput, TOutput> y)
-            => x.AndThen(_ => y);
+        public static Effect<T> operator |(Effect<T> x, Result<T> y) => x.Or(y);
 
-        public static Effect<TInput, TOutput> operator >>(Effect<TInput, TOutput> x, Fallible<TOutput> y)
-            => x.AndThen(_ => New(y));
+        public static Effect<T> operator |(Effect<T> x, Error y) => x.Or(y);
 
-        public static Effect<TInput, TOutput> operator >>(Effect<TInput, TOutput> x, Effect<TInput, Unit> y)
-            => x.AndThen(v => y.Map(_ => v));
+        public static Effect<T> operator >>(Effect<T> x, Effect<T> y) => x.Then(y);
 
-        public static Effect<TInput, TOutput> operator >>(Effect<TInput, TOutput> x, Fallible<Unit> y)
-            => x.AndThen(v => New(y.Map(_ => v)));
+        public static Effect<T> operator >>(Effect<T> x, Effect<Nothing> y) => x.Then(y, (v, _) => v);
 
-        public static Effect<TInput, TOutput> operator >>(Effect<TInput, TOutput> x, Func<TInput, Result<TOutput>> y)
-            => new(i =>
-            {
-                _ = x.thunk(i);
-                return y(i);
-            });
+        public static Effect<T> operator >>(Effect<T> x, Func<Result<T>> y) => x.AndThen(_ => y());
 
-        public static Effect<TInput, TOutput> operator >>(Effect<TInput, TOutput> x, Func<TOutput> y)
-            => new(i =>
-            {
-                _ = x.thunk(i);
-                return y();
-            });
+        public static Effect<T> operator >>(Effect<T> x, Func<T> y) => x.Map(_ => y());
     }
 }

@@ -43,7 +43,7 @@ namespace Glitch.Functional.Parsing.Results
             Expectation = expectation;
         }
 
-        public abstract bool WasSuccessful { get; }
+        public abstract bool IsOkay { get; }
 
         // TODO Replace these two fields with ParseState
         public TokenSequence<TToken> Remaining { get; init; }
@@ -74,12 +74,12 @@ namespace Glitch.Functional.Parsing.Results
         public abstract ParseResult<TToken, T> OrElse(Func<ParseError<TToken, T>, ParseResult<TToken, T>> bind);
         
         public ParseResult<TToken, TResult> And<TResult>(ParseResult<TToken, TResult> other)
-            => WasSuccessful ? other : Cast<TResult>();
+            => IsOkay ? other : Cast<TResult>();
 
-        public ParseResult<TToken, T> Or(ParseResult<TToken, T> other) => WasSuccessful ? this : other;
+        public ParseResult<TToken, T> Or(ParseResult<TToken, T> other) => IsOkay ? this : other;
 
         public ParseResult<TToken, T> XOr(ParseResult<TToken, T> other)
-            => (WasSuccessful, other.WasSuccessful) switch
+            => (IsOkay, other.IsOkay) switch
             {
                 (true, true) => ParseResult.Error<TToken, T>($"Exclusive OR failed. Both results succeeded. Left {(T)this}, Right: {(T)other}"),
                 (true, _) => other,
@@ -105,7 +105,7 @@ namespace Glitch.Functional.Parsing.Results
             _ => throw new InvalidCastException($"Cannot faulted result to value of type {typeof(T).Name}"),
         };
 
-        public static implicit operator bool(ParseResult<TToken, T> result) => result.WasSuccessful;
+        public static implicit operator bool(ParseResult<TToken, T> result) => result.IsOkay;
 
         public static ParseResult<TToken, T> operator &(ParseResult<TToken, T> x, ParseResult<TToken, T> y) => x.And(y);
         public static ParseResult<TToken, T> operator |(ParseResult<TToken, T> x, ParseResult<TToken, T> y) => x.Or(y);

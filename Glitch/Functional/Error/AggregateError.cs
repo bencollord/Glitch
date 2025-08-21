@@ -12,7 +12,7 @@
 
         public override int Code => errors.Any() ? ErrorCodes.Aggregate : ErrorCodes.None;
 
-        public override string Message => errors.Select(e => e.Message).Join(", ");
+        public override string Message => string.Join(", ", errors.Select(e => e.Message));
 
         public override Option<Error> Inner => FN.None;
 

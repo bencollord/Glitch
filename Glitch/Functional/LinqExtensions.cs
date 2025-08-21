@@ -60,12 +60,12 @@
         private static Option<T> SingleOrNone<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
             => source.TrySingle(predicate) switch
             {
-                Result.Okay<T>(var value) => Some(value),
+                Result.Success<T>(var value) => Some(value),
 
-                Result.Fail<T>(Error e)
+                Result.Failure<T>(Error e)
                     when e.IsCode(ErrorCodes.NoElements) => None,
 
-                Result.Fail<T>(Error e) => throw e.AsException(),
+                Result.Failure<T>(Error e) => throw e.AsException(),
 
                 _ => throw BadMatchException()
             };

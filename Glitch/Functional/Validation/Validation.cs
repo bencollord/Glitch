@@ -105,20 +105,6 @@ namespace Glitch.Functional
 
         public abstract IEnumerable<T> Iterate();
 
-        public OneOf<T, Error> AsLeft() => LeftOrElse(Identity);
-
-        public OneOf<Error, T> AsRight() => RightOrElse(Identity);
-
-        public OneOf<T, TRight> LeftOr<TRight>(TRight value) => LeftOrElse(_ => value);
-
-        public OneOf<T, TRight> LeftOrElse<TRight>(Func<Error, TRight> func)
-            => Match(OneOf<T, TRight>.Left, func.Then(OneOf<T, TRight>.Right));
-
-        public OneOf<TLeft, T> RightOr<TLeft>(TLeft value) => RightOrElse(_ => value);
-
-        public OneOf<TLeft, T> RightOrElse<TLeft>(Func<Error, TLeft> func)
-            => Match(OneOf<TLeft, T>.Right, func.Then(OneOf<TLeft, T>.Left));
-
         public abstract override string ToString();
 
         public static bool operator true(Validation<T> result) => result.IsSuccess;

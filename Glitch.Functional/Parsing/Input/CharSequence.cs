@@ -1,11 +1,12 @@
-﻿namespace Glitch.Functional.Parsing.Input
+﻿
+namespace Glitch.Functional.Parsing.Input
 {
-    internal record CharSequence : TokenSequence<char>
+    public record CharSequence : TokenSequence<char>
     {
         private string sourceText;
         private int cursor;
 
-        internal CharSequence(string sourceText)
+        public CharSequence(string sourceText)
         {
             this.sourceText = sourceText;
             cursor = 0;
@@ -31,6 +32,8 @@
 
             return this with { cursor = Math.Min(nextPosition, sourceText.Length) };
         }
+
+        public override IEnumerable<char> ReadToEnd() => sourceText.Substring(cursor);
 
         protected override string DisplayRemainder() => sourceText.Substring(cursor + 1);
     }

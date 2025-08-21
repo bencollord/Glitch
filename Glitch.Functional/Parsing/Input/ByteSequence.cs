@@ -3,11 +3,11 @@ using Glitch.Functional.Parsing;
 
 namespace Glitch.Functional.Parsing.Input
 {
-    internal record ByteSequence : ArrayTokenSequence<byte>
+    public record ByteSequence : ArrayTokenSequence<byte>
     {
         private byte[] source;
 
-        internal ByteSequence(byte[] source)
+        public ByteSequence(byte[] source)
             : base(source)
         {
             this.source = source;

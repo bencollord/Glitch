@@ -38,6 +38,8 @@ namespace Glitch.Functional.Parsing.Input
             return current;
         }
 
+        public abstract IEnumerable<TToken> ReadToEnd();
+
         public override string ToString()
         {
             return new StringBuilder()
@@ -46,6 +48,8 @@ namespace Glitch.Functional.Parsing.Input
                 .Append($", Pos: {Position}")
                 .ToString();
         }
+
+        public static implicit operator TokenSequence<TToken>(TToken[] tokens) => new ArrayTokenSequence<TToken>(tokens);
 
         protected abstract string DisplayRemainder();
     }

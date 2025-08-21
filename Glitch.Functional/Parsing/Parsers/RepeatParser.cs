@@ -21,7 +21,7 @@ namespace Glitch.Functional.Parsing.Parsers
             {
                 var result = parser.Execute(remaining);
 
-                if (!result.WasSuccessful)
+                if (!result.IsOkay)
                 {
                     break;
                 }

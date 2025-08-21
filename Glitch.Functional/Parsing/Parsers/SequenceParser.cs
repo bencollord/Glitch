@@ -22,7 +22,7 @@ namespace Glitch.Functional.Parsing.Parsers
             {
                 var r = p.Execute(remaining);
 
-                if (!r.WasSuccessful)
+                if (!r.IsOkay)
                 {
                     return r.Cast<IEnumerable<T>>() with
                     {

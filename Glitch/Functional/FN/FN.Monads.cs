@@ -7,7 +7,7 @@ namespace Glitch.Functional
     {
         public static readonly OptionNone None = new();
 
-        public static readonly Unit End = new();
+        public static readonly Nothing End = new();
 
         public static NotSupportedException BadMatchException()
         {
@@ -20,7 +20,7 @@ namespace Glitch.Functional
             return new NotSupportedException(message);
         }
 
-        public static Unit Ignore<T>(T _) => default;
+        public static Nothing Ignore<T>(T _) => default;
 
         public static Identity<T> Id<T>() where T : new() => IdentityMonad<T>(new());
 
@@ -32,37 +32,33 @@ namespace Glitch.Functional
 
         public static Option<T> Maybe<T>(T? value) => Option<T>.Maybe(value);
 
-        public static Result<T> Okay<T>() where T : new() => Okay<T>(new());
+        public static Success<T> Okay<T>() where T : new() => Okay<T>(new());
 
-        public static Result<T> Okay<T>(T value) => new Success<T>(value);
+        public static Success<T> Okay<T>(T value) => new(value);
 
-        public static Result<T, TError> Okay<T, TError>() where T : new() => Okay<T, TError>(new());
+        public static Failure<T> Fail<T>(T error) => new(error);
 
-        public static Result<T, TError> Okay<T, TError>(T value) => new Result.Okay<T, TError>(value);
+        public static Effect<T> Try<T>(Func<Result<T>> function) => Effect<T>.Lift(function);
 
-        public static Result<T> Fail<T>(Error error) => new Result.Fail<T>(error);
+        public static Effect<T> Try<T>(Func<Nothing, Result<T>> function) => Effect<T>.Lift(() => function(End));
 
-        public static Fallible<T> Try<T>(Func<Result<T>> function) => Fallible<T>.New(function);
+        public static Effect<T> Try<T>(Func<T> function) => Effect<T>.Lift(function);
 
-        public static Fallible<T> Try<T>(Func<Unit, Result<T>> function) => Fallible<T>.New(() => function(End));
+        public static Effect<T> Try<T>(Func<Nothing, T> function) => Effect<T>.Lift(() => function(End));
 
-        public static Fallible<T> Try<T>(Func<T> function) => Fallible<T>.New(function);
+        public static Effect<Nothing> Try(Action action) => Effect<Nothing>.Lift(action.Return());
 
-        public static Fallible<T> Try<T>(Func<Unit, T> function) => Fallible<T>.New(() => function(End));
+        public static Effect<Nothing> Try(Action<Nothing> action) => Try(action.Return());
 
-        public static Fallible<Unit> Try(Action action) => Fallible<Unit>.New(action.Return());
+        public static Effect<T> Try<T>(T value) => Effect<T>.Okay(value);
 
-        public static Fallible<Unit> Try(Action<Unit> action) => Try(action.Return());
+        public static Effect<T> Try<T>(Result<T> result) => Effect<T>.Return(result);
 
-        public static Fallible<T> Try<T>(T value) => Fallible<T>.Okay(value);
-
-        public static Fallible<T> Try<T>(Result<T> result) => Fallible<T>.New(result);
-
-        public static Effect<TInput, Unit> TryWith<TInput>(Action<TInput> function)
+        public static Effect<TInput, Nothing> TryWith<TInput>(Action<TInput> function)
             => TryWith(function.Return());
 
-        public static Effect<TInput, Unit> TryWith<TInput>(Func<TInput, Unit> function)
-            => TryWith<TInput, Unit>(function);
+        public static Effect<TInput, Nothing> TryWith<TInput>(Func<TInput, Nothing> function)
+            => TryWith<TInput, Nothing>(function);
 
         public static Effect<TInput, TOutput> TryWith<TInput, TOutput>(Func<TInput, TOutput> function)
             => Effect.Lift(function);
@@ -72,23 +68,11 @@ namespace Glitch.Functional
 
         public static Effect<T, T> Ask<T>() => Effect.Ask<T>();
 
-        public static Fallible<T> TryCast<T>(object obj) => Try(() => (T)(dynamic)obj);
+        public static Effect<T> TryCast<T>(object obj) => Try(() => (T)(dynamic)obj);
 
-        public static OneOf.Left<TLeft> Left<TLeft>(TLeft left) => new(left);
+        public static Sequence<T> Sequence<T>(T item) => Sequence([item]);
 
-        public static OneOf<TLeft, TRight> Left<TLeft, TRight>(TLeft left) => new OneOf.Left<TLeft, TRight>(left);
-
-        public static OneOf.Right<TRight> Right<TRight>(TRight right) => new(right);
-        
-        public static OneOf<TLeft, TRight> Right<TLeft, TRight>(TRight right) => new OneOf.Right<TLeft, TRight>(right);
-        
-        public static OneOf<TLeft, TRight> OneOf<TLeft, TRight>(TLeft left) => new OneOf.Left<TLeft, TRight>(left);
-        
-        public static OneOf<TLeft, TRight> OneOf<TLeft, TRight>(TRight right) => new OneOf.Right<TLeft, TRight>(right);
-
-        public static Sequence<T> Sequence<T>(IEnumerable<T> items) => items.AsSequence();
-
-        public static Sequence<T> Sequence<T>(params T[] items) => items.AsSequence();
+        public static Sequence<T> Sequence<T>(params IEnumerable<T> items) => items.AsSequence();
 
         public static Sequence<T> Range<T>(T start, T end)
             where T : IComparisonOperators<T, T, bool>, IIncrementOperators<T>

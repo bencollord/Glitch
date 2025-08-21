@@ -18,7 +18,7 @@ namespace Glitch.Functional.Parsing
 
         public static Parser<TToken, TToken> Token<TToken>(TToken token)
         {
-            return Satisfy<TToken>(t => t?.Equals(token) == true);
+            return Satisfy(t => t?.Equals(token) == true, Expectation.Expected(token));
         }
 
         public static Parser<TToken, Nothing> Not<TToken, T>(Parser<TToken, T> parser)

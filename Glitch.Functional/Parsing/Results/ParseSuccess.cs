@@ -12,7 +12,7 @@ namespace Glitch.Functional.Parsing.Results
 
         public T Value { get; init; }
 
-        public override bool WasSuccessful => true;
+        public override bool IsOkay => true;
 
         public override ParseResult<TToken, TResult> AndThen<TResult>(Func<T, ParseResult<TToken, TResult>> bind) => bind(Value);
 

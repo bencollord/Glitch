@@ -1,7 +1,6 @@
 ﻿using Glitch.Functional;
 using System;
 using System.Runtime.CompilerServices;
-using static Glitch.Functional.FN;
 using static Glitch.Functional.Result;
 
 namespace Glitch.Test.Functional
@@ -12,7 +11,7 @@ namespace Glitch.Test.Functional
         public void Result_IfOneFails_AllFail()
         {
             // Arrange
-            var successfulResults = Range(1, 10)
+            var successfulResults = Sequence.Range(1, 10)
                 .Select(Okay)
                 .ToList();
 
@@ -24,7 +23,7 @@ namespace Glitch.Test.Functional
             Result<IEnumerable<int>> result = successfulResults.Traverse();
 
             // Assert
-            Assert.True(result.IsFail);
+            Assert.True(result.IsError);
             Assert.Equal("Bad result", result.UnwrapError().Message);
         }
     }

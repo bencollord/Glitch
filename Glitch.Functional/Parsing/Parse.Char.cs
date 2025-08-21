@@ -1,4 +1,6 @@
-﻿namespace Glitch.Functional.Parsing
+﻿using Glitch.Functional.Parsing.Results;
+
+namespace Glitch.Functional.Parsing
 {
     public static partial class Parse
     {
@@ -15,7 +17,7 @@
         public static Parser<char, string> LineBreak => from cr in Char('\r').Maybe()
                                                         from lf in Char('\n')
                                                         select Environment.NewLine;
-        public static Parser<char, char> Char(char c) => Char(x => x == c).WithExpected(c);
+        public static Parser<char, char> Char(char c) => Satisfy(x => x == c, Expectation.Expected(c));
 
         public static Parser<char, char> Char(Func<char, bool> predicate) => Satisfy(predicate);
 

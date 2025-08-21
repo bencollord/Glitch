@@ -13,7 +13,7 @@ namespace Glitch.CodeAnalysis
         (
             r => r.Members.TrySingle(x => x is NamespaceDeclarationSyntax)
                           .Cast<NamespaceDeclarationSyntax>()
-                          .OrNone(),
+                          .OkayOrNone(),
             (r, o, t) => r.WithMembers(r.Members.Replace(o, t))
         );
 
@@ -21,7 +21,7 @@ namespace Glitch.CodeAnalysis
         (
             r => r.Members.TrySingle(x => x is TypeDeclarationSyntax)
                           .Cast<TypeDeclarationSyntax>()
-                          .OrNone(),
+                          .OkayOrNone(),
             (r, o, t) => r.WithMembers(r.Members.Replace(o, t))
         );
 

@@ -59,7 +59,7 @@ namespace Glitch.Data
         /// <returns></returns>
         public static Option<T> TryGetValue<T>(this IDataRecord record, string name)
             => Try(() => record.GetOrdinal(name))
-                   .Run().OrNone()
+                   .Run().OkayOrNone()
                    .AndThen(record.TryGetValue<T>);
 
         /// <summary>

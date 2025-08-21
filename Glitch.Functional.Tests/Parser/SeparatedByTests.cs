@@ -1,10 +1,26 @@
-﻿using Glitch.Functional.Parsing.Input;
-using Glitch.Functional.Parsing.Results;
+﻿using Glitch.Functional.Parsing;
 using static Glitch.Functional.Parsing.Parse;
 
 namespace Glitch.Test.Functional
 {
-    public class ParserTests
+    public class SeparatedByTests
     {
+        [Fact]
+        public void SeparatedBy_WithSeparatedInput_Succeeds()
+        {
+            // Arrange
+            var csv = "Alpha,Bravo,Charlie,Delta";
+
+            var parser = Letter.AtLeastOnce()
+                               .AsString()
+                               .SeparatedBy(',')
+                               .AtLeastOnce();
+
+            // Act
+            var result = parser.Parse(csv);
+
+            // Assert
+            Assert.True(result.SequenceEqual(csv.Split(',')));
+        }
     }
 }
