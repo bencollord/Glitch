@@ -1,5 +1,8 @@
-﻿namespace Glitch.Functional
+﻿using Glitch.Functional.Attributes;
+
+namespace Glitch.Functional
 {
+    [Monad]
     public interface IEffect<TInput, TOutput> : IGuardable<IEffect<TInput, TOutput>, TOutput, Error>
     {
         IEffect<TInput, TResult> Map<TResult>(Func<TOutput, TResult> map);
@@ -26,6 +29,6 @@
             });
 
         public static virtual IEffect<TInput, TOutput> operator >>(IEffect<TInput, TOutput> x, IEffect<TInput, TOutput> y) => x.AndThen(_ => y);
-        public static virtual IEffect<TInput, TOutput> operator >>(IEffect<TInput, TOutput> x, IEffect<TInput, Nothing> y) => x.AndThen(v => y.Map(_ => v));
+        public static virtual IEffect<TInput, TOutput> operator >>(IEffect<TInput, TOutput> x, IEffect<TInput, Unit> y) => x.AndThen(v => y.Map(_ => v));
     }
 }

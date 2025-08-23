@@ -1,8 +1,10 @@
-﻿using System.Diagnostics;
+﻿using Glitch.Functional.Attributes;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Glitch.Functional
 {
+    [Monad]
     public partial record Result<T>
     {
         private Result<T, Error> inner;
@@ -38,11 +40,11 @@ namespace Glitch.Functional
         /// <param name="map"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Result<TResult> Map<TResult>(Func<T, TResult> map) => new(inner.Map(map));
+        public Result<TResult> Select<TResult>(Func<T, TResult> map) => new(inner.Map(map));
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Result<Func<T2, TResult>> PartialMap<T2, TResult>(Func<T, T2, TResult> map)
-            => Map(map.Curry());
+        public Result<Func<T2, TResult>> PartialSelect<T2, TResult>(Func<T, T2, TResult> map)
+            => Select(map.Curry());
 
         /// <summary>
         /// If the result is a failure, returns a new result with the mapping function
@@ -74,7 +76,7 @@ namespace Glitch.Functional
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result<TResult> Apply<TResult>(Result<Func<T, TResult>> function)
-            => AndThen(v => function.Map(fn => fn(v)));
+            => AndThen(v => function.Select(fn => fn(v)));
 
         /// <summary>
         /// Returns other if Ok, otherwise returns the current error wrapped
@@ -107,7 +109,7 @@ namespace Glitch.Functional
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result<TResult> AndThen<TElement, TResult>(Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project)
-            => AndThen(x => bind(x).Map(y => project(x, y)));
+            => AndThen(x => bind(x).Select(y => project(x, y)));
 
         /// <summary>
         /// Returns the current result if Ok, otherwise returns the other result.
@@ -161,7 +163,7 @@ namespace Glitch.Functional
         /// <param name="action"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Result<T> Do(Func<T, Nothing> action) => inner.Do(action);
+        public Result<T> Do(Func<T, Unit> action) => inner.Do(action);
 
         /// <summary>
         /// Executes an impure action if failed.
@@ -183,7 +185,7 @@ namespace Glitch.Functional
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TResult Match<TResult>(Func<T, TResult> okay, TResult error)
-            => Map(okay).IfFail(error);
+            => Select(okay).IfFail(error);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TResult Match<TResult>(Func<T, TResult> okay, Func<TResult> error)
@@ -199,6 +201,10 @@ namespace Glitch.Functional
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TResult Match<TResult>(Func<T, TResult> okay, Func<Error, TResult> error)
+            => inner.Match(okay, error);
+
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Unit Match(Action<T> okay, Action<Error> error)
             => inner.Match(okay, error);
 
         /// <summary>
@@ -271,7 +277,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T Unwrap() => inner.Unwrap();
+        public T UnwrapOrThrow() => inner.Unwrap();
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T UnwrapOr(T fallback) => inner.UnwrapOr(fallback);

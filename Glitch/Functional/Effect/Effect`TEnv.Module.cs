@@ -4,7 +4,7 @@
     {
         public static Effect<TEnv, TEnv> Ask<TEnv>() => Effect<TEnv, TEnv>.Lift(Identity);
 
-        public static Effect<TEnv, T> Okay<TEnv, T>(T value) => Effect<T>.Okay(value);
+        public static Effect<TEnv, T> Return<TEnv, T>(T value) => Effect<T>.Return(value);
 
         public static Effect<TEnv, T> Fail<TEnv, T>(Error error) => Effect<T>.Fail(error);
 
@@ -14,7 +14,7 @@
         public static Effect<TEnv, T> Lift<TEnv, T>(Func<TEnv, Result<T>> function) => Lift<TEnv, T>(x => function(x).Match(Result.Okay<T, Error>, Result.Fail<T, Error>));
         public static Effect<TEnv, T> Lift<TEnv, T>(Func<TEnv, Result<T, Error>> function) => Effect<TEnv, T>.Lift(function);
 
-        public static Effect<TEnv, Nothing> Lift<TEnv>(Action<TEnv> action) => Effect<TEnv, Nothing>.Lift(action.Return());
+        public static Effect<TEnv, Unit> Lift<TEnv>(Action<TEnv> action) => Effect<TEnv, Unit>.Lift(action.Return());
 
         public static Effect<TEnv, T> Lift<TEnv, T>(Func<TEnv, T> function) => Effect<TEnv, T>.Lift(function);
     }

@@ -1,8 +1,10 @@
+using Glitch.Functional.Attributes;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Glitch.Functional
 {
+    [Monad]
     public abstract partial record Result<T, E>
     {
         private protected Result() { }
@@ -133,7 +135,7 @@ namespace Glitch.Functional
         /// <param name="action"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Result<T, E> Do(Func<T, Nothing> action) => Map(x => action(x).Return(x));
+        public Result<T, E> Do(Func<T, Unit> action) => Map(x => action(x).Return(x));
 
         /// <summary>
         /// Executes an impure action if failed.
@@ -171,6 +173,8 @@ namespace Glitch.Functional
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract TResult Match<TResult>(Func<T, TResult> okay, Func<E, TResult> error);
+
+        public Unit Match(Action<T> okay, Action<E> error) => Match(okay.Return(), error.Return());
 
         /// <summary>
         /// If Okay, casts the wrapped value to <typeparamref name="TResult"/>,

@@ -1,3 +1,4 @@
+using Glitch.Functional.Attributes;
 using System.Collections;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -5,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Functional
 {
+    [Monad]
     [SuppressMessage("Style", "IDE0303:Simplify collection initialization", Justification = "May change semantics")]
     public readonly partial struct OneOrMany<T> : IEquatable<OneOrMany<T>>, IEnumerable<T>
     {
@@ -74,7 +76,7 @@ namespace Glitch.Functional
         public bool IsManyAnd(Func<T, bool> predicate)
             => many.Any(predicate);
 
-        public T First() => this[0].IfNone(_ => Debug.Fail("OneOrMany was somehow empty")).Unwrap(); // There should always be at least one item.
+        public T First() => this[0].IfNone(_ => Debug.Fail("OneOrMany was somehow empty")).UnwrapOrThrow(); // There should always be at least one item.
 
         public Option<T> FirstOrNone(Func<T, bool> predicate)
         {
@@ -96,7 +98,7 @@ namespace Glitch.Functional
         {
             if (IsOne)
             {
-                return bind(one.Unwrap());
+                return bind(one.UnwrapOrThrow());
             }
 
             var many = from item in this.many
@@ -138,7 +140,7 @@ namespace Glitch.Functional
             return one.Match(ifOne, _ => ifMany(self.many));
         }
 
-        public Nothing Match(Action<T> ifOne, Action<IEnumerable<T>> ifMany) => Match(ifOne.Return(), ifMany.Return());
+        public Unit Match(Action<T> ifOne, Action<IEnumerable<T>> ifMany) => Match(ifOne.Return(), ifMany.Return());
 
         public OneOrMany<TResult> Cast<TResult>()
             => Map(DynamicCast<TResult>.From);

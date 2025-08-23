@@ -21,7 +21,7 @@ namespace Glitch.CodeAnalysis
         public static RecordDeclarationSyntax RecordDeclaration(SyntaxToken identifier)
             => RecordDeclaration(Token(SyntaxKind.RecordKeyword), identifier);
 
-        public static SeparatedSyntaxList<TNode> SeparatedList<TNode>(IEnumerable<TNode> nodes, SyntaxToken separator)
+        public static SeparatedSyntaxList<TNode> SeparatedList<TNode>(SyntaxToken separator, params IEnumerable<TNode> nodes)
             where TNode : SyntaxNode
             => SeparatedList(nodes, Enumerable.Repeat(separator, nodes.Count() - 1));
     }

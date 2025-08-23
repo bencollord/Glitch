@@ -30,7 +30,7 @@ namespace Glitch.Collections
 
         public T Shift() => TryShift()
             .OkayOrElse(EmptyDequeError)
-            .Unwrap();
+            .UnwrapOrThrow();
 
         public Option<T> TryShift() 
             => TryPeekFront().Do(_ => items.RemoveFirst());
@@ -40,7 +40,7 @@ namespace Glitch.Collections
 
         public T Pop() => TryPop()
             .OkayOrElse(EmptyDequeError)
-            .Unwrap();
+            .UnwrapOrThrow();
 
         public Option<T> TryPop() 
             => TryPeekBack().Do(_ => items.RemoveLast());

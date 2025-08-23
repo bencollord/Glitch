@@ -1,5 +1,8 @@
+using Glitch.Functional.Attributes;
+
 namespace Glitch.Functional
 {
+    [MonadExtension(typeof(Option<>))]
     public static class OptionExtensions
     {
         public static Option<TResult> Select<T, TResult>(this Option<T> source, Func<T, TResult> mapper)

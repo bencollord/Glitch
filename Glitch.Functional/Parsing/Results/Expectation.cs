@@ -20,7 +20,7 @@ namespace Glitch.Functional.Parsing.Results
 
         public Option<TToken> Unexpected { get; init; }
 
-        public IEnumerable<TToken> Expected { get; init; }
+        public IEnumerable<TToken> Expected { get; init; } = Enumerable.Empty<TToken>();
 
         public override string ToString()
         {

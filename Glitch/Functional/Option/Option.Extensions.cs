@@ -48,9 +48,9 @@ namespace Glitch.Functional
         /// <param name="options"></param>
         /// <returns></returns>
         public static IEnumerable<T> Somes<T>(this IEnumerable<Option<T>> options)
-            => options.Where(o => o.IsSome).Select(o => o.Unwrap());
+            => options.Where(o => o.IsSome).Select(o => o.UnwrapOrThrow());
 
-        public static Option<T> Map<T>(this Option<bool> result, Func<Nothing, T> ifTrue, Func<Nothing, T> ifFalse)
+        public static Option<T> Map<T>(this Option<bool> result, Func<Unit, T> ifTrue, Func<Unit, T> ifFalse)
             => result.Map(flag => flag ? ifTrue(default) : ifFalse(default));
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Glitch.Functional
             => booleanOption.Match(v => v ? ifTrue() : ifFalse(), ifNone);
 
 
-        public static Nothing Match(this Option<bool> result, Action ifTrue, Action ifFalse, Action ifNone)
+        public static Unit Match(this Option<bool> result, Action ifTrue, Action ifFalse, Action ifNone)
             => result.Match(flag => flag ? ifTrue.Return()() : ifFalse.Return()(), ifNone.Return());
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace Glitch.Functional
         /// the result of the provided function.
         /// </summary>
         /// <param name="function"></param>
-        public static Result<T, E> FailOrElse<E, T>(this Option<E> opt, Func<Nothing, T> function)
+        public static Result<T, E> FailOrElse<E, T>(this Option<E> opt, Func<Unit, T> function)
             => opt.Match(Result.Fail<T, E>, function.Then(Result.Okay<T, E>));
 
         /// <summary>

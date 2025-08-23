@@ -1,0 +1,47 @@
+﻿using Glitch.Functional.Parsing.Input;
+using Glitch.Functional.Parsing.Results;
+
+namespace Glitch.Functional.Parsing
+{
+    public class TokenParser<TToken> : Parser<TToken, TToken>
+    {
+        private Func<TToken, bool> predicate;
+        private Expectation<TToken> expectation;
+
+        internal TokenParser(TToken token)
+            : this(t => t!.Equals(token), Expectation.Expected(token)) { }
+
+        internal TokenParser(Func<TToken, bool> predicate, Expectation<TToken> expectation)
+        {
+            this.predicate = predicate;
+            this.expectation = expectation;
+        }
+
+        public TokenParser<TToken> Except(TToken token) => WithPredicate(x => predicate(x) && !x.Equals(token));
+
+        public TokenParser<TToken> Except(Func<TToken, bool> predicate) => WithPredicate(x => this.predicate(x) && !predicate(x));
+
+        public override TokenParser<TToken> WithExpectation(Expectation<TToken> expectation)
+            => new(predicate, expectation);
+
+        public override TokenParser<TToken> WithLabel(string label)
+            => WithExpectation(e => e with { Label = label });
+
+        public override TokenParser<TToken> WithExpected(TToken expected)
+            => WithExpected([expected]);
+
+        public override TokenParser<TToken> WithExpected(params IEnumerable<TToken> expected)
+            => WithExpectation(e => e with { Expected = expected });
+
+        private TokenParser<TToken> WithExpectation(Func<Expectation<TToken>, Expectation<TToken>> updater)
+            => WithExpectation(updater(expectation));
+
+        private TokenParser<TToken> WithPredicate(Func<TToken, bool> predicate) => new(predicate, expectation);
+        public override ParseResult<TToken, TToken> Execute(TokenSequence<TToken> input)
+        {
+            return predicate(input.Current)
+                 ? ParseResult.Okay(input.Current, input.Advance())
+                 : ParseResult.Error<TToken, TToken>(expectation with { Unexpected = input.Current }, input);
+        }
+    }
+}

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Glitch.Functional.Attributes;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
@@ -9,6 +10,7 @@ namespace Glitch.Functional
         public static readonly OptionNone Value = new();
     }
 
+    [Monad]
     public readonly partial struct Option<T> : IEquatable<Option<T>>
     {
         public static readonly Option<T> None = new();
@@ -30,6 +32,8 @@ namespace Glitch.Functional
         public bool IsSome => hasValue;
 
         public bool IsNone => !hasValue;
+
+        public object Value => Match<object>(v => v!, _ => OptionNone.Value);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsSomeAnd(Func<T, bool> predicate)
@@ -126,7 +130,7 @@ namespace Glitch.Functional
             => Match(bindSome, bindNone);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TResult> Choose<TResult>(Func<T, Option<TResult>> bindSome, Func<Nothing, Option<TResult>> bindNone)
+        public Option<TResult> Choose<TResult>(Func<T, Option<TResult>> bindSome, Func<Unit, Option<TResult>> bindNone)
             => Match(bindSome, bindNone);
 
         /// <summary>
@@ -178,7 +182,7 @@ namespace Glitch.Functional
         /// <param name="other"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<T> OrElse(Func<Nothing, Option<T>> other)
+        public Option<T> OrElse(Func<Unit, Option<T>> other)
             => IsSome ? this : other(default);
 
         /// <summary>
@@ -251,10 +255,10 @@ namespace Glitch.Functional
             => Map(some).IfNone(none);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Nothing Match(Action<T> some, Action none) => Match(some.Return(), none.Return());
+        public Unit Match(Action<T> some, Action none) => Match(some.Return(), none.Return());
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Nothing Match(Action<T> some, Action<Nothing> none) => Match(some, () => none(default));
+        public Unit Match(Action<T> some, Action<Unit> none) => Match(some, () => none(default));
 
         /// <summary>
         /// If this <see cref="Option{T}"/> contains a value, returns the result of the first function 
@@ -269,7 +273,7 @@ namespace Glitch.Functional
             => IsSome ? some(value!) : none();
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TResult Match<TResult>(Func<T, TResult> some, Func<Nothing, TResult> none)
+        public TResult Match<TResult>(Func<T, TResult> some, Func<Unit, TResult> none)
             => Match(some, () => none(default));
 
         /// <summary>
@@ -293,7 +297,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T Unwrap() => IsSome ? value! : throw new InvalidOperationException("Attempted to unwrap an empty option");
+        public T UnwrapOrThrow() => IsSome ? value! : throw new InvalidOperationException("Attempted to unwrap an empty option");
 
         /// <summary>
         /// Returns the wrapped value if it exists, otherwise returns the fallback value.
@@ -319,7 +323,7 @@ namespace Glitch.Functional
         /// <param name="fallback"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T UnwrapOrElse(Func<Nothing, T> fallback) => Match(val => val, fallback);
+        public T UnwrapOrElse(Func<Unit, T> fallback) => Match(val => val, fallback);
 
         /// <summary>
         /// Returns the wrapped value if exists. Otherwise, returns the default value
@@ -360,7 +364,7 @@ namespace Glitch.Functional
         /// <param name="fallback"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T IfNone(Func<Nothing, T> fallback) => Match(val => val, fallback);
+        public T IfNone(Func<Unit, T> fallback) => Match(val => val, fallback);
 
         /// <summary>
         /// Executes an impure action if empty.
@@ -386,7 +390,7 @@ namespace Glitch.Functional
         /// <param name="action"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<T> IfNone(Action<Nothing> action) => IfNone(() => action(Nothing.Value));
+        public Option<T> IfNone(Action<Unit> action) => IfNone(() => action(Unit.Value));
 
         /// <summary>
         /// Returns the wrapped value if exists. Otherwise, returns the default value
@@ -458,7 +462,7 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="error"></param>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Result<T> OkayOrElse(Func<Nothing, Error> function) => IsSome ? Okay(value!) : Fail(function(default));
+        public Result<T> OkayOrElse(Func<Unit, Error> function) => IsSome ? Okay(value!) : Fail(function(default));
 
         public bool Equals(Option<T> other)
         {

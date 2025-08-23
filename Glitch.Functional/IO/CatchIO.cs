@@ -1,31 +1,31 @@
-﻿namespace Glitch.Functional
+namespace Glitch.Functional
 {
-    internal class CatchIO<TEnv, T, TError> : IO<TEnv, T>
+    internal class CatchIO<T, TError> : IO<T>
     {
-        private IO<TEnv, T> source;
-        private Func<TError, IO<TEnv, T>> next;
+        private IO<T> source;
+        private Func<TError, IO<T>> next;
         private Option<Func<TError, bool>> filter;
 
-        public CatchIO(IO<TEnv, T> source, Func<TError, IO<TEnv, T>> next, Func<TError, bool>? filter = null)
+        public CatchIO(IO<T> source, Func<TError, IO<T>> next, Func<TError, bool>? filter = null)
         {
             this.source = source;
             this.next = next;
             this.filter = Maybe(filter);
         }
 
-        public override T Run(TEnv input)
+        public override T Run(IOEnv env)
         {
             try
             {
-                return source.Run(input);
+                return source.Run(env);
             }
             catch (ApplicationErrorException err) when (err.Error is TError er && IsMatch(er))
             {
-                return next(er).Run(input);
+                return next(er).Run(env);
             }
             catch (Exception e) when (e is TError ex && IsMatch(ex))
             {
-                return next(ex).Run(input);
+                return next(ex).Run(env);
             }
         }
 

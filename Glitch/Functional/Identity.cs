@@ -38,7 +38,7 @@
 
         public Option<T> Filter(Func<T, bool> predicate) => predicate(Value) ? Some(Value) : None;
 
-        public Effect<TResult> Try<TResult>(Func<T, TResult> func) => Effect.Okay(Value).Map(func);
+        public Effect<TResult> Try<TResult>(Func<T, TResult> func) => Effect.Return(Value).Select(func);
 
         public override string ToString() 
             => $"Id({Value})";

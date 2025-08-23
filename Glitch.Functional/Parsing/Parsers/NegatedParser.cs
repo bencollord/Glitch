@@ -4,7 +4,7 @@ using Glitch.Functional.Parsing.Results;
 
 namespace Glitch.Functional.Parsing.Parsers
 {
-    internal class NegatedParser<TToken, T> : Parser<TToken, Nothing>
+    internal class NegatedParser<TToken, T> : Parser<TToken, Unit>
     {
         private readonly Parser<TToken, T> parser;
 
@@ -13,12 +13,12 @@ namespace Glitch.Functional.Parsing.Parsers
             this.parser = parser;
         }
 
-        public override ParseResult<TToken, Nothing> Execute(TokenSequence<TToken> input)
+        public override ParseResult<TToken, Unit> Execute(TokenSequence<TToken> input)
         {
             return parser.Execute(input)
                          .Match(
-                             okay: val => ParseResult<TToken, Nothing>.Error($"Negated parser succeeded with {val}", input),
-                             error: _ => ParseResult.Okay(Nothing.Value, input));
+                             okay: val => ParseResult<TToken, Unit>.Error($"Negated parser succeeded with {val}", input),
+                             error: _ => ParseResult.Okay(Unit.Value, input));
         }
     }
 }

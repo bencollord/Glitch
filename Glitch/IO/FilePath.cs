@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using Glitch.Functional;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.IO
 {
@@ -28,7 +29,10 @@ namespace Glitch.IO
         public FilePath Root => new(Path.GetPathRoot(path));
         public bool EndsInDirectorySeparator => Path.EndsInDirectorySeparator(path);
         public bool Exists => Path.Exists(path);
-        public string? Extension => Path.GetExtension(path);
+        public bool IsEmpty => string.IsNullOrEmpty(path);
+        public bool IsFile => !FileName.IsEmpty;
+        public bool IsDirectory => !IsEmpty && FileName.IsEmpty;
+        public FilePath Extension => new(Path.GetExtension(path));
         public bool HasExtension => Path.HasExtension(path);
         public bool IsFullyQualified => Path.IsPathFullyQualified(path);
         public bool IsRooted => Path.IsPathRooted(path);
@@ -63,10 +67,8 @@ namespace Glitch.IO
         public FilePath Append(FilePath path1, FilePath path2) => Append(path1.path, path2.path);
         public FilePath Append(string path1, string path2, string path3) => new(Path.Combine(path, path1, path2, path3));
         public FilePath Append(FilePath path1, FilePath path2, FilePath path3) => Append(path1.path, path2.path, path3.path);
-        public FilePath Append(params string[] paths) => new(Path.Combine(path, Path.Combine(paths)));
-        public FilePath Append(IEnumerable<string> paths) => new(Path.Combine(paths.Prepend(path).ToArray()));
-        public FilePath Append(IEnumerable<FilePath> paths) => Append(paths.Select(p => p.path));
-        public FilePath Append(params FilePath[] paths) => Append(paths.AsEnumerable());
+        public FilePath Append(params IEnumerable<string> paths) => new(Path.Combine(paths.Prepend(path).ToArray()));
+        public FilePath Append(params IEnumerable<FilePath> paths) => Append(paths.Select(p => p.path));
 
         public FilePath Concat(ReadOnlySpan<char> other)
             => new(Path.Join(path.AsSpan(), other));
@@ -80,10 +82,8 @@ namespace Glitch.IO
         public FilePath Concat(FilePath path1, FilePath path2) => Concat(path1.path, path2.path);
         public FilePath Concat(string path1, string path2, string path3) => new(Path.Join(path, path1, path2, path3));
         public FilePath Concat(FilePath path1, FilePath path2, FilePath path3) => Concat(path1.path, path2.path, path3.path);
-        public FilePath Concat(params string[] paths) => new(Path.Join(path, Path.Combine(paths)));
-        public FilePath Concat(IEnumerable<string> paths) => new(Path.Join(paths.Prepend(path).ToArray()));
-        public FilePath Concat(IEnumerable<FilePath> paths) => Concat(paths.Select(p => p.path));
-        public FilePath Concat(params FilePath[] paths) => Concat(paths.AsEnumerable());
+        public FilePath Concat(params IEnumerable<string> paths) => new(Path.Join(paths.Prepend(path).ToArray()));
+        public FilePath Concat(params IEnumerable<FilePath> paths) => Concat(paths.Select(p => p.path));
 
         public int CompareTo(FilePath? other)
         {
@@ -139,33 +139,62 @@ namespace Glitch.IO
 
         public static implicit operator string(FilePath path) => path.path;
 
-        public static explicit operator FilePath(string path) => new(path);
+        /// <summary>
+        /// Implicit conversion operator from string to <see cref="FilePath"/>.
+        /// </summary>
+        /// <remarks>
+        /// The conversion is implicit since the static <see cref="Path"/> class
+        /// and all of the types in the System.IO namespace expect a string, so
+        /// this will make it easier to work with. 
+        /// </remarks>
+        /// <param name="path"></param>
+        public static implicit operator FilePath(string path) => new(path);
 
-        public static implicit operator FilePath(FileSystemInfo node) => new(node.FullName);
+        public static implicit operator FilePath(FileSystemInfo? node) => new(node?.FullName);
 
-        public static explicit operator DirectoryInfo(FilePath path) => new(path);
+        public static implicit operator FileSystemInfo?(FilePath? path)
+            => path switch
+            {
+                FilePath p when p.IsFile => new FileInfo(p),
+                FilePath p when p.IsDirectory => new DirectoryInfo(p),
+                _ => null
+            };
 
-        public static explicit operator FileInfo(FilePath path) => new(path);
+        public static explicit operator DirectoryInfo(FilePath path) => path.IsDirectory ? new(path) : throw new InvalidCastException($"Path '{path}' is not a valid directory");
+
+        public static explicit operator FileInfo(FilePath path) => path.IsFile ? new(path) : throw new InvalidCastException($"Path '{path}' is not a valid file");
 
         public static bool operator ==(FilePath? left, FilePath? right) => left is null ? right == null : left.Equals(right);
 
         public static bool operator !=(FilePath? left, FilePath? right) => !(left == right);
 
         [return: NotNullIfNotNull(nameof(left))]
+        [return: NotNullIfNotNull(nameof(right))]
         public static FilePath? operator +(FilePath? left, string? right)
             => right is null ? left : left + new FilePath(right);
 
         [return: NotNullIfNotNull(nameof(left))]
+        [return: NotNullIfNotNull(nameof(right))]
         public static FilePath? operator +(FilePath? left, FilePath? right)
             => (left is not null && right is not null) ? new FilePath(left.path + right.path) : left ?? right;
 
         [return: NotNullIfNotNull(nameof(left))]
+        [return: NotNullIfNotNull(nameof(right))]
         public static FilePath? operator /(FilePath? left, string? right)
             => right is null ? left : left / new FilePath(right);
 
         [return: NotNullIfNotNull(nameof(left))]
+        [return: NotNullIfNotNull(nameof(right))]
         public static FilePath? operator /(FilePath? left, FilePath? right)
             => (left is not null && right is not null) ? left.Append(right) : left ?? right;
+
+        [return: NotNullIfNotNull(nameof(node))]
+        [return: NotNullIfNotNull(nameof(path))]
+        public static FileSystemInfo? operator +(FileSystemInfo? node, FilePath? path) => node?.ToPath() / path;
+
+        [return: NotNullIfNotNull(nameof(node))]
+        [return: NotNullIfNotNull(nameof(path))]
+        public static FileSystemInfo? operator /(FileSystemInfo? node, FilePath? path) => node?.ToPath() / path;
 
         public static bool operator <(FilePath? left, FilePath? right) 
             => left is null ? right is not null : left.CompareTo(right) < 0;

@@ -6,10 +6,10 @@
             => source.Traverse(Identity);
 
         public static Effect<Sequence<TResult>> Traverse<T, TResult>(this Sequence<Effect<T>> source, Func<T, TResult> traverse)
-            => source.Traverse(opt => opt.Map(traverse));
+            => source.Traverse(opt => opt.Select(traverse));
 
         public static Effect<Sequence<TResult>> Traverse<T, TResult>(this Sequence<Effect<T>> source, Func<T, int, TResult> traverse)
-            => source.Map((s, i) => s.PartialMap(traverse).Apply(i))
+            => source.Map((s, i) => s.PartialSelect(traverse).Apply(i))
                      .Traverse();
 
         public static Effect<Sequence<TResult>> Traverse<T, TResult>(this Sequence<T> source, Func<T, int, Effect<TResult>> traverse)
@@ -20,10 +20,10 @@
             => source.Traverse(Identity);
 
         public static Result<Sequence<TResult>> Traverse<T, TResult>(this Sequence<Result<T>> source, Func<T, TResult> traverse)
-            => source.Traverse(opt => opt.Map(traverse));
+            => source.Traverse(opt => opt.Select(traverse));
 
         public static Result<Sequence<TResult>> Traverse<T, TResult>(this Sequence<Result<T>> source, Func<T, int, TResult> traverse)
-            => source.Traverse((opt, idx) => opt.Map(o => traverse(o, idx)));
+            => source.Traverse((opt, idx) => opt.Select(o => traverse(o, idx)));
 
         public static Result<Sequence<TResult>> Traverse<T, TResult>(this Sequence<T> source, Func<T, int, Result<TResult>> traverse)
             => source.Map((s, i) => traverse(s, i))

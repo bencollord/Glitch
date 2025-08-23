@@ -1,4 +1,6 @@
 ﻿
+using Glitch.Functional.Attributes;
+
 namespace Glitch.Functional
 {
     /// <summary>
@@ -8,6 +10,7 @@ namespace Glitch.Functional
     /// </summary>
     /// <typeparam name="TEnv"></typeparam>
     /// <typeparam name="T"></typeparam>
+    [Monad]
     public partial class Effect<TEnv, T>
     {
         private Func<TEnv, Result<T, Error>> thunk;
@@ -17,7 +20,7 @@ namespace Glitch.Functional
             this.thunk = thunk;
         }
 
-        public static Effect<TEnv, T> Okay(T value) => new(_ => Result.Okay(value));
+        public static Effect<TEnv, T> Return(T value) => new(_ => Result.Okay(value));
 
         public static Effect<TEnv, T> Fail(Error error) => new(_ => Result.Fail<T>(error));
 
@@ -113,9 +116,7 @@ namespace Glitch.Functional
             {
                 var result = thunk(i);
 
-                return result is Result.Success<T>(var ok)
-                     ? bind(ok).thunk(i)
-                     : result.Cast<TResult>();
+                return result.AndThen(v => bind(v).thunk(i));
             });
 
         /// <summary>
@@ -150,7 +151,7 @@ namespace Glitch.Functional
         /// <param name="project"></param>
         /// <returns></returns>
         public Effect<TEnv, TResult> AndThen<TElement, TResult>(Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project)
-            => AndThen(x => bind(x).Map(y => project(x, y)));
+            => AndThen(x => bind(x).Select(y => project(x, y)));
 
         public Effect<TEnv, TResult> Choose<TResult>(Func<T, Effect<TEnv, TResult>> okay, Func<Error, Effect<TEnv, TResult>> error)
             => new(i => thunk(i).Match(okay, error).Run(i));
@@ -175,7 +176,7 @@ namespace Glitch.Functional
         /// <param name="project"></param>
         /// <returns></returns>
         public Effect<TEnv, TResult> AndThen<TElement, TResult>(Func<T, Effect<TElement>> bind, Func<T, TElement, TResult> project)
-            => AndThen(x => bind(x).Map(y => project(x, y)));
+            => AndThen(x => bind(x).Select(y => project(x, y)));
 
 
         public Effect<TEnv, T> Guard(Func<T, bool> predicate, Error error)
@@ -214,7 +215,7 @@ namespace Glitch.Functional
             {
                 var result = thunk(i);
 
-                return result is Result.Failure<T> fail ? other(fail.Error).thunk(i) : result;
+                return result.OrElse(e => other(e).thunk(i));
             });
 
         public Effect<TEnv, T> Filter(Func<T, bool> predicate)
@@ -376,7 +377,7 @@ namespace Glitch.Functional
 
         public static implicit operator Effect<TEnv, T>(Result<T, Error> result) => new(_ => result);
 
-        public static implicit operator Effect<TEnv, T>(T value) => Okay(value);
+        public static implicit operator Effect<TEnv, T>(T value) => Return(value);
 
         public static implicit operator Effect<TEnv, T>(Error error) => Fail(error);
 
@@ -388,11 +389,11 @@ namespace Glitch.Functional
         public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Effect<T> y)
             => x.AndThen(_ => Lift(y));
 
-        public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Effect<TEnv, Nothing> y)
+        public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Effect<TEnv, Unit> y)
             => x.AndThen(v => y.Map(_ => v));
 
-        public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Effect<Nothing> y)
-            => x.AndThen(v => Lift(y.Map(_ => v)));
+        public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Effect<Unit> y)
+            => x.AndThen(v => Lift(y.Select(_ => v)));
 
 
         public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Func<TEnv, Result<T, Error>> y)

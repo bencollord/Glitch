@@ -13,8 +13,8 @@
 
         public static bool IsFail<T>(Result<T> result) => result.IsError;
 
-        public static Result<Nothing> Guard(bool condition, Error error)
-            => Guard(condition, Nothing.Value, error);
+        public static Result<Unit> Guard(bool condition, Error error)
+            => Guard(condition, Unit.Value, error);
 
         public static Result<T> Guard<T>(bool condition, T value, Error error)
             => condition ? Okay(value) : Fail<T>(error);

@@ -1,8 +1,10 @@
-﻿using System.Collections;
+﻿using Glitch.Functional.Attributes;
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Functional
 {
+    [Monad]
     public partial class Sequence<T> : IEnumerable<T>
     {
         public static readonly Sequence<T> Empty = new([]);

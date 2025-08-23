@@ -1,6 +1,6 @@
-﻿namespace Glitch.Functional.Optics
+﻿namespace Glitch.Functional
 {
-    public static class Lens
+    public static partial class Lens
     {
         /// <summary>
         /// <inheritdoc cref="Lens{TFocus, TValue}.New(System.Func{TFocus, TValue}, System.Func{TFocus, TValue, TFocus})"/>
@@ -91,7 +91,7 @@
 
         public TFocus Update(TFocus focus, Func<TValue, TValue> update) => Set(focus, update(Get(focus)));
 
-        public Lens<TFocus, TDeeper> AndThen<TDeeper>(Func<TValue, TDeeper> get, Func<TValue, TDeeper, TValue> set)
+        public Lens<TFocus, TDeeper> Compose<TDeeper>(Func<TValue, TDeeper> get, Func<TValue, TDeeper, TValue> set)
             => Compose(new Lens<TValue, TDeeper>(get, set));
 
         public Lens<TFocus, TDeeper> Compose<TDeeper>(Lens<TValue, TDeeper> other)

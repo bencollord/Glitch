@@ -7,7 +7,7 @@ namespace Glitch.Functional
     {
         public static readonly OptionNone None = new();
 
-        public static readonly Nothing End = new();
+        public static readonly Unit Nothing = new();
 
         public static NotSupportedException BadMatchException()
         {
@@ -20,7 +20,7 @@ namespace Glitch.Functional
             return new NotSupportedException(message);
         }
 
-        public static Nothing Ignore<T>(T _) => default;
+        public static Unit Ignore<T>(T _) => default;
 
         public static Identity<T> Id<T>() where T : new() => IdentityMonad<T>(new());
 
@@ -40,25 +40,25 @@ namespace Glitch.Functional
 
         public static Effect<T> Try<T>(Func<Result<T>> function) => Effect<T>.Lift(function);
 
-        public static Effect<T> Try<T>(Func<Nothing, Result<T>> function) => Effect<T>.Lift(() => function(End));
+        public static Effect<T> Try<T>(Func<Unit, Result<T>> function) => Effect<T>.Lift(() => function(Nothing));
 
         public static Effect<T> Try<T>(Func<T> function) => Effect<T>.Lift(function);
 
-        public static Effect<T> Try<T>(Func<Nothing, T> function) => Effect<T>.Lift(() => function(End));
+        public static Effect<T> Try<T>(Func<Unit, T> function) => Effect<T>.Lift(() => function(Nothing));
 
-        public static Effect<Nothing> Try(Action action) => Effect<Nothing>.Lift(action.Return());
+        public static Effect<Unit> Try(Action action) => Effect<Unit>.Lift(action.Return());
 
-        public static Effect<Nothing> Try(Action<Nothing> action) => Try(action.Return());
+        public static Effect<Unit> Try(Action<Unit> action) => Try(action.Return());
 
-        public static Effect<T> Try<T>(T value) => Effect<T>.Okay(value);
+        public static Effect<T> Try<T>(T value) => Effect<T>.Return(value);
 
         public static Effect<T> Try<T>(Result<T> result) => Effect<T>.Return(result);
 
-        public static Effect<TInput, Nothing> TryWith<TInput>(Action<TInput> function)
+        public static Effect<TInput, Unit> TryWith<TInput>(Action<TInput> function)
             => TryWith(function.Return());
 
-        public static Effect<TInput, Nothing> TryWith<TInput>(Func<TInput, Nothing> function)
-            => TryWith<TInput, Nothing>(function);
+        public static Effect<TInput, Unit> TryWith<TInput>(Func<TInput, Unit> function)
+            => TryWith<TInput, Unit>(function);
 
         public static Effect<TInput, TOutput> TryWith<TInput, TOutput>(Func<TInput, TOutput> function)
             => Effect.Lift(function);

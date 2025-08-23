@@ -39,9 +39,9 @@ namespace Glitch.CodeAnalysis
                     .WithModifiers(modifiers.ToTokenList())
                     .WithMembers(
                         SeparatedList(
-                            fields.Select(f => EnumMemberDeclaration(f.Name)),
                             Token(SyntaxKind.CommaToken)
-                                .WithTrailingTrivia(CarriageReturnLineFeed)));
+                                .WithTrailingTrivia(CarriageReturnLineFeed),
+                            fields.Select(f => EnumMemberDeclaration(f.Name))));
             }
 
             var properties = type.GetProperties(flags).Select(PropertyDeclaration);
@@ -90,7 +90,7 @@ namespace Glitch.CodeAnalysis
 
             var method = getMethod.Or(setMethod)
                 .OkayOrElse(_ => new ArgumentException("Property must provide accessors"))
-                .Unwrap();
+                .UnwrapOrThrow();
 
             var modifiers = GetMethodModifiers(method);
 
@@ -156,9 +156,9 @@ namespace Glitch.CodeAnalysis
                 .WithModifiers(modifiers.ToTokenList())
                 .WithParameterList(
                     ParameterList(
-                        SeparatedList(parameters.Select(p =>
-                            Parameter(p.Type, p.Name)), // TODO Parameter modifiers
-                            Token(SyntaxKind.CommaToken))))
+                        SeparatedList(Token(SyntaxKind.CommaToken), // TODO Parameter modifiers
+                            parameters.Select(p =>
+                            Parameter(p.Type, p.Name)))))
                 .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
         }
 
@@ -181,7 +181,7 @@ namespace Glitch.CodeAnalysis
                     p.Type.WithTrailingTrivia(Space),
                     p.Name));
 
-            var parameterList = parameters.Any() ? SeparatedList(parameters, Token(SyntaxKind.CommaToken).WithTrailingTrivia(Space)) : SeparatedList<ParameterSyntax>();
+            var parameterList = parameters.Any() ? SeparatedList(Token(SyntaxKind.CommaToken).WithTrailingTrivia(Space), parameters) : SeparatedList<ParameterSyntax>();
 
             // TODO Generics
             return MethodDeclaration(returnType, method.Name)

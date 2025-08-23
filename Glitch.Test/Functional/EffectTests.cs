@@ -12,7 +12,7 @@ namespace Glitch.Test.Functional
         public void Map_ShouldNotRun_UntilRunMethodIsCalled()
         {
             // Arrange
-            var item = Effect<string>.Okay("Good afternoon");
+            var item = Effect<string>.Return("Good afternoon");
             bool funcHasExecuted = false;
             var func = (string s) =>
             {
@@ -21,13 +21,13 @@ namespace Glitch.Test.Functional
             };
 
             // Act
-            var mapped = item.Map(func);
+            var mapped = item.Select(func);
             var wasExecutedBeforeRun = funcHasExecuted;
             var result = mapped.Run();
             var wasExecutedAfterRun = funcHasExecuted;
 
             // Assert
-            Assert.Equal("GOOD AFTERNOON", result.Unwrap());
+            Assert.Equal("GOOD AFTERNOON", result.UnwrapOrThrow());
             Assert.False(wasExecutedBeforeRun);
             Assert.True(wasExecutedAfterRun);
         }
@@ -36,11 +36,11 @@ namespace Glitch.Test.Functional
         public void Map_FuncThrowsException_ReturnsFailedResult()
         {
             // Arrange
-            var item = Effect<string>.Okay("Test");
+            var item = Effect<string>.Return("Test");
             var func = Func<string, string>(s => throw new Exception("Failure"));
 
             // Act
-            var mapped = item.Map(func);
+            var mapped = item.Select(func);
             var result = mapped.Run();
 
             // Assert
@@ -52,12 +52,12 @@ namespace Glitch.Test.Functional
         public void AndThen_ShouldNotRun_UntilRunMethodIsCalled()
         {
             // Arrange
-            var item = Effect<string>.Okay("Good afternoon");
+            var item = Effect<string>.Return("Good afternoon");
             bool funcHasExecuted = false;
             var func = (string s) =>
             {
                 funcHasExecuted = true;
-                return Effect.Okay(s.ToUpper());
+                return Effect.Return(s.ToUpper());
             };
 
             // Act
@@ -67,7 +67,7 @@ namespace Glitch.Test.Functional
             var wasExecutedAfterRun = funcHasExecuted;
 
             // Assert
-            Assert.Equal("GOOD AFTERNOON", result.Unwrap());
+            Assert.Equal("GOOD AFTERNOON", result.UnwrapOrThrow());
             Assert.False(wasExecutedBeforeRun);
             Assert.True(wasExecutedAfterRun);
         }
@@ -76,7 +76,7 @@ namespace Glitch.Test.Functional
         public void AndThen_FuncThrowsException_ReturnsFailedResult()
         {
             // Arrange
-            var item = Effect<string>.Okay("Test");
+            var item = Effect<string>.Return("Test");
             var func = Func<string, Effect<string>>(s => throw new Exception("Failure"));
 
             // Act
@@ -92,8 +92,8 @@ namespace Glitch.Test.Functional
         public void Apply_ShouldApplyFunction_WhenBothAreSuccess()
         {
             // Arrange
-            var item = Effect.Okay("Test");
-            var func = Effect.Okay((string s) => s.ToUpper());
+            var item = Effect.Return("Test");
+            var func = Effect.Return((string s) => s.ToUpper());
 
             // Act
             var mapped = item.Apply(func);
@@ -101,14 +101,14 @@ namespace Glitch.Test.Functional
 
             // Assert
             Assert.True(result.IsOkay);
-            Assert.Equal("TEST", result.Unwrap());
+            Assert.Equal("TEST", result.UnwrapOrThrow());
         }
 
         [Fact]
         public void Apply_ShouldReturnFunctionError_WhenFunctionIsError_AndValueIsSuccess()
         {
             // Arrange
-            var item = Effect.Okay("Test");
+            var item = Effect.Return("Test");
             var func = Effect.Fail<Func<string, string>>("Function failed");
 
             // Act
@@ -125,7 +125,7 @@ namespace Glitch.Test.Functional
         {
             // Arrange
             var item = Effect.Fail<string>("Value failed");
-            var func = Effect.Okay((string s) => s.ToUpper());
+            var func = Effect.Return((string s) => s.ToUpper());
 
             // Act
             var mapped = item.Apply(func);
@@ -156,7 +156,7 @@ namespace Glitch.Test.Functional
         public void AllLazyMethods_ShouldReturnErrorResults_WhenFunctionThrows()
         {
             // Arrange
-            var okayItem           = Effect.Okay(10);
+            var okayItem           = Effect.Return(10);
             var mapFunc            = (int _) => Throw<int>();
             var bindFunc           = (int _) => Throw<Effect<int>>();
             var bindResultFunc     = (int _) => Throw<Result<int>>();
@@ -167,19 +167,19 @@ namespace Glitch.Test.Functional
             var inlineError        = Error.New("Inline error");
 
             // Act
-            Effect<int> map            = okayItem.Map(mapFunc);
+            Effect<int> map            = okayItem.Select(mapFunc);
             Effect<int> andThen        = okayItem.AndThen(bindFunc);
             Effect<int> andThen2       = okayItem.AndThen(bindFunc, bindProjectionFunc);
             Effect<int> andThenResult  = okayItem.AndThen(bindResultFunc);
             Effect<int> andThenResult2 = okayItem.AndThen(bindResultFunc, bindProjectionFunc);
             Effect<int> andThenBiBind  = okayItem.Choose(bindFunc, bindErrFunc);
             Effect<int> filter         = okayItem.Filter(filterFunc);
-            Effect<int> zipWith        = okayItem.Zip(Effect.Okay(1), bindProjectionFunc);
+            Effect<int> zipWith        = okayItem.Zip(Effect.Return(1), bindProjectionFunc);
 
             // These two items will only run for faulted items
             var failItem           = Effect.Fail<int>("Should be an error");
             Effect<int> orElse   = failItem.OrElse(bindErrFunc);
-            Effect<int> mapError = failItem.MapError(mapErrFunc);
+            Effect<int> mapError = failItem.SelectError(mapErrFunc);
 
             var fallibleItems = new Dictionary<string, Effect<int>>
             {
@@ -222,28 +222,28 @@ namespace Glitch.Test.Functional
             // Wrap the above assertion into delegates that can be passed to Effect's higher order functions.
             // The delegates are curried so we can pass the name of the case in to know which one failed.
             var mapFunc            = (string caseName) => (int _) => MarkCaseRun(caseName, resultValue);
-            var bindFunc           = (string caseName) => (int _) => MarkCaseRun(caseName, Effect.Okay(resultValue));
+            var bindFunc           = (string caseName) => (int _) => MarkCaseRun(caseName, Effect.Return(resultValue));
             var bindResultFunc     = (string caseName) => (int _) => MarkCaseRun(caseName, Result.Okay(resultValue));
             var bindProjectionFunc = (string caseName) => (int _, int _) => MarkCaseRun(caseName, resultValue);
             var mapErrFunc         = (string caseName) => (Error _) => MarkCaseRun(caseName, errorValue);
             var mapErrToResultFunc = (string caseName) => (Error _) => MarkCaseRun(caseName, resultValue);
-            var bindErrFunc        = (string caseName) => (Error _) => MarkCaseRun(caseName, Effect.Okay(resultValue));
+            var bindErrFunc        = (string caseName) => (Error _) => MarkCaseRun(caseName, Effect.Return(resultValue));
             var filterFunc         = (string caseName) => (int _) => MarkCaseRun(caseName, true);
-            var okayItem           = Effect.Okay(10);
+            var okayItem           = Effect.Return(10);
 
             // Act
-            Effect<int> map            = okayItem.Map(mapFunc(nameof(map)));
+            Effect<int> map            = okayItem.Select(mapFunc(nameof(map)));
             Effect<int> andThen        = okayItem.AndThen(bindFunc(nameof(andThen)));
             Effect<int> andThen2       = okayItem.AndThen(bindFunc(nameof(andThen2)), bindProjectionFunc(nameof(andThen2)));
             Effect<int> andThenResult  = okayItem.AndThen(bindResultFunc(nameof(andThenResult)));
             Effect<int> andThenResult2 = okayItem.AndThen(bindResultFunc(nameof(andThenResult2)), bindProjectionFunc(nameof(andThenResult2)));
             Effect<int> filter         = okayItem.Filter(filterFunc(nameof(filter)));
-            Effect<int> zipWith        = okayItem.Zip(Effect.Okay(1), bindProjectionFunc(nameof(zipWith)));
+            Effect<int> zipWith        = okayItem.Zip(Effect.Return(1), bindProjectionFunc(nameof(zipWith)));
 
              // These two items will only run for faulted items
-            var failItem           = Effect.Fail<int>("Should be an error");
+            var failItem         = Effect.Fail<int>("Should be an error");
             Effect<int> orElse   = failItem.OrElse(bindErrFunc(nameof(orElse)));
-            Effect<int> mapError = failItem.MapError(mapErrFunc(nameof(mapError)));
+            Effect<int> mapError = failItem.SelectError(mapErrFunc(nameof(mapError)));
 
             // These items should be run for both Okay and Fail
             Effect<int> andThenBiBindOkay  = okayItem.Choose(bindFunc(nameof(andThenBiBindOkay)), err => AssertNotCalled<Effect<int>>());
@@ -278,22 +278,22 @@ namespace Glitch.Test.Functional
         public void ZipWith_BothOkay_ShouldApplyFunction()
         {
             // Arrange
-            var left  = Effect<int>.Okay(10);
-            var right = Effect<int>.Okay(20);
+            var left  = Effect<int>.Return(10);
+            var right = Effect<int>.Return(20);
 
             // Act
             var result = left.Zip(right, (x, y) => x + y).Run();
 
             // Assert
             Assert.True(result.IsOkay);
-            Assert.Equal(30, result.Unwrap());
+            Assert.Equal(30, result.UnwrapOrThrow());
         }
 
         [Fact]
         public void ZipWith_OneResultFailed_ShouldReturnErroredResult()
         {
             // Arrange
-            var okay = Effect<int>.Okay(10);
+            var okay = Effect<int>.Return(10);
             var leftError = Effect<int>.Fail("Left failed");
             var rightError = Effect<int>.Fail("Right failed");
 

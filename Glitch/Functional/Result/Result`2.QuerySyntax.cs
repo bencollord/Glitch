@@ -1,7 +1,9 @@
+using Glitch.Functional.Attributes;
 using System.Numerics;
 
 namespace Glitch.Functional
 {
+    [MonadExtension(typeof(Result<,>))]
     public static class Result2Extensions
     {
         public static Result<TResult, E> Select<T, E, TResult>(this Result<T, E> source, Func<T, TResult> mapper)

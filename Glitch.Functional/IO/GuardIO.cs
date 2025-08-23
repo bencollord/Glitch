@@ -1,21 +1,21 @@
-﻿namespace Glitch.Functional
+namespace Glitch.Functional
 {
-    internal class GuardIO<TEnv, T> : IO<TEnv, T>
+    internal class GuardIO<T> : IO<T>
     {
-        private IO<TEnv, T> source;
+        private IO<T> source;
         private Func<T, bool> predicate;
         private Func<T, Error> error;
 
-        public GuardIO(IO<TEnv, T> source, Func<T, bool> predicate, Func<T, Error> error)
+        public GuardIO(IO<T> source, Func<T, bool> predicate, Func<T, Error> error)
         {
             this.source = source;
             this.predicate = predicate;
             this.error = error;
         }
 
-        public override T Run(TEnv input)
+        public override T Run(IOEnv env)
         {
-            var result = source.Run(input);
+            var result = source.Run(env);
 
             if (!predicate(result))
             {

@@ -3,9 +3,9 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Glitch.CodeAnalysis
 {
-    public static class SyntaxTokenExtensions
+    internal static class SyntaxTokenExtensions
     {
-        public static bool IsAccessModifier(this SyntaxToken token)
+        internal static bool IsAccessModifier(this SyntaxToken token)
         {
             return token.IsKind(SyntaxKind.PublicKeyword)
                 || token.IsKind(SyntaxKind.InternalKeyword)

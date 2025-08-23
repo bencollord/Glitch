@@ -8,16 +8,16 @@ namespace Glitch.Functional
             => source.Traverse(Identity);
 
         public static Effect<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<Effect<T>> source, Func<T, TResult> traverse)
-            => source.Traverse(opt => opt.Map(traverse));
+            => source.Traverse(opt => opt.Select(traverse));
 
         public static Effect<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<T> source, Func<T, Effect<TResult>> traverse)
             => source.Aggregate(
-                Okay(ImmutableList<TResult>.Empty),
+                Return(ImmutableList<TResult>.Empty),
                 (list, item) => list.AndThen(_ => traverse(item), (lst, i) => lst.Add(i)),
-                list => list.Map(l => l.AsEnumerable()));
+                list => list.Select(l => l.AsEnumerable()));
 
         public static Effect<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<Effect<T>> source, Func<T, int, TResult> traverse)
-            => source.Select((s, i) => s.PartialMap(traverse).Apply(i))
+            => source.Select((s, i) => s.PartialSelect(traverse).Apply(i))
                      .Traverse();
 
         public static Effect<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<T> source, Func<T, int, Effect<TResult>> traverse)

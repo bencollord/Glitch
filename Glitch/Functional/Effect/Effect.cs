@@ -1,26 +1,30 @@
 ﻿
+using Glitch.Functional.Attributes;
+
 namespace Glitch.Functional
 {
+    [Monad]
     public partial class Effect<T>
     {
-        private Effect<Nothing, T> inner;
+        private Effect<Unit, T> inner;
 
-        internal Effect(Effect<Nothing, T> inner)
+        internal Effect(Effect<Unit, T> inner)
         {
             this.inner = inner;
         }
 
-        public static Effect<T> Okay(T value) => new(Effect<Nothing, T>.Okay(value));
+        [MonadReturn]
+        public static Effect<T> Return(T value) => new(Effect<Unit, T>.Return(value));
 
-        public static Effect<T> Fail(Error error) => new(Effect<Nothing, T>.Fail(error));
+        public static Effect<T> Fail(Error error) => new(Effect<Unit, T>.Fail(error));
 
-        public static Effect<T> Return(Result<T, Error> result) => new(Effect<Nothing, T>.Return(result));
+        public static Effect<T> Return(Result<T, Error> result) => new(Effect<Unit, T>.Return(result));
 
-        public static Effect<T> Lift(Func<Result<T>> function) => new(Effect<Nothing, T>.Lift(_ => function()));
+        public static Effect<T> Lift(Func<Result<T>> function) => new(Effect<Unit, T>.Lift(_ => function()));
 
-        public static Effect<T> Lift(Func<Result<T, Error>> function) => new(Effect<Nothing, T>.Lift(_ => function()));
+        public static Effect<T> Lift(Func<Result<T, Error>> function) => new(Effect<Unit, T>.Lift(_ => function()));
 
-        public static Effect<T> Lift(Func<T> function) => new(Effect<Nothing, T>.Lift(_ => function()));
+        public static Effect<T> Lift(Func<T> function) => new(Effect<Unit, T>.Lift(_ => function()));
 
         /// <summary>
         /// <inheritdoc cref="Effect{Unit, T}.Map{TResult}(Func{T, TResult})"/>.
@@ -28,10 +32,15 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <param name="map"></param>
         /// <returns></returns>
-        public Effect<TResult> Map<TResult>(Func<T, TResult> map)
+        [MonadMap]
+        public Effect<TResult> Select<TResult>(Func<T, TResult> map)
             => new(inner.Map(map));
 
-        public Effect<Func<T2, TResult>> PartialMap<T2, TResult>(Func<T, T2, TResult> map)
+        [MonadMap]
+        [Obsolete(Warnings.UseSelectInsteadOfMap)]
+        public Effect<TResult> Map<TResult>(Func<T, TResult> map) => Select(map);
+
+        public Effect<Func<T2, TResult>> PartialSelect<T2, TResult>(Func<T, T2, TResult> map)
             => new(inner.PartialMap(map));
 
         /// <summary>
@@ -39,10 +48,10 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="map"></param>
         /// <returns></returns>
-        public Effect<T> MapError(Func<Error, Error> map)
+        public Effect<T> SelectError(Func<Error, Error> map)
             => new(inner.MapError(map));
 
-        public Effect<T> MapError<TError>(Func<TError, Error> map)
+        public Effect<T> SelectError<TError>(Func<TError, Error> map)
             where TError : Error
             => new(inner.MapError(map));
 
@@ -121,7 +130,7 @@ namespace Glitch.Functional
         /// <param name="project"></param>
         /// <returns></returns>
         public Effect<TResult> AndThen<TElement, TResult>(Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project)
-            => AndThen(x => bind(x).Map(y => project(x, y)));
+            => AndThen(x => bind(x).Select(y => project(x, y)));
 
         public Effect<TResult> Choose<TResult>(Func<T, Effect<TResult>> okay, Func<Error, Effect<TResult>> error)
             => new(inner.Choose(okay: v => okay(v).inner, error: e => error(e).inner));
@@ -246,21 +255,21 @@ namespace Glitch.Functional
         public Effect<TResult> Zip<TOther, TResult>(Effect<TOther> other, Func<T, TOther, TResult> zipper)
             => new(inner.Zip(other.inner, zipper));
 
-        public Effect<TInput, T> WithInput<TInput>() => inner.With<TInput>(input => Nothing.Value);
+        public Effect<TInput, T> WithInput<TInput>() => inner.With<TInput>(input => Unit.Value);
 
         /// <summary>
         /// <inheritdoc cref="Effect{Unit, T}.Run(Unit)"/>
         /// </summary>
         /// <returns></returns>
-        public Result<T> Run() => inner.Run(Nothing.Value);
+        public Result<T> Run() => inner.Run(Unit.Value);
 
         public static implicit operator Effect<T>(Result<T> result) => Return(result);
 
-        public static implicit operator Effect<T>(T value) => Okay(value);
+        public static implicit operator Effect<T>(T value) => Return(value);
 
         public static implicit operator Effect<T>(Error error) => Fail(error);
 
-        public static implicit operator Effect<T>(Effect<Nothing, T> effect) => new(effect);
+        public static implicit operator Effect<T>(Effect<Unit, T> effect) => new(effect);
 
         public static Effect<T> operator |(Effect<T> x, Effect<T> y) => x.Or(y);
 
@@ -270,10 +279,10 @@ namespace Glitch.Functional
 
         public static Effect<T> operator >>(Effect<T> x, Effect<T> y) => x.Then(y);
 
-        public static Effect<T> operator >>(Effect<T> x, Effect<Nothing> y) => x.Then(y, (v, _) => v);
+        public static Effect<T> operator >>(Effect<T> x, Effect<Unit> y) => x.Then(y, (v, _) => v);
 
         public static Effect<T> operator >>(Effect<T> x, Func<Result<T>> y) => x.AndThen(_ => y());
 
-        public static Effect<T> operator >>(Effect<T> x, Func<T> y) => x.Map(_ => y());
+        public static Effect<T> operator >>(Effect<T> x, Func<T> y) => x.Select(_ => y());
     }
 }

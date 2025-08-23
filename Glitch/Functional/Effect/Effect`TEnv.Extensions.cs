@@ -12,7 +12,7 @@ namespace Glitch.Functional
 
         public static Effect<TInput, IEnumerable<TResult>> Traverse<TInput, TOutput, TResult>(this IEnumerable<TOutput> source, Func<TOutput, Effect<TInput, TResult>> traverse)
             => source.Aggregate(
-                Effect<TInput, ImmutableList<TResult>>.Okay(ImmutableList<TResult>.Empty),
+                Effect<TInput, ImmutableList<TResult>>.Return(ImmutableList<TResult>.Empty),
                 (list, item) => list.AndThen(_ => traverse(item), (lst, i) => lst.Add(i)),
                 list => list.Map(l => l.AsEnumerable()));
 

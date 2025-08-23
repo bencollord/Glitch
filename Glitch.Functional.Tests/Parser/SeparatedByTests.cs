@@ -22,5 +22,24 @@ namespace Glitch.Test.Functional
             // Assert
             Assert.True(result.SequenceEqual(csv.Split(',')));
         }
+
+        [Fact]
+        public void SeparatedBy_WithStringSeparator_Succeeds()
+        {
+            // Arrange
+            var separator = ", ";
+            var csv = "Foo, Bar, Baz";
+
+            var parser = AnyChar.AtLeastOnce()
+                                .AsString()
+                                .SeparatedBy(Literal(separator))
+                                .AtLeastOnce();
+
+            // Act
+            var result = parser.Parse(csv);
+
+            // Assert
+            Assert.True(result.SequenceEqual(csv.Split(separator)));
+        }
     }
 }

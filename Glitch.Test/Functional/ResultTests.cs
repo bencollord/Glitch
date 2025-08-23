@@ -1,5 +1,4 @@
-﻿using Glitch.Functional;
-using static Glitch.Functional.Result;
+﻿using static Glitch.Functional.Result;
 
 namespace Glitch.Test.Functional
 {
@@ -17,7 +16,7 @@ namespace Glitch.Test.Functional
 
             // Assert
             Assert.True(result.IsOkay);
-            Assert.Equal(30, result.Unwrap());
+            Assert.Equal(30, result.UnwrapOrThrow());
         }
 
         [Fact]
@@ -37,23 +36,6 @@ namespace Glitch.Test.Functional
             Assert.False(rightResult.IsOkay);
             Assert.Equal("Left failed", leftResult.UnwrapError().Message);
             Assert.Equal("Right failed", rightResult.UnwrapError().Message);
-        }
-
-        [Fact]
-        public void ZipWith_BothResultsFailed_AggregateError()
-        {
-            // Arrange
-            var left = Fail<int>("Left failed");
-            var right = Fail<int>("Right failed");
-
-            // Act
-            var result = left.Zip(right, (x, y) => x + y);
-
-            // Assert
-            Assert.False(result.IsOkay);
-            Assert.IsType<AggregateError>(result.UnwrapError());
-            Assert.Contains(result.UnwrapError().Iterate(), e => e.Message == "Left failed");
-            Assert.Contains(result.UnwrapError().Iterate(), e => e.Message == "Right failed");
         }
     }
 }

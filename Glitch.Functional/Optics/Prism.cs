@@ -2,7 +2,7 @@
 
 namespace Glitch.Functional
 {
-    public static class Prism
+    public static partial class Prism
     {
         /// <summary>
         /// <inheritdoc cref="Prism{TFocus, TValue}.New(System.Func{TFocus, Option{TValue}}, System.Func{TFocus, TValue, TFocus})"/>
@@ -102,10 +102,10 @@ namespace Glitch.Functional
         public TFocus Update(TFocus focus, Func<TValue, TValue> update)
             => Get(focus).Map(old => Set(focus, update(old))).IfNone(focus);
 
-        public Prism<TFocus, TDeeper> AndThen<TDeeper>(Func<TValue, TDeeper> get, Func<TValue, TDeeper, TValue> set)
-            => AndThen(get.Then(Some), set);
+        public Prism<TFocus, TDeeper> Compose<TDeeper>(Func<TValue, TDeeper> get, Func<TValue, TDeeper, TValue> set)
+            => Compose(get.Then(Some), set);
 
-        public Prism<TFocus, TDeeper> AndThen<TDeeper>(Func<TValue, Option<TDeeper>> get, Func<TValue, TDeeper, TValue> set)
+        public Prism<TFocus, TDeeper> Compose<TDeeper>(Func<TValue, Option<TDeeper>> get, Func<TValue, TDeeper, TValue> set)
             => Compose(new Prism<TValue, TDeeper>(get, set));
 
         public Prism<TFocus, TDeeper> Compose<TDeeper>(Prism<TValue, TDeeper> next)
