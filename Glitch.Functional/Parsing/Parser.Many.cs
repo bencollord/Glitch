@@ -7,7 +7,7 @@ namespace Glitch.Functional.Parsing
     {
         public virtual Parser<TToken, IEnumerable<T>> AtLeastOnce()
         {
-            return from once in Map(ImmutableList.Create)
+            return from once in Select(ImmutableList.Create)
                    from tail in ZeroOrMoreTimes()
                    select once.Concat(tail);
         }

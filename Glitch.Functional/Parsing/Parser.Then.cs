@@ -9,7 +9,7 @@ namespace Glitch.Functional.Parsing
             => Then(_ => other);
 
         public virtual Parser<TToken, TResult> Then<TElement, TResult>(Parser<TToken, TElement> next, Func<T, TElement, TResult> projection)
-            => Then(x => next.Map(y => projection(x, y)));
+            => Then(x => next.Select(y => projection(x, y)));
 
         public virtual Parser<TToken, TResult> Then<TResult>(Func<T, Parser<TToken, TResult>> next)
             => Then(next, (_, nxt) => nxt);

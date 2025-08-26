@@ -15,7 +15,7 @@ namespace Glitch.Functional.Parsing
                     .After(Literal("0x").Maybe())
                     .AsString();
 
-        public static Parser<char, int> Int => Numeric.Map(parseInt(10)) | Hex.Map(parseInt(16));
+        public static Parser<char, int> Int => Numeric.Select(parseInt(10)) | Hex.Select(parseInt(16));
 
         public static Parser<char, decimal> Decimal
         {

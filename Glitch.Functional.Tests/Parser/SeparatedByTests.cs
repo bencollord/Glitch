@@ -32,7 +32,7 @@ namespace Glitch.Test.Functional
 
             var parser = AnyChar.AtLeastOnce()
                                 .AsString()
-                                .SeparatedBy(Literal(separator))
+                                .SeparatedBy(Char(','))
                                 .AtLeastOnce();
 
             // Act

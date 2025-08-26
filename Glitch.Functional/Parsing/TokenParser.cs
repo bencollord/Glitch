@@ -3,6 +3,8 @@ using Glitch.Functional.Parsing.Results;
 
 namespace Glitch.Functional.Parsing
 {
+    using static Parse;
+
     public class TokenParser<TToken> : Parser<TToken, TToken>
     {
         private Func<TToken, bool> predicate;
@@ -15,6 +17,22 @@ namespace Glitch.Functional.Parsing
         {
             this.predicate = predicate;
             this.expectation = expectation;
+        }
+
+        public override SeparatedByContext<TToken, TToken, TToken> SeparatedBy(TToken token)
+        {
+            return new SeparatedByContext<TToken, TToken, TToken>(
+                parser: Except(token),
+                separator: Token(token));
+        }
+
+        public override SeparatedByContext<TToken, TToken, TSeparator> SeparatedBy<TSeparator>(Parser<TToken, TSeparator> separator)
+        {
+            return new SeparatedByContext<TToken, TToken, TSeparator>(
+                parser: from _ in separator.Not()
+                        from tkn in this
+                        select tkn,
+                separator: separator);
         }
 
         public TokenParser<TToken> Except(TToken token) => WithPredicate(x => predicate(x) && !x.Equals(token));
