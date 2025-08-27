@@ -1,7 +1,10 @@
 ﻿using Glitch.Functional.Parsing.Input;
+using Glitch.Functional.Results;
 
 namespace Glitch.Functional.Parsing.Results
 {
+    using static Option;
+
     public record ParseError<TToken, T> : ParseResult<TToken, T>
     {
         private const string DefaultMessage = "Parse error";

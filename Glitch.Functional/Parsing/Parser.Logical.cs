@@ -1,5 +1,6 @@
 using Glitch.Functional.Parsing.Parsers;
 using Glitch.Functional.Parsing.Results;
+using Glitch.Functional.Results;
 
 namespace Glitch.Functional.Parsing
 {
@@ -18,7 +19,7 @@ namespace Glitch.Functional.Parsing
         /// </summary>
         /// <returns></returns>
         public virtual Parser<TToken, Option<T>> Maybe()
-            => Match(ok => ParseResult.Okay(Some(ok.Value), ok.Remaining),
+            => Match(ok => ParseResult.Okay(Option.Some(ok.Value), ok.Remaining),
                      err => ParseResult.Okay(Option<T>.None, err.Remaining));
     }
 }

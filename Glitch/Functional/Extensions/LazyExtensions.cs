@@ -1,4 +1,6 @@
-﻿namespace Glitch.Functional
+﻿using Glitch.Functional.Results;
+
+namespace Glitch.Functional
 {
     public static partial class LazyExtensions
     {
@@ -24,7 +26,7 @@
             => source.AndThen(s => bind(s).Map(e => bindMap(s, e)));
 
         public static Lazy<Option<T>> Where<T>(this Lazy<T> source, Func<T, bool> predicate)
-            => source.Map(s => predicate(s) ? Some(s) : None);
+            => source.Map(s => predicate(s) ? Option.Some(s) : Option.None);
 
         public static Lazy<T> Do<T>(this Lazy<T> lazy, Action<T> action) 
             => new(() =>

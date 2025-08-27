@@ -1,3 +1,5 @@
+using Glitch.Functional.Results;
+
 namespace Glitch.Functional
 {
     internal class FailIO<T> : IO<T>

@@ -1,7 +1,8 @@
 ﻿using Glitch.Functional;
+using Glitch.Functional.Results;
 using System;
 using System.Runtime.CompilerServices;
-using static Glitch.Functional.Result;
+using static Glitch.Functional.Results.Result;
 
 namespace Glitch.Test.Functional
 {

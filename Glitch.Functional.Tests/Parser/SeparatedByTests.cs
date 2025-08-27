@@ -30,10 +30,10 @@ namespace Glitch.Test.Functional
             var separator = ", ";
             var csv = "Foo, Bar, Baz";
 
-            var parser = AnyChar.AtLeastOnce()
-                                .AsString()
-                                .SeparatedBy(Char(','))
-                                .AtLeastOnce();
+            var parser = Letter.AtLeastOnce()
+                               .AsString()
+                               .SeparatedBy(Literal(", "))
+                               .AtLeastOnce();
 
             // Act
             var result = parser.Parse(csv);

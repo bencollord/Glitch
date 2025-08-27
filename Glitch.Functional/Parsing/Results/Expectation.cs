@@ -1,7 +1,9 @@
-﻿using System.Collections.Immutable;
+﻿using Glitch.Functional.Results;
 
 namespace Glitch.Functional.Parsing.Results
 {
+    using static Option;
+
     /// <summary>
     /// Factory methods for <see cref="Expectation{TToken}"/>.
     /// </summary>

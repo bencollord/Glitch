@@ -1,5 +1,6 @@
 ﻿
 using Glitch.Functional.Attributes;
+using Glitch.Functional.Results;
 
 namespace Glitch.Functional
 {
@@ -18,11 +19,11 @@ namespace Glitch.Functional
 
         public static Effect<T> Fail(Error error) => new(Effect<Unit, T>.Fail(error));
 
-        public static Effect<T> Return(Result<T, Error> result) => new(Effect<Unit, T>.Return(result));
+        public static Effect<T> Return(Expected<T, Error> result) => new(Effect<Unit, T>.Return(result));
 
         public static Effect<T> Lift(Func<Result<T>> function) => new(Effect<Unit, T>.Lift(_ => function()));
 
-        public static Effect<T> Lift(Func<Result<T, Error>> function) => new(Effect<Unit, T>.Lift(_ => function()));
+        public static Effect<T> Lift(Func<Expected<T, Error>> function) => new(Effect<Unit, T>.Lift(_ => function()));
 
         public static Effect<T> Lift(Func<T> function) => new(Effect<Unit, T>.Lift(_ => function()));
 

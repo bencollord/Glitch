@@ -1,7 +1,10 @@
-﻿using System.Collections.Immutable;
+﻿using Glitch.Functional.Results;
+using System.Collections.Immutable;
 
 namespace Glitch.Functional
 {
+    using static Option;
+
     public static class CollectionExtensions
     {
         public static Option<TValue> TryGetValue<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key)

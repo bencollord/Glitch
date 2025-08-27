@@ -1,3 +1,5 @@
+using Glitch.Functional.Results;
+
 namespace Glitch.Functional
 {
     internal class CatchIO<T, TError> : IO<T>
@@ -10,7 +12,7 @@ namespace Glitch.Functional
         {
             this.source = source;
             this.next = next;
-            this.filter = Maybe(filter);
+            this.filter = Option.Maybe(filter);
         }
 
         public override T Run(IOEnv env)

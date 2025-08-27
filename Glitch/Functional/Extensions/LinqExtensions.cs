@@ -1,5 +1,9 @@
-﻿namespace Glitch.Functional
+﻿using Glitch.Functional.Results;
+
+namespace Glitch.Functional
 {
+    using static Option;
+
     public static class LinqExtensions
     {
         public static IEnumerable<Func<T2, TResult>> PartialSelect<T, T2, TResult>(this IEnumerable<T> source, Func<T, T2, TResult> selector)
@@ -67,7 +71,7 @@
 
                 Result.Failure<T>(Error e) => throw e.AsException(),
 
-                _ => throw BadMatchException()
+                _ => throw new BadDiscriminatedUnionException()
             };
                      
 

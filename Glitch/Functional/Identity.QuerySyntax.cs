@@ -1,3 +1,5 @@
+using Glitch.Functional.Results;
+
 namespace Glitch.Functional
 {
     public static class IdentityExtensions

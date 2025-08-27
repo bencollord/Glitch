@@ -1,4 +1,5 @@
 ﻿using Glitch.Functional;
+using Glitch.Functional.Results;
 using static Glitch.Functional.FN;
 
 namespace Glitch.Test.Functional

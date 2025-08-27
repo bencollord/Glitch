@@ -1,6 +1,8 @@
+using Glitch.Functional.Results;
+
 namespace Glitch.Functional
 {
-    public abstract partial class IO<T> : IGuardable<IO<T>, T, Error>
+    public abstract partial class IO<T>
     {
         public IO<TResult> Select<TResult>(Func<T, TResult> map) => AndThen(x => new ReturnIO<TResult>(map(x)));
 

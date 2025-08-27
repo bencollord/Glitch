@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using Glitch.Functional.Results;
+using System.Runtime.Serialization;
 
 namespace Glitch.Functional
 {

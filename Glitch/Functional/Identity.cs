@@ -1,4 +1,6 @@
-﻿namespace Glitch.Functional
+﻿using Glitch.Functional.Results;
+
+namespace Glitch.Functional
 {
     public readonly record struct Identity<T>(T Value) : IEquatable<Identity<T>>
     {

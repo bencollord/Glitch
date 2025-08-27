@@ -13,6 +13,11 @@ namespace Glitch.Functional.Parsing
 
         [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public virtual Parser<TToken, Unit> IgnoreResult()
+            => Select(_ => Nothing);
+
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual Parser<TToken, TResult> Apply<TResult>(Parser<TToken, Func<T, TResult>> apply)
             => Then(x => apply.Select(y => y(x)));
 

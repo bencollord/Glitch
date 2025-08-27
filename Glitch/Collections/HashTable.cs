@@ -1,4 +1,5 @@
 ﻿using Glitch.Functional;
+using Glitch.Functional.Results;
 using System.Collections;
 
 namespace Glitch.Collections

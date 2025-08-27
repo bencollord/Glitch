@@ -1,18 +1,19 @@
-﻿using System.Diagnostics;
+﻿using Glitch.Functional.Parsing.Results;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Glitch.Functional.Parsing
 {
-    public abstract partial class Parser<TToken, T>
+    public static partial class ParseExtensions
     {
         [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Parser<TToken, TResult> SelectMany<TElement, TResult>(Func<T, Parser<TToken, TElement>> selector, Func<T, TElement, TResult> projection)
-            => Then(selector, projection);
+        public static Parser<TToken, TResult> SelectMany<TToken, T, TElement, TResult>(this Parser<TToken, T> source, Func<T, Parser<TToken, TElement>> selector, Func<T, TElement, TResult> projection)
+            => source.Then(selector, projection);
 
         [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public virtual Parser<TToken, T> Where(Func<T, bool> predicate)
-            => Guard(predicate);
+        public static Parser<TToken, T> Where<TToken, T>(this Parser<TToken, T> parser, Func<T, bool> predicate)
+            => parser.Guard(predicate);
     }
 }

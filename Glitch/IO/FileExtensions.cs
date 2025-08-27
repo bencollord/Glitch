@@ -4,6 +4,9 @@ namespace Glitch.IO
 {
     public static class FileExtensions
     {
+        public static void MoveTo(this FileInfo file, FileInfo destination)
+            => file.MoveTo(destination.FullName);
+
         public static string ReadAllText(this FileInfo file)
         {
             using var stream = file.OpenText();

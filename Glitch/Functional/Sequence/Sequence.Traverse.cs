@@ -1,4 +1,6 @@
-﻿namespace Glitch.Functional
+﻿using Glitch.Functional.Results;
+
+namespace Glitch.Functional
 {
     public partial class Sequence<T>
     {

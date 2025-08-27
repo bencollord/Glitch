@@ -1,5 +1,6 @@
 ﻿using Glitch.Functional.Parsing.Input;
 using Glitch.Functional.Parsing.Results;
+using Glitch.Functional.Results;
 
 namespace Glitch.Functional.Parsing
 {
@@ -8,7 +9,7 @@ namespace Glitch.Functional.Parsing
         public static ParseResult<char, T> Execute<T>(this Parser<char, T> parser, string input)
             => parser.Execute(new CharSequence(input));
 
-        public static Result<T, ParseError> TryParse<T>(this Parser<char, T> parser, string input)
+        public static Result<T> TryParse<T>(this Parser<char, T> parser, string input)
             => parser.TryParse(new CharSequence(input));
 
         public static T Parse<T>(this Parser<char, T> parser, string input)

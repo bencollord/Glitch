@@ -1,4 +1,6 @@
-﻿namespace Glitch.Functional
+﻿using Glitch.Functional.Results;
+
+namespace Glitch.Functional
 {
     public static partial class Effect
     {
@@ -9,10 +11,10 @@
         public static Effect<TEnv, T> Fail<TEnv, T>(Error error) => Effect<T>.Fail(error);
 
         public static Effect<TEnv, T> Return<TEnv, T>(Result<T> result) => Effect<TEnv, T>.Return(result);
-        public static Effect<TEnv, T> Return<TEnv, T>(Result<T, Error> result) => Effect<TEnv, T>.Return(result);
+        public static Effect<TEnv, T> Return<TEnv, T>(Expected<T, Error> result) => Effect<TEnv, T>.Return(result);
 
-        public static Effect<TEnv, T> Lift<TEnv, T>(Func<TEnv, Result<T>> function) => Lift<TEnv, T>(x => function(x).Match(Result.Okay<T, Error>, Result.Fail<T, Error>));
-        public static Effect<TEnv, T> Lift<TEnv, T>(Func<TEnv, Result<T, Error>> function) => Effect<TEnv, T>.Lift(function);
+        public static Effect<TEnv, T> Lift<TEnv, T>(Func<TEnv, Expected<T, Error>> function) => Lift<TEnv, T>(x => function(x).Match(Expected.Okay<T, Error>, Expected.Fail<T, Error>));
+        public static Effect<TEnv, T> Lift<TEnv, T>(Func<TEnv, Result<T>> function) => Effect<TEnv, T>.Lift(function);
 
         public static Effect<TEnv, Unit> Lift<TEnv>(Action<TEnv> action) => Effect<TEnv, Unit>.Lift(action.Return());
 

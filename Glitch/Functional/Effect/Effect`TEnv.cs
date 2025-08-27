@@ -1,5 +1,6 @@
 ﻿
 using Glitch.Functional.Attributes;
+using Glitch.Functional.Results;
 
 namespace Glitch.Functional
 {
@@ -13,9 +14,9 @@ namespace Glitch.Functional
     [Monad]
     public partial class Effect<TEnv, T>
     {
-        private Func<TEnv, Result<T, Error>> thunk;
+        private Func<TEnv, Result<T>> thunk;
 
-        public Effect(Func<TEnv, Result<T, Error>> thunk)
+        public Effect(Func<TEnv, Result<T>> thunk)
         {
             this.thunk = thunk;
         }
@@ -24,11 +25,11 @@ namespace Glitch.Functional
 
         public static Effect<TEnv, T> Fail(Error error) => new(_ => Result.Fail<T>(error));
 
-        public static Effect<TEnv, T> Return(Result<T, Error> result) => new(_ => result);
+        public static Effect<TEnv, T> Return(Expected<T, Error> result) => new(_ => result);
 
         public static Effect<TEnv, T> Lift(Effect<T> effect) => new(_ => effect.Run());
 
-        public static Effect<TEnv, T> Lift(Func<TEnv, Result<T, Error>> function) => new(function);
+        public static Effect<TEnv, T> Lift(Func<TEnv, Result<T>> function) => new(function);
 
         public static Effect<TEnv, T> Lift(Func<TEnv, T> function) => new(i => Result.Okay(function(i)));
 
@@ -42,7 +43,7 @@ namespace Glitch.Functional
         /// <param name="map"></param>
         /// <returns></returns>
         public Effect<TEnv, TResult> Map<TResult>(Func<T, TResult> map)
-            => new(i => thunk(i).Map(map));
+            => new(i => thunk(i).Select(map));
 
         public Effect<TEnv, Func<T2, TResult>> PartialMap<T2, TResult>(Func<T, T2, TResult> map)
             => Map(map.Curry());
@@ -102,7 +103,7 @@ namespace Glitch.Functional
         /// <param name="other"></param>
         /// <returns></returns>
         public Effect<TEnv, TResult> Then<TOther, TResult>(Effect<TEnv, TOther> other, Func<T, TOther, TResult> projection)
-            => new(i => thunk(i).AndThen(x => other.thunk(i).Map(projection.Curry()(x))));
+            => new(i => thunk(i).AndThen(x => other.thunk(i).Select(projection.Curry()(x))));
 
         /// <summary>
         /// If Okay, applies the function to the wrapped value. Otherwise, returns
@@ -375,7 +376,7 @@ namespace Glitch.Functional
 
         public static implicit operator Effect<TEnv, T>(Result<T> result) => new(_ => result);
 
-        public static implicit operator Effect<TEnv, T>(Result<T, Error> result) => new(_ => result);
+        public static implicit operator Effect<TEnv, T>(Expected<T, Error> result) => new(_ => result);
 
         public static implicit operator Effect<TEnv, T>(T value) => Return(value);
 
@@ -396,7 +397,7 @@ namespace Glitch.Functional
             => x.AndThen(v => Lift(y.Select(_ => v)));
 
 
-        public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Func<TEnv, Result<T, Error>> y)
+        public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Func<TEnv, Expected<T, Error>> y)
             => new(i =>
             {
                 _ = x.thunk(i);

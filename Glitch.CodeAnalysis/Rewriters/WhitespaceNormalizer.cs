@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Diagnostics.CodeAnalysis;
+using Glitch.Functional.Results;
 
 namespace Glitch.CodeAnalysis.Rewriters
 {

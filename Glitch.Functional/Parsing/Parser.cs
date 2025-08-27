@@ -1,5 +1,6 @@
 using Glitch.Functional.Parsing.Input;
 using Glitch.Functional.Parsing.Results;
+using Glitch.Functional.Results;
 
 namespace Glitch.Functional.Parsing
 {
@@ -7,9 +8,9 @@ namespace Glitch.Functional.Parsing
     {
         public abstract ParseResult<TToken, T> Execute(TokenSequence<TToken> input);
 
-        public virtual Result<T, ParseError> TryParse(TokenSequence<TToken> input)
-            => Execute(input).Match(ok => Result.Okay<T, ParseError>(ok.Value),
-                                    err => Result.Fail<T, ParseError>(new ParseError(err.Message, typeof(T)))); // TODO Unify ParseError types
+        public virtual Result<T> TryParse(TokenSequence<TToken> input)
+            => Execute(input).Match(ok => Result.Okay<T>(ok.Value),
+                                    err => Result.Fail<T>(err.Message));
 
         public virtual T Parse(TokenSequence<TToken> input)
             => Execute(input).Match(ok => ok.Value,

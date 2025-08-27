@@ -1,5 +1,6 @@
 ﻿using Glitch.Functional.Parsing.Input;
 using Glitch.Functional.Parsing.Results;
+using Glitch.Functional.Results;
 
 namespace Glitch.Functional.Parsing.Parsers
 {
@@ -15,7 +16,7 @@ namespace Glitch.Functional.Parsing.Parsers
         public override ParseResult<TToken, Option<T>> Execute(TokenSequence<TToken> input)
         {
             return parser.Execute(input)
-                         .Match(ok => ParseResult.Okay(Some(ok.Value), input), // Backtrack
+                         .Match(ok => ParseResult.Okay(Option.Some(ok.Value), input), // Backtrack
                                 err => ParseResult.Okay(Option<T>.None, input));
         }
     }

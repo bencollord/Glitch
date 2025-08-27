@@ -1,9 +1,10 @@
 ﻿using Glitch.Functional.Attributes;
+using Glitch.Functional.Results;
 
 namespace Glitch.Functional
 {
     [Monad]
-    public interface IEffect<TInput, TOutput> : IGuardable<IEffect<TInput, TOutput>, TOutput, Error>
+    public interface IEffect<TInput, TOutput>
     {
         IEffect<TInput, TResult> Map<TResult>(Func<TOutput, TResult> map);
         IEffect<TInput, TOutput> MapError(Func<Error, Error> map);
@@ -13,7 +14,7 @@ namespace Glitch.Functional
 
         IEffect<TInput, TOutput> Catch<TException>(Func<TException, TOutput> map) where TException : Exception;
 
-        Result<TOutput, Error> Run(TInput input);
+        Result<TOutput> Run(TInput input);
 
         virtual IEffect<TInput, TResult> Cast<TResult>() => Map(x => (TResult)(dynamic)x!);
         
