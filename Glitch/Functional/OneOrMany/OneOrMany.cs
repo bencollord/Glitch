@@ -77,7 +77,7 @@ namespace Glitch.Functional
         public bool IsManyAnd(Func<T, bool> predicate)
             => many.Any(predicate);
 
-        public T First() => this[0].IfNone(_ => Debug.Fail("OneOrMany was somehow empty")).UnwrapOrThrow(); // There should always be at least one item.
+        public T First() => this[0].IfNone(_ => Debug.Fail("OneOrMany was somehow empty")).Unwrap(); // There should always be at least one item.
 
         public Option<T> FirstOrNone(Func<T, bool> predicate)
         {
@@ -99,7 +99,7 @@ namespace Glitch.Functional
         {
             if (IsOne)
             {
-                return bind(one.UnwrapOrThrow());
+                return bind(one.Unwrap());
             }
 
             var many = from item in this.many

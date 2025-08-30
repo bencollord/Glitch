@@ -17,7 +17,7 @@ namespace Glitch.Test.Functional
 
             // Assert
             Assert.True(traverse.IsSome);
-            Assert.True(traverse.UnwrapOrThrow().SequenceEqual(items));
+            Assert.True(traverse.Unwrap().SequenceEqual(items));
         }
 
         [Fact]

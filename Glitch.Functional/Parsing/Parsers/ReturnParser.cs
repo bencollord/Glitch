@@ -8,15 +8,15 @@ namespace Glitch.Functional.Parsing.Parsers
     /// </summary>
     /// <typeparam name="TToken"></typeparam>
     /// <typeparam name="T"></typeparam>
-    internal class ReturnParser<TToken, T> : Parser<TToken, T>
+    public class ReturnParser<TToken, T> : Parser<TToken, T>
     {
-        private ParseResult<TToken, T> result;
+        private T result;
 
-        internal ReturnParser(ParseResult<TToken, T> result)
+        internal ReturnParser(T result)
         {
             this.result = result;
         }
 
-        public override ParseResult<TToken, T> Execute(TokenSequence<TToken> input) => result;
+        public override ParseResult<TToken, T> Execute(TokenSequence<TToken> input) => ParseResult.Okay(result, input);
     }
 }

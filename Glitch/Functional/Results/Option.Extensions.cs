@@ -48,7 +48,7 @@ namespace Glitch.Functional.Results
         /// <param name="options"></param>
         /// <returns></returns>
         public static IEnumerable<T> Somes<T>(this IEnumerable<Option<T>> options)
-            => options.Where(o => o.IsSome).Select(o => o.UnwrapOrThrow());
+            => options.Where(o => o.IsSome).Select(o => o.Unwrap());
 
         public static Option<T> Map<T>(this Option<bool> result, Func<Unit, T> ifTrue, Func<Unit, T> ifFalse)
             => result.Map(flag => flag ? ifTrue(default) : ifFalse(default));

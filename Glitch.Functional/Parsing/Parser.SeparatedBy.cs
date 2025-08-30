@@ -1,5 +1,7 @@
 namespace Glitch.Functional.Parsing
 {
+    using Glitch.Functional.Results;
+    using System.Collections.Immutable;
     using static Parse;
 
     public abstract partial class Parser<TToken, T>
@@ -22,20 +24,30 @@ namespace Glitch.Functional.Parsing
             this.separator = separator;
         }
 
-        public Parser<TToken, IEnumerable<T>> AtLeastOnce() => BuildParser(p => p.AtLeastOnce());
+        public Parser<TToken, IEnumerable<T>> AtLeastOnce() => from once in parser
+                                                               from rest in separator
+                                                                   .Then(parser)
+                                                                   .ZeroOrMoreTimes()
+                                                               let items = rest.Prepend(once)
+                                                               from last in parser.Maybe()
+                                                               select last.Select(items.Append)
+                                                                          .IfNone(items);
 
-        public Parser<TToken, IEnumerable<T>> ZeroOrMoreTimes() => BuildParser(p => p.ZeroOrMoreTimes());
+        
+        public Parser<TToken, IEnumerable<T>> ZeroOrMoreTimes()
+            // TODO Add support for allowing/disallowing a terminating separator
+            => parser.Before(separator)
+                     .ZeroOrMoreTimes()
+                     .Then(parser.Maybe(), (items, lastOpt) => 
+                         lastOpt.Match(
+                             some: items.Append,
+                             none: items));
 
-        public Parser<TToken, IEnumerable<T>> Times(int count) => BuildParser(p => p.Times(count));
+        public Parser<TToken, IEnumerable<T>> Times(int count)
+            => from once in parser
+               from rest in separator.Then(parser).Times(count - 1)
+               select rest.Prepend(once);
 
         public static implicit operator Parser<TToken, IEnumerable<T>>(SeparatedByContext<TToken, T, TSeparator> context) => context.ZeroOrMoreTimes();
-
-        private Parser<TToken, IEnumerable<T>> BuildParser(Func<Parser<TToken, T>, Parser<TToken, IEnumerable<T>>> enumerableParserSelector)
-        {
-            return from items in parser.Before(separator).PipeInto(enumerableParserSelector)
-                   from last in parser.Maybe() // TODO Add support for allowing/disallowing a terminating separator
-                   select last.Match(some: x => items.Append(x),
-                                     none: _ => items);
-        }
     }
 }

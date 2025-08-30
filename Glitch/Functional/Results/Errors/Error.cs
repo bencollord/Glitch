@@ -81,7 +81,7 @@ namespace Glitch.Functional.Results
 
             while (current.IsSome)
             {
-                yield return current.UnwrapOrThrow();
+                yield return current.Unwrap();
                 current = current.AndThen(c => c.Inner);
             }
         }

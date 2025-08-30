@@ -297,7 +297,7 @@ namespace Glitch.Functional.Results
         /// </summary>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T UnwrapOrThrow() => IsSome ? value! : throw new InvalidOperationException("Attempted to unwrap an empty option");
+        public T Unwrap() => IsSome ? value! : throw new InvalidOperationException("Attempted to unwrap an empty option");
 
         /// <summary>
         /// Returns the wrapped value if it exists, otherwise returns the fallback value.

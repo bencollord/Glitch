@@ -18,11 +18,7 @@ namespace Glitch.Functional.Parsing
         {
             ArgumentOutOfRangeException.ThrowIfNegative(count);
 
-            return AtLeastOnce()
-                .Guard(items => items.Count() == count,
-                       // TODO Extract expected tokens
-                       // UNDONE 
-                       items => $"Expected {count} times, found {items.Count()} times");
+            return new RepeatParser<TToken, T>(this, count, count);
         }
     }
 }
