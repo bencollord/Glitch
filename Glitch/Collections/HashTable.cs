@@ -26,9 +26,9 @@ namespace Glitch.Collections
             get
             {
                 return FindEntry(key)
-                    .Map(x => x.Value)
+                    .Select(x => x.Value)
                     .OkayOrElse(_ => new KeyNotFoundException())
-                    .UnwrapOrThrow();
+                    .Unwrap();
             }
             set
             {
@@ -165,7 +165,7 @@ namespace Glitch.Collections
         {
             var entry = FindEntry(key);
 
-            value = entry.Map(e => e.Value).DefaultIfNone()!;
+            value = entry.Select(e => e.Value).DefaultIfNone()!;
 
             return entry.IsSome;
         }
@@ -242,7 +242,7 @@ namespace Glitch.Collections
             }
 
             public KeyValuePair<TKey, TValue> Current
-                => current.Map(e => e.ToKeyValuePair())
+                => current.Select(e => e.ToKeyValuePair())
                           .IfNone(default(KeyValuePair<TKey, TValue>));
 
             object IEnumerator.Current => Current;

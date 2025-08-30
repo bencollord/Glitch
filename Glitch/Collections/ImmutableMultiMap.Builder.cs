@@ -110,7 +110,7 @@ namespace Glitch.Collections
             private MultiMap<TKey, TValue> InitMutable()
             {
                 var comparer = keyComparer
-                    .OrElse(() => immutable.Map(i => i.Comparer))
+                    .OrElse(() => immutable.Select(i => i.Comparer))
                     .IfNone(EqualityComparer<TKey>.Default);
 
 

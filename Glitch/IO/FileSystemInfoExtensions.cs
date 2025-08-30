@@ -8,7 +8,7 @@
         {
             // TODO Use FilePath class when tested
             var newPath = Maybe(file.Directory)
-                .Map(d => Path.Combine(d.FullName, newName))
+                .Select(d => Path.Combine(d.FullName, newName))
                 .IfNone(newName);
 
             file.MoveTo(newPath);
@@ -18,7 +18,7 @@
         {
             // TODO Use FilePath class when tested
             var newPath = Maybe(directory.Parent)
-                .Map(d => Path.Combine(d.FullName, newName))
+                .Select(d => Path.Combine(d.FullName, newName))
                 .IfNone(newName);
 
             directory.MoveTo(newPath);

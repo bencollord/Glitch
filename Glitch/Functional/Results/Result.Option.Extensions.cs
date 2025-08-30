@@ -9,11 +9,11 @@ namespace Glitch.Functional.Results
     {
         public static Option<Result<T>> Invert<T>(this Result<Option<T>> result)
             => result.Match(
-                okay: (Option<T> opt) => opt.Map(Okay),
+                okay: (Option<T> opt) => opt.Select(Okay),
                 error: (Error err) => Some(Fail<T>(err)));
 
         public static Result<Option<TResult>> Map<T, TResult>(this Result<Option<T>> result, Func<T, TResult> map)
-            => result.Select(opt => opt.Map(map));
+            => result.Select(opt => opt.Select(map));
 
         public static Result<Option<T>> Filter<T>(this Result<Option<T>> result, Func<T, bool> predicate)
             => result.Select(opt => opt.Filter(predicate));

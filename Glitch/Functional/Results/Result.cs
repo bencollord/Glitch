@@ -277,7 +277,7 @@ namespace Glitch.Functional.Results
         /// </summary>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T UnwrapOrThrow() => inner.Unwrap();
+        public T Unwrap() => inner.Unwrap();
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T UnwrapOr(T fallback) => inner.UnwrapOr(fallback);

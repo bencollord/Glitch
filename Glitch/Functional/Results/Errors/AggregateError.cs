@@ -16,6 +16,8 @@ namespace Glitch.Functional.Results
 
         public override Option<Error> Inner => Option.None;
 
+        public int Count => errors.Count();
+
         public override bool IsException<T>() 
             => errors.Any(e => e.IsException<T>()) || typeof(T).Equals(typeof(AggregateException));
 
@@ -31,8 +33,5 @@ namespace Glitch.Functional.Results
 
         public override IEnumerable<Error> IterateRecursive() 
             => errors.SelectMany(e => e.IterateRecursive());
-
-        private IEnumerable<Error> ErrorsInOrder()
-            => errors.OrderBy(e => e.Message);
     }
 }

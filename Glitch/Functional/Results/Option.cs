@@ -37,11 +37,11 @@ namespace Glitch.Functional.Results
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsSomeAnd(Func<T, bool> predicate)
-            => Map(predicate).IfNone(false);
+            => Select(predicate).IfNone(false);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsNoneOr(Func<T, bool> predicate)
-            => Map(predicate).IfNone(true);
+            => Select(predicate).IfNone(true);
 
         /// <summary>
         /// If the <see cref="Option{T}"/> has a value, applies the provided
@@ -52,6 +52,11 @@ namespace Glitch.Functional.Results
         /// <param name="map"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Option<TResult> Select<TResult>(Func<T, TResult> map)
+            => IsSome ? new Option<TResult>(map(value!)) : new Option<TResult>();
+
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Obsolete("Use Select instead")]
         public Option<TResult> Map<TResult>(Func<T, TResult> map)
             => IsSome ? new Option<TResult>(map(value!)) : new Option<TResult>();
 
@@ -65,7 +70,7 @@ namespace Glitch.Functional.Results
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<Func<T2, TResult>> PartialMap<T2, TResult>(Func<T, T2, TResult> map)
-            => Map(map.Curry());
+            => Select(map.Curry());
 
         /// <summary>
         /// Applies a wrapped function to the wrapped value if both exist.
@@ -76,7 +81,7 @@ namespace Glitch.Functional.Results
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> Apply<TResult>(Option<Func<T, TResult>> function)
-            => AndThen(v => function.Map(fn => fn(v)));
+            => AndThen(v => function.Select(fn => fn(v)));
 
         /// <summary>
         /// Returns other if some. Otherwise, returns an empty <see cref="Option{TResult}"/>.
@@ -123,7 +128,7 @@ namespace Glitch.Functional.Results
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> AndThen<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project)
-            => AndThen(x => bind(x).Map(y => project(x, y)));
+            => AndThen(x => bind(x).Select(y => project(x, y)));
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> Choose<TResult>(Func<T, Option<TResult>> bindSome, Func<Option<TResult>> bindNone)
@@ -223,7 +228,7 @@ namespace Glitch.Functional.Results
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> Zip<TOther, TResult>(Option<TOther> other, Func<T, TOther, TResult> zipper)
-            => AndThen(x => other.Map(y => zipper(x, y)));
+            => AndThen(x => other.Select(y => zipper(x, y)));
 
         /// <summary>
         /// Executes an impure action against the value if it exists.
@@ -252,7 +257,7 @@ namespace Glitch.Functional.Results
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TResult Match<TResult>(Func<T, TResult> some, TResult none)
-            => Map(some).IfNone(none);
+            => Select(some).IfNone(none);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Unit Match(Action<T> some, Action none) => Match(some.Return(), none.Return());
@@ -290,7 +295,7 @@ namespace Glitch.Functional.Results
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> OfType<TResult>()
             where TResult : T
-            => Filter(val => val is TResult).Map(val => (TResult)val!);
+            => Filter(val => val is TResult).Select(val => (TResult)val!);
 
         /// <summary>
         /// Returns the wrapped value if it exists. Otherwise throws an exception.

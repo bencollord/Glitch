@@ -54,12 +54,12 @@ namespace Glitch.Functional
         /// </summary>
         /// <param name="map"></param>
         /// <returns></returns>
-        public Effect<TEnv, T> MapError(Func<Error, Error> map)
+        public Effect<TEnv, T> SelectError(Func<Error, Error> map)
             => new(i => thunk(i).MapError(map));
 
         public Effect<TEnv, T> MapError<TError>(Func<TError, Error> map)
             where TError : Error
-            => MapError(err => err is TError e ? map(e) : err);
+            => SelectError(err => err is TError e ? map(e) : err);
 
         public Effect<TEnv, T> Catch<TException>(Func<TException, T> map)
             where TException : Exception
@@ -67,7 +67,7 @@ namespace Glitch.Functional
 
         public Effect<TEnv, T> Catch<TException>(Func<TException, Error> map)
             where TException : Exception
-            => MapError(err => err.IsException<TException>() ? map((TException)err.AsException()) : err);
+            => SelectError(err => err.IsException<TException>() ? map((TException)err.AsException()) : err);
 
         /// <summary>
         /// Applies a wrapped function to the wrapped value if both are successful.
@@ -91,6 +91,34 @@ namespace Glitch.Functional
                 var result = thunk(i);
 
                 return result.IsOkay ? other.thunk(i) : result.Cast<TResult>();
+            });
+
+        /// <summary>
+        /// Returns an effect that runs the second, discards the result, and returns
+        /// the result of this effect if both succeed. Otherwise, returns the resulting error.
+        /// in a new <see cref="Effect{TEnv, TResult}">effect type.</see>
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public Effect<TEnv, T> Then(Effect<TEnv, Unit> other)
+            => new(i =>
+            {
+                var result = thunk(i);
+
+                if (result.IsError)
+                {
+                    return result;
+                }
+
+                var otherResult = other.thunk(i);
+
+                if (otherResult.IsError)
+                {
+                    return otherResult.Cast<T>();
+                }
+
+                return result;
             });
 
         /// <summary>

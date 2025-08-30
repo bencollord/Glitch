@@ -6,6 +6,29 @@ namespace Glitch.Functional
 
     public static class LinqExtensions
     {
+        public static TResult Match<T, TResult>(this IEnumerable<T> source, Func<T, TResult> one, Func<IEnumerable<T>, TResult> many, Func<Unit, TResult> none)
+            => source.Match(one, many, () => none(default));
+
+        public static TResult Match<T, TResult>(this IEnumerable<T> source, Func<T, TResult> one, Func<IEnumerable<T>, TResult> many, Func<TResult> none)
+        {
+            using (var enumerator = source.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                {
+                    return none();
+                }
+
+                var first = enumerator.Current;
+
+                if (!enumerator.MoveNext())
+                {
+                    return one(first);
+                }
+            }
+
+            return many(source);
+        }
+
         public static IEnumerable<Func<T2, TResult>> PartialSelect<T, T2, TResult>(this IEnumerable<T> source, Func<T, T2, TResult> selector)
             => source.Select(selector.Curry());
 
@@ -84,7 +107,7 @@ namespace Glitch.Functional
         private static Result<T> TrySingle<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
         {
             using var iterator = predicate
-                .Map(source.Where)
+                .Select(source.Where)
                 .IfNone(source)
                 .GetEnumerator();
 

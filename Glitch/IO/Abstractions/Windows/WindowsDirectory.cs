@@ -18,7 +18,7 @@ namespace Glitch.IO.Abstractions.Windows
         }
 
         public Option<IDirectory> Parent => Maybe(directory.Parent)
-                                                .Map<IDirectory>(e => new WindowsDirectory(e));
+                                                .Select<IDirectory>(e => new WindowsDirectory(e));
 
         public IEnumerable<IFileSystemNode> Children() 
             => directory.EnumerateFileSystemInfos().Select(Wrap);

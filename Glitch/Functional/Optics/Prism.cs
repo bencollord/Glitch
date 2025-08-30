@@ -66,7 +66,7 @@ namespace Glitch.Functional
         {
             this.getter = getter;
             this.setter = (focus, value) => getter(focus)
-                .Map(old => setter(focus, old, value))
+                .Select(old => setter(focus, old, value))
                 .IfNone(focus);
         }
 
@@ -101,7 +101,7 @@ namespace Glitch.Functional
             => focus => Update(focus, update);
 
         public TFocus Update(TFocus focus, Func<TValue, TValue> update)
-            => Get(focus).Map(old => Set(focus, update(old))).IfNone(focus);
+            => Get(focus).Select(old => Set(focus, update(old))).IfNone(focus);
 
         public Prism<TFocus, TDeeper> Compose<TDeeper>(Func<TValue, TDeeper> get, Func<TValue, TDeeper, TValue> set)
             => Compose(get.Then(Option.Some), set);

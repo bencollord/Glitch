@@ -1,18 +1,21 @@
 namespace Glitch.Functional.Results
 {
-    internal static class ErrorCodes
+    public static class ErrorCodes
     {
-        internal const int None              = -0xBC00000;
-        internal const int Aggregate          = -0xBC00001;
-        internal const int NoElements         = -0xBC00002;
-        internal const int MoreThanOneElement = -0xBC00003;
-        internal const int ParseError         = -0xBC00004;
+        public const int None               = -0xBC00000;
+        public const int Aggregate          = -0xBC00001;
+        public const int NoElements         = -0xBC00002;
+        public const int MoreThanOneElement = -0xBC00003;
+        public const int ParseError         = -0xBC00004;
+        public const int Unexpected         = -0xBC00005;
     }
 
-    internal static class Errors
+    public static class Errors
     {
-        internal static readonly Error NoElements = Error.New(ErrorCodes.NoElements, "Sequence contains no elements");
+        public static readonly Error NoElements = Error.New(ErrorCodes.NoElements, "No elements found");
 
-        internal static readonly Error MoreThanOneElement = Error.New(ErrorCodes.MoreThanOneElement, "Sequence more than one element");
+        public static readonly Error MoreThanOneElement = Error.New(ErrorCodes.MoreThanOneElement, "More than one element found");
+
+        public static Error Unexpected<E>(E value) => Error.New(ErrorCodes.Unexpected, $"Unexpected {value}");
     }
 }

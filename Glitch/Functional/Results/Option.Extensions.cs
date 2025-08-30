@@ -8,13 +8,13 @@ namespace Glitch.Functional.Results
             => source.Traverse(Identity);
 
         public static Option<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<Option<T>> source, Func<T, TResult> traverse)
-            => source.Traverse(opt => opt.Map(traverse));
+            => source.Traverse(opt => opt.Select(traverse));
 
         public static Option<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<T> source, Func<T, Option<TResult>> traverse)
             => source.Aggregate(
                 Some(ImmutableList<TResult>.Empty),
                 (list, item) => list.AndThen(_ => traverse(item), (lst, i) => lst.Add(i)),
-                list => list.Map(l => l.AsEnumerable()));
+                list => list.Select(l => l.AsEnumerable()));
 
         public static Option<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<Option<T>> source, Func<T, int, TResult> traverse)
             => source.Select((s, i) => s.PartialMap(traverse).Apply(i))
@@ -28,15 +28,15 @@ namespace Glitch.Functional.Results
             where T : struct
             => option.Match(v => v, () => new T?());
 
-        public static Option<TResult> Invoke<TResult>(this Option<Func<TResult>> function) => function.Map(fn => fn());
-        public static Option<TResult> Invoke<T, TResult>(this Option<Func<T, TResult>> function, T value) => function.Map(fn => fn(value));
-        public static Option<TResult> Invoke<T1, T2, TResult>(this Option<Func<T1, T2, TResult>> function, T1 arg1, T2 arg2) => function.Map(fn => fn(arg1, arg2));
-        public static Option<TResult> Invoke<T1, T2, T3, TResult>(this Option<Func<T1, T2, T3, TResult>> function, T1 arg1, T2 arg2, T3 arg3) => function.Map(fn => fn(arg1, arg2, arg3));
-        public static Option<TResult> Invoke<T1, T2, T3, T4, TResult>(this Option<Func<T1, T2, T3, T4, TResult>> function, T1 arg1, T2 arg2, T3 arg3, T4 arg4) => function.Map(fn => fn(arg1, arg2, arg3, arg4));
+        public static Option<TResult> Invoke<TResult>(this Option<Func<TResult>> function) => function.Select(fn => fn());
+        public static Option<TResult> Invoke<T, TResult>(this Option<Func<T, TResult>> function, T value) => function.Select(fn => fn(value));
+        public static Option<TResult> Invoke<T1, T2, TResult>(this Option<Func<T1, T2, TResult>> function, T1 arg1, T2 arg2) => function.Select(fn => fn(arg1, arg2));
+        public static Option<TResult> Invoke<T1, T2, T3, TResult>(this Option<Func<T1, T2, T3, TResult>> function, T1 arg1, T2 arg2, T3 arg3) => function.Select(fn => fn(arg1, arg2, arg3));
+        public static Option<TResult> Invoke<T1, T2, T3, T4, TResult>(this Option<Func<T1, T2, T3, T4, TResult>> function, T1 arg1, T2 arg2, T3 arg3, T4 arg4) => function.Select(fn => fn(arg1, arg2, arg3, arg4));
         
-        public static Option<Func<T2, TResult>> Invoke<T1, T2, TResult>(this Option<Func<T1, T2, TResult>> function, T1 arg) => function.Map(fn => fn.Curry()(arg));
-        public static Option<Func<T2, Func<T3, TResult>>> Invoke<T1, T2, T3, TResult>(this Option<Func<T1, T2, T3, TResult>> function, T1 arg) => function.Map(fn => fn.Curry()(arg));
-        public static Option<Func<T2, Func<T3, Func<T4, TResult>>>> Invoke<T1, T2, T3, T4, TResult>(this Option<Func<T1, T2, T3, T4, TResult>> function, T1 arg) => function.Map(fn => fn.Curry()(arg));
+        public static Option<Func<T2, TResult>> Invoke<T1, T2, TResult>(this Option<Func<T1, T2, TResult>> function, T1 arg) => function.Select(fn => fn.Curry()(arg));
+        public static Option<Func<T2, Func<T3, TResult>>> Invoke<T1, T2, T3, TResult>(this Option<Func<T1, T2, T3, TResult>> function, T1 arg) => function.Select(fn => fn.Curry()(arg));
+        public static Option<Func<T2, Func<T3, Func<T4, TResult>>>> Invoke<T1, T2, T3, T4, TResult>(this Option<Func<T1, T2, T3, T4, TResult>> function, T1 arg) => function.Select(fn => fn.Curry()(arg));
 
         public static Option<TResult> Apply<T, TResult>(this Option<Func<T, TResult>> function, Option<T> value)
             => value.Apply(function);
@@ -51,7 +51,7 @@ namespace Glitch.Functional.Results
             => options.Where(o => o.IsSome).Select(o => o.Unwrap());
 
         public static Option<T> Map<T>(this Option<bool> result, Func<Unit, T> ifTrue, Func<Unit, T> ifFalse)
-            => result.Map(flag => flag ? ifTrue(default) : ifFalse(default));
+            => result.Select(flag => flag ? ifTrue(default) : ifFalse(default));
 
         /// <summary>
         /// Allows three valued logic to be applied to an optional boolean.
@@ -109,7 +109,7 @@ namespace Glitch.Functional.Results
         /// <param name="option"></param>
         /// <returns></returns>
         public static (Option<T1>, Option<T2>) Unzip<T1, T2>(this Option<(T1, T2)> option)
-            => (option.Map(o => o.Item1), option.Map(o => o.Item2));
+            => (option.Select(o => o.Item1), option.Select(o => o.Item2));
 
         /// <summary>
         /// Flattens a nested option to a single level.

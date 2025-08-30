@@ -45,12 +45,12 @@ namespace Glitch.Functional
             => new(inner.PartialMap(map));
 
         /// <summary>
-        /// <inheritdoc cref="Effect{Unit, T}.MapError(Func{Error, Error})"/>.
+        /// <inheritdoc cref="Effect{Unit, T}.SelectError(Func{Error, Error})"/>.
         /// </summary>
         /// <param name="map"></param>
         /// <returns></returns>
         public Effect<T> SelectError(Func<Error, Error> map)
-            => new(inner.MapError(map));
+            => new(inner.SelectError(map));
 
         public Effect<T> SelectError<TError>(Func<TError, Error> map)
             where TError : Error
@@ -80,6 +80,15 @@ namespace Glitch.Functional
         /// <param name="other"></param>
         /// <returns></returns>
         public Effect<TResult> Then<TResult>(Effect<TResult> other)
+            => new(inner.Then(other.inner));
+
+        /// <summary>
+        /// <inheritdoc cref="Effect{Unit, T}.Then(Effect{Unit, Unit})"/>
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public Effect<T> Then(Effect<Unit> other)
             => new(inner.Then(other.inner));
 
         /// <summary>

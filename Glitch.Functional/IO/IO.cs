@@ -4,16 +4,60 @@ namespace Glitch.Functional
 {
     public abstract partial class IO<T>
     {
+        public abstract T Run(IOEnv env);
+
+        public T Run()
+        {
+            using var env = IOEnv.New();
+
+            return Run(env);
+        }
+
+        public Result<T> Try()
+        {
+            using var env = IOEnv.New();
+
+            return Try(env);
+        }
+
+        public Result<T> Try(IOEnv env)
+        {
+            try
+            {
+                return Run(env);
+            }
+            catch (Exception e)
+            {
+                return Result.Fail<T>(e);
+            }
+        }
+
         public IO<TResult> Select<TResult>(Func<T, TResult> map) => AndThen(x => new ReturnIO<TResult>(map(x)));
 
-        public IO<TResult> AndThen<TResult>(Func<T, IO<TResult>> bind) => AndThen(bind, (_, p) => p);
-
+        public IO<TResult> AndThen<TResult>(Func<T, IO<TResult>> bind) => AndThen(bind, (_, y) => y);
         public IO<TResult> AndThen<TElement, TResult>(Func<T, IO<TElement>> bind, Func<T, TElement, TResult> project) => new ContinueIO<T, TElement, TResult>(this, bind, project);
+
+        public IO<TResult> AndThen<TResult>(Func<T, Option<TResult>> bind) => AndThen(bind, (_, y) => y);
+        public IO<TResult> AndThen<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, _ => IO.Fail<TElement>(Errors.NoElements)), project);
+
+        public IO<TResult> AndThen<TResult>(Func<T, Result<TResult>> bind) => AndThen(bind, (_, y) => y);
+        public IO<TResult> AndThen<TElement, TResult>(Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, IO.Fail<TElement>), project);
+
+        public IO<TResult> AndThen<E, TResult>(Func<T, Expected<TResult, E>> bind) => AndThen(bind, (_, y) => y);
+        public IO<TResult> AndThen<E, TElement, TResult>(Func<T, Expected<TElement, E>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, err => IO.Fail<TElement>(Errors.Unexpected(err))), project);
+
+        public Effect<TResult> AndThen<TResult>(Func<T, Effect<TResult>> bind) => AndThen(bind, (_, y) => y);
+        public Effect<TResult> AndThen<TElement, TResult>(Func<T, Effect<TElement>> bind, Func<T, TElement, TResult> project) => Effect.Lift(Run).AndThen(bind, project);
+
+        public Effect<TEnv, TResult> AndThen<TEnv, TResult>(Func<T, Effect<TEnv, TResult>> bind) => AndThen(bind, (_, y) => y);
+        public Effect<TEnv, TResult> AndThen<TEnv, TElement, TResult>(Func<T, Effect<TEnv, TElement>> bind, Func<T, TElement, TResult> project) => Effect<TEnv, T>.Lift(_ => Run()).AndThen(bind, project);
 
         public IO<T> Or(IO<T> other) => OrElse(_ => other);
 
-        public IO<T> OrElse(Func<Error, IO<T>> bind) => new CatchIO<T, Error>(this, bind);
+        public IO<T> OrElse(Func<Error, IO<T>> bind) => Catch(bind);
 
+        public IO<T> Where(Func<T, bool> predicate) => Guard(predicate);
+        public IO<T> Guard(Func<T, bool> predicate) => Guard(predicate, v => $"Value {v} did not match filter");
         public IO<T> Guard(Func<T, bool> predicate, Func<T, Error> error) => new GuardIO<T>(this, predicate, error);
 
         public IO<TResult> Match<TResult>(Func<T, TResult> okay, Func<Error, TResult> error)
@@ -22,9 +66,20 @@ namespace Glitch.Functional
         public IO<Unit> Match(Action<T> okay, Action<Error> error)
             => Match(okay.Return(), error.Return());
 
-        public IO<T> Catch<TError>(Func<TError, T> map) => new CatchIO<T, TError>(this, map.Then(Return));
+        public IO<TResource> Use<TResource>(Func<T, TResource> acquire) => IO<TResource>.Use(Select(acquire));
 
-        public abstract T Run(IOEnv env);
+        public IO<Unit> Release() => IO.Release(this);
+
+        public IO<T> Catch<TError>(Func<TError, T> map) => Catch(err => err switch
+        {
+            TError error => IO.Return(map(error)),
+            ExceptionError ex when ex.Exception is TError exception => IO.Return(map(exception)),
+            _ => IO.Fail<T>(err)
+        });
+
+        public IO<T> Catch(Func<Error, IO<T>> bind) => new CatchIO<T>(this, bind);
+
+        public IO<T> Catch(Func<Error, bool> filter, Func<Error, IO<T>> bind) => new CatchIO<T>(this, bind, filter);
 
         public IO<TResult> Cast<TResult>() => Select(DynamicCast<TResult>.From);
 

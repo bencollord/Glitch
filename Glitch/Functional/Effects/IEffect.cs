@@ -6,9 +6,11 @@ namespace Glitch.Functional
     [Monad]
     public interface IEffect<TInput, TOutput>
     {
-        IEffect<TInput, TResult> Map<TResult>(Func<TOutput, TResult> map);
-        IEffect<TInput, TOutput> MapError(Func<Error, Error> map);
+        IEffect<TInput, TResult> Select<TResult>(Func<TOutput, TResult> map);
+        IEffect<TInput, TOutput> SelectError(Func<Error, Error> map);
         IEffect<TInput, TResult> AndThen<TResult>(Func<TOutput, IEffect<TInput, TResult>> bind);
+        virtual IEffect<TInput, TResult> AndThen<TElement, TResult>(Func<TOutput, IEffect<TInput, TElement>> bind, Func<TOutput, TElement, TResult> project)
+            => AndThen(x => bind(x).Select(project.Curry(x)));
 
         IEffect<TInput, TResult> Match<TResult>(Func<TOutput, TResult> ifOkay, Func<Error, TResult> ifFail);
 
@@ -16,20 +18,20 @@ namespace Glitch.Functional
 
         Result<TOutput> Run(TInput input);
 
-        virtual IEffect<TInput, TResult> Cast<TResult>() => Map(x => (TResult)(dynamic)x!);
+        virtual IEffect<TInput, TResult> Cast<TResult>() => Select(x => (TResult)(dynamic)x!);
         
-        virtual IEffect<TInput, TOutput> MapError<TError>(Func<TError, Error> map) 
+        virtual IEffect<TInput, TOutput> SelectError<TError>(Func<TError, Error> map) 
             where TError : Error
-            => MapError(error => error is TError derived ? map(derived) : error);
+            => SelectError(error => error is TError derived ? map(derived) : error);
 
         virtual IEffect<TInput, TOutput> Do(Action<TOutput> action)
-            => Map(v =>
+            => Select(v =>
             {
                 action(v);
                 return v;
             });
 
         public static virtual IEffect<TInput, TOutput> operator >>(IEffect<TInput, TOutput> x, IEffect<TInput, TOutput> y) => x.AndThen(_ => y);
-        public static virtual IEffect<TInput, TOutput> operator >>(IEffect<TInput, TOutput> x, IEffect<TInput, Unit> y) => x.AndThen(v => y.Map(_ => v));
+        public static virtual IEffect<TInput, TOutput> operator >>(IEffect<TInput, TOutput> x, IEffect<TInput, Unit> y) => x.AndThen(v => y.Select(_ => v));
     }
 }

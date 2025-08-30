@@ -7,6 +7,8 @@
 
         public static Result<T> Okay<T>(T value) => new Success<T>(value);
 
+        public static Functional.Failure<Error> Fail(Error error) => new Functional.Failure<Error>(error);
+
         public static Result<T> Fail<T>(Error error) => new Failure<T>(error);
 
         public static bool IsOkay<T>(Result<T> result) => result.IsOkay;

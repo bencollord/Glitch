@@ -35,7 +35,7 @@ namespace Glitch.Functional
             => source.Traverse(Identity);
 
         public static Option<Sequence<TResult>> Traverse<T, TResult>(this Sequence<Option<T>> source, Func<T, TResult> traverse)
-            => source.Traverse(opt => opt.Map(traverse));
+            => source.Traverse(opt => opt.Select(traverse));
 
         public static Option<Sequence<TResult>> Traverse<T, TResult>(this Sequence<Option<T>> source, Func<T, int, TResult> traverse)
             => source.Map((s, i) => s.PartialMap(traverse).Apply(i))

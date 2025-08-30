@@ -13,7 +13,7 @@ namespace Glitch.Functional.Results
                 none: () => Okay<Option<T>>(None));
 
         public static Option<Result<TResult>> Map<T, TResult>(this Option<Result<T>> option, Func<T, TResult> map)
-            => option.Map(opt => opt.Select(map));
+            => option.Select(opt => opt.Select(map));
 
         public static Option<Result<T>> Filter<T>(this Option<Result<T>> option, Func<T, bool> predicate)
             => option.AndThen(res => res.IsErrorOr(predicate) ? Some(res) : None);
@@ -22,7 +22,7 @@ namespace Glitch.Functional.Results
            => option.AndThen(bind, (_, r) => r);
 
         public static Option<Result<TResult>> AndThen<T, TElement, TResult>(this Option<Result<T>> option, Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project)
-            => option.AndThen(res => res.Match(okay: v => bind(v).Map(Okay<TElement>).Map(project.Curry()(v)),
+            => option.AndThen(res => res.Match(okay: v => bind(v).Select(Okay<TElement>).Map(project.Curry()(v)),
                                                error: err =>  Some(Fail<TResult>(err))));
 
         public static Option<Result<TResult>> AndThen<T, TResult>(this Option<Result<T>> option, Func<T, Result<TResult>> bind)

@@ -11,12 +11,14 @@ namespace Glitch.Functional.Results
             : base(code, exception.Message)
         {
             this.exception = exception;
-            Inner = Option.Maybe(exception.InnerException).Map(New);
+            Inner = Option.Maybe(exception.InnerException).Select(New);
         }
 
         public override string Message => exception.Message;
 
         public string StackTrace => exception.StackTrace ?? string.Empty;
+
+        public Exception Exception => exception;
 
         public override Option<Error> Inner { get; }
 

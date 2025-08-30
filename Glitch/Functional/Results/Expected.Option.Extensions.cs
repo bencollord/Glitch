@@ -8,11 +8,11 @@ namespace Glitch.Functional.Results
     {
         public static Option<Expected<T, E>> Invert<T, E>(this Expected<Option<T>, E> result)
             => result.Match(
-                okay: opt => opt.Map(Okay<T, E>),
+                okay: opt => opt.Select(Okay<T, E>),
                 error: err => Option.Some(Fail<T, E>(err)));
 
         public static Expected<Option<TResult>, E> Map<T, E, TResult>(this Expected<Option<T>, E> result, Func<T, TResult> map)
-            => result.Map(opt => opt.Map(map));
+            => result.Map(opt => opt.Select(map));
 
         public static Expected<Option<T>, E> Filter<T, E>(this Expected<Option<T>, E> result, Func<T, bool> predicate)
             => result.Map(opt => opt.Filter(predicate));

@@ -7,12 +7,19 @@ namespace Glitch.Functional
         public static IO<TResult> SelectMany<T, TElement, TResult>(this IO<T> source, Func<T, IO<TElement>> bind, Func<T, TElement, TResult> project) 
             => source.AndThen(bind, project);
 
-        public static IO<TResult> SelectMany<T, TElement, TResult>(this IO<T> source, Func<T, Expected<TElement, Error>> bind, Func<T, TElement, TResult> project)
-            => from src in source
-               let res = bind(src)
-               from io in res.Match(
-                   okay: IO.Return<TElement>,
-                   error: IO.Fail<TElement>)
-               select project(src, io);
+        public static IO<TResult> SelectMany<T, TElement, TResult>(this IO<T> source, Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project)
+            => source.AndThen(bind, project);
+
+        public static IO<TResult> SelectMany<T, TElement, TResult>(this IO<T> source, Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project)
+            => source.AndThen(bind, project);
+
+        public static IO<TResult> SelectMany<T, E, TElement, TResult>(this IO<T> source, Func<T, Expected<TElement, E>> bind, Func<T, TElement, TResult> project)
+            => source.AndThen(bind, project);
+
+        public static Effect<TResult> SelectMany<T, TElement, TResult>(this IO<T> source, Func<T, Effect<TElement>> bind, Func<T, TElement, TResult> project)
+            => source.AndThen(bind, project);
+
+        public static Effect<TEnv, TResult> SelectMany<TEnv, T, TElement, TResult>(this IO<T> source, Func<T, Effect<TEnv, TElement>> bind, Func<T, TElement, TResult> project)
+            => source.AndThen(bind, project);
     }
 }

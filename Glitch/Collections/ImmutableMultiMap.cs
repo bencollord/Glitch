@@ -114,8 +114,8 @@ namespace Glitch.Collections
         public ImmutableMultiMap<TKey, TValue> Add(TKey key, TValue value)
         {
             return TryGetList(key)
-                .Map(list => list.Add(value))
-                .Map(list => SetList(key, list))
+                .Select(list => list.Add(value))
+                .Select(list => SetList(key, list))
                 .IfNone(this);
         }
 
@@ -125,7 +125,7 @@ namespace Glitch.Collections
 
         public ImmutableMultiMap<TKey, TValue> AddRange(TKey key, IImmutableList<TValue> list)
             => TryGetList(key)
-                   .Map(existing => dictionary.SetItem(key, existing.AddRange(list)))
+                   .Select(existing => dictionary.SetItem(key, existing.AddRange(list)))
                    .IfNone(() => dictionary.Add(key, list))
                    .PipeInto(dict => new ImmutableMultiMap<TKey, TValue>(dict));
 

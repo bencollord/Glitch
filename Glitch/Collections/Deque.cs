@@ -31,7 +31,7 @@ namespace Glitch.Collections
 
         public T Shift() => TryShift()
             .OkayOrElse(EmptyDequeError)
-            .UnwrapOrThrow();
+            .Unwrap();
 
         public Option<T> TryShift() 
             => TryPeekFront().Do(_ => items.RemoveFirst());
@@ -41,7 +41,7 @@ namespace Glitch.Collections
 
         public T Pop() => TryPop()
             .OkayOrElse(EmptyDequeError)
-            .UnwrapOrThrow();
+            .Unwrap();
 
         public Option<T> TryPop() 
             => TryPeekBack().Do(_ => items.RemoveLast());
@@ -64,7 +64,7 @@ namespace Glitch.Collections
             // I don't know why C#'s janky type inference got confused here, 
             // but we need to explicitly type the linked list node or else
             // it thinks we're trying to map a plain T for some stupid reason.
-            => Maybe<LinkedListNode<T>>(node).Map(n => n.Value);
+            => Maybe<LinkedListNode<T>>(node).Select(n => n.Value);
 
         private Error EmptyDequeError() => new ApplicationError("Deque is empty");
     }

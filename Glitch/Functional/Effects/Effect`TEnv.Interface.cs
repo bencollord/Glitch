@@ -5,17 +5,18 @@ namespace Glitch.Functional
 {
     public partial class Effect<TEnv, T> : IEffect<TEnv, T>
     {
-        IEffect<TEnv, TResult> IEffect<TEnv, T>.AndThen<TResult>(Func<T, IEffect<TEnv, TResult>> bind)
+        public IEffect<TEnv, TResult> AndThen<TResult>(Func<T, IEffect<TEnv, TResult>> bind)
             => new Effect<TEnv, TResult>(i => thunk(i).AndThen(x => bind(x).Run(i)));
+
+        public IEffect<TEnv, TResult> AndThen<TElement, TResult>(Func<T, IEffect<TEnv, TElement>> bind, Func<T, TElement, TResult> project)
+            => AndThen(x => bind(x).Select(project.Curry(x)));
 
         IEffect<TEnv, T> IEffect<TEnv, T>.Catch<TException>(Func<TException, T> map) => Catch(map);
 
-        IEffect<TEnv, TResult> IEffect<TEnv, T>.Map<TResult>(Func<T, TResult> map) => Map(map);
+        IEffect<TEnv, TResult> IEffect<TEnv, T>.Select<TResult>(Func<T, TResult> map) => Map(map);
 
-        IEffect<TEnv, T> IEffect<TEnv, T>.MapError(Func<Error, Error> map) => MapError(map);
+        IEffect<TEnv, T> IEffect<TEnv, T>.SelectError(Func<Error, Error> map) => SelectError(map);
 
         IEffect<TEnv, TResult> IEffect<TEnv, T>.Match<TResult>(Func<T, TResult> ifOkay, Func<Error, TResult> ifFail) => Match(ifOkay, ifFail);
-
-        Result<T> IEffect<TEnv, T>.Run(TEnv input) => Run(input);
     }
 }

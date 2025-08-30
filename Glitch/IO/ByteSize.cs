@@ -195,7 +195,7 @@ namespace Glitch.IO
 
                 // TODO Fix me
                 return numberFormat
-                    .Map(fmt => IsFractionalFormat(fmt) 
+                    .Select(fmt => IsFractionalFormat(fmt) 
                              ? byteSize.GetValue(denomination).ToString(fmt, formatProvider)
                              : Convert.ToInt64(byteSize.GetValue(denomination)).ToString(fmt, formatProvider))
                     .IfNone(byteSize.GetValue(denomination).ToString());

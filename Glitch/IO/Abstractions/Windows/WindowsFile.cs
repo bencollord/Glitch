@@ -25,7 +25,7 @@ namespace Glitch.IO.Abstractions.Windows
         public string Extension => file.Extension;
 
         public Option<IDirectory> Directory => Maybe(file.Directory)
-                                                   .Map<IDirectory>(d => new WindowsDirectory(d));
+                                                   .Select<IDirectory>(d => new WindowsDirectory(d));
 
         public ByteSize Length => ByteSize.FromBytes(file.Length);
 
