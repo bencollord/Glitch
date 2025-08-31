@@ -53,18 +53,7 @@ namespace Glitch.Functional.Results
         /// <param name="map"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Result<T> SelectError(Func<Error, Error> map) => inner.SelectError(map);
-
-        /// <summary>
-        /// If the result is a failure, returns a new <see cref="Expected{TOkay, TError}"/>
-        /// with the mapping function applied to the error. Otherwise, returns the okay
-        /// value of self wrapped in the <see cref="Expected{TOkay, TError}"/> type.
-        /// </summary>
-        /// <typeparam name="E"></typeparam>
-        /// <param name="map"></param>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Expected<T, E> SelectError<E>(Func<Error, E> map) => inner.SelectError(map);
+        public Result<T> SelectError(Func<Error, Error> map) => inner.SelectError(e => map(e));
 
         /// <summary>
         /// Applies a wrapped function to the wrapped value if both exist.
@@ -277,7 +266,7 @@ namespace Glitch.Functional.Results
         /// </summary>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T Unwrap() => inner.Unwrap();
+        public T Unwrap() => inner.IfFail(err => err.Throw<T>());
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T UnwrapOr(T fallback) => inner.UnwrapOr(fallback);
