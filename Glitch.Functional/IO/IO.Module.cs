@@ -2,7 +2,7 @@ using Glitch.Functional.Results;
 
 namespace Glitch.Functional
 {
-    public static class IO
+    public static partial class IO
     {
         public static IO<IOEnv> Env() => Lift(env => env);
 

@@ -4,6 +4,8 @@
     {
         public static T Identity<T>(T x) => x;
 
+        public static Func<T, TResult> Constant<T, TResult>(TResult x) => _ => x;
+
         public static void Nop<T>(T _) { /* Do nothing */ }
 
         public static Func<T> Func<T>(Func<T> func) => func;

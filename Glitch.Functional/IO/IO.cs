@@ -1,4 +1,6 @@
 using Glitch.Functional.Results;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Glitch.Functional
 {
@@ -63,42 +65,80 @@ namespace Glitch.Functional
 
         public IO<T> With(Func<IOEnv, IOEnv> mapEnv) => new MapEnvIO<T>(this, mapEnv);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<TResult> Select<TResult>(Func<T, TResult> map) => AndThen(x => IO.Return(map(x)));
         public IO<TResult> SelectAsync<TResult>(Func<T, Task<TResult>> map) 
             => AndThenAsync(async x => IO.Return(await map(x)));
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IO<TResult> Apply<TResult>(IO<Func<T, TResult>> map) => map.AndThen(fn => Select(fn));
+
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<TResult> AndThen<TResult>(Func<T, IO<TResult>> bind) => AndThen(bind, (_, y) => y);
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<TResult> AndThen<TElement, TResult>(Func<T, IO<TElement>> bind, Func<T, TElement, TResult> project) => new ContinueIO<T, TElement, TResult>(this, bind, project);
 
         public IO<TResult> AndThenAsync<TResult>(Func<T, Task<IO<TResult>>> bind) => AndThenAsync(bind, (_, y) => y);
         public IO<TResult> AndThenAsync<TElement, TResult>(Func<T, Task<IO<TElement>>> bind, Func<T, TElement, TResult> project) => new ContinueAsyncIO<T, TElement, TResult>(this, bind, project);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<TResult> AndThen<TResult>(Func<T, Option<TResult>> bind) => AndThen(bind, (_, y) => y);
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<TResult> AndThen<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, _ => IO.Fail<TElement>(Errors.NoElements)), project);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<TResult> AndThen<TResult>(Func<T, Result<TResult>> bind) => AndThen(bind, (_, y) => y);
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<TResult> AndThen<TElement, TResult>(Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, IO.Fail<TElement>), project);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<TResult> AndThen<E, TResult>(Func<T, Expected<TResult, E>> bind) => AndThen(bind, (_, y) => y);
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<TResult> AndThen<E, TElement, TResult>(Func<T, Expected<TElement, E>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, err => IO.Fail<TElement>(Errors.Unexpected(err))), project);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Effect<TResult> AndThen<TResult>(Func<T, Effect<TResult>> bind) => AndThen(bind, (_, y) => y);
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Effect<TResult> AndThen<TElement, TResult>(Func<T, Effect<TElement>> bind, Func<T, TElement, TResult> project) => Effect.Lift(Run).AndThen(bind, project);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Effect<TEnv, TResult> AndThen<TEnv, TResult>(Func<T, Effect<TEnv, TResult>> bind) => AndThen(bind, (_, y) => y);
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Effect<TEnv, TResult> AndThen<TEnv, TElement, TResult>(Func<T, Effect<TEnv, TElement>> bind, Func<T, TElement, TResult> project) => Effect<TEnv, T>.Lift(_ => Run()).AndThen(bind, project);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IO<TResult> Then<TResult>(IO<TResult> other) => Then(other, (_, y) => y);
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IO<TResult> Then<TElement, TResult>(IO<TElement> other, Func<T, TElement, TResult> project) => AndThen(FN<T>.Constant(other), project);
+
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Effect<TResult> Then<TResult>(Effect<TResult> other) => Then(other, (_, y) => y);
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Effect<TResult> Then<TElement, TResult>(Effect<TElement> other, Func<T, TElement, TResult> project) => AndThen(FN<T>.Constant(other), project);
+
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Effect<TEnv, TResult> Then<TEnv, TResult>(Effect<TEnv, TResult> other) => Then(other, (_, y) => y);
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Effect<TEnv, TResult> Then<TEnv, TElement, TResult>(Effect<TEnv, TElement> other, Func<T, TElement, TResult> project) => AndThen(FN<T>.Constant(other), project);
+
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<T> Or(IO<T> other) => OrElse(_ => other);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<T> OrElse(Func<Error, IO<T>> bind) => Catch(bind);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<T> Where(Func<T, bool> predicate) => Guard(predicate);
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<T> Guard(Func<T, bool> predicate) => Guard(predicate, v => $"Value {v} did not match filter");
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<T> Guard(Func<T, bool> predicate, Func<T, Error> error) => new GuardIO<T>(this, predicate, error);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<TResult> Match<TResult>(Func<T, TResult> okay, Func<Error, TResult> error)
             => Select(okay).Catch(error);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<Unit> Match(Action<T> okay, Action<Error> error)
             => Match(okay.Return(), error.Return());
 
@@ -113,11 +153,15 @@ namespace Glitch.Functional
             _ => IO.Fail<T>(err)
         });
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<T> Catch(Func<Error, IO<T>> bind) => new CatchIO<T>(this, bind);
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<T> Catch(Func<Error, bool> filter, Func<Error, IO<T>> bind) => new CatchIO<T>(this, bind, filter);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<TResult> Cast<TResult>() => Select(DynamicCast<TResult>.From);
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<T> Do(Action<T> action)
             => Select(v =>
             {
