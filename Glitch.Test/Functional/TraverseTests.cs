@@ -12,8 +12,8 @@ namespace Glitch.Test.Functional
         public void Result_IfOneFails_AllFail()
         {
             // Arrange
-            var successfulResults = Sequence.Range(1, 10)
-                .Select(Okay)
+            var successfulResults = Enumerable.Select(Sequence.Range(1, 10)
+, Okay)
                 .ToList();
 
             var failedResult = Fail<int>("Bad result");

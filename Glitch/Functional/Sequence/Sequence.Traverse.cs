@@ -22,7 +22,7 @@ namespace Glitch.Functional
 
         public Effect<TInput, Sequence<TResult>> Traverse<TInput, TResult>(Func<T, Effect<TInput, TResult>> traverse)
             => items.Aggregate(
-                Effect.Return(Sequence<TResult>.Empty).WithInput<TInput>(),
+                Effect.Return(Sequence<TResult>.Empty).With<TInput>(),
                 (list, item) => list.AndThen(_ => traverse(item), (lst, i) => lst.Append(i)));
 
         public Effect<TInput, Sequence<TResult>> Traverse<TInput, TResult>(Func<T, int, Effect<TInput, TResult>> traverse)

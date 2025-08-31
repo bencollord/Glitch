@@ -16,19 +16,19 @@ namespace Glitch.Functional
             this.items = items;
         }
 
-        public Sequence<TResult> Map<TResult>(Func<T, TResult> map)
+        public Sequence<TResult> Select<TResult>(Func<T, TResult> map)
             => new(items.Select(map));
 
-        public Sequence<TResult> Map<TResult>(Func<T, int, TResult> map)
+        public Sequence<TResult> Select<TResult>(Func<T, int, TResult> map)
             => new(items.Select(map));
 
         public Sequence<(int Index, T Item)> Index() => new(items.Index());
 
-        public Sequence<Func<T2, TResult>> PartialMap<T2, TResult>(Func<T, T2, TResult> mapper)
-            => Map(mapper.Curry());
+        public Sequence<Func<T2, TResult>> PartialSelect<T2, TResult>(Func<T, T2, TResult> mapper)
+            => Select(mapper.Curry());
 
         public Sequence<TResult> Apply<TResult>(Sequence<Func<T, TResult>> function)
-            => AndThen(v => function.Map(fn => fn(v)));
+            => AndThen(v => function.Select(fn => fn(v)));
 
         public Sequence<T> Concat(IEnumerable<T> other)
             => new(items.Concat(other));
@@ -53,7 +53,7 @@ namespace Glitch.Functional
         
         public Sequence<T> Except(Sequence<T> other) => new(items.Except(other.items));
 
-        public Sequence<T> Filter(Func<T, bool> predicate)
+        public Sequence<T> Where(Func<T, bool> predicate)
             => new(items.Where(predicate));
 
         public Sequence<(T, TOther)> Zip<TOther>(Sequence<TOther> other)
@@ -62,16 +62,7 @@ namespace Glitch.Functional
         public Sequence<TResult> Zip<TOther, TResult>(Sequence<TOther> other, Func<T, TOther, TResult> zipper)
             => AndThen(x => other, zipper);
 
-        public T Reduce<TResult>(Func<T, T, T> reduce)
-            => items.Aggregate(reduce);
-
-        public TResult Fold<TResult>(TResult start, Func<TResult, T, TResult> fold)
-            => items.Aggregate(start, fold);
-
-        public TResult Fold<TStart, TResult>(TStart start, Func<TStart, T, TStart> fold, Func<TStart, TResult> map)
-            => items.Aggregate(start, fold, map);
-
-        public Sequence<T> Do(Action<T> action)
+        public Sequence<T> ForEach(Action<T> action)
         {
             IEnumerable<T> Iter()
             {
@@ -94,7 +85,7 @@ namespace Glitch.Functional
             };
 
         public Sequence<TResult> Cast<TResult>()
-            => Map(val => (TResult)(dynamic)val!);
+            => Select(val => (TResult)(dynamic)val!);
 
         public IEnumerator<T> GetEnumerator() => items.GetEnumerator();
 

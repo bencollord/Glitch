@@ -30,10 +30,6 @@ namespace Glitch.Functional
             return project(res, bnd);
         }
 
-        [Obsolete(Warnings.UseWhereInsteadOfFilter)]
-        public static Task<T> Filter<T>(this Task<T> source, Func<T, bool> predicate)
-            => source.Where(predicate);
-
         public static async Task<T> Where<T>(this Task<T> task, Func<T, bool> predicate)
         {
             var res = await task.ConfigureAwait(false);
@@ -45,10 +41,6 @@ namespace Glitch.Functional
 
             return res;
         }
-
-        [Obsolete(Warnings.UseSelectInsteadOfMap)]
-        public static Task<TResult> Map<T, TResult>(this Task<T> source, Func<T, TResult> mapper)
-            => source.Select(mapper);
 
         public static Task<TResult> SelectMany<T, TResult>(this Task<T> source, Func<T, Task<TResult>> bind)
             => source.AndThen(bind);

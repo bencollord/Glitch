@@ -37,8 +37,8 @@ namespace Glitch.Functional.Parsing.Results
                                    select $"Expected {exp}, but found {uxp}";
 
             return expectedButFound
-                .Or(expected.Map(format("Expected {0}")))
-                .Or(unexpected.Map(format("Unexpected {0}")))
+                .Or(expected.Select(format("Expected {0}")))
+                .Or(unexpected.Select(format("Unexpected {0}")))
                 .IfNone(string.Empty);
         }
 

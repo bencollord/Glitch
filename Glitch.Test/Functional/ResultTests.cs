@@ -16,7 +16,7 @@ namespace Glitch.Test.Functional
 
             // Assert
             Assert.True(result.IsOkay);
-            Assert.Equal(30, result.UnwrapOrThrow());
+            Assert.Equal(30, result.Unwrap());
         }
 
         [Fact]

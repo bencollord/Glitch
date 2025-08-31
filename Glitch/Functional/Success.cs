@@ -2,10 +2,10 @@
 {
     public readonly record struct Success<T>(T Value) : IEquatable<Success<T>>
     {
-        public Success<TResult> Map<TResult>(Func<T, TResult> map) => new(map(Value));
+        public Success<TResult> Select<TResult>(Func<T, TResult> map) => new(map(Value));
 
         public Success<TResult> Apply<TResult>(Success<Func<T, TResult>> function)
-            => AndThen(v => function.Map(fn => fn(v)));
+            => AndThen(v => function.Select(fn => fn(v)));
 
         public Success<TResult> AndThen<TResult>(Func<T, Success<TResult>> bind)
             => bind(Value);

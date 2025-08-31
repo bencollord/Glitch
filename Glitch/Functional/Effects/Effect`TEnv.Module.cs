@@ -17,7 +17,14 @@ namespace Glitch.Functional
         public static Effect<TEnv, T> Lift<TEnv, T>(Func<TEnv, Result<T>> function) => Effect<TEnv, T>.Lift(function);
 
         public static Effect<TEnv, Unit> Lift<TEnv>(Action<TEnv> action) => Effect<TEnv, Unit>.Lift(action.Return());
-
         public static Effect<TEnv, T> Lift<TEnv, T>(Func<TEnv, T> function) => Effect<TEnv, T>.Lift(function);
+
+        // TODO These are the same as Lift, but I'm experimenting with a new naming convention.
+        // Pick one and stick with it.
+        public static Effect<TEnv, T> TryWith<TEnv, T>(Func<TEnv, Expected<T, Error>> function) => TryWith<TEnv, T>(x => function(x).Match(Expected.Okay<T, Error>, Expected.Fail<T, Error>));
+        public static Effect<TEnv, T> TryWith<TEnv, T>(Func<TEnv, Result<T>> function) => Effect<TEnv, T>.Lift(function);
+
+        public static Effect<TEnv, Unit> TryWith<TEnv>(Action<TEnv> action) => Effect<TEnv, Unit>.Lift(action.Return());
+        public static Effect<TEnv, T> TryWith<TEnv, T>(Func<TEnv, T> function) => Effect<TEnv, T>.Lift(function);
     }
 }

@@ -42,11 +42,11 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <param name="map"></param>
         /// <returns></returns>
-        public Effect<TEnv, TResult> Map<TResult>(Func<T, TResult> map)
+        public Effect<TEnv, TResult> Select<TResult>(Func<T, TResult> map)
             => new(i => thunk(i).Select(map));
 
-        public Effect<TEnv, Func<T2, TResult>> PartialMap<T2, TResult>(Func<T, T2, TResult> map)
-            => Map(map.Curry());
+        public Effect<TEnv, Func<T2, TResult>> PartialSelect<T2, TResult>(Func<T, T2, TResult> map)
+            => Select(map.Curry());
 
         /// <summary>
         /// If the result is a failure, returns a new result with the mapping function
@@ -55,9 +55,9 @@ namespace Glitch.Functional
         /// <param name="map"></param>
         /// <returns></returns>
         public Effect<TEnv, T> SelectError(Func<Error, Error> map)
-            => new(i => thunk(i).MapError(map));
+            => new(i => thunk(i).SelectError(map));
 
-        public Effect<TEnv, T> MapError<TError>(Func<TError, Error> map)
+        public Effect<TEnv, T> SelectError<TError>(Func<TError, Error> map)
             where TError : Error
             => SelectError(err => err is TError e ? map(e) : err);
 
@@ -76,7 +76,7 @@ namespace Glitch.Functional
         /// <param name="function"></param>
         /// <returns></returns>
         public Effect<TEnv, TResult> Apply<TResult>(Effect<TEnv, Func<T, TResult>> function)
-            => AndThen(v => function.Map(fn => fn(v)));
+            => AndThen(v => function.Select(fn => fn(v)));
 
         /// <summary>
         /// Returns other if Okay, otherwise returns the current error wrapped
@@ -158,7 +158,7 @@ namespace Glitch.Functional
         /// <param name="project"></param>
         /// <returns></returns>
         public Effect<TEnv, TResult> AndThen<TElement, TResult>(Func<T, Effect<TEnv, TElement>> bind, Func<T, TElement, TResult> project)
-            => AndThen(x => bind(x).Map(y => project(x, y)));
+            => AndThen(x => bind(x).Select(y => project(x, y)));
 
         /// <summary>
         /// Convenience method that allows bind operations to work
@@ -247,7 +247,7 @@ namespace Glitch.Functional
                 return result.OrElse(e => other(e).thunk(i));
             });
 
-        public Effect<TEnv, T> Filter(Func<T, bool> predicate)
+        public Effect<TEnv, T> Where(Func<T, bool> predicate)
             => Guard(predicate, _ => Error.Empty);
 
         /// <summary>
@@ -295,11 +295,9 @@ namespace Glitch.Functional
             => CastOrElse<TResult>(_ => error);
 
         public Effect<TEnv, TResult> CastOrElse<TResult>(Func<T, Error> error)
-            => from val in this
-               let cast = Effect<TEnv, TResult>.Lift(_ => DynamicCast<T, TResult>(val))
-               let err = Effect<TEnv, TResult>.Fail(error(val))
-               from res in cast | err
-               select res;
+            => AndThen(x => 
+                   Effect.TryWith<TEnv, TResult>(_ => DynamicCast<TResult>.From(x))
+                         .IfFail(_ => error(x)));
 
         /// <summary>
         /// Combines another try into a try of a tuple.
@@ -321,7 +319,7 @@ namespace Glitch.Functional
         public Effect<TEnv, TResult> Zip<TOther, TResult>(Effect<TEnv, TOther> other, Func<T, TOther, TResult> zipper)
             => new(i => thunk(i).Zip(other.thunk(i), zipper));
 
-        public Effect<T> Apply(TEnv input) => Effect<T>.Lift(() => Run(input));
+        public Effect<T> With(TEnv input) => Effect<T>.Lift(() => Run(input));
 
         /// <summary>
         /// If Ok, returns the result of the first function to the wrapped value.
@@ -400,7 +398,7 @@ namespace Glitch.Functional
             }
         }
 
-        public static implicit operator Effect<TEnv, T>(Effect<T> effect) => effect.WithInput<TEnv>();
+        public static implicit operator Effect<TEnv, T>(Effect<T> effect) => effect.With<TEnv>();
 
         public static implicit operator Effect<TEnv, T>(Result<T> result) => new(_ => result);
 
@@ -411,6 +409,9 @@ namespace Glitch.Functional
         public static implicit operator Effect<TEnv, T>(Error error) => Fail(error);
 
         public static Effect<TEnv, T> operator |(Effect<TEnv, T> x, Effect<TEnv, T> y) => x.Or(y);
+        public static Effect<TEnv, T> operator |(Effect<TEnv, T> x, Effect<T> y) => x.Or(y);
+        public static Effect<TEnv, T> operator |(Effect<TEnv, T> x, Result<T> y) => x.Or(y);
+        public static Effect<TEnv, T> operator |(Effect<TEnv, T> x, Expected<T, Error> y) => x.Or(y);
 
         public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Effect<TEnv, T> y)
             => x.Then(y);
@@ -419,7 +420,7 @@ namespace Glitch.Functional
             => x.AndThen(_ => Lift(y));
 
         public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Effect<TEnv, Unit> y)
-            => x.AndThen(v => y.Map(_ => v));
+            => x.AndThen(v => y.Select(_ => v));
 
         public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Effect<Unit> y)
             => x.AndThen(v => Lift(y.Select(_ => v)));

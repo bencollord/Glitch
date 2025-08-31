@@ -17,7 +17,7 @@ namespace Glitch.Functional.Results
                 list => list.Select(l => l.AsEnumerable()));
 
         public static Option<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<Option<T>> source, Func<T, int, TResult> traverse)
-            => source.Select((s, i) => s.PartialMap(traverse).Apply(i))
+            => source.Select((s, i) => s.PartialSelect(traverse).Apply(i))
                      .Traverse();
 
         public static Option<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<T> source, Func<T, int, Option<TResult>> traverse)

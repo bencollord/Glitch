@@ -41,7 +41,7 @@ namespace Glitch.Test.Functional
             var isEven = (int x) => x % 2 == 0;
             var someIfEven = (int x) => isEven(x) ? Some(x) : None;
             var stringify = (int x) => x.ToString("C");
-            var stringifyIfEven = someIfEven.Then(opt => opt.Map(stringify));
+            var stringifyIfEven = someIfEven.Then(opt => opt.Select(stringify));
             var values = Enumerable.Range(0, 10);
             var options = Enumerable.Range(0, 10).Select(someIfEven);
 

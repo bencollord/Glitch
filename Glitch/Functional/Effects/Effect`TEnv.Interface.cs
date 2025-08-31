@@ -1,5 +1,4 @@
 ﻿using Glitch.Functional.Results;
-using System.Collections.Immutable;
 
 namespace Glitch.Functional
 {
@@ -13,7 +12,7 @@ namespace Glitch.Functional
 
         IEffect<TEnv, T> IEffect<TEnv, T>.Catch<TException>(Func<TException, T> map) => Catch(map);
 
-        IEffect<TEnv, TResult> IEffect<TEnv, T>.Select<TResult>(Func<T, TResult> map) => Map(map);
+        IEffect<TEnv, TResult> IEffect<TEnv, T>.Select<TResult>(Func<T, TResult> map) => Select(map);
 
         IEffect<TEnv, T> IEffect<TEnv, T>.SelectError(Func<Error, Error> map) => SelectError(map);
 

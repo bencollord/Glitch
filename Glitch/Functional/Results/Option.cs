@@ -55,11 +55,6 @@ namespace Glitch.Functional.Results
         public Option<TResult> Select<TResult>(Func<T, TResult> map)
             => IsSome ? new Option<TResult>(map(value!)) : new Option<TResult>();
 
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [Obsolete("Use Select instead")]
-        public Option<TResult> Map<TResult>(Func<T, TResult> map)
-            => IsSome ? new Option<TResult>(map(value!)) : new Option<TResult>();
-
         /// <summary>
         /// Partially applies the value to a 2 arg function and
         /// returns an option of the resulting function.
@@ -69,7 +64,7 @@ namespace Glitch.Functional.Results
         /// <param name="map"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<Func<T2, TResult>> PartialMap<T2, TResult>(Func<T, T2, TResult> map)
+        public Option<Func<T2, TResult>> PartialSelect<T2, TResult>(Func<T, T2, TResult> map)
             => Select(map.Curry());
 
         /// <summary>
@@ -198,7 +193,7 @@ namespace Glitch.Functional.Results
         /// <param name="predicate"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<T> Filter(Func<T, bool> predicate)
+        public Option<T> Where(Func<T, bool> predicate)
         {
             if (IsSomeAnd(predicate))
             {
@@ -295,7 +290,7 @@ namespace Glitch.Functional.Results
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> OfType<TResult>()
             where TResult : T
-            => Filter(val => val is TResult).Select(val => (TResult)val!);
+            => Where(val => val is TResult).Select(val => (TResult)val!);
 
         /// <summary>
         /// Returns the wrapped value if it exists. Otherwise throws an exception.

@@ -9,10 +9,10 @@ namespace Glitch.Functional.Results
             => source.Traverse(Identity);
 
         public static Expected<IEnumerable<TResult>, E> Traverse<T, E, TResult>(this IEnumerable<Expected<T, E>> source, Func<T, TResult> traverse)
-            => source.Traverse(opt => opt.Map(traverse));
+            => source.Traverse(opt => opt.Select(traverse));
 
         public static Expected<IEnumerable<TResult>, E> Traverse<T, E, TResult>(this IEnumerable<Expected<T, E>> source, Func<T, int, TResult> traverse)
-            => source.Select((s, i) => s.PartialMap(traverse).Apply(i))
+            => source.Select((s, i) => s.PartialSelect(traverse).Apply(i))
                      .Traverse();
 
         public static Expected<IEnumerable<TResult>, E> Traverse<T, E, TResult>(this IEnumerable<T> source, Func<T, int, Expected<TResult, E>> traverse)
@@ -23,7 +23,7 @@ namespace Glitch.Functional.Results
             => source.Aggregate(
                 Expected<ImmutableList<TResult>, E>.Okay(ImmutableList<TResult>.Empty),
                 (list, item) => list.AndThen(_ => traverse(item), (lst, i) => lst.Add(i)),
-                list => list.Map(l => l.AsEnumerable()));
+                list => list.Select(l => l.AsEnumerable()));
 
         /// <summary>
         /// Returns a the unwrapped values of all the successful results.

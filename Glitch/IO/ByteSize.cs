@@ -180,7 +180,7 @@ namespace Glitch.IO
 
                 string denomination = format[..2];
                 var numberFormat = Some(format[2..].Trim())
-                    .Filter(f => !string.IsNullOrEmpty(f));
+                    .Where(f => !string.IsNullOrEmpty(f));
 
                 numberFormat.Do(ValidateNumberFormat);
 

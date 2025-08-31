@@ -32,11 +32,11 @@ namespace Glitch.Functional.Results
             public override IEnumerable<T> Iterate() => Enumerable.Empty<T>();
 
             /// <inheritdoc />
-            public override Expected<TResult, E> Map<TResult>(Func<T, TResult> mapper)
+            public override Expected<TResult, E> Select<TResult>(Func<T, TResult> mapper)
                 => new Failure<TResult, E>(Error);
 
             /// <inheritdoc />
-            public override Expected<T, TNewError> MapError<TNewError>(Func<E, TNewError> mapper) => mapper(Error);
+            public override Expected<T, TNewError> SelectError<TNewError>(Func<E, TNewError> mapper) => mapper(Error);
 
             /// <inheritdoc />
             public override TResult Match<TResult>(Func<T, TResult> _, Func<E, TResult> ifFail)

@@ -28,11 +28,11 @@ namespace Glitch.Functional.Results
             }
 
             /// <inheritdoc />
-            public override Expected<TResult, E> Map<TResult>(Func<T, TResult> mapper)
+            public override Expected<TResult, E> Select<TResult>(Func<T, TResult> mapper)
                 => new Success<TResult, E>(mapper(Value));
 
             /// <inheritdoc />
-            public override Expected<T, TNewError> MapError<TNewError>(Func<E, TNewError> _) => Expected<T, TNewError>.Okay(Value);
+            public override Expected<T, TNewError> SelectError<TNewError>(Func<E, TNewError> _) => Expected<T, TNewError>.Okay(Value);
 
             /// <inheritdoc />
             public override TResult Match<TResult>(Func<T, TResult> ifOkay, Func<E, TResult> _)

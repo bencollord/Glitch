@@ -16,7 +16,7 @@ namespace Glitch.Functional.Results
             => result.Select(opt => opt.Select(map));
 
         public static Result<Option<T>> Filter<T>(this Result<Option<T>> result, Func<T, bool> predicate)
-            => result.Select(opt => opt.Filter(predicate));
+            => result.Select(opt => opt.Where(predicate));
 
         public static Result<Option<TResult>> AndThen<T, TResult>(this Result<Option<T>> result, Func<T, Option<TResult>> bind)
            => result.AndThen(bind, (_, r) => r);

@@ -28,7 +28,7 @@ namespace Glitch.Test.Functional
             var wasExecutedAfterRun = funcHasExecuted;
 
             // Assert
-            Assert.Equal("GOOD AFTERNOON", result.UnwrapOrThrow());
+            Assert.Equal("GOOD AFTERNOON", result.Unwrap());
             Assert.False(wasExecutedBeforeRun);
             Assert.True(wasExecutedAfterRun);
         }
@@ -68,7 +68,7 @@ namespace Glitch.Test.Functional
             var wasExecutedAfterRun = funcHasExecuted;
 
             // Assert
-            Assert.Equal("GOOD AFTERNOON", result.UnwrapOrThrow());
+            Assert.Equal("GOOD AFTERNOON", result.Unwrap());
             Assert.False(wasExecutedBeforeRun);
             Assert.True(wasExecutedAfterRun);
         }
@@ -102,7 +102,7 @@ namespace Glitch.Test.Functional
 
             // Assert
             Assert.True(result.IsOkay);
-            Assert.Equal("TEST", result.UnwrapOrThrow());
+            Assert.Equal("TEST", result.Unwrap());
         }
 
         [Fact]
@@ -287,7 +287,7 @@ namespace Glitch.Test.Functional
 
             // Assert
             Assert.True(result.IsOkay);
-            Assert.Equal(30, result.UnwrapOrThrow());
+            Assert.Equal(30, result.Unwrap());
         }
 
         [Fact]

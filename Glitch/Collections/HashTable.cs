@@ -157,7 +157,7 @@ namespace Glitch.Collections
         public bool Contains(KeyValuePair<TKey, TValue> item)
         {
             return FindEntry(item.Key)
-                .Filter(e => EqualityComparer<TValue>.Default.Equals(e.Value, item.Value))
+                .Where(e => EqualityComparer<TValue>.Default.Equals(e.Value, item.Value))
                 .IsSome;
         }
 

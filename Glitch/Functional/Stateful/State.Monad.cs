@@ -1,5 +1,8 @@
-﻿namespace Glitch.Functional
+﻿using Glitch.Functional.Attributes;
+
+namespace Glitch.Functional
 {
+    [MonadExtension(typeof(IStateful<,>))]
     public static partial class State
     {
         public static IStateful<S, TResult> Select<S, T, TResult>(this IStateful<S, T> source, Func<T, TResult> map)
@@ -16,8 +19,8 @@
 
         private class MapState<S, T, TResult> : IStateful<S, TResult>
         {
-            private IStateful<S, T> source;
-            private Func<T, TResult> map;
+            private readonly IStateful<S, T> source;
+            private readonly Func<T, TResult> map;
 
             internal MapState(IStateful<S, T> source, Func<T, TResult> map)
             {
@@ -35,8 +38,8 @@
 
         private class BindState<S, T, TResult> : IStateful<S, TResult>
         {
-            private IStateful<S, T> source;
-            private Func<T, IStateful<S, TResult>> bind;
+            private readonly IStateful<S, T> source;
+            private readonly Func<T, IStateful<S, TResult>> bind;
 
             internal BindState(IStateful<S, T> source, Func<T, IStateful<S, TResult>> bind)
             {

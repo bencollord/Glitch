@@ -91,14 +91,14 @@ namespace Glitch.CodeAnalysis
 
             var method = getMethod.Or(setMethod)
                 .OkayOrElse(_ => new ArgumentException("Property must provide accessors"))
-                .UnwrapOrThrow();
+                .Unwrap();
 
             var modifiers = GetMethodModifiers(method);
 
             // TODO Indexers
 
             var setterModifiers = getMethod.Zip(setMethod)
-                .Map(e => new
+                .Select(e => new
                 {
                     Get = new
                     {
@@ -112,12 +112,12 @@ namespace Glitch.CodeAnalysis
                     }
                 })
                 .Where(e => e.Get.Access > e.Set.Access)
-                .Map(e => GetAccessModifiers(e.Set.Method))
-                .Map(e => e.ToTokenList());
+                .Select(e => GetAccessModifiers(e.Set.Method))
+                .Select(e => e.ToTokenList());
 
-            var getAccessor = getMethod.Map(_ => AccessorDeclaration(SyntaxKind.GetAccessorDeclaration));
-            var setAccessor = setMethod.Map(_ => AccessorDeclaration(SyntaxKind.SetAccessorDeclaration))
-                                       .Map(s => setterModifiers.Map(m => s.WithModifiers(m)).IfNone(s));
+            var getAccessor = getMethod.Select(_ => AccessorDeclaration(SyntaxKind.GetAccessorDeclaration));
+            var setAccessor = setMethod.Select(_ => AccessorDeclaration(SyntaxKind.SetAccessorDeclaration))
+                                       .Select(s => setterModifiers.Select(m => s.WithModifiers(m)).IfNone(s));
 
             var accessors = Sequence(getAccessor, setAccessor)
                 .Somes()

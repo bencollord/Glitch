@@ -226,7 +226,7 @@ namespace Glitch.CodeAnalysis.Rewriters
         public override SyntaxNode? VisitParameter(ParameterSyntax node)
         {
             return Maybe(node.Type)
-                .Map(t => node.WithType(t.WithTrailingTrivia(Space)))
+                .Select(t => node.WithType(t.WithTrailingTrivia(Space)))
                 .IfNone(node)
                 .WithModifiers(
                     TokenList(

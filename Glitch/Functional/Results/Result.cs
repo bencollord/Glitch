@@ -40,7 +40,7 @@ namespace Glitch.Functional.Results
         /// <param name="map"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Result<TResult> Select<TResult>(Func<T, TResult> map) => new(inner.Map(map));
+        public Result<TResult> Select<TResult>(Func<T, TResult> map) => new(inner.Select(map));
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result<Func<T2, TResult>> PartialSelect<T2, TResult>(Func<T, T2, TResult> map)
@@ -53,7 +53,7 @@ namespace Glitch.Functional.Results
         /// <param name="map"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Result<T> MapError(Func<Error, Error> map) => inner.MapError(map);
+        public Result<T> SelectError(Func<Error, Error> map) => inner.SelectError(map);
 
         /// <summary>
         /// If the result is a failure, returns a new <see cref="Expected{TOkay, TError}"/>
@@ -64,7 +64,7 @@ namespace Glitch.Functional.Results
         /// <param name="map"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Expected<T, E> MapError<E>(Func<Error, E> map) => inner.MapError(map);
+        public Expected<T, E> SelectError<E>(Func<Error, E> map) => inner.SelectError(map);
 
         /// <summary>
         /// Applies a wrapped function to the wrapped value if both exist.
@@ -221,7 +221,7 @@ namespace Glitch.Functional.Results
         public Result<TResult> Cast<TResult>() => inner.Cast<TResult>();
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Result<T> Filter(Func<T, bool> predicate)
+        public Result<T> Where(Func<T, bool> predicate)
             => Guard(predicate, Error.Empty);
 
         /// <summary>
@@ -412,7 +412,7 @@ namespace Glitch.Functional.Results
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator T(Result<T> result)
-            => result.MapError(err => new InvalidCastException($"Cannot cast a faulted result to a value", err.AsException()))
+            => result.SelectError(err => new InvalidCastException($"Cannot cast a faulted result to a value", err.AsException()))
                      .Unwrap();
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]

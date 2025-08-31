@@ -34,10 +34,10 @@ namespace Glitch.Functional.Results
         /// <typeparam name="TResult"></typeparam>
         /// <param name="map"></param>
         /// <returns></returns>
-        public abstract Expected<TResult, E> Map<TResult>(Func<T, TResult> map);
+        public abstract Expected<TResult, E> Select<TResult>(Func<T, TResult> map);
 
-        public Expected<Func<T2, TResult>, E> PartialMap<T2, TResult>(Func<T, T2, TResult> map)
-            => Map(map.Curry());
+        public Expected<Func<T2, TResult>, E> PartialSelect<T2, TResult>(Func<T, T2, TResult> map)
+            => Select(map.Curry());
 
         /// <summary>
         /// If the result is a failure, returns a new result with the mapping function
@@ -46,7 +46,7 @@ namespace Glitch.Functional.Results
         /// <param name="map"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract Expected<T, TNewError> MapError<TNewError>(Func<E, TNewError> map);
+        public abstract Expected<T, TNewError> SelectError<TNewError>(Func<E, TNewError> map);
 
         /// <summary>
         /// Applies a wrapped function to the wrapped value if both exist.
@@ -58,7 +58,7 @@ namespace Glitch.Functional.Results
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Expected<TResult, E> Apply<TResult>(Expected<Func<T, TResult>, E> function)
-            => AndThen(v => function.Map(fn => fn(v)));
+            => AndThen(v => function.Select(fn => fn(v)));
 
         /// <summary>
         /// Returns other if Ok, otherwise returns the current error wrapped
@@ -90,7 +90,7 @@ namespace Glitch.Functional.Results
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Expected<TResult, E> AndThen<TElement, TResult>(Func<T, Expected<TElement, E>> bind, Func<T, TElement, TResult> project)
-            => AndThen(x => bind(x).Map(y => project(x, y)));
+            => AndThen(x => bind(x).Select(y => project(x, y)));
 
         /// <summary>
         /// Returns the current result if Ok, otherwise returns the other result.
@@ -135,7 +135,7 @@ namespace Glitch.Functional.Results
         /// <param name="action"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Expected<T, E> Do(Func<T, Unit> action) => Map(x => action(x).Return(x));
+        public Expected<T, E> Do(Func<T, Unit> action) => Select(x => action(x).Return(x));
 
         /// <summary>
         /// Executes an impure action if failed.
@@ -189,7 +189,7 @@ namespace Glitch.Functional.Results
         /// </exception>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Expected<TResult, E> Cast<TResult>() => Map(DynamicCast<TResult>.From);
+        public Expected<TResult, E> Cast<TResult>() => Select(DynamicCast<TResult>.From);
 
         /// <summary>
         /// For a successful result, checks the value against a predicate
