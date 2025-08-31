@@ -15,19 +15,19 @@ namespace Glitch.Functional
             this.filter = Option.Maybe(filter);
         }
 
-        public override T Run(IOEnv env)
+        protected override async Task<T> RunIOAsync(IOEnv env)
         {
             try
             {
-                return source.Run(env);
+                return await source.RunAsync(env).ConfigureAwait(false);
             }
             catch (ApplicationErrorException err) when (IsMatch(err.Error))
             {
-                return next(err.Error).Run(env);
+                return await next(err.Error).RunAsync(env).ConfigureAwait(false);
             }
             catch (Exception e) when (IsMatch(e))
             {
-                return next(e).Run(env);
+                return await next(e).RunAsync(env).ConfigureAwait(false);
             }
         }
 

@@ -15,9 +15,9 @@ namespace Glitch.Functional
             this.error = error;
         }
 
-        public override T Run(IOEnv env)
+        protected override async Task<T> RunIOAsync(IOEnv env)
         {
-            var result = source.Run(env);
+            var result = await source.RunAsync(env).ConfigureAwait(false);
 
             if (!predicate(result))
             {

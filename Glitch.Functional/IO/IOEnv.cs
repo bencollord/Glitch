@@ -6,13 +6,19 @@ namespace Glitch.Functional
     {
         private readonly ConcurrentDictionary<object, IOResource> resources = new();
 
+        public CancellationToken CancellationToken { get; init; }
+
         public static IOEnv New() => new();
+        public static IOEnv New(CancellationToken cancellationToken) => new() { CancellationToken = cancellationToken };
 
         public Unit Track(object? resource)
         {
             if (resource is IDisposable d)
             {
-                resources.TryAdd(d, new DisposableResource(d));
+                if (resources.TryAdd(d, new DisposableResource(d)))
+                {
+                    OnResourceTracked(resource);
+                }
             }
 
             return Nothing;
@@ -22,7 +28,8 @@ namespace Glitch.Functional
         {
             if (resource is not null && resources.TryRemove(resource, out IOResource? d))
             {
-                return d.Release();
+                d.Release();
+                OnResourceReleased(resource);
             }
 
             return Nothing;
@@ -30,9 +37,10 @@ namespace Glitch.Functional
 
         public Unit ReleaseAll()
         {
-            foreach (var (_, resource) in resources)
+            foreach (var (obj, resource) in resources)
             {
                 resource.Release();
+                OnResourceReleased(obj);
             }
 
             resources.Clear();
@@ -40,7 +48,16 @@ namespace Glitch.Functional
             return Nothing;
         }
 
-        public void Dispose() => ReleaseAll();
+        public void Dispose()
+        {
+            ReleaseAll();
+            OnDisposed();
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void OnResourceTracked(object resource) { }
+        protected virtual void OnResourceReleased(object resource) { }
+        protected virtual void OnDisposed() { }
 
         private abstract record IOResource
         {

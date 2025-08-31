@@ -11,6 +11,6 @@ namespace Glitch.Functional
             this.error = error;
         }
 
-        public override T Run(IOEnv env) => error.Throw<T>();
+        protected override Task<T> RunIOAsync(IOEnv env) => error.Throw<Task<T>>();
     }
 }

@@ -9,6 +9,6 @@ namespace Glitch.Functional
             this.runIO = runIO;
         }
 
-        public override T Run(IOEnv env) => runIO(env);
+        protected override Task<T> RunIOAsync(IOEnv env) => Task.FromResult(runIO(env));
     }
 }

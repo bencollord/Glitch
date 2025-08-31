@@ -1,13 +1,13 @@
 
 namespace Glitch.Functional
 {
-    internal class ContinueIO<TSource, TNext, TResult> : IO<TResult>
+    internal class ContinueAsyncIO<TSource, TNext, TResult> : IO<TResult>
     {
         private IO<TSource> source;
-        private Func<TSource, IO<TNext>> next;
+        private Func<TSource, Task<IO<TNext>>> next;
         private Func<TSource, TNext, TResult> project;
 
-        internal ContinueIO(IO<TSource> source, Func<TSource, IO<TNext>> next, Func<TSource, TNext, TResult> project)
+        internal ContinueAsyncIO(IO<TSource> source, Func<TSource, Task<IO<TNext>>> next, Func<TSource, TNext, TResult> project)
         {
             this.source = source;
             this.next = next;
@@ -17,7 +17,8 @@ namespace Glitch.Functional
         protected override async Task<TResult> RunIOAsync(IOEnv env)
         {
             var src = await source.RunAsync(env).ConfigureAwait(false);
-            var nxt = await next(src).RunAsync(env).ConfigureAwait(false);
+            var nio = await next(src).ConfigureAwait(false);
+            var nxt = await nio.RunAsync(env).ConfigureAwait(false);
 
             return project(src, nxt);
         }

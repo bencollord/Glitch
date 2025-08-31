@@ -1,16 +1,22 @@
+
+
 namespace Glitch.Functional
 {
     internal class MapEnvIO<T> : IO<T>
     {
-        private IO<T> source;
-        private Func<IOEnv, IOEnv> map;
+        private readonly IO<T> source;
+        private readonly Func<IOEnv, IOEnv> mapEnv;
 
-        internal MapEnvIO(IO<T> source, Func<IOEnv, IOEnv> map)
+        internal MapEnvIO(IO<T> source, Func<IOEnv, IOEnv> mapEnv)
         {
             this.source = source;
-            this.map = map;
+            this.mapEnv = mapEnv;
         }
 
-        public override T Run(IOEnv input) => source.Run(map(input));
+        protected override async Task<T> RunIOAsync(IOEnv env)
+        {
+            return await source.RunAsync(mapEnv(env))
+                               .ConfigureAwait(false);
+        }
     }
 }

@@ -1,3 +1,4 @@
+
 namespace Glitch.Functional
 {
     internal class UsingIO<T> : IO<T>
@@ -9,9 +10,9 @@ namespace Glitch.Functional
             this.acquire = acquire;
         }
 
-        public override T Run(IOEnv env)
+        protected override async Task<T> RunIOAsync(IOEnv env)
         {
-            var result = acquire.Run(env);
+            var result = await acquire.RunAsync(env).ConfigureAwait(false);
 
             env.Track(result);
 

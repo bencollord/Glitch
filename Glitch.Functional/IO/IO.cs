@@ -4,14 +4,43 @@ namespace Glitch.Functional
 {
     public abstract partial class IO<T>
     {
-        public abstract T Run(IOEnv env);
-
         public T Run()
         {
             using var env = IOEnv.New();
 
             return Run(env);
         }
+
+        public T Run(IOEnv env)
+        {
+            var task = RunAsync(env);
+
+            if (task.IsCompleted)
+            {
+                return task.Result;
+            }
+
+            return task.GetAwaiter().GetResult();
+        }
+
+        public async Task<T> RunAsync()
+        {
+            using var env = IOEnv.New();
+
+            return await RunAsync(env);
+        }
+
+        public async Task<T> RunAsync(IOEnv env)
+        {
+            if (!env.CancellationToken.IsCancellationRequested)
+            {
+                return await RunIOAsync(env);
+            }
+
+            return await Task.FromCanceled<T>(env.CancellationToken);
+        }
+
+        protected abstract Task<T> RunIOAsync(IOEnv env);
 
         public Result<T> Try()
         {
@@ -32,10 +61,17 @@ namespace Glitch.Functional
             }
         }
 
-        public IO<TResult> Select<TResult>(Func<T, TResult> map) => AndThen(x => new ReturnIO<TResult>(map(x)));
+        public IO<T> With(Func<IOEnv, IOEnv> mapEnv) => new MapEnvIO<T>(this, mapEnv);
+
+        public IO<TResult> Select<TResult>(Func<T, TResult> map) => AndThen(x => IO.Return(map(x)));
+        public IO<TResult> SelectAsync<TResult>(Func<T, Task<TResult>> map) 
+            => AndThenAsync(async x => IO.Return(await map(x)));
 
         public IO<TResult> AndThen<TResult>(Func<T, IO<TResult>> bind) => AndThen(bind, (_, y) => y);
         public IO<TResult> AndThen<TElement, TResult>(Func<T, IO<TElement>> bind, Func<T, TElement, TResult> project) => new ContinueIO<T, TElement, TResult>(this, bind, project);
+
+        public IO<TResult> AndThenAsync<TResult>(Func<T, Task<IO<TResult>>> bind) => AndThenAsync(bind, (_, y) => y);
+        public IO<TResult> AndThenAsync<TElement, TResult>(Func<T, Task<IO<TElement>>> bind, Func<T, TElement, TResult> project) => new ContinueAsyncIO<T, TElement, TResult>(this, bind, project);
 
         public IO<TResult> AndThen<TResult>(Func<T, Option<TResult>> bind) => AndThen(bind, (_, y) => y);
         public IO<TResult> AndThen<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, _ => IO.Fail<TElement>(Errors.NoElements)), project);
@@ -78,7 +114,6 @@ namespace Glitch.Functional
         });
 
         public IO<T> Catch(Func<Error, IO<T>> bind) => new CatchIO<T>(this, bind);
-
         public IO<T> Catch(Func<Error, bool> filter, Func<Error, IO<T>> bind) => new CatchIO<T>(this, bind, filter);
 
         public IO<TResult> Cast<TResult>() => Select(DynamicCast<TResult>.From);
@@ -87,6 +122,13 @@ namespace Glitch.Functional
             => Select(v =>
             {
                 action(v);
+                return v;
+            });
+
+        public IO<T> DoAsync(Func<T, Task> action)
+            => SelectAsync(async v =>
+            {
+                await action(v).ConfigureAwait(false);
                 return v;
             });
 
@@ -99,5 +141,8 @@ namespace Glitch.Functional
 
         public static IO<T> operator >>(IO<T> x, IO<T> y) => x.AndThen(_ => y);
         public static IO<T> operator >>(IO<T> x, IO<Unit> y) => x.AndThen(v => y.Select(_ => v));
+
+        public static Effect<T> operator >>(IO<T> x, Effect<T> y) => x.AndThen(_ => y);
+        public static Effect<T> operator >>(IO<T> x, Effect<Unit> y) => x.AndThen(v => y.Select(_ => v));
     }
 }
