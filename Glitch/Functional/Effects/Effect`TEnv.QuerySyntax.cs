@@ -6,22 +6,25 @@ namespace Glitch.Functional
     [MonadExtension(typeof(Effect<,>))]
     public static partial class EffectExtensions
     {
-        public static Effect<TEnv, TResult> SelectMany<TEnv, T, TResult>(this Effect<TEnv, T> source, Func<T, Effect<TEnv, TResult>> bind)
-            => source.AndThen(bind);
-
+        // Effect w/env
         public static Effect<TEnv, TResult> SelectMany<TEnv, T, TElement, TResult>(this Effect<TEnv, T> source, Func<T, Effect<TEnv, TElement>> bind, Func<T, TElement, TResult> bindMap)
             => source.AndThen(s => bind(s).Select(e => bindMap(s, e)));
 
-        public static Effect<TEnv, TResult> SelectMany<TEnv, T, TResult>(this Effect<TEnv, T> source, Func<T, Result<TResult>> bind)
-            => source.AndThen(bind);
+        // Effect no env
+        public static Effect<TEnv, TResult> SelectMany<TEnv, T, TElement, TResult>(this Effect<TEnv, T> source, Func<T, Effect<TElement>> bind, Func<T, TElement, TResult> bindMap)
+            => source.AndThen(s => bind(s).Select(e => bindMap(s, e)));
 
+        // Result
         public static Effect<TEnv, TResult> SelectMany<TEnv, T, TElement, TResult>(this Effect<TEnv, T> source, Func<T, Result<TElement>> bind, Func<T, TElement, TResult> bindMap)
             => source.AndThen(s => bind(s).Select(e => bindMap(s, e)));
 
-        public static Effect<TEnv, TResult> SelectMany<TEnv, T, TResult>(this Effect<TEnv, T> source, Func<T, Effect<TResult>> bind)
-           => source.AndThen(bind);
+        // Expected
+        public static Effect<TEnv, TResult> SelectMany<TEnv, T, E, TElement, TResult>(this Effect<TEnv, T> source, Func<T, Expected<TElement, E>> bind, Func<T, TElement, TResult> bindMap)
+            where E : Error
+            => source.AndThen(s => Effect.Return(bind(s)).Select(e => bindMap(s, e)));
 
-        public static Effect<TEnv, TResult> SelectMany<TEnv, T, TElement, TResult>(this Effect<TEnv, T> source, Func<T, Effect<TElement>> bind, Func<T, TElement, TResult> bindMap)
-            => source.AndThen(s => bind(s).Select(e => bindMap(s, e)));
+        // Option
+        public static Effect<TEnv, TResult> SelectMany<TEnv, T, TElement, TResult>(this Effect<TEnv, T> source, Func<T, Option<TElement>> bind, Func<T, TElement, TResult> bindMap)
+            => source.AndThen(s => bind(s).OkayOr(Error.Empty).Select(e => bindMap(s, e)));
     }
 }

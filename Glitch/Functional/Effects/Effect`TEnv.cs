@@ -27,11 +27,22 @@ namespace Glitch.Functional
 
         public static Effect<TEnv, T> Return(Expected<T, Error> result) => new(_ => result);
 
+        public static Effect<TEnv, T> Return<E>(Expected<T, E> result) where E : Error => new(_ => result.SelectError(StaticCast<Error>.UpFrom));
+
         public static Effect<TEnv, T> Lift(Effect<T> effect) => new(_ => effect.Run());
 
         public static Effect<TEnv, T> Lift(Func<TEnv, Result<T>> function) => new(function);
 
         public static Effect<TEnv, T> Lift(Func<TEnv, T> function) => new(i => Result.Okay(function(i)));
+
+        // TODO Decide on this naming convention or Lift
+        public static Effect<TEnv, T> Try<E>(Func<TEnv, Expected<T, E>> function)
+            where E : Error
+            => new(env => function(env).Match(Result.Okay, Result.Fail<T>));
+
+        public static Effect<TEnv, T> Try(Func<TEnv, Result<T>> function) => new(function);
+
+        public static Effect<TEnv, T> Try(Func<TEnv, T> function) => new(i => Result.Okay(function(i)));
 
         public Effect<TNewInput, T> With<TNewInput>(Func<TNewInput, TEnv> map)
             => new(newInput => thunk(map(newInput)));

@@ -14,6 +14,8 @@ namespace Glitch.Functional
         
         public static Effect<T> Return<T>(Expected<T, Error> result) => Return<Unit, T>(result);
 
+        public static Effect<T> Return<T, E>(Expected<T, E> result) where E : Error => Effect<Unit, T>.Return(result);
+
         public static Effect<T> Lift<T>(Func<Result<T>> function) => Lift<Unit, T>(_ => function());
 
         public static Effect<T> Lift<T>(Func<T> function) => Effect<T>.Lift(function);

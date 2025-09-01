@@ -26,9 +26,12 @@ namespace Glitch.Functional.Results
 
         public static Error New(Exception exception) => new ExceptionError(exception);
 
-        public static Error New(IEnumerable<Error> errors) => new AggregateError(errors);
+        public static Error New(int code, Exception exception) => new ExceptionError(code, exception);
 
-        public static Error New(params Error[] errors) => errors.Length == 0 ? Empty : new AggregateError(errors);
+        public static Error New(params IEnumerable<Error> errors) 
+            => errors.Match(just: Identity,
+                            many: _ => new AggregateError(errors),
+                            none: _ => Empty);
 
         public abstract Exception AsException();
 
