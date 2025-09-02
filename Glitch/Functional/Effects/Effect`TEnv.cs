@@ -151,6 +151,7 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <param name="bind"></param>
         /// <returns></returns>
+        [MonadBind]
         public Effect<TEnv, TResult> AndThen<TResult>(Func<T, Effect<TEnv, TResult>> bind)
             => new(i =>
             {
@@ -168,6 +169,7 @@ namespace Glitch.Functional
         /// <param name="bind"></param>
         /// <param name="project"></param>
         /// <returns></returns>
+        [MonadBindMap]
         public Effect<TEnv, TResult> AndThen<TElement, TResult>(Func<T, Effect<TEnv, TElement>> bind, Func<T, TElement, TResult> project)
             => AndThen(x => bind(x).Select(y => project(x, y)));
 

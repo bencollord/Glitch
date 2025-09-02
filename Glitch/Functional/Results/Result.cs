@@ -268,8 +268,15 @@ namespace Glitch.Functional.Results
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Unwrap() => inner.IfFail(err => err.Throw<T>());
 
+        // TODO Decide between this naming convention or IfFail
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T UnwrapOr(T fallback) => inner.UnwrapOr(fallback);
+
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T UnwrapOrElse(Func<T> fallback) => IfFail(fallback);
+
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T UnwrapOrElse(Func<Error, T> fallback) => IfFail(fallback);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryUnwrap(out T result) => inner.TryUnwrap(out result);

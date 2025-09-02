@@ -9,8 +9,10 @@ namespace Glitch.Functional.Results
         public static OptionNone None => OptionNone.Value;
 
         public static bool IsSome<T>(Option<T> option) => option.IsSome;
-
         public static bool IsNone<T>(Option<T> option) => option.IsNone;
+
+        public static Option<T> Filter<T>(T? value, Func<T, bool> predicate) => Maybe(value).Where(predicate);
+        public static Option<T> Filter<T>(T? value, Func<T, bool> predicate) where T : struct => Maybe(value).Where(predicate);
 
         public static Option<T> Some<T>(T value) => Option<T>.Some(value);
 

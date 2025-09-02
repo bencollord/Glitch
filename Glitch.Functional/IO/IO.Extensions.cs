@@ -1,5 +1,3 @@
-using Glitch.Functional.Results;
-
 namespace Glitch.Functional
 {
     public static partial class IOExtensions
