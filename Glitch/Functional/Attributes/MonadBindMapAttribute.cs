@@ -6,5 +6,5 @@
     /// I.E. M a (a -> M b) -> (a -> b -> c) -> M c
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)] 
-    internal class MonadBindMapAttribute : Attribute;
+    public class MonadBindMapAttribute : Attribute;
 }

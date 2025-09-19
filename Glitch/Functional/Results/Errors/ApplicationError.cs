@@ -33,9 +33,9 @@ namespace Glitch.Functional.Results
             Inner = inner;
         }
 
-        public override Option<Error> Inner { get; }
+        public override Option<Error> Inner { get; init; }
 
-        public override bool IsException<T>() => false;
+        public override bool Is<T>() => false;
 
         public override Exception AsException() 
             => new ApplicationErrorException(this);

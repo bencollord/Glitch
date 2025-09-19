@@ -5,5 +5,5 @@
     /// I.E. M a (a -> b) -> M b
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)] 
-    internal class MonadMapAttribute : Attribute;
+    public class MonadMapAttribute : Attribute;
 }

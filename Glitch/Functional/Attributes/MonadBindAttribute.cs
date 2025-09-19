@@ -25,5 +25,5 @@
     /// coding on my days off, so I write it how I want).
     /// </remarks>
     [AttributeUsage(AttributeTargets.Method)]
-    internal class MonadBindAttribute : Attribute;
+    public class MonadBindAttribute : Attribute;
 }

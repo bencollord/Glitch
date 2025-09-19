@@ -17,6 +17,7 @@ namespace Glitch.Functional.Results
         public static Option<T> Some<T>(T value) => Option<T>.Some(value);
 
         public static Option<T> Maybe<T>(T? value) => Option<T>.Maybe(value);
+
         public static Option<T> Maybe<T>(T? value) where T : struct
             => value.HasValue
              ? Some(value.Value)

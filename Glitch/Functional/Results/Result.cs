@@ -260,6 +260,8 @@ namespace Glitch.Functional.Results
         public Result<TResult> Zip<TOther, TResult>(Result<TOther> other, Func<T, TOther, TResult> zipper)
             => AndThen(_ => other, zipper);
 
+        public Expected<T, Error> AsExpected() => inner;
+
         /// <summary>
         /// Returns the wrapped value if ok. Otherwise throws the wrapped error
         /// as an exception.

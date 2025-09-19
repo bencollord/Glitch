@@ -1,4 +1,4 @@
-﻿namespace Glitch.Functional
+﻿namespace Glitch.Functional.Results
 {
     public readonly record struct Success<T>(T Value) : IEquatable<Success<T>>
     {

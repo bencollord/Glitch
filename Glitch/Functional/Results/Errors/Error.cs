@@ -14,11 +14,13 @@ namespace Glitch.Functional.Results
             Message = message;
         }
 
-        public virtual int Code { get; }
+        public virtual int Code { get; init; }
 
-        public virtual string Message { get; }
+        public virtual string Message { get; init; }
 
-        public virtual Option<Error> Inner { get; }
+        public virtual Option<Error> Inner { get; init; }
+        
+        public virtual bool IsException => false;
 
         public static Error New(string message) => New(0, message);
 
@@ -37,19 +39,14 @@ namespace Glitch.Functional.Results
 
         public virtual bool IsCode(int code) => Code == code;
 
-        public virtual bool IsError<T>() where T : Error => this is T;
+        public virtual bool Is<T>() => this is T || AsException() is T;
 
-        public bool IsException() => IsException<Exception>();
-
-        public virtual bool IsException<T>() where T : Exception => false;
-
-        public virtual Error Combine(Error other)
+        public virtual Error Add(Error other)
         {
-            var errors = Iterate().Concat(other.Iterate());
-
-            return errors.Count() > 1 
-                 ? new AggregateError(errors) 
-                 : errors.Single();
+            return Iterate().Concat(other.Iterate())
+                .Match(just: Identity,
+                       many: x => new AggregateError(x),
+                       none: Empty);
         }
 
         public virtual bool Equals(Error? other)
@@ -94,6 +91,6 @@ namespace Glitch.Functional.Results
 
         public static implicit operator Error(Exception exception) => New(exception);
 
-        public static Error operator +(Error? x, Error? y) => (y is null ? x : x?.Combine(y) ?? y) ?? Empty;
+        public static Error operator +(Error? x, Error? y) => (y is null ? x : x?.Add(y) ?? y) ?? Empty;
     }
 }

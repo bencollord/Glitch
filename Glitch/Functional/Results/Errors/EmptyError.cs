@@ -11,7 +11,7 @@ namespace Glitch.Functional.Results
 
         public override Exception AsException() => throw new BottomException("Error is empty");
 
-        public override Error Combine(Error other) => other;
+        public override Error Add(Error other) => other;
 
         public override IEnumerable<Error> Iterate()
         {

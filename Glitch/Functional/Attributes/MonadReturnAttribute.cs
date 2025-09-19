@@ -11,5 +11,5 @@ namespace Glitch.Functional.Attributes
     /// like Result.Okay() or Option.Some()
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)] 
-    internal class MonadReturnAttribute : Attribute;
+    public class MonadReturnAttribute : Attribute;
 }

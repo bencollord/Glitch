@@ -74,11 +74,11 @@ namespace Glitch.Functional
 
         public Effect<TEnv, T> Catch<TException>(Func<TException, T> map)
             where TException : Exception
-            => OrElse(err => err.IsException<TException>() ? map((TException)err.AsException()) : err);
+            => OrElse(err => err.Is<TException>() ? map((TException)err.AsException()) : err);
 
         public Effect<TEnv, T> Catch<TException>(Func<TException, Error> map)
             where TException : Exception
-            => SelectError(err => err.IsException<TException>() ? map((TException)err.AsException()) : err);
+            => SelectError(err => err.Is<TException>() ? map((TException)err.AsException()) : err);
 
         /// <summary>
         /// Applies a wrapped function to the wrapped value if both are successful.

@@ -35,7 +35,7 @@ namespace Glitch.Functional.Parsing
                 separator: separator);
         }
 
-        public TokenParser<TToken> Except(TToken token) => WithPredicate(x => predicate(x) && !x.Equals(token));
+        public TokenParser<TToken> Except(TToken token) => WithPredicate(x => predicate(x) && !x!.Equals(token));
 
         public TokenParser<TToken> Except(Func<TToken, bool> predicate) => WithPredicate(x => this.predicate(x) && !predicate(x));
 
@@ -55,6 +55,7 @@ namespace Glitch.Functional.Parsing
             => WithExpectation(updater(expectation));
 
         private TokenParser<TToken> WithPredicate(Func<TToken, bool> predicate) => new(predicate, expectation);
+
         public override ParseResult<TToken, TToken> Execute(TokenSequence<TToken> input)
         {
             return predicate(input.Current)
