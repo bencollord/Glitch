@@ -176,6 +176,12 @@ namespace Glitch.Functional
                 return v;
             });
 
+        // LinqPad
+        protected object? ToDump()
+        {
+            return Run();
+        }
+
         public static implicit operator IO<T>(T value) => Return(value);
         public static implicit operator IO<T>(Error error) => Fail(error);
 

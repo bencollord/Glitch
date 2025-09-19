@@ -70,6 +70,9 @@ namespace Glitch.Functional.Results
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract Expected<TResult, E> And<TResult>(Expected<TResult, E> other);
 
+        public Expected<TResult, E> And<TResult>(Success<TResult> other)
+            => And(Expected.Okay<TResult, E>(other.Value));
+
         /// <summary>
         /// If Okay, applies the function to the wrapped value. Otherwise, returns
         /// the current error wrapped in a new result type.
@@ -117,7 +120,7 @@ namespace Glitch.Functional.Results
         /// <param name="error"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Expected<TResult, E> Choose<TResult>(Func<T, Expected<TResult, E>> okay, Func<E, Expected<TResult, E>> error) => Match(okay, error);
+        public Expected<TResult, EResult> Choose<TResult, EResult>(Func<T, Expected<TResult, EResult>> okay, Func<E, Expected<TResult, EResult>> error) => Match(okay, error);
 
         /// <summary>
         /// Executes an impure action against the value if Ok.

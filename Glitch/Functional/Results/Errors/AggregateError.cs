@@ -18,13 +18,12 @@ namespace Glitch.Functional.Results
 
         public int Count => errors.Count();
 
-        public override bool IsException<T>() 
-            => errors.Any(e => e.IsException<T>()) || typeof(T).Equals(typeof(AggregateException));
+        public override bool Is<T>()
+            => errors.Any(e => e.Is<T>())
+            || typeof(T).IsAssignableTo(typeof(AggregateException))
+            || typeof(T).IsAssignableTo(typeof(AggregateError));
 
         public override bool IsCode(int code) => base.IsCode(code) || errors.Any(e => e.IsCode(code));
-
-        public override bool IsError<T>() 
-            => errors.Any(e => e.IsError<T>() || typeof(T).IsAssignableTo(typeof(AggregateError)));
 
         public override Exception AsException() 
             => new AggregateException(errors.Select(e => e.AsException()));

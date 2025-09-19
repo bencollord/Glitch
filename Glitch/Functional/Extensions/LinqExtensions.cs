@@ -6,10 +6,21 @@ namespace Glitch.Functional
 
     public static class LinqExtensions
     {
-        public static TResult Match<T, TResult>(this IEnumerable<T> source, Func<T, TResult> one, Func<IEnumerable<T>, TResult> many, Func<Unit, TResult> none)
-            => source.Match(one, many, () => none(default));
+        public static TResult Match<T, TResult>(this IEnumerable<T> source, Func<IEnumerable<T>, TResult> many, TResult none)
+            => source.Match(many, _ => none);
 
-        public static TResult Match<T, TResult>(this IEnumerable<T> source, Func<T, TResult> one, Func<IEnumerable<T>, TResult> many, Func<TResult> none)
+        public static TResult Match<T, TResult>(this IEnumerable<T> source, Func<IEnumerable<T>, TResult> many, Func<Unit, TResult> none)
+            => source.Match(many, () => none(default));
+
+        public static TResult Match<T, TResult>(this IEnumerable<T> source, Func<IEnumerable<T>, TResult> many, Func<TResult> none) => source.Any() ? many(source) : none();
+
+        public static TResult Match<T, TResult>(this IEnumerable<T> source, Func<T, TResult> just, Func<IEnumerable<T>, TResult> many, TResult none)
+            => source.Match(just, many, _ => none);
+
+        public static TResult Match<T, TResult>(this IEnumerable<T> source, Func<T, TResult> just, Func<IEnumerable<T>, TResult> many, Func<Unit, TResult> none)
+            => source.Match(just, many, () => none(default));
+
+        public static TResult Match<T, TResult>(this IEnumerable<T> source, Func<T, TResult> just, Func<IEnumerable<T>, TResult> many, Func<TResult> none)
         {
             using (var enumerator = source.GetEnumerator())
             {
@@ -22,7 +33,7 @@ namespace Glitch.Functional
 
                 if (!enumerator.MoveNext())
                 {
-                    return one(first);
+                    return just(first);
                 }
             }
 

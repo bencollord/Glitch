@@ -8,7 +8,7 @@ namespace Glitch.Functional.Parsing.Parsers
     /// </summary>
     /// <typeparam name="TToken"></typeparam>
     /// <typeparam name="T"></typeparam>
-    public class ReturnParser<TToken, T> : Parser<TToken, T>
+    internal class ReturnParser<TToken, T> : Parser<TToken, T>
     {
         private T result;
 

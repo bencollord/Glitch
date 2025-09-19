@@ -27,11 +27,22 @@ namespace Glitch.Functional
 
         public static Effect<TEnv, T> Return(Expected<T, Error> result) => new(_ => result);
 
+        public static Effect<TEnv, T> Return<E>(Expected<T, E> result) where E : Error => new(_ => result.SelectError(StaticCast<Error>.UpFrom));
+
         public static Effect<TEnv, T> Lift(Effect<T> effect) => new(_ => effect.Run());
 
         public static Effect<TEnv, T> Lift(Func<TEnv, Result<T>> function) => new(function);
 
         public static Effect<TEnv, T> Lift(Func<TEnv, T> function) => new(i => Result.Okay(function(i)));
+
+        // TODO Decide on this naming convention or Lift
+        public static Effect<TEnv, T> Try<E>(Func<TEnv, Expected<T, E>> function)
+            where E : Error
+            => new(env => function(env).Match(Result.Okay, Result.Fail<T>));
+
+        public static Effect<TEnv, T> Try(Func<TEnv, Result<T>> function) => new(function);
+
+        public static Effect<TEnv, T> Try(Func<TEnv, T> function) => new(i => Result.Okay(function(i)));
 
         public Effect<TNewInput, T> With<TNewInput>(Func<TNewInput, TEnv> map)
             => new(newInput => thunk(map(newInput)));
@@ -63,11 +74,11 @@ namespace Glitch.Functional
 
         public Effect<TEnv, T> Catch<TException>(Func<TException, T> map)
             where TException : Exception
-            => OrElse(err => err.IsException<TException>() ? map((TException)err.AsException()) : err);
+            => OrElse(err => err.Is<TException>() ? map((TException)err.AsException()) : err);
 
         public Effect<TEnv, T> Catch<TException>(Func<TException, Error> map)
             where TException : Exception
-            => SelectError(err => err.IsException<TException>() ? map((TException)err.AsException()) : err);
+            => SelectError(err => err.Is<TException>() ? map((TException)err.AsException()) : err);
 
         /// <summary>
         /// Applies a wrapped function to the wrapped value if both are successful.
@@ -140,6 +151,7 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <param name="bind"></param>
         /// <returns></returns>
+        [MonadBind]
         public Effect<TEnv, TResult> AndThen<TResult>(Func<T, Effect<TEnv, TResult>> bind)
             => new(i =>
             {
@@ -157,6 +169,7 @@ namespace Glitch.Functional
         /// <param name="bind"></param>
         /// <param name="project"></param>
         /// <returns></returns>
+        [MonadBindMap]
         public Effect<TEnv, TResult> AndThen<TElement, TResult>(Func<T, Effect<TEnv, TElement>> bind, Func<T, TElement, TResult> project)
             => AndThen(x => bind(x).Select(y => project(x, y)));
 

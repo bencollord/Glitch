@@ -5,6 +5,8 @@ namespace Glitch
 {
     public static class StringExtensions
     {
+        public static string TakeUntil(this string input, char c) => input.Substring(0, input.IndexOf(c));
+
         public static string Capitalize(this string input) => Char.ToUpper(input[0]) + input.Substring(1);
 
         public static string Uncapitalize(this string input) => Char.ToLower(input[0]) + input.Substring(1);

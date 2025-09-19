@@ -23,6 +23,8 @@ namespace Glitch.CodeAnalysis
 
         public static SeparatedSyntaxList<TNode> SeparatedList<TNode>(SyntaxToken separator, params IEnumerable<TNode> nodes)
             where TNode : SyntaxNode
-            => SeparatedList(nodes, Enumerable.Repeat(separator, nodes.Count() - 1));
+            => nodes.Match(just: SingletonSeparatedList,
+                           many: n => SeparatedList(n, Enumerable.Repeat(separator, n.Count() - 1)),
+                           none: SeparatedList<TNode>);
     }
 }

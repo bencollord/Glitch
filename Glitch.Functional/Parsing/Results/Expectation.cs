@@ -34,11 +34,11 @@ namespace Glitch.Functional.Parsing.Results
 
             var expectedButFound = from exp in expected
                                    from uxp in unexpected
-                                   select $"Expected {exp}, but found {uxp}";
+                                   select $"Expected '{exp}', but found '{uxp}'";
 
             return expectedButFound
-                .Or(expected.Select(format("Expected {0}")))
-                .Or(unexpected.Select(format("Unexpected {0}")))
+                .Or(expected.Select(format("Expected '{0}'")))
+                .Or(unexpected.Select(format("Unexpected '{0}'")))
                 .IfNone(string.Empty);
         }
 

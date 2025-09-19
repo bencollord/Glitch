@@ -61,5 +61,15 @@ namespace Glitch.Functional
         {
             return queue.TryPeek(out var value) ? value : None;
         }
+
+        public static IEnumerable<T> ForEach<T>(this IEnumerable<T> source, Func<T, Unit> action)
+        {
+            foreach (var item in source)
+            {
+                action(item);
+            }
+
+            return source;
+        }
     }
 }

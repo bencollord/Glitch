@@ -5,8 +5,12 @@ namespace Glitch.Functional.Results
     // TODO Incomplete
     public static partial class Expected
     {
+        public static Success<T> Okay<T>(T value) => new(value);
+
         public static Expected<T, E> Okay<T, E>(T value) => new Success<T, E>(value);
         
+        public static Failure<E> Fail<E>(E error) => new(error);
+
         public static Expected<T, E> Fail<T, E>(E error) => new Failure<T, E>(error);
 
         public static bool IsOkay<T, E>(Expected<T, E> result) => result.IsOkay;

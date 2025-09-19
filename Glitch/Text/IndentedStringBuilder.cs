@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Glitch.Text
 {
@@ -50,10 +51,12 @@ namespace Glitch.Text
         {
             if (shouldIndent)
             {
-                inner.Append(Indentation);
+                inner.Append(indentation);
+                shouldIndent = false;
             }
 
             inner.Append(value);
+
             return this;
         }
 

@@ -20,9 +20,9 @@ namespace Glitch.Functional.Results
 
         public Exception Exception => exception;
 
-        public override Option<Error> Inner { get; }
+        public override Option<Error> Inner { get; init; }
 
-        public override bool IsException<T>() => exception is T;
+        public override bool Is<T>() => exception is T;
 
         public override Exception AsException() => exception;
     }

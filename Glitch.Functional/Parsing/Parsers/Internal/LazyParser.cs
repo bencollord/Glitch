@@ -3,7 +3,7 @@ using Glitch.Functional.Parsing.Results;
 
 namespace Glitch.Functional.Parsing.Parsers
 {
-    public class LazyParser<TToken, T> : Parser<TToken, T>
+    internal class LazyParser<TToken, T> : Parser<TToken, T>
     {
         private Lazy<Parser<TToken, T>> parser;
 

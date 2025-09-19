@@ -8,7 +8,7 @@ namespace Glitch.Functional.Parsing.Parsers
     /// </summary>
     /// <typeparam name="TToken"></typeparam>
     /// <typeparam name="T"></typeparam>
-    public class FailParser<TToken, T> : Parser<TToken, T>
+    internal class FailParser<TToken, T> : Parser<TToken, T>
     {
         private ParseError<TToken, T> error;
 
