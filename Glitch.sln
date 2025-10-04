@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Glitch.Functional", "Glitch
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Glitch.Functional.Tests", "Glitch.Functional.Tests\Glitch.Functional.Tests.csproj", "{7BE88C92-BDC4-3FA5-60C6-F2A065130DF2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Glitch.Json", "Glitch.Json\Glitch.Json.csproj", "{B01FABF7-AB0F-4F62-B4D4-26B0840EC184}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{7BE88C92-BDC4-3FA5-60C6-F2A065130DF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7BE88C92-BDC4-3FA5-60C6-F2A065130DF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7BE88C92-BDC4-3FA5-60C6-F2A065130DF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B01FABF7-AB0F-4F62-B4D4-26B0840EC184}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B01FABF7-AB0F-4F62-B4D4-26B0840EC184}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B01FABF7-AB0F-4F62-B4D4-26B0840EC184}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B01FABF7-AB0F-4F62-B4D4-26B0840EC184}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

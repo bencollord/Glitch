@@ -37,25 +37,17 @@ namespace Glitch
 
         public static string Join(this IEnumerable<string> items) => items.Join(string.Empty);
 
-        public static string Join(this IEnumerable<string> items, string separator)
-        {
-            return string.Join(separator, items);
-        }
+        public static string Join(this IEnumerable<string> items, string separator) => string.Join(separator, items);
 
-        public static string Join<T>(this IEnumerable<T> items, string separator)
-        {
-            return string.Join(separator, items);
-        }
+        public static string Join<T>(this IEnumerable<T> items, string separator) => string.Join(separator, items);
 
-        public static string JoinLines(this IEnumerable<string> items)
-        {
-            return String.Join(Environment.NewLine, items);
-        }
+        public static string Join(this IEnumerable<string> items, char separator) => string.Join(separator, items);
 
-        public static string JoinLines(this IEnumerable<string> items, string separator)
-        {
-            return String.Join(separator + Environment.NewLine, items);
-        }
+        public static string Join<T>(this IEnumerable<T> items, char separator) => string.Join(separator, items);
+
+        public static string JoinLines(this IEnumerable<string> items) => items.Join(Environment.NewLine);
+
+        public static string JoinLines(this IEnumerable<string> items, string separator) => items.Join(separator + Environment.NewLine);
 
         public static string[] SplitLines(this string input) => input.Split(Environment.NewLine);
 

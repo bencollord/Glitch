@@ -11,13 +11,10 @@ namespace Glitch.CodeAnalysis
     /// </summary>
     public static partial class CSharpSyntax
     {
-        public static SyntaxTree Parse(string code) => CSharpSyntaxTree.ParseText(code);
-
-        public static SyntaxTree Load(string path) => Load(new FileInfo(path));
-
-        public static SyntaxTree Load(FileInfo file) => Parse(file.ReadAllText()).WithFilePath(file.FullName);
-
         // TODO Move the rest of the convenience methods that aren't simple passthroughs to this file instead of .Wrappers
+        public static MemberAccessExpressionSyntax MemberAccess(ExpressionSyntax expression, SimpleNameSyntax member)
+            => MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, expression, member);
+        
         public static RecordDeclarationSyntax RecordDeclaration(SyntaxToken identifier)
             => RecordDeclaration(Token(SyntaxKind.RecordKeyword), identifier);
 

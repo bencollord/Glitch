@@ -1,4 +1,4 @@
-﻿namespace Glitch.Collections
+﻿namespace Glitch.Incomplete
 {
     public class RedBlackTree<T>
     {

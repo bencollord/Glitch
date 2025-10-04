@@ -63,6 +63,7 @@ namespace Glitch.IO
             stream.Write(bytes);
         }
 
+        [Obsolete("This method is tightly coupled to MD5 and doesn't support async. Will be replaced with something better")]
         public static string Checksum(this FileInfo file)
         {
             using var stream = file.OpenRead();

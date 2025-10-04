@@ -1,27 +1,22 @@
 ﻿using Glitch.Functional;
+using Glitch.Text;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 namespace Glitch.IO
 {
-    public sealed class FilePath : IEquatable<FilePath>, IComparable<FilePath>
+    public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePath>
     {
-        public static readonly FilePath Empty = new(string.Empty);
-
         private readonly string path;
 
         public FilePath(string? path)
         {
-            this.path = Normalize(path ?? string.Empty);
+            this.path = path?.Replace(AltDirectorySeparatorChar, DirectorySeparatorChar) ?? string.Empty;
         }
 
         public FilePath(FileSystemInfo fileOrDirectory)
             : this(fileOrDirectory.FullName) { }
-
-        public static char[] InvalidFileNameChars => Path.GetInvalidFileNameChars();
-        public static char[] InvalidPathChars => Path.GetInvalidPathChars();
-        public static FilePath TempPath => new(Path.GetTempPath());
-        public static char DirectorySeparatorChar => Path.DirectorySeparatorChar;
-        public static char AltDirectorySeparatorChar => Path.AltDirectorySeparatorChar;
 
         public FilePath Directory => new(Path.GetDirectoryName(path));
         public FilePath FileName => new(Path.GetFileName(path));
@@ -36,18 +31,12 @@ namespace Glitch.IO
         public bool HasExtension => Path.HasExtension(path);
         public bool IsFullyQualified => Path.IsPathFullyQualified(path);
         public bool IsRooted => Path.IsPathRooted(path);
+        public bool IsValid => !InvalidPathChars.Any(path.Contains) && !InvalidFileNameChars.Any(path.Contains);
 
-        public static FilePath GetRandomFileName() => new(Path.GetRandomFileName());
-        public static FilePath GetTempFileName() => new(Path.GetTempFileName());
-
-        public static FilePath Combine(string path1, string path2) => new(Path.Combine(path1, path2));
-        public static FilePath Combine(FilePath path1, FilePath path2) => Combine(path1.path, path2.path);
-        public static FilePath Combine(string path1, string path2, string path3) => new(Path.Combine(path1, path2, path3));
-        public static FilePath Combine(FilePath path1, FilePath path2, FilePath path3) => Combine(path1.path, path2.path, path3.path);
-        public static FilePath Combine(params string[] paths) => new(Path.Combine(paths));
-        public static FilePath Combine(IEnumerable<string> paths) => Combine(paths.ToArray());
-        public static FilePath Combine(IEnumerable<FilePath> paths) => Combine(paths.Select(p => p.path));
-        public static FilePath Combine(params FilePath[] paths) => Combine(paths.AsEnumerable());
+        public FilePath[] ToSegments()
+            => Array.ConvertAll(
+                path.Split([DirectorySeparatorChar, AltDirectorySeparatorChar], StringSplitOptions.RemoveEmptyEntries),
+                p => new FilePath(p));
 
         public FilePath WithExtension(string extension)
             => Extension != extension ? new(Path.ChangeExtension(path, extension)) : this;
@@ -67,6 +56,7 @@ namespace Glitch.IO
         public FilePath Append(FilePath path1, FilePath path2) => Append(path1.path, path2.path);
         public FilePath Append(string path1, string path2, string path3) => new(Path.Combine(path, path1, path2, path3));
         public FilePath Append(FilePath path1, FilePath path2, FilePath path3) => Append(path1.path, path2.path, path3.path);
+        public FilePath Append(ReadOnlySpan<string> paths) => Append(Path.Combine(paths));
         public FilePath Append(params IEnumerable<string> paths) => new(Path.Combine(paths.Prepend(path).ToArray()));
         public FilePath Append(params IEnumerable<FilePath> paths) => Append(paths.Select(p => p.path));
 
@@ -121,21 +111,6 @@ namespace Glitch.IO
 
         public override string ToString() => path;
 
-        private static string Normalize(string path)
-        {
-            // TODO: Use algorithm below
-
-            // Algorithm taken from https://en.cppreference.com/w/cpp/filesystem/path
-            // If the path is empty, stop (normal form of an empty path is an empty path).
-            // Replace each directory-separator (which may consist of multiple slashes) with a single path::preferred_separator.
-            // Remove each dot and any immediately following directory-separator.
-            // Remove each non-dot-dot filename immediately followed by a directory-separator and a dot-dot, along with any immediately following directory-separator.
-            // If there is root-directory, remove all dot-dots and any directory-separators immediately following them.
-            // If the last filename is dot-dot, remove any trailing directory-separator.
-            // If the path is empty, add a dot (normal form of ./ is .).
-
-            return path.Replace(AltDirectorySeparatorChar, DirectorySeparatorChar);
-        }
 
         public static implicit operator string(FilePath path) => path.path;
 

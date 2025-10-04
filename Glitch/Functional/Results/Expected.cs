@@ -186,9 +186,8 @@ namespace Glitch.Functional.Results
         /// <typeparam name="TResult"></typeparam>
         /// <exception cref="InvalidCastException">
         /// If the cast is not valid. If you need safe casting,
-        /// lift the result into the <see cref="Effect{T}"/> type.
-        /// 
-        /// This method is guaranteed not to throw on a failed result.
+        /// lift the result into the <see cref="Effect{T}"/> type,
+        /// which will not throw.
         /// </exception>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]

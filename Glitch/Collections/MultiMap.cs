@@ -147,7 +147,7 @@ namespace Glitch.Collections
                     State.BeforeList => MoveNextList(),
                     State.EnumeratingList => MoveNextItem(),
                     State.Complete => false,
-                    _ => GlitchDebug.Fail(false, "Invalid enumerator state reached")
+                    _ => throw new UnreachableException("Invalid enumerator state reached")
                 };
             }
 

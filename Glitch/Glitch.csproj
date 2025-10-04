@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Base64String - Copy.cs" />
     <Compile Remove="ByteSize - Copy.cs" />
     <Compile Remove="Collections\HashTable - Copy.cs" />
     <Compile Remove="Data\ObjectResultStream`1 - Copy %282%29.cs" />
@@ -19,10 +20,6 @@
     <Using Include="Glitch.Functional.FN">
       <Static>True</Static>
     </Using>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="IO\Compression\" />
   </ItemGroup>
 
 </Project>

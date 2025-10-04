@@ -1,9 +1,18 @@
 ﻿using Glitch.Functional;
+using System.Collections;
 
 namespace Glitch.Linq
 {
     public static class EnumerableExtensions
     {
+        public static IEnumerable<T> DynamicCast<T>(this IEnumerable source)
+        {
+            foreach (var item in source)
+            {
+                yield return Glitch.DynamicCast<T>.From(item);
+            }
+        }
+
         public static IEnumerable<TResult> LeftJoin<TLeft, TRight, TKey, TResult>(
                 this IEnumerable<TLeft> left,
                 IEnumerable<TRight> right,

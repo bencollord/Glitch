@@ -3,9 +3,56 @@
 namespace Glitch.Functional
 {
     using static Option;
+    using static Result;
 
     public static class LinqExtensions
     {
+        /// <summary>
+        /// Zips two sequences together into a tuple containing both elements. 
+        /// When one sequence is longer than the other, <see cref="None"/> 
+        /// is returned for the corresponding other item. The resulting sequence will
+        /// be the length of the longest sequence.
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TOther"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public static IEnumerable<(Option<TSource> First, Option<TOther> Second)> LongZip<TSource, TOther>(this IEnumerable<TSource> source, IEnumerable<TOther> other)
+        {
+            using var src = source.GetEnumerator();
+            using var otr = other.GetEnumerator();
+
+            while (true)
+            {
+                var s = src.MoveNext() ? Some(src.Current) : None;
+                var o = otr.MoveNext() ? Some(otr.Current) : None;
+
+                if (s.IsNone && o.IsNone)
+                {
+                    yield break;
+                }
+
+                yield return (s, o);
+            }
+        }
+
+        /// <summary>
+        /// Zips two sequences together using the provided <paramref name="zipper"/> function.
+        /// If one of the sequences is shorter than the other, <paramref name="zipper"/> will receive 
+        /// <see cref="None"/> for the corresponding argument. The resulting sequence will be the 
+        /// length of the longest sequence.
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TOther"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="other"></param>
+        /// <param name="zipper"></param>
+        /// <returns></returns>
+        public static IEnumerable<TResult> LongZip<TSource, TOther, TResult>(this IEnumerable<TSource> source, IEnumerable<TOther> other, Func<Option<TSource>, Option<TOther>, TResult> zipper)
+            => source.LongZip(other).Select(x => zipper(x.First, x.Second));
+
         public static TResult Match<T, TResult>(this IEnumerable<T> source, Func<IEnumerable<T>, TResult> many, TResult none)
             => source.Match(many, _ => none);
 
@@ -96,18 +143,7 @@ namespace Glitch.Functional
             => source.SingleOrNone(Some(predicate));
 
         private static Option<T> SingleOrNone<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
-            => source.TrySingle(predicate) switch
-            {
-                Result.Success<T>(var value) => Some(value),
-
-                Result.Failure<T>(Error e)
-                    when e.IsCode(ErrorCodes.NoElements) => None,
-
-                Result.Failure<T>(Error e) => throw e.AsException(),
-
-                _ => throw new BadDiscriminatedUnionException()
-            };
-                     
+            => source.TrySingleOrNone(predicate).Unwrap();
 
         public static Result<T> TrySingle<T>(this IEnumerable<T> source)
             => source.TrySingle(None);
@@ -117,24 +153,36 @@ namespace Glitch.Functional
 
         private static Result<T> TrySingle<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
         {
+            return source.TrySingleOrNone(predicate)
+                         .AndThen(opt => opt.OkayOr(Errors.NoElements));
+        }
+
+        public static Result<Option<T>> TrySingleOrNone<T>(this IEnumerable<T> source)
+            => source.TrySingleOrNone(None);
+
+        public static Result<Option<T>> TrySingleOrNone<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+            => source.TrySingleOrNone(Some(predicate));
+
+        private static Result<Option<T>> TrySingleOrNone<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
+        {
             using var iterator = predicate
                 .Select(source.Where)
                 .IfNone(source)
                 .GetEnumerator();
 
-            if (!iterator.MoveNext())
-            {
-                return Result<T>.Fail(Errors.NoElements);
-            }
-
-            var value = iterator.Current;
+            Option<T> value = None;
 
             if (iterator.MoveNext())
             {
-                return Result<T>.Fail(Errors.MoreThanOneElement);
+                value = Some(iterator.Current);
             }
 
-            return Result<T>.Okay(value);
+            if (iterator.MoveNext())
+            {
+                return Fail(Errors.MoreThanOneElement);
+            }
+
+            return Okay(value);
         }
     }
 }
