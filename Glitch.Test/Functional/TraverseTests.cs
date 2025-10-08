@@ -2,7 +2,7 @@
 using Glitch.Functional.Results;
 using System;
 using System.Runtime.CompilerServices;
-using static Glitch.Functional.Results.Result;
+using static Glitch.Functional.Results.Expected;
 
 namespace Glitch.Test.Functional
 {
@@ -21,7 +21,7 @@ namespace Glitch.Test.Functional
             // Act
             successfulResults.Add(failedResult);
 
-            Result<IEnumerable<int>> result = successfulResults.Traverse();
+            Expected<IEnumerable<int>> result = successfulResults.Traverse();
 
             // Assert
             Assert.True(result.IsError);

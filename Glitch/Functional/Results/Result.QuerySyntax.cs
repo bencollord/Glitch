@@ -1,18 +1,18 @@
 using Glitch.Functional.Attributes;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using System.Numerics;
 
 namespace Glitch.Functional.Results
 {
-    [MonadExtension(typeof(Result<>))]
-    public static class ResultQuerySyntax
+    [MonadExtension(typeof(Result<,>))]
+    public static class Result2Extensions
     {
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Result<TResult> SelectMany<T, TResult>(this Result<T> source, Func<T, Result<TResult>> bind)
-            => source.AndThen(bind);
-
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Result<TResult> SelectMany<T, TElement, TResult>(this Result<T> source, Func<T, Result<TElement>> bind, Func<T, TElement, TResult> bindMap)
+        public static Result<TResult, E> SelectMany<T, E, TElement, TResult>(this Result<T, E> source, Func<T, Result<TElement, E>> bind, Func<T, TElement, TResult> bindMap)
             => source.AndThen(s => bind(s).Select(e => bindMap(s, e)));
+
+        public static Result<TResult, E> SelectMany<T, E, TElement, TResult>(this Result<T, E> source, Func<T, Success<TElement>> bind, Func<T, TElement, TResult> bindMap)
+            => source.AndThen(s => (Result<TResult, E>)bind(s).Select(e => bindMap(s, e)));
+
+        public static Result<TResult, E> SelectMany<T, E, TElement, TResult>(this Result<T, E> source, Func<T, Failure<E>> bind, Func<T, TElement, TResult> bindMap)
+            => source.AndThen(s => Result<TResult, E>.Fail(bind(s).Error));
     }
 }

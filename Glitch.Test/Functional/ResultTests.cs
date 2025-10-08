@@ -1,4 +1,4 @@
-﻿using static Glitch.Functional.Results.Result;
+﻿using static Glitch.Functional.Results.Expected;
 
 namespace Glitch.Test.Functional
 {

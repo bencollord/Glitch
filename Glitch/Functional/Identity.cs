@@ -34,7 +34,7 @@ namespace Glitch.Functional
             yield return Value;
         }
 
-        public Result<T> Okay() => new Result.Success<T>(Value);
+        public Expected<T> Okay() => new Expected.Success<T>(Value);
 
         public Option<T> Maybe() => Option<T>.Maybe(Value);
 
@@ -47,7 +47,7 @@ namespace Glitch.Functional
 
         public static implicit operator Option<T>(Identity<T> identity) => identity.Maybe();
 
-        public static implicit operator Result<T>(Identity<T> identity) => identity.Okay();
+        public static implicit operator Expected<T>(Identity<T> identity) => identity.Okay();
 
         public static implicit operator Effect<T>(Identity<T> identity) => identity.Try(i => i);
 

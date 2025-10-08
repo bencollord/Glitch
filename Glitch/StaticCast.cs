@@ -9,7 +9,7 @@ namespace Glitch
             where TDerived : T => obj;
 
         [Obsolete("Will remove dependency on Glitch.Functional at some point")]
-        public static Result<T> TryDownFrom(object obj)
+        public static Expected<T> TryDownFrom(object obj)
             => Maybe(obj as T)
                   .OkayOrElse(_ => 
                       new InvalidCastException($"Cannot cast {obj} to type {typeof(T)}"));

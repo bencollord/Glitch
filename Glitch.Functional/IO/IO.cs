@@ -44,14 +44,14 @@ namespace Glitch.Functional
 
         protected abstract Task<T> RunIOAsync(IOEnv env);
 
-        public Result<T> Try()
+        public Expected<T> Try()
         {
             using var env = IOEnv.New();
 
             return Try(env);
         }
 
-        public Result<T> Try(IOEnv env)
+        public Expected<T> Try(IOEnv env)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace Glitch.Functional
             }
             catch (Exception e)
             {
-                return Result.Fail<T>(e);
+                return Expected.Fail<T>(e);
             }
         }
 
@@ -87,14 +87,14 @@ namespace Glitch.Functional
         public IO<TResult> AndThen<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, _ => IO.Fail<TElement>(Errors.NoElements)), project);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IO<TResult> AndThen<TResult>(Func<T, Result<TResult>> bind) => AndThen(bind, (_, y) => y);
+        public IO<TResult> AndThen<TResult>(Func<T, Expected<TResult>> bind) => AndThen(bind, (_, y) => y);
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IO<TResult> AndThen<TElement, TResult>(Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, IO.Fail<TElement>), project);
+        public IO<TResult> AndThen<TElement, TResult>(Func<T, Expected<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, IO.Fail<TElement>), project);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IO<TResult> AndThen<E, TResult>(Func<T, Expected<TResult, E>> bind) => AndThen(bind, (_, y) => y);
+        public IO<TResult> AndThen<E, TResult>(Func<T, Result<TResult, E>> bind) => AndThen(bind, (_, y) => y);
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IO<TResult> AndThen<E, TElement, TResult>(Func<T, Expected<TElement, E>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, err => IO.Fail<TElement>(Errors.Unexpected(err))), project);
+        public IO<TResult> AndThen<E, TElement, TResult>(Func<T, Result<TElement, E>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, err => IO.Fail<TElement>(Errors.Unexpected(err))), project);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Effect<TResult> AndThen<TResult>(Func<T, Effect<TResult>> bind) => AndThen(bind, (_, y) => y);

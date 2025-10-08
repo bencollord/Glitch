@@ -8,9 +8,9 @@ namespace Glitch.Functional.Parsing
     {
         public abstract ParseResult<TToken, T> Execute(TokenSequence<TToken> input);
 
-        public virtual Result<T> TryParse(TokenSequence<TToken> input)
-            => Execute(input).Match(ok => Result.Okay<T>(ok.Value),
-                                    err => Result.Fail<T>(err.Message));
+        public virtual Expected<T> TryParse(TokenSequence<TToken> input)
+            => Execute(input).Match(ok => Expected.Okay<T>(ok.Value),
+                                    err => Expected.Fail<T>(err.Message));
 
         public virtual T Parse(TokenSequence<TToken> input)
             => Execute(input).Match(ok => ok.Value,

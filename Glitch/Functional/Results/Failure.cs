@@ -5,7 +5,7 @@
         public override string ToString() 
             => $"Fail({Error})";
 
-        public Expected<T, E> Expected<T>() => Expected<T, E>.Fail(Error);
+        public Result<T, E> Expected<T>() => Result<T, E>.Fail(Error);
 
         public static implicit operator Failure<E>(E error) => new(error);
 

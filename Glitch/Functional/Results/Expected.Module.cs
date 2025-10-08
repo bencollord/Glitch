@@ -1,29 +1,37 @@
-using Glitch.Functional.Results;
-
-namespace Glitch.Functional.Results
+﻿namespace Glitch.Functional.Results
 {
     // TODO Incomplete
     public static partial class Expected
     {
-        public static Success<T> Okay<T>(T value) => new(value);
+        public static Expected<T> Okay<T>() where T : new() => Okay(new T());
 
-        public static Expected<T, E> Okay<T, E>(T value) => new Success<T, E>(value);
-        
-        public static Failure<E> Fail<E>(E error) => new(error);
+        public static Expected<T> Okay<T>(T value) => new Success<T>(value);
 
-        public static Expected<T, E> Fail<T, E>(E error) => new Failure<T, E>(error);
+        public static Results.Failure<Error> Fail(Error error) => new(error);
 
-        public static bool IsOkay<T, E>(Expected<T, E> result) => result.IsOkay;
+        public static Results.Failure<Error> Fail(IEnumerable<Error> errors) => Fail(Error.New(errors));
 
-        public static bool IsFail<T, E>(Expected<T, E> result) => result.IsError;
+        public static Expected<T> Fail<T>(Error error) => new Failure<T>(error);
 
-        public static Expected<T, E> Guard<T, E>(bool condition, T value, E error)
-            => condition ? new Success<T, E>(value) : new Failure<T, E>(error);
+        public static Expected<T> Fail<T>(IEnumerable<Error> errors) => new Failure<T>(Error.New(errors));
 
-        public static Expected<T, E> Guard<T, E>(bool condition, T value, Func<T, E> error)
-            => condition ? new Success<T, E>(value) : new Failure<T, E>(error(value));
+        public static bool IsOkay<T>(Expected<T> result) => result.IsOkay;
 
-        public static Expected<T, E> Guard<T, E>(Func<T, bool> predicate, T value, E error)
-            => predicate(value) ? new Success<T, E>(value) : new Failure<T, E>(error);
+        public static bool IsFail<T>(Expected<T> result) => result.IsError;
+
+        public static Expected<Unit> Guard(bool condition, Error error)
+            => Guard(condition, Unit.Value, error);
+
+        public static Expected<T> Guard<T>(bool condition, T value, Error error)
+            => condition ? Okay(value) : Fail<T>(error);
+
+        public static Expected<T> Guard<T>(bool condition, T value, Func<T, Error> error)
+            => condition ? Okay(value) : Fail<T>(error(value));
+
+        public static Expected<T> Guard<T>(Func<T, bool> predicate, T value, Error error)
+            => predicate(value) ? Okay(value) : Fail<T>(error);
+
+        public static Expected<T> Guard<T>(Func<T, bool> predicate, T value, Func<T, Error> error)
+            => predicate(value) ? Okay(value) : Fail<T>(error(value));
     }
 }

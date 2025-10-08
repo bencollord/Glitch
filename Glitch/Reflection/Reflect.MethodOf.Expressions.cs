@@ -16,16 +16,16 @@ namespace Glitch.Reflection
         public static MethodInfo MethodOf<T>(Expression<Action<T>> expression) => GetMethod(expression);
         public static MethodInfo MethodOf<T>(Expression<Func<T, object>> expression) => GetMethod(expression);
 
-        public static Result<MethodInfo> TryMethodOf(Expression<Action> expression) => TryGetMethod(expression);
-        public static Result<MethodInfo> TryMethodOf(Expression<Func<object>> expression) => TryGetMethod(expression);
-        public static Result<MethodInfo> TryMethodOf<T>(Expression<Action<T>> expression) => TryGetMethod(expression);
-        public static Result<MethodInfo> TryMethodOf<T>(Expression<Func<T, object>> expression) => TryGetMethod(expression);
+        public static Expected<MethodInfo> TryMethodOf(Expression<Action> expression) => TryGetMethod(expression);
+        public static Expected<MethodInfo> TryMethodOf(Expression<Func<object>> expression) => TryGetMethod(expression);
+        public static Expected<MethodInfo> TryMethodOf<T>(Expression<Action<T>> expression) => TryGetMethod(expression);
+        public static Expected<MethodInfo> TryMethodOf<T>(Expression<Func<T, object>> expression) => TryGetMethod(expression);
 
         private static MethodInfo GetMethod(LambdaExpression expression)
             => TryGetMethod(expression)
                    .IfFail(e => throw new ArgumentException(e.Message));
 
-        private static Result<MethodInfo> TryGetMethod(LambdaExpression expression)
+        private static Expected<MethodInfo> TryGetMethod(LambdaExpression expression)
         {
             var body = new UnwrapMethodCallVisitor().Visit(expression.Body);
 
@@ -34,7 +34,7 @@ namespace Glitch.Reflection
                 return call.Method;
             }
 
-            return Result.Fail($"Expression was not a valid method. Expression: {expression}");
+            return Expected.Fail($"Expression was not a valid method. Expression: {expression}");
         }
 
         private class UnwrapMethodCallVisitor : ExpressionVisitor

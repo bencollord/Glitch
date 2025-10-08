@@ -16,7 +16,7 @@ namespace Glitch.Functional
 
         IEffect<TInput, TOutput> Catch<TException>(Func<TException, TOutput> map) where TException : Exception;
 
-        Result<TOutput> Run(TInput input);
+        Expected<TOutput> Run(TInput input);
 
         virtual IEffect<TInput, TResult> Cast<TResult>() => Select(x => (TResult)(dynamic)x!);
         

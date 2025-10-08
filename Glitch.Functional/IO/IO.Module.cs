@@ -8,7 +8,7 @@ namespace Glitch.Functional
 
         public static IO<T> Return<T>() where T : new() => IO<T>.Return(new());
         public static IO<T> Return<T>(T value) => IO<T>.Return(value);
-        public static IO<T> Return<T>(Result<T> result) => IO<T>.Return(result);
+        public static IO<T> Return<T>(Expected<T> result) => IO<T>.Return(result);
         public static IO<T> ReturnAsync<T>(Task<T> value) => IO<T>.ReturnAsync(value);
         public static IO<T> Fail<T>(Error error) => IO<T>.Fail(error);
         public static IO<T> Lift<T>(Func<T> func) => IO<T>.Lift(func);
@@ -40,7 +40,7 @@ namespace Glitch.Functional
     public abstract partial class IO<T>
     {
         public static IO<T> Return(T value) => ReturnAsync(Task.FromResult(value));
-        public static IO<T> Return(Result<T> result) => result.Match(Return, Fail);
+        public static IO<T> Return(Expected<T> result) => result.Match(Return, Fail);
         public static IO<T> ReturnAsync(Task<T> value) => new ReturnAsyncIO<T>(value);
 
         public static IO<T> Fail(Error error) => new FailIO<T>(error);

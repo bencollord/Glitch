@@ -19,11 +19,11 @@ namespace Glitch.Functional
 
         public static Effect<T> Fail(Error error) => new(Effect<Unit, T>.Fail(error));
 
-        public static Effect<T> Return(Expected<T, Error> result) => new(Effect<Unit, T>.Return(result));
+        public static Effect<T> Return(Result<T, Error> result) => new(Effect<Unit, T>.Return(result));
 
-        public static Effect<T> Lift(Func<Result<T>> function) => new(Effect<Unit, T>.Lift(_ => function()));
+        public static Effect<T> Lift(Func<Expected<T>> function) => new(Effect<Unit, T>.Lift(_ => function()));
 
-        public static Effect<T> Lift(Func<Expected<T, Error>> function) => new(Effect<Unit, T>.Lift(_ => function()));
+        public static Effect<T> Lift(Func<Result<T, Error>> function) => new(Effect<Unit, T>.Lift(_ => function()));
 
         public static Effect<T> Lift(Func<T> function) => new(Effect<Unit, T>.Lift(_ => function()));
 
@@ -119,23 +119,23 @@ namespace Glitch.Functional
             => new(inner.AndThen(v => bind(v).inner, project));
 
         /// <summary>
-        /// <inheritdoc cref="Effect{Unit, T}.AndThen{TResult}(Func{T, Result{TResult}})"/>
+        /// <inheritdoc cref="Effect{Unit, T}.AndThen{TResult}(Func{T, Expected{TResult}})"/>
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="bind"></param>
         /// <returns></returns>
-        public Effect<TResult> AndThen<TResult>(Func<T, Result<TResult>> bind)
+        public Effect<TResult> AndThen<TResult>(Func<T, Expected<TResult>> bind)
             => AndThen(e => Effect<TResult>.Return(bind(e)));
 
         /// <summary>
-        /// <inheritdoc cref="Effect{Unit, T}.AndThen{TElement, TResult}(Func{T, Result{TElement}}, Func{T, TElement, TResult})"/>
+        /// <inheritdoc cref="Effect{Unit, T}.AndThen{TElement, TResult}(Func{T, Expected{TElement}}, Func{T, TElement, TResult})"/>
         /// </summary>
         /// <typeparam name="TElement"></typeparam>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="bind"></param>
         /// <param name="project"></param>
         /// <returns></returns>
-        public Effect<TResult> AndThen<TElement, TResult>(Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project)
+        public Effect<TResult> AndThen<TElement, TResult>(Func<T, Expected<TElement>> bind, Func<T, TElement, TResult> project)
             => AndThen(x => bind(x).Select(y => project(x, y)));
 
         public Effect<TResult> Choose<TResult>(Func<T, Effect<TResult>> okay, Func<Error, Effect<TResult>> error)
@@ -267,9 +267,9 @@ namespace Glitch.Functional
         /// <inheritdoc cref="Effect{Unit, T}.Run(Unit)"/>
         /// </summary>
         /// <returns></returns>
-        public Result<T> Run() => inner.Run(Unit.Value);
+        public Expected<T> Run() => inner.Run(Unit.Value);
 
-        public static implicit operator Effect<T>(Result<T> result) => Return(result);
+        public static implicit operator Effect<T>(Expected<T> result) => Return(result);
 
         public static implicit operator Effect<T>(T value) => Return(value);
 
@@ -279,9 +279,9 @@ namespace Glitch.Functional
 
         public static Effect<T> operator |(Effect<T> x, Effect<T> y) => x.Or(y);
 
-        public static Effect<T> operator |(Effect<T> x, Result<T> y) => x.Or(y);
+        public static Effect<T> operator |(Effect<T> x, Expected<T> y) => x.Or(y);
 
-        public static Effect<T> operator |(Effect<T> x, Expected<T, Error> y) => x.Or((Result<T>)y);
+        public static Effect<T> operator |(Effect<T> x, Result<T, Error> y) => x.Or((Expected<T>)y);
 
         public static Effect<T> operator |(Effect<T> x, Error y) => x.Or(y);
 
@@ -289,9 +289,9 @@ namespace Glitch.Functional
 
         public static Effect<T> operator >>(Effect<T> x, Effect<Unit> y) => x.Then(y, (v, _) => v);
 
-        public static Effect<T> operator >>(Effect<T> x, Func<Result<T>> y) => x.AndThen(_ => y());
+        public static Effect<T> operator >>(Effect<T> x, Func<Expected<T>> y) => x.AndThen(_ => y());
 
-        public static Effect<T> operator >>(Effect<T> x, Func<Expected<T, Error>> y) => x.AndThen(_ => y().Match(Result.Okay, Result.Fail<T>));
+        public static Effect<T> operator >>(Effect<T> x, Func<Result<T, Error>> y) => x.AndThen(_ => y().Match(Expected.Okay, Expected.Fail<T>));
 
         public static Effect<T> operator >>(Effect<T> x, Func<T> y) => x.Select(_ => y());
     }

@@ -12,11 +12,11 @@ namespace Glitch.Functional
         
         [return: NotNull]
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        public static Result<TResult> IIf<T, TResult>(this Result<T> source, Func<T, bool> @if, Func<T, TResult> then, Func<T, TResult> @else) => source.Select(s => @if(s) ? then(s) : @else(s));
+        public static Expected<TResult> IIf<T, TResult>(this Expected<T> source, Func<T, bool> @if, Func<T, TResult> then, Func<T, TResult> @else) => source.Select(s => @if(s) ? then(s) : @else(s));
         
         [return: NotNull] 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Expected<TResult, E> IIf<T, E, TResult>(this Expected<T, E> source, Func<T, bool> @if, Func<T, TResult> then, Func<T, TResult> @else) => source.Select(s => @if(s) ? then(s) : @else(s));
+        public static Result<TResult, E> IIf<T, E, TResult>(this Result<T, E> source, Func<T, bool> @if, Func<T, TResult> then, Func<T, TResult> @else) => source.Select(s => @if(s) ? then(s) : @else(s));
 
         [return: NotNull] 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]

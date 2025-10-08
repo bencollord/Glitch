@@ -13,7 +13,7 @@ namespace Glitch
             };
 
         [Obsolete("Will remove dependency on Glitch.Functional at some point")]
-        public static Result<T> Try<TOther>(TOther obj)
+        public static Expected<T> Try<TOther>(TOther obj)
             => Effect<TOther, T>.Lift(From).Run(obj);
     }
 }

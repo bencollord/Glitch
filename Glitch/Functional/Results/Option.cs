@@ -437,32 +437,32 @@ namespace Glitch.Functional.Results
         }
 
         /// <summary>
-        /// Wraps the value in a <see cref="Result{T}" /> if it exists,
-        /// otherwise returns an errored <see cref="Result{T}" /> containing 
+        /// Wraps the value in a <see cref="Expected{T}" /> if it exists,
+        /// otherwise returns an errored <see cref="Expected{T}" /> containing 
         /// the provided error.
         /// </summary>
         /// <param name="error"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Result<T> OkayOr(Error error) => IsSome ? Result.Okay(value!) : Result.Fail<T>(error);
+        public Expected<T> OkayOr(Error error) => IsSome ? Expected.Okay(value!) : Expected.Fail<T>(error);
 
         /// <summary>
-        /// Wraps the value in a <see cref="Result{T}" /> if it exists,
-        /// otherwise returns an errored <see cref="Result{T}" /> containing 
+        /// Wraps the value in a <see cref="Expected{T}" /> if it exists,
+        /// otherwise returns an errored <see cref="Expected{T}" /> containing 
         /// the result of the provided error function.
         /// </summary>
         /// <param name="error"></param>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Result<T> OkayOrElse(Func<Error> function) => IsSome ? Result.Okay(value!) : Result.Fail<T>(function());
+        public Expected<T> OkayOrElse(Func<Error> function) => IsSome ? Expected.Okay(value!) : Expected.Fail<T>(function());
 
         /// <summary>
-        /// Wraps the value in a <see cref="Result{T}" /> if it exists,
-        /// otherwise returns an errored <see cref="Result{T}" /> containing 
+        /// Wraps the value in a <see cref="Expected{T}" /> if it exists,
+        /// otherwise returns an errored <see cref="Expected{T}" /> containing 
         /// the result of the provided error function.
         /// </summary>
         /// <param name="error"></param>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Result<T> OkayOrElse(Func<Unit, Error> function) => IsSome ? Result.Okay(value!) : Result.Fail<T>(function(default));
+        public Expected<T> OkayOrElse(Func<Unit, Error> function) => IsSome ? Expected.Okay(value!) : Expected.Fail<T>(function(default));
 
         public bool Equals(Option<T> other)
         {
@@ -502,7 +502,7 @@ namespace Glitch.Functional.Results
         public static T operator |(Option<T> x, T y) => x.IfNone(y);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Result<T> operator |(Option<T> x, Failure<Error> y) => x.OkayOr(y.Error);
+        public static Expected<T> operator |(Option<T> x, Failure<Error> y) => x.OkayOr(y.Error);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator bool(Option<T> option) => option.IsSome;

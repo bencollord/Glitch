@@ -70,33 +70,33 @@ namespace Glitch.Functional.Results
             => result.Match(flag => flag ? ifTrue.Return()() : ifFalse.Return()(), ifNone.Return());
 
         /// <summary>
-        /// Wraps the error in a <see cref="Result{T}" /> if it exists,
-        /// otherwise returns an okay <see cref="Result{T}" /> containing 
+        /// Wraps the error in a <see cref="Expected{T}" /> if it exists,
+        /// otherwise returns an okay <see cref="Expected{T}" /> containing 
         /// the provided value.
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static Expected<T, E> FailOr<E, T>(this Option<E> opt, T value)
-            => opt.Match(Expected.Fail<T, E>, () => Expected.Okay<T, E>(value));
+        public static Result<T, E> FailOr<E, T>(this Option<E> opt, T value)
+            => opt.Match(Result.Fail<T, E>, () => Result.Okay<T, E>(value));
 
         /// <summary>
-        /// Wraps the error in a failed <see cref="Result{T}" /> if it exists,
-        /// otherwise returns an okay <see cref="Result{T}" /> containing 
+        /// Wraps the error in a failed <see cref="Expected{T}" /> if it exists,
+        /// otherwise returns an okay <see cref="Expected{T}" /> containing 
         /// the result of the provided function.
         /// </summary>
         /// <param name="function"></param>
-        public static Expected<T, E> FailOrElse<E, T>(this Option<E> opt, Func<T> function)
+        public static Result<T, E> FailOrElse<E, T>(this Option<E> opt, Func<T> function)
             where E : Error
-            => opt.Match(Expected.Fail<T, E>, function.Then(Expected.Okay<T, E>));
+            => opt.Match(Result.Fail<T, E>, function.Then(Result.Okay<T, E>));
 
         /// <summary>
-        /// Wraps the error in a failed <see cref="Result{T}" /> if it exists,
-        /// otherwise returns an okay <see cref="Result{T}" /> containing 
+        /// Wraps the error in a failed <see cref="Expected{T}" /> if it exists,
+        /// otherwise returns an okay <see cref="Expected{T}" /> containing 
         /// the result of the provided function.
         /// </summary>
         /// <param name="function"></param>
-        public static Expected<T, E> FailOrElse<E, T>(this Option<E> opt, Func<Unit, T> function)
-            => opt.Match(Expected.Fail<T, E>, function.Then(Expected.Okay<T, E>));
+        public static Result<T, E> FailOrElse<E, T>(this Option<E> opt, Func<Unit, T> function)
+            => opt.Match(Result.Fail<T, E>, function.Then(Result.Okay<T, E>));
 
         /// <summary>
         /// Unzips an option of a tuple into a tuple of two options.

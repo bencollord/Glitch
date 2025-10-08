@@ -5,7 +5,7 @@ namespace Glitch.Functional.Results
 
         public static readonly EmptyError Value = new();
 
-        private EmptyError() : base(ErrorCodes.None, "No error") { }
+        private EmptyError() : base(ErrorCodes.None, "Empty error") { }
 
         public override Option<Error> Inner => Option.None;
 

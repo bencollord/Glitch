@@ -3,7 +3,7 @@
 namespace Glitch.Functional
 {
     using static Option;
-    using static Result;
+    using static Expected;
 
     public static class LinqExtensions
     {
@@ -145,25 +145,25 @@ namespace Glitch.Functional
         private static Option<T> SingleOrNone<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
             => source.TrySingleOrNone(predicate).Unwrap();
 
-        public static Result<T> TrySingle<T>(this IEnumerable<T> source)
+        public static Expected<T> TrySingle<T>(this IEnumerable<T> source)
             => source.TrySingle(None);
 
-        public static Result<T> TrySingle<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+        public static Expected<T> TrySingle<T>(this IEnumerable<T> source, Func<T, bool> predicate)
             => source.TrySingle(Some(predicate));
 
-        private static Result<T> TrySingle<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
+        private static Expected<T> TrySingle<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
         {
             return source.TrySingleOrNone(predicate)
                          .AndThen(opt => opt.OkayOr(Errors.NoElements));
         }
 
-        public static Result<Option<T>> TrySingleOrNone<T>(this IEnumerable<T> source)
+        public static Expected<Option<T>> TrySingleOrNone<T>(this IEnumerable<T> source)
             => source.TrySingleOrNone(None);
 
-        public static Result<Option<T>> TrySingleOrNone<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+        public static Expected<Option<T>> TrySingleOrNone<T>(this IEnumerable<T> source, Func<T, bool> predicate)
             => source.TrySingleOrNone(Some(predicate));
 
-        private static Result<Option<T>> TrySingleOrNone<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
+        private static Expected<Option<T>> TrySingleOrNone<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
         {
             using var iterator = predicate
                 .Select(source.Where)

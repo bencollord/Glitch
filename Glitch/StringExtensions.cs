@@ -75,11 +75,11 @@ namespace Glitch
             where T : IParsable<T>
             => input.TryParse<T>(formatProvider).Unwrap();
 
-        public static Result<T> TryParse<T>(this string input)
+        public static Expected<T> TryParse<T>(this string input)
             where T : IParsable<T>
             => input.TryParse<T>(null);
 
-        public static Result<T> TryParse<T>(this string input, IFormatProvider? formatProvider)
+        public static Expected<T> TryParse<T>(this string input, IFormatProvider? formatProvider)
             where T : IParsable<T>
             => Try(() => T.Parse(input, formatProvider)).Run();
 
@@ -92,11 +92,11 @@ namespace Glitch
             where T : struct, Enum
             => input.TryParseEnum<T>(ignoreCase).Unwrap();
 
-        public static Result<T> TryParseEnum<T>(this string input)
+        public static Expected<T> TryParseEnum<T>(this string input)
             where T : struct, Enum
             => input.TryParseEnum<T>(false);
 
-        public static Result<T> TryParseEnum<T>(this string input, bool ignoreCase)
+        public static Expected<T> TryParseEnum<T>(this string input, bool ignoreCase)
             where T : struct, Enum
             => Try(() => Enum.Parse<T>(input, ignoreCase)).Run();
     }
