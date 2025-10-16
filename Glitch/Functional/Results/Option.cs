@@ -243,6 +243,23 @@ namespace Glitch.Functional.Results
         }
 
         /// <summary>
+        /// Executes an impure action against the value if it exists.
+        /// No op if none.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Option<T> Do(Func<T, Unit> action)
+        {
+            if (IsSome)
+            {
+                action(value!);
+            }
+
+            return this;
+        }
+
+        /// <summary>
         /// Maps using the provided function if Some.
         /// Otherwise, returns the fallback value.
         /// </summary>
@@ -284,7 +301,11 @@ namespace Glitch.Functional.Results
         /// <typeparam name="TResult"></typeparam>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TResult> Cast<TResult>()
+            // TODO Inconsistent behavior between this and result/expected, which throw if the cast fails.
+            // The case for throwing is consistency with Linq, but these types already use a different casting
+            // method to support user-defined conversion operators anyway and this method allows Linq expressions
+            // like from TResult x in opt, which is very convenient.
+        public Option<TResult> Cast<TResult>() 
             => AndThen(v => DynamicCast<TResult>.Try(v).OkayOrNone());
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]

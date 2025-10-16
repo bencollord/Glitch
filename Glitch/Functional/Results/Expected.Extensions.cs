@@ -69,11 +69,24 @@ namespace Glitch.Functional.Results
             => result.Select(flag => flag ? @true(default) : @false(default));
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Expected<T> Select<T>(this Expected<bool> result, Func<T> @true, Func<T> @false)
+            => result.Select(flag => flag ? @true() : @false());
+
+        // TODO IResult interface to remove inconsistencies
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Match<T>(this Expected<bool> result, Func<Unit, T> @true, Func<Unit, T> @false, Func<Error, T> error)
             => result.Match(flag => flag ? @true(default) : @false(default), error);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T Match<T>(this Expected<bool> result, Func<T> @true, Func<T> @false, Func<Error, T> error)
+            => result.Match(flag => flag ? @true() : @false(), error);
+
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Unit Match(this Expected<bool> result, Action @true, Action @false, Action<Error> error)
             => result.Match(flag => flag ? @true.Return()() : @false.Return()(), error.Return());
+
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Unit Match(this Expected<bool> result, Action<Unit> @true, Action<Unit> @false, Action<Error> error)
+            => result.Match(flag => flag ? @true.Return()(default) : @false.Return()(default), error.Return());
     }
 }

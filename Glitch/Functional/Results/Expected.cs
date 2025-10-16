@@ -199,15 +199,15 @@ namespace Glitch.Functional.Results
         /// <summary>
         /// Casts the wrapped value to <typeparamref name="TResult"/> if Ok,
         /// otherwise returns the current error wrapped in a new result type.
+        /// 
+        /// Unlike <see cref="Result{T, E}.Cast{TResult}"/>, will not throw on failure,
+        /// but instead returns a new <see cref="Expected{TResult}"/> with the
+        /// <see cref="InvalidCastException"/> as its wrapped error.
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
-        /// <exception cref="InvalidCastException">
-        /// If the cast is not valid. If you need safe casting,
-        /// lift the result into the <see cref="Effect{T}"/> type.
-        /// </exception>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Expected<TResult> Cast<TResult>() => inner.Cast<TResult>();
+        public Expected<TResult> Cast<TResult>() => AndThen(x => DynamicCast<TResult>.Try(x));
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Expected<T> Where(Func<T, bool> predicate)

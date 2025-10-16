@@ -24,8 +24,9 @@ namespace Glitch.Functional
 
         public static Effect<Unit> Lift(Action action) => Effect<Unit>.Lift(action.Return());
 
-        // TODO These are the same as Lift, but I'm experimenting with a new naming convention.
+        // TODO These are the same as Lift and/or Return, but I'm experimenting with a new naming convention.
         // Pick one and stick with it.
+        public static Effect<T> Try<T>(T value) => Return(value);
         public static Effect<T> Try<T>(Func<Expected<T>> function) => Lift<Unit, T>(_ => function());
 
         public static Effect<T> Try<T>(Func<T> function) => Effect<T>.Lift(function);

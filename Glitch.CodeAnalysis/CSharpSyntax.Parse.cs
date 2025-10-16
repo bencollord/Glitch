@@ -12,8 +12,8 @@ namespace Glitch.CodeAnalysis
     {
         public static SyntaxTree ParseTree(string code) => CSharpSyntaxTree.ParseText(code);
 
-        public static SyntaxTree Load(string path) => Load(new FileInfo(path));
+        public static SyntaxTree LoadTree(string path) => LoadTree(new FileInfo(path));
 
-        public static SyntaxTree Load(FileInfo file) => ParseTree(file.ReadAllText()).WithFilePath(file.FullName);
+        public static SyntaxTree LoadTree(FileInfo file) => ParseTree(file.ReadAllText()).WithFilePath(file.FullName);
     }
 }
