@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace Glitch.Functional.Results
 {
     [Monad]
-    public abstract partial record Result<T, E> : IResult<T, E>
+    public abstract partial record Result<T, E>
     {
         private protected Result() { }
 
@@ -221,10 +221,6 @@ namespace Glitch.Functional.Results
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract override string ToString();
 
-        // TODO Make these unnecessary
-        IResult<TResult, E> IResult<T, E>.Select<TResult>(Func<T, TResult> map) => Select(map);
-        IResult<T, EResult> IResult<T, E>.SelectError<EResult>(Func<E, EResult> map) => SelectError(map);
-
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator true(Result<T, E> result) => result.IsOkay;
 
@@ -254,10 +250,10 @@ namespace Glitch.Functional.Results
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator T(Result<T, E> result)
-            => result.UnwrapOrElse(_ => Errors.InvalidCast<T>(result).Throw<T>());
+            => result.Match(Identity, _ => Errors.InvalidCast<T>(result).Throw<T>());
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator E(Result<T, E> result)
-            => result.UnwrapErrorOrElse(_ => Errors.InvalidCast<E>(result).Throw<E>());
+            => result.Match(_ => Errors.InvalidCast<E>(result).Throw<E>(), Identity);
     }
 }

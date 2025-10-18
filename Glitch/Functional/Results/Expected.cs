@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace Glitch.Functional.Results
 {
     [Monad]
-    public partial record Expected<T> : IResult<T, Error>
+    public partial record Expected<T>
     {
         private Result<T, Error> inner;
 
@@ -249,12 +249,6 @@ namespace Glitch.Functional.Results
         public T Unwrap() => inner.UnwrapOrElse(err => err.Throw<T>());
 
         public override string ToString() => inner.ToString();
-
-        // TODO Try and make these methods not necessary
-        IResult<TResult, Error> IResult<T, Error>.Select<TResult>(Func<T, TResult> map) => Select(map);
-
-        IResult<T, EResult> IResult<T, Error>.SelectError<EResult>(Func<Error, EResult> map)
-            => Match<IResult<T, EResult>>(v => Result.Okay<T, EResult>(v), err => Result.Fail<T, EResult>(map(err)));
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator true(Expected<T> result) => result.IsOkay;

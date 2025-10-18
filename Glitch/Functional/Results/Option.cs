@@ -11,10 +11,7 @@ namespace Glitch.Functional.Results
     }
 
     [Monad]
-    public readonly partial struct Option<T> 
-        : IResult<T, Unit>,
-          IEquatable<Option<T>>, 
-          IComparable<Option<T>>
+    public readonly partial struct Option<T> : IEquatable<Option<T>>, IComparable<Option<T>>
     {
         public static readonly Option<T> None = new();
 
@@ -37,10 +34,6 @@ namespace Glitch.Functional.Results
         public bool IsNone => !hasValue;
 
         public object Value => Match<object>(v => v!, _ => OptionNone.Value);
-
-        bool IResult.IsError => IsNone;
-
-        bool IResult.IsOkay => IsSome;
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsSomeAnd(Func<T, bool> predicate)
@@ -507,10 +500,6 @@ namespace Glitch.Functional.Results
                 })
                 .IfNone(_ => self.IsSome.CompareTo(other.IsSome));
         }
-
-        IResult<TResult, Unit> IResult<T, Unit>.Select<TResult>(Func<T, TResult> map) => Select(map);
-
-        IResult<T, EResult> IResult<T, Unit>.SelectError<EResult>(Func<Unit, EResult> map) => OkayOrElse(map);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator true(Option<T> option) => option.IsSome;

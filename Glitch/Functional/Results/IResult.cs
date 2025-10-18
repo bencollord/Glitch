@@ -7,6 +7,12 @@ namespace Glitch.Functional.Results
         bool IsOkay { get; }
     }
 
+    public interface IResultFactory<T, E>
+    {
+        static abstract IResult<T, E> Okay(T value);
+        static abstract IResult<T, E> Fail(E error);
+    }
+
     public interface IResult<out T, out E> : IResult
     {
         TResult Match<TResult>(Func<T, TResult> okay, Func<E, TResult> error);
