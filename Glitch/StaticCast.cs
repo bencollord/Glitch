@@ -11,7 +11,6 @@ namespace Glitch
         [Obsolete("Will remove dependency on Glitch.Functional at some point")]
         public static Expected<T> TryDownFrom(object obj)
             => Maybe(obj as T)
-                  .OkayOrElse(_ => 
-                      new InvalidCastException($"Cannot cast {obj} to type {typeof(T)}"));
+                  .Expect(Errors.InvalidCast<T>(obj));
     }
 }

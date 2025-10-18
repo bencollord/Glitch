@@ -26,9 +26,13 @@ namespace Glitch.Functional.Results
 
         public static Error New(int code, string message) => new ApplicationError(code, message);
 
+        public static Error New<TCode>(TCode code, string message) where TCode : Enum => New(Convert.ToInt32(code), message);
+
         public static Error New(Exception exception) => new ExceptionError(exception);
 
         public static Error New(int code, Exception exception) => new ExceptionError(code, exception);
+
+        public static Error New<TCode>(TCode code, Exception exception) => New(Convert.ToInt32(code), exception);
 
         public static Error New(params IEnumerable<Error> errors) 
             => errors.Match(just: Identity,

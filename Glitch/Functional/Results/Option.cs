@@ -11,7 +11,10 @@ namespace Glitch.Functional.Results
     }
 
     [Monad]
-    public readonly partial struct Option<T> : IEquatable<Option<T>>
+    public readonly partial struct Option<T> 
+        : IResult<T, Unit>,
+          IEquatable<Option<T>>, 
+          IComparable<Option<T>>
     {
         public static readonly Option<T> None = new();
 
@@ -34,6 +37,10 @@ namespace Glitch.Functional.Results
         public bool IsNone => !hasValue;
 
         public object Value => Match<object>(v => v!, _ => OptionNone.Value);
+
+        bool IResult.IsError => IsNone;
+
+        bool IResult.IsOkay => IsSome;
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsSomeAnd(Func<T, bool> predicate)
@@ -210,7 +217,7 @@ namespace Glitch.Functional.Results
         /// <param name="other"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<(T, TOther)> Zip<TOther>(Option<TOther> other)
+        public Option<(T Left, TOther Right)> Zip<TOther>(Option<TOther> other)
             => Zip(other, (x, y) => (x, y));
 
         /// <summary>
@@ -326,47 +333,6 @@ namespace Glitch.Functional.Results
         /// <param name="fallback"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T UnwrapOr(T fallback) => Match(val => val, () => fallback);
-
-        /// <summary>
-        /// Returns the wrapped value if exists. Otherwise, returns the result
-        /// of the fallback function.
-        /// </summary>
-        /// <param name="fallback"></param>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T UnwrapOrElse(Func<T> fallback) => Match(val => val, fallback);
-
-        /// <summary>
-        /// Returns the wrapped value if exists. Otherwise, returns the result
-        /// of the fallback function.
-        /// </summary>
-        /// <param name="fallback"></param>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T UnwrapOrElse(Func<Unit, T> fallback) => Match(val => val, fallback);
-
-        /// <summary>
-        /// Returns the wrapped value if exists. Otherwise, returns the default value
-        /// of <typeparamref name="T"/>.
-        /// </summary>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T? UnwrapOrDefault() => IsSome ? value : default;
-
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryUnwrap(out T result)
-        {
-            result = value!;
-            return IsSome;
-        }
-
-        /// <summary>
-        /// Returns the wrapped value if it exists, otherwise returns the fallback value.
-        /// </summary>
-        /// <param name="fallback"></param>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T IfNone(T fallback) => Match(val => val, () => fallback);
 
         /// <summary>
@@ -444,46 +410,71 @@ namespace Glitch.Functional.Results
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T? DefaultIfNone(Func<T?> fallback) => IsSome ? value : fallback();
 
-        /// <summary>
-        /// Yields a singleton sequence if some, otherwise an empty sequence.
-        /// </summary>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> Iterate()
-        {
-            if (IsSome)
-            {
-                yield return value!;
-            }
-        }
-
+        // ==================== TODO Should these be extension methods? =====================================
         /// <summary>
         /// Wraps the value in a <see cref="Expected{T}" /> if it exists,
         /// otherwise returns an errored <see cref="Expected{T}" /> containing 
         /// the provided error.
         /// </summary>
+        /// <remarks>
+        /// Convenience overload for <see cref="OkayOr{E}(E)"/> specifically for <see cref="Error"/> values.
+        /// </remarks>
         /// <param name="error"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Expected<T> OkayOr(Error error) => IsSome ? Expected.Okay(value!) : Expected.Fail<T>(error);
+        public Expected<T> Expect(Error error) => OkayOr(error);
 
         /// <summary>
         /// Wraps the value in a <see cref="Expected{T}" /> if it exists,
         /// otherwise returns an errored <see cref="Expected{T}" /> containing 
         /// the result of the provided error function.
         /// </summary>
+        /// <remarks>
+        /// Convenience overload for <see cref="OkayOrElse{E}(Func{E})"/> specifically for <see cref="Error"/> values.
+        /// </remarks>
         /// <param name="error"></param>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Expected<T> OkayOrElse(Func<Error> function) => IsSome ? Expected.Okay(value!) : Expected.Fail<T>(function());
+        public Expected<T> Expect(Func<Error> function) => OkayOrElse(function);
 
         /// <summary>
         /// Wraps the value in a <see cref="Expected{T}" /> if it exists,
         /// otherwise returns an errored <see cref="Expected{T}" /> containing 
         /// the result of the provided error function.
         /// </summary>
+        /// <remarks>
+        /// Convenience overload for <see cref="OkayOrElse{E}(Func{Unit, E})"/> specifically for <see cref="Error"/> values.
+        /// </remarks>
         /// <param name="error"></param>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Expected<T> OkayOrElse(Func<Unit, Error> function) => IsSome ? Expected.Okay(value!) : Expected.Fail<T>(function(default));
+        public Expected<T> Expect(Func<Unit, Error> function) => IsSome ? Result.Okay(value!) : Result.Fail(function(default));
+
+        /// <summary>
+        /// Wraps the value in a <see cref="Result{T, E}" /> if it exists,
+        /// otherwise returns an errored <see cref="Result{T, E}" /> containing 
+        /// the provided error.
+        /// </summary>
+        /// <param name="error"></param>
+        /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Result<T, E> OkayOr<E>(E error) => IsSome ? Result.Okay(value!) : Result.Fail(error);
+
+        /// <summary>
+        /// Wraps the value in a <see cref="Result{T, E}" /> if it exists,
+        /// otherwise returns an errored <see cref="Result{T, E}" /> containing 
+        /// the result of the provided error function.
+        /// </summary>
+        /// <param name="error"></param>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Result<T, E> OkayOrElse<E>(Func<E> function) => IsSome ? Result.Okay(value!) : Result.Fail(function());
+
+        /// <summary>
+        /// Wraps the value in a <see cref="Result{T, E}" /> if it exists,
+        /// otherwise returns an errored <see cref="Result{T, E}" /> containing 
+        /// the result of the provided error function.
+        /// </summary>
+        /// <param name="error"></param>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Result<T, E> OkayOrElse<E>(Func<Unit, E> function) => IsSome ? Result.Okay(value!) : Result.Fail(function(default));
 
         public bool Equals(Option<T> other)
         {
@@ -502,6 +493,24 @@ namespace Glitch.Functional.Results
 
         public override string ToString()
             => Match(v => $"Some({v})", () => "None");
+
+        public int CompareTo(Option<T> other)
+        {
+            var self = this;
+
+            return Zip(other)
+                .AndThen(pair => pair.Left switch
+                {
+                    IComparable<T> c => Option<int>.Some(c.CompareTo(pair.Right)),
+                    IComparable c => Option<int>.Some(c.CompareTo(pair.Right)),
+                    _ => Option<int>.None
+                })
+                .IfNone(_ => self.IsSome.CompareTo(other.IsSome));
+        }
+
+        IResult<TResult, Unit> IResult<T, Unit>.Select<TResult>(Func<T, TResult> map) => Select(map);
+
+        IResult<T, EResult> IResult<T, Unit>.SelectError<EResult>(Func<Unit, EResult> map) => OkayOrElse(map);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator true(Option<T> option) => option.IsSome;
@@ -536,6 +545,18 @@ namespace Glitch.Functional.Results
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Option<T> x, Option<T> y) => x.Equals(y);
+
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >=(Option<T> x, Option<T> y) => x.CompareTo(y) >= 0;
+
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <=(Option<T> x, Option<T> y) => x.CompareTo(y) <= 0;
+
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >(Option<T> x, Option<T> y) => x.CompareTo(y) > 0;
+
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <(Option<T> x, Option<T> y) => x.CompareTo(y) < 0;
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Option<T> x, Option<T> y) => !(x == y);

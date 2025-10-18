@@ -1,24 +1,33 @@
 namespace Glitch.Functional.Results
 {
-    public static class ErrorCodes
+    public enum ErrorCode
     {
-        public const int None               = -0xBC00000;
-        public const int Aggregate          = -0xBC00001;
-        public const int NoElements         = -0xBC00002;
-        public const int MoreThanOneElement = -0xBC00003;
-        public const int ParseError         = -0xBC00004;
-        public const int Unexpected         = -0xBC00005;
-        public const int InvalidCast        = -0xBADCA57;
+        None               = -0xBAD0000,
+        Aggregate          = -0xBAD0001,
+        NoElements         = -0xBAD0002,
+        MoreThanOneElement = -0xBAD0003,
+        ParseError         = -0xBAD0004,
+        Unexpected         = -0xBAD0005,
+        BadUnwrap          = -0xBAD0006,
+        KeyNotFound        = -0xBAD0007,
+        InvalidCast        = -0xBADCA57,
     }
 
     public static class Errors
     {
-        public static readonly Error NoElements = Error.New(ErrorCodes.NoElements, "No elements found");
+        public static readonly Error NoElements = Error.New(ErrorCode.NoElements, "No elements found");
 
-        public static readonly Error MoreThanOneElement = Error.New(ErrorCodes.MoreThanOneElement, "More than one element found");
+        public static readonly Error MoreThanOneElement = Error.New(ErrorCode.MoreThanOneElement, "More than one element found");
 
-        public static Error Unexpected<E>(E value) => Error.New(ErrorCodes.Unexpected, $"Unexpected {value}");
+        public static Error Unexpected<E>(E value) => Error.New(ErrorCode.Unexpected, $"Unexpected {value}");
 
-        public static Error InvalidCast(object? from, Type to) => Error.New(ErrorCodes.InvalidCast, new InvalidCastException($"Cannot cast '{from ?? "null"}' to type {to}"));
+        public static Error InvalidCast<T>(object? from) => InvalidCast(from, typeof(T));
+        public static Error InvalidCast(object? from, Type to) => Error.New(ErrorCode.InvalidCast, new InvalidCastException($"Cannot cast '{from ?? "null"}' to type {to}"));
+
+        internal static Error BadUnwrap<E>(E error) => BadUnwrap($"Attempted to unwrap a faulted result. Error: {error}");
+        internal static Error BadUnwrapError<T>(T value) => BadUnwrap($"Attempted to unwrap error value of a successful result. Value: {value}");
+        internal static Error KeyNotFound<TKey>(TKey key) => Error.New(ErrorCode.KeyNotFound, $"Key '{key}' was not found");
+        
+        private static Error BadUnwrap(string message) => Error.New(ErrorCode.BadUnwrap, new InvalidOperationException(message));
     }
 }

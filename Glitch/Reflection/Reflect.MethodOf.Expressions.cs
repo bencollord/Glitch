@@ -23,7 +23,7 @@ namespace Glitch.Reflection
 
         private static MethodInfo GetMethod(LambdaExpression expression)
             => TryGetMethod(expression)
-                   .IfFail(e => throw new ArgumentException(e.Message));
+                   .UnwrapOrElse(e => throw new ArgumentException(e.Message));
 
         private static Expected<MethodInfo> TryGetMethod(LambdaExpression expression)
         {

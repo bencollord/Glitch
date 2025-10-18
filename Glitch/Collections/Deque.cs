@@ -30,7 +30,7 @@ namespace Glitch.Collections
             => items.AddFirst(item ?? throw new ArgumentNullException(nameof(item)));
 
         public T Shift() => TryShift()
-            .OkayOrElse(EmptyDequeError)
+            .Expect(EmptyDequeError)
             .Unwrap();
 
         public Option<T> TryShift() 
@@ -40,7 +40,7 @@ namespace Glitch.Collections
             => items.AddLast(item ?? throw new ArgumentNullException(nameof(item)));
 
         public T Pop() => TryPop()
-            .OkayOrElse(EmptyDequeError)
+            .Expect(EmptyDequeError)
             .Unwrap();
 
         public Option<T> TryPop() 

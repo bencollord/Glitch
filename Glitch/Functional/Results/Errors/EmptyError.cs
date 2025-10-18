@@ -5,11 +5,11 @@ namespace Glitch.Functional.Results
 
         public static readonly EmptyError Value = new();
 
-        private EmptyError() : base(ErrorCodes.None, "Empty error") { }
+        private EmptyError() : base((int)ErrorCode.None, "Empty error") { }
 
         public override Option<Error> Inner => Option.None;
 
-        public override Exception AsException() => throw new BottomException("Error is empty");
+        public override Exception AsException() => throw new InvalidOperationException("Error is empty");
 
         public override Error Add(Error other) => other;
 

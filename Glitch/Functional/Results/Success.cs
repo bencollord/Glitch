@@ -1,23 +1,8 @@
 ﻿namespace Glitch.Functional.Results
 {
-    public readonly record struct Success<T>(T Value) : IEquatable<Success<T>>
+    public readonly record struct Success<T>(T Value) : Okay<T>
     {
-        public Success<TResult> Select<TResult>(Func<T, TResult> map) => new(map(Value));
-
-        public Success<TResult> Apply<TResult>(Success<Func<T, TResult>> function)
-            => AndThen(v => function.Select(fn => fn(v)));
-
-        public Success<TResult> AndThen<TResult>(Func<T, Success<TResult>> bind)
-            => bind(Value);
-
-        public Success<TResult> AndThen<TElement, TResult>(Func<T, Success<TElement>> bind, Func<T, TElement, TResult> project)
-            => new(project(Value, bind(Value).Value));
-
-        public Success<TResult> Cast<TResult>()
-            => new((TResult)(dynamic)Value!);
-
-        public override string ToString() 
-            => $"Okay({Value})";
+        public override string ToString() => $"Okay({Value})";
 
         public static implicit operator Success<T>(T value) => new(value);
 

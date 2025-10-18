@@ -17,7 +17,7 @@ namespace Glitch.Functional.Parsing.Json
         public JsonNode this[string name]
             => Property(name)
                    .Select(p => p.Value)
-                   .OkayOrElse(_ => new KeyNotFoundException(name))
+                   .Expect(_ => new KeyNotFoundException(name))
                    .Unwrap();
 
         public JsonObject Add(string name, JsonNode value) => Add(new JsonProperty(name, value));

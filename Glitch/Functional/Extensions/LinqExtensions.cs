@@ -154,7 +154,7 @@ namespace Glitch.Functional
         private static Expected<T> TrySingle<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
         {
             return source.TrySingleOrNone(predicate)
-                         .AndThen(opt => opt.OkayOr(Errors.NoElements));
+                         .AndThen(opt => opt.Expect(Errors.NoElements));
         }
 
         public static Expected<Option<T>> TrySingleOrNone<T>(this IEnumerable<T> source)

@@ -27,7 +27,7 @@ namespace Glitch.Collections
             {
                 return FindEntry(key)
                     .Select(x => x.Value)
-                    .OkayOrElse(_ => new KeyNotFoundException())
+                    .Expect(_ => Errors.KeyNotFound(key))
                     .Unwrap();
             }
             set

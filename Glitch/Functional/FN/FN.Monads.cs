@@ -23,10 +23,6 @@ namespace Glitch.Functional
 
         public static Unit Ignore<T>(T _) => default;
 
-        public static Identity<T> Id<T>() where T : new() => IdentityMonad<T>(new());
-
-        public static Identity<T> IdentityMonad<T>(T value) => value;
-
         public static Option<T> Some<T>() where T : new() => Some<T>(new());
 
         public static Option<T> Some<T>(T value) => Option<T>.Some(value);

@@ -1,10 +1,8 @@
-using Glitch.Functional.Results;
-
 namespace Glitch.Functional.Results
 {
     public static partial class Result
     {
-        public sealed record Success<T, E>(T Value) : Result<T, E>
+        public sealed record Success<T, E>(T Value) : Result<T, E>, Okay<T>
         {
             public override bool IsOkay => true;
 
@@ -20,12 +18,6 @@ namespace Glitch.Functional.Results
 
             /// <inheritdoc />
             public override Result<T, E> IfFail(Action<E> _) => this;
-
-            /// <inheritdoc />
-            public override IEnumerable<T> Iterate()
-            {
-                yield return Value;
-            }
 
             /// <inheritdoc />
             public override Result<TResult, E> Select<TResult>(Func<T, TResult> mapper)
@@ -51,37 +43,7 @@ namespace Glitch.Functional.Results
             public override Result<T, E> Guard(Func<T, bool> predicate, Func<T, E> error)
                 => predicate(Value) ? this : error(Value);
 
-            /// <inheritdoc />
-            public override Option<T> OkayOrNone() => Option.Some(Value);
-
-            public override string ToString() => $"Ok: {Value}";
-
-            /// <inheritdoc />
-            public override T Unwrap() => Value;
-
-            /// <inheritdoc />
-            public override T IfFail(T _) => Value;
-
-            /// <inheritdoc />
-            public override T IfFail(Func<E, T> _) => Value;
-
-            public override E UnwrapErrorOr(E fallback) => fallback;
-
-            public override bool TryUnwrap(out T result)
-            {
-                result = Value;
-                return true;
-            }
-
-            public override bool TryUnwrapError(out E result)
-            {
-                result = default!;
-                return false;
-            }
-
-            public override E UnwrapErrorOrElse(Func<T, E> fallback) => fallback(Value);
-
-            public override Option<E> ErrorOrNone() => Option.None;
+            public override string ToString() => $"Okay({Value})";
         }
     }
 }

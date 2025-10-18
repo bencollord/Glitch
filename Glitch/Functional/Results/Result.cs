@@ -19,12 +19,6 @@ namespace Glitch.Functional.Results
 
         public abstract bool IsError { get; }
 
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsOkayAnd(Func<T, bool> predicate) => Match(predicate, false);
-
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsErrorOr(Func<T, bool> predicate) => Match(predicate, true);
-
         /// <summary>
         /// If the result is <see cref="Result.Success{T}" />, applies
         /// the provided function to the value and returns it wrapped in a
@@ -158,14 +152,6 @@ namespace Glitch.Functional.Results
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract Result<T, E> IfFail(Action<E> action);
 
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TResult Match<TResult>(Func<T, TResult> okay, TResult error)
-            => Match(okay, _ => error);
-
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TResult Match<TResult>(Func<T, TResult> okay, Func<TResult> error)
-            => Match(okay, _ => error());
-
         /// <summary>
         /// If Ok, returns the result of the first function to the wrapped value.
         /// Otherwise, returns the result of the second function to the wrapped error.
@@ -176,8 +162,6 @@ namespace Glitch.Functional.Results
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract TResult Match<TResult>(Func<T, TResult> okay, Func<E, TResult> error);
-
-        public Unit Match(Action<T> okay, Action<E> error) => Match(okay.Return(), error.Return());
 
         /// <summary>
         /// If Okay, casts the wrapped value to <typeparamref name="TResult"/>,
@@ -238,108 +222,6 @@ namespace Glitch.Functional.Results
         public Result<TResult, E> Zip<TOther, TResult>(Result<TOther, E> other, Func<T, TOther, TResult> zipper)
             => AndThen(_ => other, zipper);
 
-        /// <summary>
-        /// Returns the wrapped value if ok. Otherwise throws the wrapped error
-        /// as an exception.
-        /// </summary>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract T Unwrap();
-
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T UnwrapOr(T fallback) => IfFail(fallback);
-
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract bool TryUnwrap(out T result);
-
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract bool TryUnwrapError(out E result);
-
-        /// <summary>
-        /// Returns the wrapped value if Ok, otherwise returns the fallback value.
-        /// </summary>
-        /// <param name="fallback"></param>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract T IfFail(T fallback);
-
-        /// <summary>
-        /// Returns the wrapped value if Ok. Otherwise, returns the result
-        /// of the fallback function.
-        /// </summary>
-        /// <param name="fallback"></param>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T IfFail(Func<T> fallback) => IfFail(_ => fallback());
-
-        /// <summary>
-        /// Returns the wrapped value if Ok. Otherwise, returns the result
-        /// of the fallback function applied to the wrapped error.
-        /// </summary>
-        /// <param name="fallback"></param>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract T IfFail(Func<E, T> fallback);
-
-        /// <summary>
-        /// Returns Some(<typeparamref name="T" />) if Ok. Otherwise, returns
-        /// an empty <see cref="Option{T}" />.
-        /// </summary>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract Option<T> OkayOrNone();
-
-        /// <summary>
-        /// Returns the wrapped error if faulted. Otherwise throws an <see cref="InvalidOperationException"/>.
-        /// </summary>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public E UnwrapError()
-            => UnwrapErrorOrElse(() => throw new InvalidOperationException("Cannot unwrap error of successful result"));
-
-        /// <summary>
-        /// Returns the wrapped error if faulted otherwise returns the fallback error.
-        /// </summary>
-        /// <param name="fallback"></param>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract E UnwrapErrorOr(E fallback);
-
-        /// <summary>
-        /// Returns the wrapped error if faulted. Otherwise, returns the error
-        /// produced by the fallback function.
-        /// </summary>
-        /// <param name="fallback"></param>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public E UnwrapErrorOrElse(Func<E> fallback)
-            => UnwrapErrorOrElse(_ => fallback());
-
-        /// <summary>
-        /// Returns the wrapped error if faulted. Otherwise, returns the error
-        /// produced by the fallback function.
-        /// </summary>
-        /// <param name="fallback"></param>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract E UnwrapErrorOrElse(Func<T, E> fallback);
-
-        /// <summary>
-        /// Returns Some(<see cref="Error"/>) if faulted. Otherwise, returns
-        /// an empty <see cref="Option{Error}"/>.
-        /// </summary>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract Option<E> ErrorOrNone();
-
-        /// <summary>
-        /// Returns a singleton <see cref="IEnumerable{T}" /> if Ok.
-        /// Otherwise, yields and empty <see cref="IEnumerable{T}" .
-        /// </summary>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract IEnumerable<T> Iterate();
-
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract override string ToString();
 
@@ -376,11 +258,10 @@ namespace Glitch.Functional.Results
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator T(Result<T, E> result)
-            => result.IfFail(err => throw new InvalidCastException($"Cannot cast a faulted result to {typeof(T)}"));
+            => result.UnwrapOrElse(_ => Errors.InvalidCast<T>(result).Throw<T>());
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator E(Result<T, E> result)
-            => result is Result.Failure<T, E>(var err)
-                   ? err : throw new InvalidCastException("Cannot cast a successful result to an error");
+            => result.UnwrapErrorOrElse(_ => Errors.InvalidCast<E>(result).Throw<E>());
     }
 }

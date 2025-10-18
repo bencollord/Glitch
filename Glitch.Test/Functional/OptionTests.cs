@@ -1,4 +1,5 @@
-﻿using Glitch.Functional;
+﻿using FluentAssertions;
+using Glitch.Functional;
 using Glitch.Functional.Results;
 using static Glitch.Functional.FN;
 
@@ -6,6 +7,18 @@ namespace Glitch.Test.Functional
 {
     public class OptionTests
     {
+        [Fact]
+        public void Unwrap_ShouldThrowOptionSpecificException_AndBypassExtensionMethodDefault()
+        {
+            // Arrange
+            Option<int> option = None;
+
+            // Act/Assert
+            option.Invoking(opt => opt.Unwrap())
+                  .Should().Throw<InvalidOperationException>()
+                  .WithMessage("Attempted to unwrap an empty option");
+        }
+
         [Fact]
         public void Traverse_ShouldProduceOptionOfList_WhenFunctionIsSome()
         {

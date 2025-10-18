@@ -1,9 +1,23 @@
-﻿using static Glitch.Functional.Results.Expected;
+﻿using FluentAssertions;
+using Glitch.Functional.Results;
+using static Glitch.Functional.Results.Expected;
 
 namespace Glitch.Test.Functional
 {
-    public class ResultTests
+    public class ExpectedTests
     {
+        [Fact]
+        public void Unwrap_Failed_ShouldThrowContainedException_AndBypassExtensionMethodDefault()
+        {
+            // Arrange
+            Expected<int> item = Fail(new KeyNotFoundException("The key wasn't found"));
+
+            // Act/Assert
+            item.Invoking(ex => ex.Unwrap())
+                .Should().Throw<KeyNotFoundException>()
+                .WithMessage("The key wasn't found");
+        }
+
         [Fact]
         public void ZipWith_BothResultsOkay_ShouldApplyFunction()
         {
