@@ -107,22 +107,13 @@ namespace Glitch.Functional.Results
         public abstract Result<T, EResult> OrElse<EResult>(Func<E, Result<T, EResult>> other);
 
         /// <summary>
-        /// BiBind operation
-        /// </summary>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="okay"></param>
-        /// <param name="error"></param>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Result<TResult, EResult> Choose<TResult, EResult>(Func<T, Result<TResult, EResult>> okay, Func<E, Result<TResult, EResult>> error) => Match(okay, error);
-
-        /// <summary>
         /// Executes an impure action against the value if Ok.
         /// No op if fail.
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Obsolete("Impure actions should really be Effects.")]
         public Result<T, E> Do(Action<T> action) => Do(action.Return());
 
         /// <summary>
@@ -132,6 +123,7 @@ namespace Glitch.Functional.Results
         /// <param name="action"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Obsolete("Impure actions should really be Effects.")]
         public Result<T, E> Do(Func<T, Unit> action) => Select(x => action(x).Return(x));
 
         /// <summary>
@@ -141,6 +133,7 @@ namespace Glitch.Functional.Results
         /// <param name="action"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Obsolete("Impure actions should really be Effects.")]
         public Result<T, E> IfFail(Action action) => IfFail(_ => action());
 
         /// <summary>
@@ -150,6 +143,7 @@ namespace Glitch.Functional.Results
         /// <param name="action"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Obsolete("Impure actions should really be Effects.")]
         public abstract Result<T, E> IfFail(Action<E> action);
 
         /// <summary>
@@ -176,6 +170,8 @@ namespace Glitch.Functional.Results
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result<TResult, E> Cast<TResult>() => Select(DynamicCast<TResult>.From);
+
+        public Result<E, T> Flip() => Match(Result.Fail<E, T>, Result.Okay<E, T>);
 
         /// <summary>
         /// For a successful result, checks the value against a predicate

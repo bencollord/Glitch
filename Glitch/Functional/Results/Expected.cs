@@ -120,23 +120,13 @@ namespace Glitch.Functional.Results
             => inner.OrElse(x => bind(x));
 
         /// <summary>
-        /// BiBind operation
-        /// </summary>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="okay"></param>
-        /// <param name="error"></param>
-        /// <returns></returns>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Expected<TResult> Choose<TResult>(Func<T, Expected<TResult>> okay, Func<Error, Expected<TResult>> error)
-            => inner.Choose(v => okay(v).inner, e => error(e).inner);
-
-        /// <summary>
         /// Executes an impure action against the value if Ok.
         /// No op if fail.
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Obsolete("Eliminate impure actions here. These should really be Effects")]
         public Expected<T> Do(Action<T> action) => inner.Do(action);
 
         /// <summary>
@@ -146,6 +136,7 @@ namespace Glitch.Functional.Results
         /// <param name="action"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Obsolete("Eliminate impure actions here. These should really be Effects")]
         public Expected<T> Do(Func<T, Unit> action) => inner.Do(action);
 
         /// <summary>
@@ -155,6 +146,7 @@ namespace Glitch.Functional.Results
         /// <param name="action"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Obsolete("Eliminate impure actions here. These should really be Effects")]
         public Expected<T> IfFail(Action action) => inner.IfFail(action);
 
         /// <summary>
@@ -164,6 +156,7 @@ namespace Glitch.Functional.Results
         /// <param name="action"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Obsolete("Eliminate impure actions here. These should really be Effects")]
         public Expected<T> IfFail(Action<Error> action) => inner.IfFail(action);
 
         /// <summary>
