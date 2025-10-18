@@ -306,7 +306,7 @@ namespace Glitch.Functional.Results
             // method to support user-defined conversion operators anyway and this method allows Linq expressions
             // like from TResult x in opt, which is very convenient.
         public Option<TResult> Cast<TResult>() 
-            => AndThen(v => DynamicCast<TResult>.Try(v).OkayOrNone());
+            => AndThen(v => DynamicCast<TResult>.Try(v, out var r) ? Option.Some(r) : Option.None);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> OfType<TResult>()

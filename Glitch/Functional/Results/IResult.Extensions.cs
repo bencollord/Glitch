@@ -1,8 +1,12 @@
 ﻿
+using System.Diagnostics.CodeAnalysis;
+
 namespace Glitch.Functional.Results
 {
     public static class ResultExtensions
     {
+        public static IResult<T, E> AsResult<T, E>(this IResult<T, E> source) => source;
+
         public static IResult<TResult, E> And<T, E, TResult>(this IResult<T, E> source, IResult<TResult, E> other) => source.IsOkay ? other : source.Cast<TResult>();
         
         public static IResult<TResult, E> AndThen<T, E, TResult>(this IResult<T, E> source, Func<T, IResult<TResult, E>> bind) 
@@ -89,11 +93,11 @@ namespace Glitch.Functional.Results
         public static IResult<Func<T2, TResult>, E> PartialSelect<T, E, T2, TResult>(this IResult<T, E> source, Func<T, T2, TResult> map)
             => source.Select(map.Curry());
 
-        public static bool TryUnwrap<T, E>(this IResult<T, E> source, out T result)
+        public static bool TryUnwrap<T, E>(this IResult<T, E> source, [NotNullWhen(true)] out T? result)
         {
             if (source.IsOkay)
             {
-                result = source.Unwrap();
+                result = source.Unwrap()!;
                 return true;
             }
 
@@ -101,11 +105,11 @@ namespace Glitch.Functional.Results
             return false;
         }
 
-        public static bool TryUnwrapError<T, E>(this IResult<T, E> source, out E result)
+        public static bool TryUnwrapError<T, E>(this IResult<T, E> source, [NotNullWhen(true)] out E result)
         {
             if (source.IsError)
             {
-                result = source.UnwrapError();
+                result = source.UnwrapError()!;
                 return true;
             }
 

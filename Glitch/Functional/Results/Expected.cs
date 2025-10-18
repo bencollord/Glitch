@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace Glitch.Functional.Results
 {
     [Monad]
-    public partial record Expected<T>
+    public partial record Expected<T> : IResult<T, Error>
     {
         private Result<T, Error> inner;
 
@@ -374,6 +374,12 @@ namespace Glitch.Functional.Results
         public IEnumerable<T> Iterate() => inner.Iterate();
 
         public override string ToString() => inner.ToString();
+
+        // TODO Try and make these methods not necessary
+        IResult<TResult, Error> IResult<T, Error>.Select<TResult>(Func<T, TResult> map) => Select(map);
+
+        IResult<T, EResult> IResult<T, Error>.SelectError<EResult>(Func<Error, EResult> map)
+            => Match<IResult<T, EResult>>(v => Result.Okay<T, EResult>(v), err => Result.Fail<T, EResult>(map(err)));
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator true(Expected<T> result) => result.IsOkay;

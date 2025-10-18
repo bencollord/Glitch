@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace Glitch.Functional.Results
 {
     [Monad]
-    public abstract partial record Result<T, E>
+    public abstract partial record Result<T, E> : IResult<T, E>
     {
         private protected Result() { }
 
@@ -342,6 +342,10 @@ namespace Glitch.Functional.Results
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract override string ToString();
+
+        // TODO Make these unnecessary
+        IResult<TResult, E> IResult<T, E>.Select<TResult>(Func<T, TResult> map) => Select(map);
+        IResult<T, EResult> IResult<T, E>.SelectError<EResult>(Func<E, EResult> map) => SelectError(map);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator true(Result<T, E> result) => result.IsOkay;
