@@ -32,24 +32,24 @@ namespace Glitch.Functional
         public static IResult<TResult, E> Apply<T, E, TResult>(this IResult<Func<T, TResult>, E> source, IResult<T, E> value)
             => source.AndThen(fn => value.Select(x => fn(x)));
 
-        public static IResult<TResult, EResult> Choose<T, E, TResult, EResult>(this IResult<T, E> source, Func<T, IResult<TResult, EResult>> okay, Func<E, IResult<TResult, EResult>> error)
-            => source.Match(okay, error);
+        public static IResult<T, E> Where<T, E>(this IResult<T, E> source, Func<T, bool> predicate)
+            where E : ICanBeEmpty<E>
+            => source.Guard(predicate, E.Empty);
 
-        public static IResult<T, E> Guard<TResult, T, E>(this TResult source, bool condition, E error)
-            where TResult : IResult<T, E>, IResultFactory<T, E> 
-            => source.Guard((T _) => condition, _ => error);
+        public static IResult<T, Unit> Where<T>(this IResult<T, Unit> source, Func<T, bool> predicate)
+            => source.Guard(predicate, Unit.Value);
 
-        public static IResult<T, E> Guard<TResult, T, E>(this TResult source, bool condition, Func<T, E> error) 
-            where TResult : IResult<T, E>, IResultFactory<T, E>
-            => source.Guard(_ => condition, error);
+        public static IResult<T, E> Guard<T, E>(this IResult<T, E> source, bool condition, E error)
+            => condition ? source : new Fail<T, E>(error);
 
-        public static IResult<T, E> Guard<TResult, T, E>(this TResult source, Func<T, bool> predicate, E error) 
-            where TResult : IResult<T, E>, IResultFactory<T, E> 
-            => source.Guard(predicate, _ => error);
+        public static IResult<T, E> Guard<T, E>(this IResult<T, E> source, bool condition, Func<T, E> error)
+            => source.AndThen(x => condition ? source : new Fail<T, E>(error(x)));
 
-        public static IResult<T, E> Guard<TResult, T, E>(this TResult source, Func<T, bool> predicate, Func<T, E> error)
-            where TResult : IResult<T, E>, IResultFactory<T, E>
-            => source.AndThen(v => predicate(v) ? TResult.Okay(v) : TResult.Fail(error(v)));
+        public static IResult<T, E> Guard<T, E>(this IResult<T, E> source, Func<T, bool> predicate, E error)
+            => source.Guard(source.IsOkayAnd(predicate), error);
+
+        public static IResult<T, E> Guard<T, E>(this IResult<T, E> source, Func<T, bool> predicate, Func<T, E> error)
+            => source.Guard(source.IsOkayAnd(predicate), error);
 
         public static IResult<T, EResult> Or<T, E, EResult>(this IResult<T, E> source, IResult<T, EResult> other)
             => source.IsError ? other : source.CastError<EResult>();

@@ -29,11 +29,11 @@ namespace Glitch.Functional
 
         public static Option<T> Maybe<T>(T? value) => Option<T>.Maybe(value);
 
-        public static Success<T> Okay<T>() where T : new() => Okay<T>(new());
+        public static Okay<T> Okay<T>() where T : new() => Okay<T>(new());
 
-        public static Success<T> Okay<T>(T value) => new(value);
+        public static Okay<T> Okay<T>(T value) => new(value);
 
-        public static Failure<T> Fail<T>(T error) => new(error);
+        public static Fail<T> Fail<T>(T error) => new(error);
 
         public static Sequence<T> Sequence<T>(T item) => Sequence([item]);
 

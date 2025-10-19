@@ -22,7 +22,7 @@ namespace Glitch.Functional.Results
            => option.AndThen(bind, (_, r) => r);
 
         public static Option<Result<TResult, E>> AndThen<T, E, TElement, TResult>(this Option<Result<T, E>> option, Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project)
-            => option.AndThen((Func<Result<T, E>, Option<Result<TResult, E>>>)(res => res.Match(okay: (Func<T, Option<Result<TResult, E>>>)(v => Option.Select<TElement, E, TResult>(bind(v).Select(Okay<TElement, E>), project.Curry()(v))),
+            => option.AndThen((Func<Result<T, E>, Option<Result<TResult, E>>>)(res => res.Match(okay: (Func<T, Option<Result<TResult, E>>>)(v => Option.Select<TElement, E, TResult>(bind(v).Select(Result.Okay<TElement, E>), project.Curry()(v))),
                                                error: err => Some(Fail<TResult, E>(err)))));
 
         public static Option<Result<TResult, E>> AndThen<T, E, TResult>(this Option<Result<T, E>> option, Func<T, Result<TResult, E>> bind)

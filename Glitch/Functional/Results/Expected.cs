@@ -15,10 +15,10 @@ namespace Glitch.Functional.Results
         }
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Expected<T> Okay(T value) => new Expected.Success<T>(value);
+        public static Expected<T> Okay(T value) => Result.Okay(value);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Expected<T> Fail(Error error) => new Expected.Failure<T>(error);
+        public static Expected<T> Fail(Error error) => Result.Fail(error);
 
         public bool IsOkay => inner.IsOkay;
 
@@ -290,13 +290,13 @@ namespace Glitch.Functional.Results
         public static implicit operator Expected<T>(T value) => Okay(value);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Expected<T>(Success<T> success) => Okay(success.Value);
+        public static implicit operator Expected<T>(Okay<T> success) => Okay(success.Value);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Expected<T>(Error error) => Fail(error);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Expected<T>(Failure<Error> failure) => Fail(failure.Error);
+        public static implicit operator Expected<T>(Fail<Error> failure) => Fail(failure.Error);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Expected<T>(Result<T, Error> result) => new(result);
@@ -306,12 +306,10 @@ namespace Glitch.Functional.Results
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator T(Expected<T> result)
-            => result.SelectError(err => new InvalidCastException($"Cannot cast a faulted result to a value", err.AsException()))
-                     .Unwrap();
+            => result.UnwrapOrElse(err => throw new InvalidCastException($"Cannot cast a faulted result to a value", err.AsException()));
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Error(Expected<T> result)
-            => result is Expected.Failure<T>(var err)
-                   ? err : throw new InvalidCastException("Cannot cast a successful result to an error");
+            => result.UnwrapErrorOrElse(_ => throw new InvalidCastException("Cannot cast a successful result to an error"));
     }
 }

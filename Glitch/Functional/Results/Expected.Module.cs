@@ -5,15 +5,15 @@
     {
         public static Expected<T> Okay<T>() where T : new() => Okay(new T());
 
-        public static Expected<T> Okay<T>(T value) => new Success<T>(value);
+        public static Expected<T> Okay<T>(T value) => new Okay<T>(value);
 
-        public static Results.Failure<Error> Fail(Error error) => new(error);
+        public static Fail<Error> Fail(Error error) => new(error);
 
-        public static Results.Failure<Error> Fail(IEnumerable<Error> errors) => Fail(Error.New(errors));
+        public static Fail<Error> Fail(IEnumerable<Error> errors) => Fail(Error.New(errors));
 
-        public static Expected<T> Fail<T>(Error error) => new Failure<T>(error);
+        public static Expected<T> Fail<T>(Error error) => new Fail<T, Error>(error);
 
-        public static Expected<T> Fail<T>(IEnumerable<Error> errors) => new Failure<T>(Error.New(errors));
+        public static Expected<T> Fail<T>(IEnumerable<Error> errors) => new Fail<T, Error>(Error.New(errors));
 
         public static bool IsOkay<T>(Expected<T> result) => result.IsOkay;
 

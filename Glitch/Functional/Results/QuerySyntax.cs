@@ -12,11 +12,11 @@ namespace Glitch.Functional.Results
             => source.AndThen(s => bind(s).Select(e => project(s, e)));
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Result<TResult, E> SelectMany<T, E, TElement, TResult>(this Result<T, E> source, Func<T, Success<TElement>> bind, Func<T, TElement, TResult> project)
+        public static Result<TResult, E> SelectMany<T, E, TElement, TResult>(this Result<T, E> source, Func<T, Okay<TElement>> bind, Func<T, TElement, TResult> project)
             => source.Select(s => project(s, bind(s).Value));
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Result<TResult, E> SelectMany<T, E, TElement, TResult>(this Result<T, E> source, Func<T, Failure<E>> bind, Func<T, TElement, TResult> project)
+        public static Result<TResult, E> SelectMany<T, E, TElement, TResult>(this Result<T, E> source, Func<T, Fail<E>> bind, Func<T, TElement, TResult> project)
             => source.AndThen(s => Result.Fail<TResult, E>(bind(s).Error));
 
         // Expected
@@ -25,7 +25,7 @@ namespace Glitch.Functional.Results
             => source.AndThen(s => bind(s).Select(e => bindMap(s, e)));
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Expected<TResult> SelectMany<T, TElement, TResult>(this Expected<T> source, Func<T, Success<TElement>> bind, Func<T, TElement, TResult> project)
+        public static Expected<TResult> SelectMany<T, TElement, TResult>(this Expected<T> source, Func<T, Okay<TElement>> bind, Func<T, TElement, TResult> project)
             => source.Select(s => project(s, bind(s).Value));
 
         // Option

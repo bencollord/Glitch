@@ -509,10 +509,10 @@ namespace Glitch.Functional.Results
         public static T operator |(Option<T> x, T y) => x.IfNone(y);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T operator |(Option<T> x, Success<T> y) => x.IfNone(y.Value);
+        public static T operator |(Option<T> x, Okay<T> y) => x.IfNone(y.Value);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Expected<T> operator |(Option<T> x, Failure<Error> y) => x.ExpectOr(y.Error);
+        public static Expected<T> operator |(Option<T> x, Fail<Error> y) => x.ExpectOr(y.Error);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator bool(Option<T> option) => option.IsSome;

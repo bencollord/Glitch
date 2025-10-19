@@ -1,4 +1,6 @@
-﻿namespace Glitch.Functional
+﻿using Glitch.Functional.Results;
+
+namespace Glitch.Functional
 {
     public interface IResult
     {
@@ -16,8 +18,10 @@
     {
         TResult Match<TResult>(Func<T, TResult> okay, Func<E, TResult> error);
 
-        IResult<TResult, E> Select<TResult>(Func<T, TResult> map);
-        IResult<T, EResult> SelectError<EResult>(Func<E, EResult> map);
+        virtual IResult<TResult, E> Select<TResult>(Func<T, TResult> map) 
+            => Match(v => Result.Okay(map(v)).ToResult<E>(), e => Result.Fail(e).ToResult<TResult>());
+        virtual IResult<T, EResult> SelectError<EResult>(Func<E, EResult> map)
+            => Match(v => Result.Okay(v).ToResult<EResult>(), e => Result.Fail(map(e)).ToResult<T>());
 
         virtual IResult<TResult, E> Cast<TResult>() => Select(DynamicCast<TResult>.From);
         virtual IResult<T, EResult> CastError<EResult>() => SelectError(DynamicCast<EResult>.From);

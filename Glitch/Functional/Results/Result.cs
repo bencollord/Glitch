@@ -10,10 +10,10 @@ namespace Glitch.Functional.Results
         private protected Result() { }
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Result<T, E> Okay(T value) => new Result.Success<T, E>(value);
+        public static Result<T, E> Okay(T value) => new Okay<T, E>(value);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Result<T, E> Fail(E error) => new Result.Failure<T, E>(error);
+        public static Result<T, E> Fail(E error) => new Fail<T, E>(error);
 
         public abstract bool IsOkay { get; }
 
@@ -64,7 +64,7 @@ namespace Glitch.Functional.Results
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract Result<TResult, E> And<TResult>(Result<TResult, E> other);
 
-        public Result<TResult, E> And<TResult>(Success<TResult> other)
+        public Result<TResult, E> And<TResult>(Okay<TResult> other)
             => And(Result.Okay<TResult, E>(other.Value));
 
         /// <summary>
@@ -240,13 +240,13 @@ namespace Glitch.Functional.Results
         public static implicit operator Result<T, E>(T value) => Okay(value);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Result<T, E>(Success<T> success) => Okay(success.Value);
+        public static implicit operator Result<T, E>(Okay<T> success) => Okay(success.Value);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Result<T, E>(E error) => Fail(error);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Result<T, E>(Failure<E> failure) => Fail(failure.Error);
+        public static implicit operator Result<T, E>(Fail<E> failure) => Fail(failure.Error);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator T(Result<T, E> result)
