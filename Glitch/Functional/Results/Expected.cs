@@ -262,7 +262,7 @@ namespace Glitch.Functional.Results
         /// as an exception.
         /// </summary>
         /// <remarks>
-        /// Overrides the default implementation provided by <see cref="IResult{T, E}"/>
+        /// Overrides the default implementation provided by <see cref="IEither{T, E}"/>
         /// to ensure the exception thrown is the contained <see cref="Error"/> value.
         /// </remarks>
         /// <returns></returns>

@@ -1,4 +1,4 @@
-﻿namespace Glitch.Functional
+﻿namespace Glitch.Functional.Results
 {
     public interface ICanBeEmpty<T>
     {

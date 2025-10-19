@@ -1,6 +1,4 @@
-﻿using Glitch.Functional.Results;
-
-namespace Glitch.Functional
+﻿namespace Glitch.Functional
 {
     public partial class Effect<TEnv, T> : IEffect<TEnv, T>
     {

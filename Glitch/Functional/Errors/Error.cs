@@ -1,7 +1,8 @@
+using Glitch.Functional.Results;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.ExceptionServices;
 
-namespace Glitch.Functional.Results
+namespace Glitch.Functional
 {
     public abstract record Error : IEquatable<Error>
     {

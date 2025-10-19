@@ -25,7 +25,7 @@ namespace Glitch.Collections
         {
             get
             {
-                return ResultExtensions.ExpectOrElse(FindEntry(key)
+                return Either.ExpectOrElse(FindEntry(key)
                     .Select(x => x.Value)
 , _ => Errors.KeyNotFound(key))
                     .Unwrap();

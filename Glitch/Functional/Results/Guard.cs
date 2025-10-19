@@ -1,12 +1,12 @@
 ﻿namespace Glitch.Functional.Results
 {
-    public class Guard<T, E> : IResult<T, E>
+    public class Guard<T, E> : IEither<T, E>
     {
-        private IResult<T, E> inner;
+        private IEither<T, E> inner;
         private Func<T, bool> predicate;
         private Func<T, E> error;
 
-        internal Guard(IResult<T, E> inner, Func<T, bool> predicate, Func<T, E> error)
+        internal Guard(IEither<T, E> inner, Func<T, bool> predicate, Func<T, E> error)
         {
             this.inner = inner;
             this.predicate = predicate;

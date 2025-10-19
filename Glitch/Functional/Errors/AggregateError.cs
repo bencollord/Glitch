@@ -1,4 +1,7 @@
-namespace Glitch.Functional.Results
+using Glitch.Functional;
+using Glitch.Functional.Results;
+
+namespace Glitch.Functional
 {
     public record AggregateError : Error
     {

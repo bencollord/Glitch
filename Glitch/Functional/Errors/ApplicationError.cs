@@ -1,4 +1,6 @@
-namespace Glitch.Functional.Results
+using Glitch.Functional.Results;
+
+namespace Glitch.Functional
 {
     using static Option;
 

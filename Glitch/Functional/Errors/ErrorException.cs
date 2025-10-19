@@ -1,4 +1,4 @@
-namespace Glitch.Functional.Results
+namespace Glitch.Functional
 {
     public class ErrorException : Exception
     {
