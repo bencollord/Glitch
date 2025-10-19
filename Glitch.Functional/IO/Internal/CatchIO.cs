@@ -21,7 +21,7 @@ namespace Glitch.Functional
             {
                 return await source.RunAsync(env).ConfigureAwait(false);
             }
-            catch (ApplicationErrorException err) when (IsMatch(err.Error))
+            catch (ErrorException err) when (IsMatch(err.Error))
             {
                 return await next(err.Error).RunAsync(env).ConfigureAwait(false);
             }

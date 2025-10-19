@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Glitch.Functional;
 using Glitch.Functional.Results;
 using static Glitch.Functional.Results.Expected;
 

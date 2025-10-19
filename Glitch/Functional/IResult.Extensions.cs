@@ -1,8 +1,10 @@
-﻿using System.Diagnostics;
+﻿using Glitch.Functional;
+using Glitch.Functional.Results;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-namespace Glitch.Functional.Results
+namespace Glitch.Functional
 {
     using static Errors;
 
@@ -193,12 +195,12 @@ namespace Glitch.Functional.Results
         public static T UnwrapOr<T, E>(this IResult<T, E> source, T fallback) => source.Match(Identity, fallback);
         public static T UnwrapOrElse<T, E>(this IResult<T, E> source, Func<E, T> fallback) => source.Match(Identity, fallback);
         public static T UnwrapOrElse<T, E>(this IResult<T, E> source, Func<T> fallback) => source.Match(Identity, fallback);
-        public static T? UnwrapOrDefault<T, E>(this IResult<T, E> source) => source.UnwrapOr(default(T));
+        public static T? UnwrapOrDefault<T, E>(this IResult<T, E> source) => source.UnwrapOr(default);
 
         public static E UnwrapErrorOr<T, E>(this IResult<T, E> source, E fallback) => source.IsError ? source.UnwrapError() : fallback;
         public static E UnwrapErrorOrElse<T, E>(this IResult<T, E> source, Func<T, E> fallback) => source.Match(fallback, Identity);
         public static E UnwrapErrorOrElse<T, E>(this IResult<T, E> source, Func<E> fallback) => source.Match(_ => fallback(), Identity);
-        public static E? UnwrapErrorOrDefault<T, E>(this IResult<T, E> source) => source.UnwrapErrorOr(default(E));
+        public static E? UnwrapErrorOrDefault<T, E>(this IResult<T, E> source) => source.UnwrapErrorOr(default);
 
         // Typed specializations
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]

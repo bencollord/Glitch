@@ -1,4 +1,5 @@
-﻿using Glitch.Functional.Results;
+﻿using Glitch.Functional;
+using Glitch.Functional.Results;
 using Glitch.Text;
 using System.Collections;
 using System.Collections.Immutable;
@@ -17,7 +18,7 @@ namespace Glitch.Functional.Parsing.Json
         public JsonNode this[string name]
             => Property(name)
                    .Select(p => p.Value)
-                   .Expect(_ => new KeyNotFoundException(name))
+                   .ExpectOrElse(_ => new KeyNotFoundException(name))
                    .Unwrap();
 
         public JsonObject Add(string name, JsonNode value) => Add(new JsonProperty(name, value));
