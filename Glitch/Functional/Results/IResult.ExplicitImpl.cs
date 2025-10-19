@@ -1,19 +1,11 @@
-﻿
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace Glitch.Functional.Results
+﻿namespace Glitch.Functional.Results
 {
     /**
      * Since <see cref="IResult{T, E}"/> is experimental and involves
      * some messiness with explicit interface implementations, I'm isolating
      * all of the implementation stuff that's in flux here so it's easily accessible.
      */
-    public readonly partial struct Option<T>
-        : IResult<T, Unit>,
-          IResultFactory<T, Unit>
+    public readonly partial struct Option<T> : IResult<T, Unit>, IResultFactory<T, Unit>
     {
         bool IResult.IsError => IsNone;
         bool IResult.IsOkay => IsSome;

@@ -2,6 +2,7 @@ namespace Glitch.Functional.Results
 {
     public enum ErrorCode
     {
+        Unspecified        = 0,
         None               = -0xBAD0000,
         Aggregate          = -0xBAD0001,
         NoElements         = -0xBAD0002,
@@ -18,8 +19,6 @@ namespace Glitch.Functional.Results
         public static readonly Error NoElements = Error.New(ErrorCode.NoElements, "No elements found");
 
         public static readonly Error MoreThanOneElement = Error.New(ErrorCode.MoreThanOneElement, "More than one element found");
-
-        public static Error Unexpected<E>(E value) => Error.New(ErrorCode.Unexpected, $"Unexpected {value}");
 
         public static Error InvalidCast<T>(object? from) => InvalidCast(from, typeof(T));
         public static Error InvalidCast(object? from, Type to) => Error.New(ErrorCode.InvalidCast, new InvalidCastException($"Cannot cast '{from ?? "null"}' to type {to}"));

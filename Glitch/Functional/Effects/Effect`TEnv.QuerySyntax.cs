@@ -25,6 +25,6 @@ namespace Glitch.Functional
 
         // Option
         public static Effect<TEnv, TResult> SelectMany<TEnv, T, TElement, TResult>(this Effect<TEnv, T> source, Func<T, Option<TElement>> bind, Func<T, TElement, TResult> bindMap)
-            => source.AndThen(s => bind(s).Expect(Error.Empty).Select(e => bindMap(s, e)));
+            => source.AndThen(s => bind(s).ExpectOr(Error.Empty).Select(e => bindMap(s, e)));
     }
 }

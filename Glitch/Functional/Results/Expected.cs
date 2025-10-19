@@ -24,6 +24,21 @@ namespace Glitch.Functional.Results
 
         public bool IsError => inner.IsError;
 
+        // DESIGN The IResult interface is still experimental, but if I decide to keep it,
+        // this method should be renamed since it effectively hides ResultExtensions.AsResult()
+        // and will be confusing to anyone trying to use the interface instead of this concrete implementation.
+        // Honestly, the real decision here is whether or not IResult makes the entire Result{T,E} class redundant.
+        // A lot of this hacking and boilerplate would be completely unnecessary if C# allowed C++ style default
+        // type parameters and template specialization.
+        /// <summary>
+        /// Retypes the instance as a <see cref="Result{T, Error}"/>.
+        /// </summary>
+        /// <returns></returns>
+        public Result<T, Error> AsResult()
+        {
+            return inner;
+        }
+
         /// <summary>
         /// If the result is <see cref="Result.Success{T}" />, applies
         /// the provided function to the value and returns it wrapped in a
@@ -118,6 +133,12 @@ namespace Glitch.Functional.Results
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result<T, E> OrElse<E>(Func<Error, Result<T, E>> bind)
             => inner.OrElse(x => bind(x));
+
+        public T IfFail(T fallback) => inner.UnwrapOr(fallback);
+
+        public T IfFail(Func<T> fallback) => inner.UnwrapOrElse(fallback);
+
+        public T IfFail(Func<Error, T> fallback) => inner.UnwrapOrElse(fallback);
 
         /// <summary>
         /// Executes an impure action against the value if Ok.

@@ -11,6 +11,6 @@ namespace Glitch
         [Obsolete("Will remove dependency on Glitch.Functional at some point")]
         public static Expected<T> TryDownFrom(object obj)
             => Maybe(obj as T)
-                  .Expect(Errors.InvalidCast<T>(obj));
+                  .ExpectOr(Errors.InvalidCast<T>(obj));
     }
 }

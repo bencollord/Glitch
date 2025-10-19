@@ -1,13 +1,13 @@
 namespace Glitch.Functional.Results
 {
-    public class ApplicationErrorException : Exception
+    public class ErrorException : Exception
     {
-        public ApplicationErrorException(ApplicationError error)
+        public ErrorException(Error error)
             : base(error.Message, error.Inner.Select(e => e.AsException()).DefaultIfNone())
         {
             Error = error;
         }
 
-        public ApplicationError Error { get; }
+        public Error Error { get; }
     }
 }

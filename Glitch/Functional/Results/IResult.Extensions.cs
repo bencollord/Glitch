@@ -81,13 +81,83 @@ namespace Glitch.Functional.Results
 
         public static Option<E> ErrorOrNone<T, E>(this IResult<T, E> source) => source.Match(_ => Option<E>.None, Some);
 
-        public static Expected<T> Expect<T, E>(this IResult<T, E> source, Func<E, Error> error) => source.Match(Expected.Okay, err => Expected.Fail(error(err)));
-        public static Expected<T> Expect<T, E>(this IResult<T, E> source, Func<Error> error) => source.Expect(_ => error());
-        public static Expected<T> Expect<T, E>(this IResult<T, E> source, Error error) => source.Match(Expected.Okay, error);
+        /// <summary>
+        /// Converts the <paramref name="source">result</paramref> into an <see cref="Expected{T}"/>.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="Expected{T}"/> is in essence just a result where the failure case is constrained
+        /// to derive from the <see cref="Error"/> type. This method could also be called 'ToExpected',
+        /// but is named this way for symmetry with the 'ExpectOr*' methods.
+        /// </remarks>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static Expected<T> Expect<T>(this IResult<T, Error> source) => source.Match(Expected.Okay, Expected.Fail<T>);
 
-        public static Expected<E> ExpectError<T, E>(this IResult<T, E> source, Func<T, Error> error) => source.Match(val => Expected.Fail(error(val)), Expected.Okay);
-        public static Expected<E> ExpectError<T, E>(this IResult<T, E> source, Func<Error> error) => source.ExpectError(_ => error());
-        public static Expected<E> ExpectError<T, E>(this IResult<T, E> source, Error error) => source.IsError ? Expected.Okay(source.UnwrapError()) : Expected.Fail(error);
+        /// <summary>
+        /// Converts the <paramref name="source">result</paramref> into an <see cref="Expected{T}"/>,
+        /// converting the <see cref="Exception"/> into an <see cref="Error"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static Expected<T> Expect<T>(this IResult<T, Exception> source) => source.Match(Expected.Okay, ex => Expected.Fail<T>(ex));
+
+        /// <summary>
+        /// Converts the <paramref name="source"/> into an <see cref="Expected{T}"/>
+        /// instance. If the result is in an error state, the <typeparamref name="E">error</typeparamref>
+        /// value is converted into an <see cref="Error"/> using the same conversion rules as
+        /// <see cref="Error.From{E}(E)"/>.
+        /// </summary>
+        /// <remarks>
+        /// This is an experimental method that may be removed.
+        /// </remarks>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="E"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static Expected<T> Expect<T, E>(this IResult<T, E> source)
+            => source.Match(
+                okay: Expected.Okay,
+                error: e => Expected.Fail<T>(Error.From(e)));
+
+        /// <summary>
+        /// Wraps the value in a <see cref="Expected{T}" /> if it exists,
+        /// otherwise returns an errored <see cref="Expected{T}" /> containing 
+        /// the provided error.
+        /// </summary>
+        /// <remarks>
+        /// Convenience overload for <see cref="OkayOr{E}(E)"/> specifically for <see cref="Error"/> values.
+        /// </remarks>
+        /// <param name="error"></param>
+        /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Expected<T> ExpectOr<T, E>(this IResult<T, E> source, Error error) => source.IsOkay ? Expected.Okay(source.Unwrap()) : Expected.Fail(error);
+
+        /// <summary>
+        /// Wraps the value in a <see cref="Expected{T}" /> if it exists,
+        /// otherwise returns an errored <see cref="Expected{T}" /> containing 
+        /// the result of the provided error function.
+        /// </summary>
+        /// <remarks>
+        /// Convenience overload for <see cref="OkayOrElse{E}(Func{E})"/> specifically for <see cref="Error"/> values.
+        /// </remarks>
+        /// <param name="error"></param>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Expected<T> ExpectOrElse<T, E>(this IResult<T, E> source, Func<Error> function) => source.ExpectOrElse(_ => function());
+
+        /// <summary>
+        /// Wraps the value in a <see cref="Expected{T}" /> if it exists,
+        /// otherwise returns an errored <see cref="Expected{T}" /> containing 
+        /// the result of the provided error function.
+        /// </summary>
+        /// <remarks>
+        /// Convenience overload for <see cref="OkayOrElse{E}(Func{Unit, E})"/> specifically for <see cref="Error"/> values.
+        /// </remarks>
+        /// <param name="error"></param>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Expected<T> ExpectOrElse<T, E>(this IResult<T, E> source, Func<E, Error> function) => source.Match(Expected.Okay, err => Expected.Fail(function(err)));
+
 
         public static IEnumerable<T> Iterate<T, E>(this IResult<T, E> source) => source.Match(x => [x], _ => Enumerable.Empty<T>());
 
@@ -120,14 +190,14 @@ namespace Glitch.Functional.Results
             return false;
         }
 
+        public static T UnwrapOr<T, E>(this IResult<T, E> source, T fallback) => source.Match(Identity, fallback);
         public static T UnwrapOrElse<T, E>(this IResult<T, E> source, Func<E, T> fallback) => source.Match(Identity, fallback);
         public static T UnwrapOrElse<T, E>(this IResult<T, E> source, Func<T> fallback) => source.Match(Identity, fallback);
-        public static T UnwrapOr<T, E>(this IResult<T, E> source, T fallback) => source.Match(Identity, fallback);
         public static T? UnwrapOrDefault<T, E>(this IResult<T, E> source) => source.UnwrapOr(default(T));
 
+        public static E UnwrapErrorOr<T, E>(this IResult<T, E> source, E fallback) => source.IsError ? source.UnwrapError() : fallback;
         public static E UnwrapErrorOrElse<T, E>(this IResult<T, E> source, Func<T, E> fallback) => source.Match(fallback, Identity);
         public static E UnwrapErrorOrElse<T, E>(this IResult<T, E> source, Func<E> fallback) => source.Match(_ => fallback(), Identity);
-        public static E UnwrapErrorOr<T, E>(this IResult<T, E> source, E fallback) => source.IsError ? source.UnwrapError() : fallback;
         public static E? UnwrapErrorOrDefault<T, E>(this IResult<T, E> source) => source.UnwrapErrorOr(default(E));
 
         // Typed specializations

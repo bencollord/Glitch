@@ -1,5 +1,4 @@
-﻿using Glitch.Functional;
-using Glitch.Functional.Results;
+﻿using Glitch.Functional.Results;
 using System.Collections;
 
 namespace Glitch.Collections
@@ -22,15 +21,15 @@ namespace Glitch.Collections
 
         bool ICollection<T>.IsReadOnly => false;
 
-        public Option<T> TryPeekFront() => Maybe(items.First);
+        public Option<T> TryPeekFront() => Maybe(items.First).Select(x => x.Value);
 
-        public Option<T> TryPeekBack() => Maybe(items.Last);
+        public Option<T> TryPeekBack() => Maybe(items.Last).Select(x => x.Value);
 
         public void Unshift(T item) 
             => items.AddFirst(item ?? throw new ArgumentNullException(nameof(item)));
 
         public T Shift() => TryShift()
-            .Expect(EmptyDequeError)
+            .ExpectOrElse(EmptyDequeError)
             .Unwrap();
 
         public Option<T> TryShift() 
@@ -40,7 +39,7 @@ namespace Glitch.Collections
             => items.AddLast(item ?? throw new ArgumentNullException(nameof(item)));
 
         public T Pop() => TryPop()
-            .Expect(EmptyDequeError)
+            .ExpectOrElse(EmptyDequeError)
             .Unwrap();
 
         public Option<T> TryPop() 
@@ -59,12 +58,6 @@ namespace Glitch.Collections
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         bool ICollection<T>.Remove(T item) => items.Remove(item);
-
-        private Option<T> Maybe(LinkedListNode<T>? node)
-            // I don't know why C#'s janky type inference got confused here, 
-            // but we need to explicitly type the linked list node or else
-            // it thinks we're trying to map a plain T for some stupid reason.
-            => Maybe<LinkedListNode<T>>(node).Select(n => n.Value);
 
         private Error EmptyDequeError() => new ApplicationError("Deque is empty");
     }

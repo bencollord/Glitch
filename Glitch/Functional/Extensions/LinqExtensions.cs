@@ -118,7 +118,7 @@ namespace Glitch.Functional
 
         private static Option<T> FirstOrNone<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
         {
-            return predicate.Choose(
+            return predicate.Match(
                 filter => Maybe(source.FirstOrDefault(filter)),
                 () => Maybe(source.FirstOrDefault()));
         }
@@ -131,7 +131,7 @@ namespace Glitch.Functional
 
         private static Option<T> LastOrNone<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
         {
-            return predicate.Choose(
+            return predicate.Match(
                 filter => Maybe(source.LastOrDefault(filter)),
                 () => Maybe(source.LastOrDefault()));
         }
@@ -154,7 +154,7 @@ namespace Glitch.Functional
         private static Expected<T> TrySingle<T>(this IEnumerable<T> source, Option<Func<T, bool>> predicate)
         {
             return source.TrySingleOrNone(predicate)
-                         .AndThen(opt => opt.Expect(Errors.NoElements));
+                         .AndThen(opt => opt.ExpectOr(Errors.NoElements));
         }
 
         public static Expected<Option<T>> TrySingleOrNone<T>(this IEnumerable<T> source)

@@ -38,7 +38,7 @@ namespace Glitch.Functional.Results
         public override bool Is<T>() => false;
 
         public override Exception AsException() 
-            => new ApplicationErrorException(this);
+            => new ErrorException(this);
 
         public static implicit operator ApplicationError(string message) => new(0, message);
     }

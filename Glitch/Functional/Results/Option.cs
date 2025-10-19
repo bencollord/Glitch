@@ -5,11 +5,6 @@ using System.Runtime.CompilerServices;
 
 namespace Glitch.Functional.Results
 {
-    public readonly struct OptionNone 
-    {
-        public static readonly OptionNone Value = new();
-    }
-
     [Monad]
     public readonly partial struct Option<T> : IEquatable<Option<T>>, IComparable<Option<T>>
     {
@@ -124,14 +119,6 @@ namespace Glitch.Functional.Results
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> AndThen<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project)
             => AndThen(x => bind(x).Select(y => project(x, y)));
-
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TResult> Choose<TResult>(Func<T, Option<TResult>> bindSome, Func<Option<TResult>> bindNone)
-            => Match(bindSome, bindNone);
-
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TResult> Choose<TResult>(Func<T, Option<TResult>> bindSome, Func<Unit, Option<TResult>> bindNone)
-            => Match(bindSome, bindNone);
 
         /// <summary>
         /// Returns the current <see cref="Option{T}"/> if it contains a value. 
@@ -353,6 +340,7 @@ namespace Glitch.Functional.Results
         /// <param name="action"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Obsolete("Impure actions should really be Effects")]
         public Option<T> IfNone(Action action)
         {
             if (IsNone)
@@ -370,6 +358,7 @@ namespace Glitch.Functional.Results
         /// <param name="action"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Obsolete("Impure actions should really be Effects")]
         public Option<T> IfNone(Action<Unit> action) => IfNone(() => action(Unit.Value));
 
         /// <summary>
@@ -403,7 +392,6 @@ namespace Glitch.Functional.Results
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T? DefaultIfNone(Func<T?> fallback) => IsSome ? value : fallback();
 
-        // ==================== TODO Should these be extension methods? =====================================
         /// <summary>
         /// Wraps the value in a <see cref="Expected{T}" /> if it exists,
         /// otherwise returns an errored <see cref="Expected{T}" /> containing 
@@ -415,7 +403,7 @@ namespace Glitch.Functional.Results
         /// <param name="error"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Expected<T> Expect(Error error) => OkayOr(error);
+        public Expected<T> ExpectOr(Error error) => IsSome ? Expected.Okay(value!) : Expected.Fail(error);
 
         /// <summary>
         /// Wraps the value in a <see cref="Expected{T}" /> if it exists,
@@ -427,7 +415,7 @@ namespace Glitch.Functional.Results
         /// </remarks>
         /// <param name="error"></param>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Expected<T> Expect(Func<Error> function) => OkayOrElse(function);
+        public Expected<T> ExpectOrElse(Func<Error> function) => ExpectOrElse(_ => function());
 
         /// <summary>
         /// Wraps the value in a <see cref="Expected{T}" /> if it exists,
@@ -439,7 +427,7 @@ namespace Glitch.Functional.Results
         /// </remarks>
         /// <param name="error"></param>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Expected<T> Expect(Func<Unit, Error> function) => IsSome ? Result.Okay(value!) : Result.Fail(function(default));
+        public Expected<T> ExpectOrElse(Func<Unit, Error> function) => IsSome ? Result.Okay(value!) : Result.Fail(function(default));
 
         /// <summary>
         /// Wraps the value in a <see cref="Result{T, E}" /> if it exists,
@@ -521,7 +509,10 @@ namespace Glitch.Functional.Results
         public static T operator |(Option<T> x, T y) => x.IfNone(y);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Expected<T> operator |(Option<T> x, Failure<Error> y) => x.OkayOr(y.Error);
+        public static T operator |(Option<T> x, Success<T> y) => x.IfNone(y.Value);
+
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Expected<T> operator |(Option<T> x, Failure<Error> y) => x.ExpectOr(y.Error);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator bool(Option<T> option) => option.IsSome;
