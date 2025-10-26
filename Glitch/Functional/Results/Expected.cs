@@ -15,10 +15,10 @@ namespace Glitch.Functional.Results
         }
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Expected<T> Okay(T value) => Result.Okay(value);
+        public static Expected<T> Okay(T value) => new(Result.Okay<T, Error>(value));
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Expected<T> Fail(Error error) => Result.Fail(error);
+        public static Expected<T> Fail(Error error) => new(Result.Fail<T, Error>(error));
 
         public bool IsOkay => inner.IsOkay;
 
