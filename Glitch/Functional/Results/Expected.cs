@@ -40,7 +40,7 @@ namespace Glitch.Functional.Results
         }
 
         /// <summary>
-        /// If the result is <see cref="Result.Success{T}" />, applies
+        /// If the result is <see cref="Okay{T}" />, applies
         /// the provided function to the value and returns it wrapped in a
         /// new <see cref="Expected{T}" />. Otherwise, returns the current error
         /// wrapped in a new result type.

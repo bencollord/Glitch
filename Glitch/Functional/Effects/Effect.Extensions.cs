@@ -4,23 +4,23 @@ namespace Glitch.Functional
 {
     public static partial class Effect
     {
-        public static Effect<IEnumerable<T>> Traverse<T>(this IEnumerable<Effect<T>> source)
+        public static Effect<Sequence<T>> Traverse<T>(this IEnumerable<Effect<T>> source)
             => source.Traverse(Identity);
 
-        public static Effect<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<Effect<T>> source, Func<T, TResult> traverse)
+        public static Effect<Sequence<TResult>> Traverse<T, TResult>(this IEnumerable<Effect<T>> source, Func<T, TResult> traverse)
             => source.Traverse(opt => opt.Select(traverse));
 
-        public static Effect<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<T> source, Func<T, Effect<TResult>> traverse)
+        public static Effect<Sequence<TResult>> Traverse<T, TResult>(this IEnumerable<T> source, Func<T, Effect<TResult>> traverse)
             => source.Aggregate(
                 Return(ImmutableList<TResult>.Empty),
                 (list, item) => list.AndThen(_ => traverse(item), (lst, i) => lst.Add(i)),
-                list => list.Select(l => l.AsEnumerable()));
+                list => list.Select(Sequence.From));
 
-        public static Effect<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<Effect<T>> source, Func<T, int, TResult> traverse)
+        public static Effect<Sequence<TResult>> Traverse<T, TResult>(this IEnumerable<Effect<T>> source, Func<T, int, TResult> traverse)
             => source.Select((s, i) => s.PartialSelect(traverse).Apply(i))
                      .Traverse();
 
-        public static Effect<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<T> source, Func<T, int, Effect<TResult>> traverse)
+        public static Effect<Sequence<TResult>> Traverse<T, TResult>(this IEnumerable<T> source, Func<T, int, Effect<TResult>> traverse)
             => source.Select((s, i) => traverse(s, i))
                      .Traverse();
 

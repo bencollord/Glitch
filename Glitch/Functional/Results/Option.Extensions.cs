@@ -4,26 +4,6 @@ namespace Glitch.Functional.Results
 {
     public static partial class Option
     {
-        public static Option<IEnumerable<T>> Traverse<T>(this IEnumerable<Option<T>> source)
-            => source.Traverse(Identity);
-
-        public static Option<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<Option<T>> source, Func<T, TResult> traverse)
-            => source.Traverse(opt => opt.Select(traverse));
-
-        public static Option<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<T> source, Func<T, Option<TResult>> traverse)
-            => source.Aggregate(
-                Some(ImmutableList<TResult>.Empty),
-                (list, item) => list.AndThen(_ => traverse(item), (lst, i) => lst.Add(i)),
-                list => list.Select(l => l.AsEnumerable()));
-
-        public static Option<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<Option<T>> source, Func<T, int, TResult> traverse)
-            => source.Select((s, i) => s.PartialSelect(traverse).Apply(i))
-                     .Traverse();
-
-        public static Option<IEnumerable<TResult>> Traverse<T, TResult>(this IEnumerable<T> source, Func<T, int, Option<TResult>> traverse)
-            => source.Select((s, i) => traverse(s, i))
-                     .Traverse();
-
         public static T? AsNullable<T>(this Option<T> option)
             where T : struct
             => option.Match(v => v, () => new T?());

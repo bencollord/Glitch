@@ -2,7 +2,7 @@
 
 namespace Glitch.Functional
 {
-    public static partial class LazyExtensions
+    public static partial class Lazy
     {
         public static Lazy<TResult> Select<T, TResult>(this Lazy<T> lazy, Func<T, TResult> mapper)
             => new(() => mapper(lazy.Value));
