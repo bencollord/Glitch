@@ -232,6 +232,9 @@ namespace Glitch.Functional.Results
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Result<T, E> operator |(Result<T, E> x, Result<T, E> y) => x.Or(y);
+        
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Result<T, E> operator |(Option<T> x, Result<T, E> y) => x.Or(y);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator bool(Result<T, E> result) => result.IsOkay;

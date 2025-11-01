@@ -1,7 +1,3 @@
-using Glitch.Functional.Parsing.Input;
-using Glitch.Functional.Parsing.Results;
-using System.Collections.Immutable;
-
 namespace Glitch.Functional.Parsing
 {
     public abstract partial class Parser<TToken, T>

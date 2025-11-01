@@ -14,7 +14,7 @@ namespace Glitch.Functional
 
         protected Error(int? code, string? message)
         {
-            Code = code ?? (int)ErrorCode.Unspecified;
+            Code = code ?? (int)Errors.Code.Unspecified;
             Message = message ?? $"Error: {GetType()}";
         }
 

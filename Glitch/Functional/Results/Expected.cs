@@ -64,6 +64,18 @@ namespace Glitch.Functional.Results
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Expected<T> SelectError(Func<Error, Error> map) => inner.SelectError(e => map(e));
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Expected<T> SelectError(Func<Error, Exception> map) => SelectError(e => Error.New(map(e)));
+
+        /// <summary>
+        /// If the result is a failure, returns a new result with the mapping function
+        /// applied to the wrapped error. Otherwise, returns self.
+        /// </summary>
+        /// <param name="map"></param>
+        /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Result<T, E> SelectError<E>(Func<Error, E> map) => inner.SelectError(e => map(e));
+
         /// <summary>
         /// Applies a wrapped function to the wrapped value if both exist.
         /// Otherwise, returns a faulted <see cref="Expected{TResult}" /> containing the 

@@ -1,4 +1,3 @@
-using Glitch.Functional.Parsing.Parsers;
 using Glitch.Functional.Parsing.Results;
 using Glitch.Functional.Results;
 
@@ -6,12 +5,6 @@ namespace Glitch.Functional.Parsing
 {
     public abstract partial class Parser<TToken, T>
     {
-        public virtual Parser<TToken, T> Or(Parser<TToken, T> other)
-            => new OneOfParser<TToken, T>(this, other);
-
-        public virtual Parser<TToken, Unit> Not()
-            => new NegatedParser<TToken, T>(this);
-
         /// <summary>
         /// Returns a new parser that returns an <see cref="Option{T}"/>
         /// on success and a successful result containing
@@ -21,5 +14,12 @@ namespace Glitch.Functional.Parsing
         public virtual Parser<TToken, Option<T>> Maybe()
             => Match(ok => ParseResult.Okay(Option.Some(ok.Value), ok.Remaining),
                      err => ParseResult.Okay(Option<T>.None, err.Remaining));
+    }
+
+    public static partial class ParserExtensions
+    {
+        public static Parser<TToken, T> IfNone<TToken, T>(this Parser<TToken, Option<T>> parser, T fallback) => parser.Select(p => p.IfNone(fallback));
+        public static Parser<TToken, T> IfNone<TToken, T>(this Parser<TToken, Option<T>> parser, Func<T> fallback) => parser.Select(p => p.IfNone(fallback));
+        public static Parser<TToken, T> IfNone<TToken, T>(this Parser<TToken, Option<T>> parser, Func<Unit, T> fallback) => parser.Select(p => p.IfNone(fallback));
     }
 }

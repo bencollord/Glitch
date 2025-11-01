@@ -129,6 +129,9 @@ namespace Glitch.Functional.Results
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<T> Or(Option<T> other) => IsSome ? this : other;
 
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Result<T, E> Or<E>(Result<T, E> other) => Match(Result.Okay<T, E>, other);
+
         /// <summary>
         /// Returns this <see cref="Option{T}"/> if it has a value and the other does not.
         /// Returns <paramref name="other"/> if this option is empty and the other has a value.
@@ -288,17 +291,24 @@ namespace Glitch.Functional.Results
         /// <typeparam name="TResult"></typeparam>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TResult> Cast<TResult>() 
-            // TODO Inconsistent behavior between this and result/expected, which throw if the cast fails.
-            // The case for throwing is consistency with Linq, but these types already use a different casting
-            // method to support user-defined conversion operators anyway and this method allows Linq expressions
-            // like from TResult x in opt, which is very convenient.
+        public Option<TResult> CastOrNone<TResult>() 
             => AndThen(v => DynamicCast<TResult>.Try(v, out var r) ? Option.Some(r) : Option.None);
+
+        /// <summary>
+        /// Dynamically casts the contained value, if it exists, to <typeparamref name="TResult"/>.
+        /// Casting is done such that any custom conversion operators will be used, but will throw
+        /// an <see cref="InvalidCastException"/> on failure. Use <see cref="CastOrNone{TResult}"/> to get back 
+        /// <see cref="Option.None"/> on failure.
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Option<TResult> Cast<TResult>()
+            => Select(DynamicCast<TResult>.From);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> OfType<TResult>()
-            where TResult : T
-            => Where(val => val is TResult).Select(val => (TResult)val!);
+            => AndThen(v => v is TResult r ? Option.Some(r) : Option.None);
 
         /// <summary>
         /// Returns the wrapped value if it exists. Otherwise throws an exception.

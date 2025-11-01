@@ -21,7 +21,7 @@ namespace Glitch.Test.Functional
             // Act
             successfulResults.Add(failedResult);
 
-            Expected<IEnumerable<int>> result = successfulResults.Traverse();
+            Expected<Sequence<int>> result = successfulResults.Traverse();
 
             // Assert
             Assert.True(result.IsError);
