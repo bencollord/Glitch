@@ -10,7 +10,7 @@ namespace Glitch.Functional.Parsing.Json
 
         public JsonArray(params IEnumerable<JsonNode> items)
         {
-            this.items = ImmutableArray.CreateRange(items);
+            this.items = [.. items];
         }
 
         public JsonNode this[int i] => items[i];

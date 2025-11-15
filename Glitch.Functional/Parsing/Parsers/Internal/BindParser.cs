@@ -23,7 +23,7 @@ namespace Glitch.Functional.Parsing.Parsers
             return result.Match(
                 okay => next(okay.Value)
                     .Execute(okay.Remaining)
-                    .Map(nxt => projection(okay.Value, nxt)),
+                    .Select(nxt => projection(okay.Value, nxt)),
                 err => err.Cast<TResult>());
         }
     }

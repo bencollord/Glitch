@@ -19,16 +19,16 @@ namespace Glitch.Functional.Parsing
             this.expectation = expectation;
         }
 
-        public override SeparatedByContext<TToken, TToken, TToken> SeparatedBy(TToken token)
+        public override SeparatedByParser<TToken, TToken, TToken> SeparatedBy(TToken token)
         {
-            return new SeparatedByContext<TToken, TToken, TToken>(
+            return new SeparatedByParser<TToken, TToken, TToken>(
                 parser: Except(token),
                 separator: Token(token));
         }
 
-        public override SeparatedByContext<TToken, TToken, TSeparator> SeparatedBy<TSeparator>(Parser<TToken, TSeparator> separator)
+        public override SeparatedByParser<TToken, TToken, TSeparator> SeparatedBy<TSeparator>(Parser<TToken, TSeparator> separator)
         {
-            return new SeparatedByContext<TToken, TToken, TSeparator>(
+            return new SeparatedByParser<TToken, TToken, TSeparator>(
                 parser: from _ in separator.Not()
                         from tkn in this
                         select tkn,

@@ -1,4 +1,5 @@
 ﻿
+
 namespace Glitch.Functional.Parsing.Input
 {
     public record EmptyTokenSequence<TToken> : TokenSequence<TToken>
@@ -16,6 +17,9 @@ namespace Glitch.Functional.Parsing.Input
         public override TokenSequence<TToken> Advance() => this;
 
         public override TokenSequence<TToken> Advance(int count) => this;
+
+        public override ReadOnlySpan<TToken> Lookback(int count) 
+            => count == 0 ? [] : throw new IndexOutOfRangeException($"Cannot look back {count} tokens");
 
         public override IEnumerable<TToken> ReadToEnd() => [];
 

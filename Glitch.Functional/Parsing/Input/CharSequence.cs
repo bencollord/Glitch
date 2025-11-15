@@ -33,6 +33,13 @@ namespace Glitch.Functional.Parsing.Input
             return this with { cursor = Math.Min(nextPosition, sourceText.Length) };
         }
 
+        public override ReadOnlySpan<char> Lookback(int count)
+        {
+            int back = Position - count;
+
+            return sourceText.AsSpan().Slice(back, Position);
+        }
+
         public override IEnumerable<char> ReadToEnd() => sourceText.Substring(cursor);
 
         protected override string DisplayRemainder() => sourceText.Substring(cursor + 1);

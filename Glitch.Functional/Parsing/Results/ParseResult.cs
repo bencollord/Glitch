@@ -62,14 +62,14 @@ namespace Glitch.Functional.Parsing.Results
         public static ParseResult<TToken, T> Error(Expectation<TToken> error, TokenSequence<TToken> remaining)
             => new ParseError<TToken, T>(error, remaining);
 
-        public abstract ParseResult<TToken, TResult> Map<TResult>(Func<T, TResult> map);
+        public abstract ParseResult<TToken, TResult> Select<TResult>(Func<T, TResult> map);
 
         public abstract ParseResult<TToken, TResult> Cast<TResult>();
 
         public abstract ParseResult<TToken, TResult> AndThen<TResult>(Func<T, ParseResult<TToken, TResult>> bind);
 
         public ParseResult<TToken, TResult> AndThen<TElement, TResult>(Func<T, ParseResult<TToken, TElement>> bind, Func<T, TElement, TResult> project)
-            => AndThen(x => bind(x).Map(y => project(x, y)));
+            => AndThen(x => bind(x).Select(y => project(x, y)));
 
         public abstract ParseResult<TToken, T> OrElse(Func<ParseError<TToken, T>, ParseResult<TToken, T>> bind);
         

@@ -40,6 +40,8 @@ namespace Glitch.Functional.Parsing.Input
 
         public abstract IEnumerable<TToken> ReadToEnd();
 
+        public abstract ReadOnlySpan<TToken> Lookback(int count);
+
         public override string ToString()
         {
             return new StringBuilder()

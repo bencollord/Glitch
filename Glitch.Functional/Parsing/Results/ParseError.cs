@@ -43,7 +43,7 @@ namespace Glitch.Functional.Parsing.Results
 
         public override ParseResult<TToken, TResult> Cast<TResult>() => new ParseError<TToken, TResult>(message, Expectation, Remaining);
 
-        public override ParseResult<TToken, TResult> Map<TResult>(Func<T, TResult> _) => Cast<TResult>();
+        public override ParseResult<TToken, TResult> Select<TResult>(Func<T, TResult> _) => Cast<TResult>();
 
         public override TResult Match<TResult>(Func<ParseSuccess<TToken, T>, TResult> _, Func<ParseError<TToken, T>, TResult> ifFail) => ifFail(this);
         

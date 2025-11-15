@@ -16,7 +16,7 @@ namespace Glitch.Functional.Parsing.Parsers
 
         public override ParseResult<TToken, TResult> Execute(TokenSequence<TToken> input)
         {
-            return source.Execute(input).Map(projection);
+            return source.Execute(input).Select(projection);
         }
     }
 }

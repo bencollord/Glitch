@@ -32,6 +32,13 @@
             return this with { cursor = Math.Min(nextPosition, tokens.Length) };
         }
 
+        public override ReadOnlySpan<TToken> Lookback(int count)
+        {
+            int back = Position - count;
+
+            return tokens[back..Position];
+        }
+
         public override IEnumerable<TToken> ReadToEnd() => tokens[cursor..];
 
         protected override string DisplayRemainder() => string.Join(", ", tokens[(cursor + 1)..]);

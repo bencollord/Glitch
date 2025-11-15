@@ -1,5 +1,4 @@
 ﻿using Glitch.Functional;
-using Glitch.Functional.Parsing;
 
 namespace Glitch.Functional.Parsing.Input
 {

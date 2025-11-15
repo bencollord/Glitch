@@ -14,6 +14,10 @@ namespace Glitch.Functional.Parsing
         
         public static TokenParser<char> Whitespace => Char(char.IsWhiteSpace).WithLabel("whitespace");
 
+        public static TokenParser<char> Tab => Char('\t');
+        
+        public static TokenParser<char> Space => Char(' ');
+
         public static Parser<char, string> LineBreak => from cr in Char('\r').Maybe()
                                                         from lf in Char('\n')
                                                         select Environment.NewLine;
