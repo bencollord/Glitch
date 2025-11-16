@@ -3,7 +3,7 @@ namespace Glitch.Functional.Errors
     public class ErrorException : Exception
     {
         public ErrorException(Error error)
-            : base(error.Message, error.Inner.Select(e => e.AsException()).DefaultIfNone())
+            : base(error.Message, error.Inner.Select(e => e.AsException()).UnwrapOrDefault())
         {
             Error = error;
         }

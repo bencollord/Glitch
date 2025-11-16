@@ -1,4 +1,5 @@
 using Glitch.Functional.Core;
+using Glitch.Functional.Errors;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -84,7 +85,7 @@ namespace Glitch.Functional
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<TResult> AndThen<TResult>(Func<T, Option<TResult>> bind) => AndThen(bind, (_, y) => y);
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IO<TResult> AndThen<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, _ => IO.Fail<TElement>(Errors.NoElements)), project);
+        public IO<TResult> AndThen<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, _ => IO.Fail<TElement>(Errors.Errors.NoElements)), project);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<TResult> AndThen<TResult>(Func<T, Expected<TResult>> bind) => AndThen(bind, (_, y) => y);
@@ -97,29 +98,9 @@ namespace Glitch.Functional
         public IO<TResult> AndThen<E, TElement, TResult>(Func<T, Result<TElement, E>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, err => IO.Fail<TElement>(Error.From(err))), project);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Effect<TResult> AndThen<TResult>(Func<T, Effect<TResult>> bind) => AndThen(bind, (_, y) => y);
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Effect<TResult> AndThen<TElement, TResult>(Func<T, Effect<TElement>> bind, Func<T, TElement, TResult> project) => Effect.Lift(Run).AndThen(bind, project);
-
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Effect<TEnv, TResult> AndThen<TEnv, TResult>(Func<T, Effect<TEnv, TResult>> bind) => AndThen(bind, (_, y) => y);
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Effect<TEnv, TResult> AndThen<TEnv, TElement, TResult>(Func<T, Effect<TEnv, TElement>> bind, Func<T, TElement, TResult> project) => Effect<TEnv, T>.Lift(_ => Run()).AndThen(bind, project);
-
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<TResult> Then<TResult>(IO<TResult> other) => Then(other, (_, y) => y);
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<TResult> Then<TElement, TResult>(IO<TElement> other, Func<T, TElement, TResult> project) => AndThen(FN<T>.Constant(other), project);
-
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Effect<TResult> Then<TResult>(Effect<TResult> other) => Then(other, (_, y) => y);
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Effect<TResult> Then<TElement, TResult>(Effect<TElement> other, Func<T, TElement, TResult> project) => AndThen(FN<T>.Constant(other), project);
-
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Effect<TEnv, TResult> Then<TEnv, TResult>(Effect<TEnv, TResult> other) => Then(other, (_, y) => y);
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Effect<TEnv, TResult> Then<TEnv, TElement, TResult>(Effect<TEnv, TElement> other, Func<T, TElement, TResult> project) => AndThen(FN<T>.Constant(other), project);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<T> Or(IO<T> other) => OrElse(_ => other);
@@ -191,8 +172,5 @@ namespace Glitch.Functional
 
         public static IO<T> operator >>(IO<T> x, IO<T> y) => x.AndThen(_ => y);
         public static IO<T> operator >>(IO<T> x, IO<Unit> y) => x.AndThen(v => y.Select(_ => v));
-
-        public static Effect<T> operator >>(IO<T> x, Effect<T> y) => x.AndThen(_ => y);
-        public static Effect<T> operator >>(IO<T> x, Effect<Unit> y) => x.AndThen(v => y.Select(_ => v));
     }
 }

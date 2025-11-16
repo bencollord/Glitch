@@ -46,6 +46,10 @@ Linq query syntax.
 
 The other packages are currently works in progress. They are as follows:
 
+#### Extensions
+
+// TODO
+
 #### Effects
 
 Provides the IEffect\<T\> interface and extension methods. Designed kind of like IEnumerable in that

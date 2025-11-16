@@ -1,4 +1,5 @@
 using Glitch.Functional.Core;
+using Glitch.Functional.Errors;
 
 namespace Glitch.Functional
 {
@@ -25,7 +26,7 @@ namespace Glitch.Functional
             => IO<Unit>.LiftAsync(async env =>
             {
                 await func(env);
-                return Nothing;
+                return Unit.Value;
             });
 
         public static IO<T> Use<T>(IO<T> resource) => IO<T>.Use(resource);

@@ -1,6 +1,7 @@
 using Glitch.Functional.Parsing.Input;
 using Glitch.Functional.Parsing.Results;
 using Glitch.Functional.Core;
+using Glitch.Functional.Extensions;
 
 namespace Glitch.Functional.Parsing.Parsers
 {
@@ -34,7 +35,7 @@ namespace Glitch.Functional.Parsing.Parsers
 
             var expectation = new Expectation<TToken>
             {
-                Label = "One of " + expectations.Select(x => x.Label).Somes().Join(", "),
+                Label = "One of " + expectations.Select(x => x.Label).Somes().PipeInto(e => string.Join(", ", e)),
                 Expected = expectations.SelectMany(e => e.Expected)
             };
 

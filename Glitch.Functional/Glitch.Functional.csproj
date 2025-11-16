@@ -7,11 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Parsing\Parsers\SeparatedByContext - Copy.cs" />
+    <Compile Remove="Parsing\Json\**" />
+    <EmbeddedResource Remove="Parsing\Json\**" />
+    <None Remove="Parsing\Json\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Glitch.Functional.FN">
+    <Compile Remove="IO\IO.File.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Glitch.Functional.Core.FN">
       <Static>True</Static>
     </Using>
   </ItemGroup>

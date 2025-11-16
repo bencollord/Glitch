@@ -1,8 +1,7 @@
-﻿using Glitch.Functional.Attributes;
+﻿using Glitch.Functional.Core;
 
 namespace Glitch.Functional
 {
-    [MonadExtension(typeof(IStateful<,>))]
     public static partial class State
     {
         public static IStateful<S, TResult> Select<S, T, TResult>(this IStateful<S, T> source, Func<T, TResult> map)

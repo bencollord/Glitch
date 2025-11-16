@@ -102,6 +102,11 @@ namespace Glitch.Functional.Core
         public Option<TResult> AndThen<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project)
             => AndThen(x => bind(x).Select(y => project(x, y)));
 
+        /// <inheritdoc cref="AndThen{TElement, TResult}(Func{T, Option{TElement}}, Func{T, TElement, TResult})"/>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Option<TResult> SelectMany<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project)
+            => AndThen(x => bind(x).Select(y => project(x, y)));
+
         /// <summary>
         /// Returns the current <see cref="Option{T}"/> if it contains a value. 
         /// Otherwise returns the other <see cref="Option{T}">.

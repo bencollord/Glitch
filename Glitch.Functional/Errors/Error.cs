@@ -38,10 +38,13 @@ namespace Glitch.Functional.Errors
 
         public static Error New<TCode>(TCode code, Exception exception) where TCode : Enum => New(Convert.ToInt32(code), exception);
 
-        public static Error New(params IEnumerable<Error> errors) 
-            => errors.Match(just: Identity,
-                            many: _ => new AggregateError(errors),
-                            none: _ => Empty);
+        public static Error New(params IEnumerable<Error> errors)
+            => errors.ToArray() switch
+            {
+                { Length: 1 } => errors.Single(),
+                { Length: > 1 } => new AggregateError(errors),
+                _ => Empty
+            };
 
         /// <summary>
         /// Converts the <paramref name="value"/> into an <see cref="Error"/>
@@ -125,10 +128,7 @@ namespace Glitch.Functional.Errors
 
         public virtual Error Add(Error other)
         {
-            return Iterate().Concat(other.Iterate())
-                .Match(just: Identity,
-                       many: x => new AggregateError(x),
-                       none: Empty);
+            return New(Iterate().Concat(other.Iterate()));
         }
 
         public virtual bool Equals(Error? other)

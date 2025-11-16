@@ -1,5 +1,4 @@
-﻿using Glitch.Text;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Immutable;
 
 namespace Glitch.Functional.Parsing.Json

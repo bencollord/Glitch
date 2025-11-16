@@ -1,4 +1,4 @@
-﻿using Glitch.Functional.Attributes;
+﻿using Glitch.Functional.Core;
 
 namespace Glitch.Functional
 {

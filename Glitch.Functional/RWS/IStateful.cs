@@ -1,4 +1,6 @@
-﻿namespace Glitch.Functional
+﻿using Glitch.Functional.Core;
+
+namespace Glitch.Functional
 {
     public interface IStateful<S, T>
     {

@@ -1,4 +1,4 @@
-﻿using Glitch.Functional.Attributes;
+﻿using Glitch.Functional.Core;
 
 namespace Glitch.Functional
 {
@@ -17,9 +17,6 @@ namespace Glitch.Functional
 
         public static RWS<TEnv, S, W, T> Lift(Func<T> runner) => new(input => (input.State, runner(), input.Output));
 
-
-
-        [MonadMap]
         public RWS<TEnv, S, W, TResult> Select<TResult>(Func<T, TResult> map)
             => new(input =>
             {

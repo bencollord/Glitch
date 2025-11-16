@@ -1,5 +1,5 @@
 using Glitch.Functional.Core;
-
+using Glitch.Functional.Errors;
 namespace Glitch.Functional
 {
     internal class GuardIO<T> : IO<T>

@@ -1,3 +1,4 @@
+using Glitch.Functional.Core;
 using System.Collections.Concurrent;
 
 namespace Glitch.Functional
@@ -21,7 +22,7 @@ namespace Glitch.Functional
                 }
             }
 
-            return Nothing;
+            return Unit.Value;
         }
 
         public Unit Release(object? resource)
@@ -32,7 +33,7 @@ namespace Glitch.Functional
                 OnResourceReleased(resource);
             }
 
-            return Nothing;
+            return Unit.Value;
         }
 
         public Unit ReleaseAll()
@@ -45,7 +46,7 @@ namespace Glitch.Functional
 
             resources.Clear();
 
-            return Nothing;
+            return Unit.Value;
         }
 
         public void Dispose()
@@ -76,7 +77,7 @@ namespace Glitch.Functional
                     isDisposed = true;
                 }
 
-                return Nothing;
+                return Unit.Value;
             }
         }
     }

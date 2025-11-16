@@ -1,3 +1,5 @@
+using Glitch.Functional.Core;
+
 namespace Glitch.Functional.Parsing
 {
     public abstract partial class Parser<TToken, T>

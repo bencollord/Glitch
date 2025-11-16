@@ -1,3 +1,4 @@
+using Glitch.Functional.Core;
 using Glitch.Functional.Parsing.Parsers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -20,7 +21,7 @@ namespace Glitch.Functional.Parsing
         [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual Parser<TToken, Unit> IgnoreResult()
-            => Select(_ => Nothing);
+            => Select(_ => Unit.Value);
 
         [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
