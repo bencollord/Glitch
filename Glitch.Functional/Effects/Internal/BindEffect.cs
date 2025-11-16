@@ -2,8 +2,8 @@
 {
     internal class BindEffect<TInput, T, TNext> : IEffect<TInput, TNext>
     {
-        private IEffect<TInput, T> source;
-        private Func<T, IEffect<TInput, TNext>> next;
+        private readonly IEffect<TInput, T> source;
+        private readonly Func<T, IEffect<TInput, TNext>> next;
 
         internal BindEffect(IEffect<TInput, T> source, Func<T, IEffect<TInput, TNext>> next)
         {
@@ -22,9 +22,9 @@
 
     internal class BindEffect<TInput, T, TNext, TResult> : IEffect<TInput, TResult>
     {
-        private IEffect<TInput, T> source;
-        private Func<T, IEffect<TInput, TNext>> next;
-        private Func<T, TNext, TResult> project;
+        private readonly IEffect<TInput, T> source;
+        private readonly Func<T, IEffect<TInput, TNext>> next;
+        private readonly Func<T, TNext, TResult> project;
 
         internal BindEffect(IEffect<TInput, T> source, Func<T, IEffect<TInput, TNext>> next, Func<T, TNext, TResult> project)
         {
