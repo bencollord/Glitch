@@ -1,8 +1,20 @@
 ﻿using Glitch.Functional.Core;
-using Glitch.Functional.Errors;
 
 namespace Glitch.Functional.Effects
 {
+    /// <summary>
+    /// Represents an effect that doesn't take any input.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface IEffect<T> : IEffect<Unit, T>
+    {
+    }
+
+    /// <summary>
+    /// Represents an effectful computation that functions can be composed over.
+    /// </summary>
+    /// <typeparam name="TInput"></typeparam>
+    /// <typeparam name="T"></typeparam>
     public interface IEffect<TInput, T>
     {
         T Run(TInput input);

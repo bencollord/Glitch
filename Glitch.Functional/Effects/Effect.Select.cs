@@ -11,7 +11,7 @@
         public static IEffect<TInput, TResult> SelectMany<TInput, T, TElement, TResult>(this IEffect<TInput, T> source, Func<T, IEffect<TInput, TElement>> bind, Func<T, TElement, TResult> projection)
             => source.AndThen(v => bind(v).Select(x => projection(v, x)));
 
-        internal class MapEffect<TInput, T, TResult> : IEffect<TInput, TResult>
+        private class MapEffect<TInput, T, TResult> : IEffect<TInput, TResult>
         {
             private readonly IEffect<TInput, T> source;
             private readonly Func<T, TResult> selector;
