@@ -1,4 +1,4 @@
-﻿using Glitch.Functional.Results;
+using Glitch.Functional.Core;
 
 namespace Glitch.Functional.Parsing.Results
 {

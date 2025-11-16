@@ -1,4 +1,4 @@
-using Glitch.Functional.Results;
+using Glitch.Functional.Core;
 using Glitch.IO;
 
 namespace Glitch.Functional

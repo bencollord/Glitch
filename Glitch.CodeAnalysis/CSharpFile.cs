@@ -46,6 +46,8 @@ namespace Glitch.CodeAnalysis
 
         public FileInfo File => new FileInfo(Path);
 
+        public bool HasUnsavedChanges => state is UnsavedFileState;
+
         public static CSharpFile Load(FilePath path) => new(path);
 
         public static CSharpFile Load(FileInfo file) => new(file);
@@ -184,6 +186,14 @@ namespace Glitch.CodeAnalysis
             public override State Rewrite(Func<SyntaxNode, SyntaxNode> updater)
             {
                 var root = Tree.GetRoot();
+                var updated = updater(root);
+
+                if (root == updated)
+                {
+                    // No change
+                    return this;
+                }
+
                 return new ModifiedState(Path, root, updater(root));
             }
 
@@ -200,18 +210,18 @@ namespace Glitch.CodeAnalysis
             public UnsavedFileState(FilePath path, SyntaxNode updated)
             {
                 Path = path;
-                Updated = updated;
+                UnsavedRoot = updated;
             }
 
             public override FilePath Path { get; }
 
-            public SyntaxNode Updated { get; }
+            public SyntaxNode UnsavedRoot { get; }
 
-            public override State CopyTo(FilePath path) => new UnsavedFileState(path, Updated);
+            public override State CopyTo(FilePath path) => new UnsavedFileState(path, UnsavedRoot);
 
             public override State LoadTree(out SyntaxTree tree)
             {
-                tree = CreateTree(Updated);
+                tree = CreateTree(UnsavedRoot);
                 return this;
             }
 
@@ -219,16 +229,16 @@ namespace Glitch.CodeAnalysis
 
             public override State Rewrite(Func<SyntaxNode, SyntaxNode> updater)
             {
-                return new ModifiedState(Path, Updated, updater(Updated));
+                return new UnsavedFileState(Path, updater(UnsavedRoot));
             }
 
             public override State SaveChanges()
             {
                 using var stream = new StreamWriter(Path);
 
-                Updated.WriteTo(stream);
+                UnsavedRoot.WriteTo(stream);
 
-                return new LoadedState(Path, CreateTree(Updated));
+                return new LoadedState(Path, CreateTree(UnsavedRoot));
             }
 
             public override string ToString() => $"Unsaved: {Path}";
@@ -241,21 +251,21 @@ namespace Glitch.CodeAnalysis
             public ModifiedState(FilePath path, SyntaxNode original, SyntaxNode updated)
                 : base(path, updated)
             {
-                Original = original;
+                OriginalRoot = original;
             }
 
-            public SyntaxNode Original { get; }
+            public SyntaxNode OriginalRoot { get; }
 
             public override State Revert()
             {
-                return new LoadedState(Path, CreateTree(Original));
+                return new LoadedState(Path, CreateTree(OriginalRoot));
             }
 
             public override string ToString() => $"Modified: {Path}";
 
             public override State Rewrite(Func<SyntaxNode, SyntaxNode> updater)
             {
-                return new ModifiedState(Path, Original, updater(Updated));
+                return new ModifiedState(Path, OriginalRoot, updater(UnsavedRoot));
             }
         }
     }
