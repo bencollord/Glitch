@@ -1,8 +1,6 @@
-﻿using Glitch.Functional;
-using Glitch.Functional.Results;
-
-namespace Glitch
+namespace Glitch.Functional.Core
 {
+    // TODO Remove duplication with Glitch
     public static class DynamicCast<T>
     {
         public static T From<TFrom>(TFrom obj)
@@ -25,9 +23,5 @@ namespace Glitch
                 return false;
             }
         }
-
-        [Obsolete("Will remove dependency on Glitch.Functional at some point")]
-        public static Expected<T> Try<TFrom>(TFrom obj)
-            => Effect<TFrom, T>.Lift(From).Run(obj);
     }
 }
