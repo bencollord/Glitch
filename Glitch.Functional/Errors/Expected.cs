@@ -157,7 +157,7 @@ namespace Glitch.Functional.Errors
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Expected<TResult> Cast<TResult>()
-            => AndThen(x => DynamicCast<TResult>.Try(x, out var r) ? Expected.Okay(r) : Expected.Fail(Errors.InvalidCast<TResult>(x)));
+            => AndThen(x => DynamicCast<TResult>.Try(x, out var r) ? Expected.Okay(r) : Expected.Fail(Error.InvalidCast<TResult>(x)));
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Expected<T> Where(Func<T, bool> predicate)

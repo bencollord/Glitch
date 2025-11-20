@@ -85,7 +85,7 @@ namespace Glitch.Functional
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<TResult> AndThen<TResult>(Func<T, Option<TResult>> bind) => AndThen(bind, (_, y) => y);
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IO<TResult> AndThen<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, _ => IO.Fail<TElement>(Errors.Errors.NoElements)), project);
+        public IO<TResult> AndThen<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, _ => IO.Fail<TElement>(Error.NoElements)), project);
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IO<TResult> AndThen<TResult>(Func<T, Expected<TResult>> bind) => AndThen(bind, (_, y) => y);

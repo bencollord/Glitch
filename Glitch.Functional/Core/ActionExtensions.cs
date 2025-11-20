@@ -73,5 +73,53 @@ namespace Glitch.Functional.Core
                 return value;
             };
         }
+
+        public static Action ReturnVoid<T>(this Func<T> action)
+        {
+            return () =>
+            {
+                action();
+            };
+        }
+
+        public static Action<T> ReturnVoid<T, TResult>(this Func<T, TResult> action)
+        {
+            return (a) =>
+            {
+                action(a);
+            };
+        }
+
+        public static Action<T1, T2> ReturnVoid<T1, T2, TResult>(this Func<T1, T2, TResult> action)
+        {
+            return (a1, a2) =>
+            {
+                action(a1, a2);
+            };
+        }
+
+        public static Action<T1, T2, T3> ReturnVoid<T1, T2, T3, TResult>(this Func<T1, T2, T3, TResult> action)
+        {
+            return (a1, a2, a3) =>
+            {
+                action(a1, a2, a3);
+            };
+        }
+
+        public static Action<T1, T2, T3, T4> ReturnVoid<T1, T2, T3, T4, TResult>(this Func<T1, T2, T3, T4, TResult> action)
+        {
+            return (a1, a2, a3, a4) =>
+            {
+                action(a1, a2, a3, a4);
+            };
+        }
+
+        public static Action<T1, T2, T3, T4, T5> ReturnVoid<T1, T2, T3, T4, T5, TResult>(this Func<T1, T2, T3, T4, T5, TResult> action)
+        {
+            return (a1, a2, a3, a4, a5) =>
+            {
+                action(a1, a2, a3, a4, a5);
+            };
+        }
     }
 }

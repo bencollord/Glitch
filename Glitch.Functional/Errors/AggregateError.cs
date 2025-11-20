@@ -8,12 +8,12 @@ namespace Glitch.Functional.Errors
         private readonly IEnumerable<Error> errors;
 
         public AggregateError(IEnumerable<Error> errors)
-            : base((int)Errors.Code.Aggregate, string.Empty)
+            : base((int)GlobalErrorCode.Aggregate, string.Empty)
         {
             this.errors = errors;
         }
 
-        public override int Code => errors.Any() ? (int)Errors.Code.Aggregate : (int)Errors.Code.None;
+        public override int Code => errors.Any() ? (int)GlobalErrorCode.Aggregate : (int)GlobalErrorCode.None;
 
         public override string Message => string.Join(", ", errors.Select(e => e.Message));
 

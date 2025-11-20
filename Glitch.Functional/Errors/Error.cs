@@ -4,7 +4,7 @@ using System.Runtime.ExceptionServices;
 
 namespace Glitch.Functional.Errors
 {
-    public abstract record Error : IEquatable<Error>
+    public abstract partial record Error : IEquatable<Error>
     {
         public static readonly EmptyError Empty = EmptyError.Value;
 
@@ -14,7 +14,7 @@ namespace Glitch.Functional.Errors
 
         protected Error(int? code, string? message)
         {
-            Code = code ?? (int)Errors.Code.Unspecified;
+            Code = code ?? (int)GlobalErrorCode.Unspecified;
             Message = message ?? $"Error: {GetType()}";
         }
 
