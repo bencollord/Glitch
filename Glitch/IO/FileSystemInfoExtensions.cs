@@ -1,23 +1,23 @@
-﻿namespace Glitch.IO
+﻿namespace Glitch.IO;
+
+public static class FileSystemInfoExtensions
 {
-    public static class FileSystemInfoExtensions
+    extension(FileSystemInfo node)
     {
-        public static FilePath ToPath(this FileSystemInfo node) => new(node);
+        public FilePath Path => new(node.FullName);
+    }
 
-        public static void Rename(this FileInfo file, string newName)
-        {
-            var path = file.ToPath();
-            var newPath = path.Directory / newName;
+    public static void Rename(this FileInfo file, string newName)
+    {
+        var newPath = file.Path.Directory / newName;
 
-            file.MoveTo(newPath);
-        }
+        file.MoveTo(newPath);
+    }
 
-        public static void Rename(this DirectoryInfo directory, string newName)
-        {
-            var path = directory.ToPath();
-            var newPath = path.Directory / newName;
+    public static void Rename(this DirectoryInfo directory, string newName)
+    {
+        var newPath = directory.Path.Directory / newName;
 
-            directory.MoveTo(newPath);
-        }
+        directory.MoveTo(newPath);
     }
 }

@@ -165,11 +165,11 @@ namespace Glitch.IO
 
         [return: NotNullIfNotNull(nameof(node))]
         [return: NotNullIfNotNull(nameof(path))]
-        public static FileSystemInfo? operator +(FileSystemInfo? node, FilePath? path) => node?.ToPath() / path;
+        public static FileSystemInfo? operator +(FileSystemInfo? node, FilePath? path) => node?.Path / path;
 
         [return: NotNullIfNotNull(nameof(node))]
         [return: NotNullIfNotNull(nameof(path))]
-        public static FileSystemInfo? operator /(FileSystemInfo? node, FilePath? path) => node?.ToPath() / path;
+        public static FileSystemInfo? operator /(FileSystemInfo? node, FilePath? path) => node?.Path / path;
 
         public static bool operator <(FilePath? left, FilePath? right) 
             => left is null ? right is not null : left.CompareTo(right) < 0;

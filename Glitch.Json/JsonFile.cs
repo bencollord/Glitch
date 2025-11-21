@@ -2,7 +2,6 @@
 using Glitch.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Net.Http.Headers;
 
 namespace Glitch.Json
 {
@@ -30,7 +29,7 @@ namespace Glitch.Json
 
         public DirectoryInfo? Directory => file.Directory;
 
-        public FilePath Path => file.ToPath();
+        public FilePath Path => file.Path;
 
         /// <summary>
         /// Creates a new instance of <see cref="JsonFile"/>
