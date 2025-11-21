@@ -71,7 +71,7 @@ namespace Glitch.IO
         public ByteSize AddKilobytes(double kilobytes) => FromKilobytes(Kilobytes + kilobytes);
         public ByteSize AddMegabytes(double megabytes) => FromMegabytes(Megabytes + megabytes);
         public ByteSize AddGigabytes(double gigabytes) => FromGigabytes(Gigabytes + gigabytes);
-        public ByteSize AddTerabytes(double terabytes) => FromTerabytes(Terabytes + Terabytes);
+        public ByteSize AddTerabytes(double terabytes) => FromTerabytes(Terabytes + terabytes);
 
         public ByteSize SubtractBits(long bits) => AddBits(-bits);
         public ByteSize SubtractBytes(long bytes) => AddBytes(-bytes);
