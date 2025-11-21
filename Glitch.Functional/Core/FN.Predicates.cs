@@ -24,5 +24,14 @@ namespace Glitch.Functional.Core
         public static Func<T, bool> OrNot<T>(this Func<T, bool> self, Func<T, bool> other) => t => self(t) && !other(t);
 
         public static Func<T, bool> Not<T>(this Func<T, bool> self) => t => !self(t);
+
+        extension<T>(Func<T, bool> _)
+        {
+            public static Func<T, bool> operator &(Func<T, bool> lhs, Func<T, bool> rhs) => t => lhs(t) && rhs(t);
+
+            public static Func<T, bool> operator |(Func<T, bool> lhs, Func<T, bool> rhs) => t => lhs(t) || rhs(t);
+            
+            public static Func<T, bool> operator ^(Func<T, bool> lhs, Func<T, bool> rhs) => t => (lhs(t) && !rhs(t)) || (!lhs(t) && rhs(t));
+        }
     }
 }

@@ -16,16 +16,44 @@ namespace Glitch.Functional.Core
 
     public static partial class FuncExtensions
     {
+        // Compose forward, no argument
         public static Func<TResult> Then<T, TResult>(this Func<T> f, Func<T, TResult> g)
             => () => g(f());
 
-        public static Func<T1, T3> Then<T1, T2, T3>(this Func<T1, T2> f, Func<T2, T3> g)
-            => x => g(f(x));
+        extension<T, TResult>(Func<T> _)
+        {
+            public static Func<TResult> operator >>(Func<T> f, Func<T, TResult> g)
+                => () => g(f());
+        }
 
+        // Compose back, no argument
         public static Func<TResult> Before<T, TResult>(this Func<T, TResult> f, Func<T> g)
             => () => f(g());
 
-        public static Func<T1, T3> Before<T1, T2, T3>(this Func<T2, T3> f, Func<T1, T2> g)
+        extension<T, TResult>(Func<T, TResult> _)
+        {
+            public static Func<TResult> operator <<(Func<T, TResult> f, Func<T> g)
+                => () => f(g());
+        }
+
+        // Compose forward
+        public static Func<T1, TResult> Then<T1, T2, TResult>(this Func<T1, T2> f, Func<T2, TResult> g)
+            => x => g(f(x));
+
+        extension<T1, T2, TResult>(Func<T1, T2> _)
+        {
+            public static Func<T1, TResult> operator >>(Func<T1, T2> f, Func<T2, TResult> g)
+                => x => g(f(x));
+        }
+
+        // Compose back
+        public static Func<T1, TResult> Before<T1, T2, TResult>(this Func<T2, TResult> f, Func<T1, T2> g)
             => x => f(g(x));
+
+        extension<T1, T2, TResult>(Func<T2, TResult> _)
+        {
+            public static Func<T1, TResult> operator <<(Func<T2, TResult> f, Func<T1, T2> g)
+                => x => f(g(x));
+        }
     }
 }
