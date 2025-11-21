@@ -2,39 +2,38 @@
 using Glitch.Functional.Parsing.Results;
 using System.Collections.Immutable;
 
-namespace Glitch.Functional.Parsing.Parsers
+namespace Glitch.Functional.Parsing.Parsers;
+
+internal class SequenceParser<TToken, T> : Parser<TToken, IEnumerable<T>>
 {
-    internal class SequenceParser<TToken, T> : Parser<TToken, IEnumerable<T>>
+    private readonly IEnumerable<Parser<TToken, T>> parsers;
+
+    internal SequenceParser(IEnumerable<Parser<TToken, T>> parsers)
     {
-        private readonly IEnumerable<Parser<TToken, T>> parsers;
+        this.parsers = parsers;
+    }
 
-        internal SequenceParser(IEnumerable<Parser<TToken, T>> parsers)
+    public override ParseResult<TToken, IEnumerable<T>> Execute(TokenSequence<TToken> input)
+    {
+        var remaining = input;
+        var results = ImmutableList.CreateBuilder<T>();
+
+        foreach (var p in parsers)
         {
-            this.parsers = parsers;
-        }
+            var r = p.Execute(remaining);
 
-        public override ParseResult<TToken, IEnumerable<T>> Execute(TokenSequence<TToken> input)
-        {
-            var remaining = input;
-            var results = ImmutableList.CreateBuilder<T>();
-
-            foreach (var p in parsers)
+            if (!r.IsOkay)
             {
-                var r = p.Execute(remaining);
-
-                if (!r.IsOkay)
+                return r.Cast<IEnumerable<T>>() with
                 {
-                    return r.Cast<IEnumerable<T>>() with
-                    {
-                        Remaining = input // Backtrack on failure
-                    };
-                }
-
-                results.Add((T)r);
-                remaining = r.Remaining;
+                    Remaining = input // Backtrack on failure
+                };
             }
 
-            return ParseResult.Okay(results.ToImmutableList().AsEnumerable(), remaining);
+            results.Add((T)r);
+            remaining = r.Remaining;
         }
+
+        return ParseResult.Okay(results.ToImmutableList().AsEnumerable(), remaining);
     }
 }

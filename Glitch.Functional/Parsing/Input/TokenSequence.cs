@@ -42,7 +42,7 @@ namespace Glitch.Functional.Parsing.Input
 
         public abstract ReadOnlySpan<TToken> Lookback(int count);
 
-        public override string ToString()
+        public sealed override string ToString()
         {
             return new StringBuilder()
                 .Append(IsEnd ? "EOF" : $"Current: {Current}")
