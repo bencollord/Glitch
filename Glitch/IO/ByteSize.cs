@@ -71,7 +71,7 @@ namespace Glitch.IO
         public ByteSize AddKilobytes(double kilobytes) => FromKilobytes(Kilobytes + kilobytes);
         public ByteSize AddMegabytes(double megabytes) => FromMegabytes(Megabytes + megabytes);
         public ByteSize AddGigabytes(double gigabytes) => FromGigabytes(Gigabytes + gigabytes);
-        public ByteSize AddTerabytes(double terabytes) => FromTerabytes(Terabytes + Terabytes);
+        public ByteSize AddTerabytes(double terabytes) => FromTerabytes(Terabytes + terabytes);
 
         public ByteSize SubtractBits(long bits) => AddBits(-bits);
         public ByteSize SubtractBytes(long bytes) => AddBytes(-bytes);
@@ -178,8 +178,8 @@ namespace Glitch.IO
 
             private static readonly char[] SupportedNumberFormats = ['B', 'D', 'F', 'N', 'X'];
 
-            private Denomination denomination;
-            private Option<string> numberFormat;
+            private readonly Denomination denomination;
+            private readonly Option<string> numberFormat;
 
             private FormatSpecifier(Denomination denomination, Option<string> numberFormat)
             {
@@ -205,7 +205,7 @@ namespace Glitch.IO
 
             internal string Format(ByteSize byteSize, IFormatProvider? formatProvider)
             {
-                bool IsFractionalFormat(string fmt)
+                static bool IsFractionalFormat(string fmt)
                     => fmt.StartsWith("F", StringComparison.OrdinalIgnoreCase)
                     || fmt.StartsWith("N", StringComparison.OrdinalIgnoreCase);
 

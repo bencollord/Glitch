@@ -7,7 +7,7 @@ namespace Glitch.IO
 {
     public sealed class Checksum : IEquatable<Checksum>, IFormattable
     {
-        private static readonly IReadOnlyDictionary<HashAlgorithmName, Func<HashAlgorithm>> FactoryMap = new Dictionary<HashAlgorithmName, Func<HashAlgorithm>>
+        private static readonly Dictionary<HashAlgorithmName, Func<HashAlgorithm>> FactoryMap = new()
         {
             [HashAlgorithmName.MD5]      = MD5.Create,
             [HashAlgorithmName.SHA1]     = SHA1.Create,
@@ -19,8 +19,8 @@ namespace Glitch.IO
             [HashAlgorithmName.SHA3_512] = SHA3_512.Create,
         };
 
-        private byte[] value;
-        private HashAlgorithmName algorithmName;
+        private readonly byte[] value;
+        private readonly HashAlgorithmName algorithmName;
 
         public Checksum(byte[] value, HashAlgorithmName algorithmName)
         {
