@@ -22,9 +22,6 @@ public abstract partial class Parser<TToken, T>
 
         return new RepeatParser<TToken, T>(this, count, count);
     }
-
-    public virtual Parser<TToken, IEnumerable<T>> Until<TStop>(Parser<TToken, TStop> stop)
-        => Except(stop).ZeroOrMoreTimes();
 }
 
 internal class RepeatParser<TToken, T> : Parser<TToken, IEnumerable<T>>
