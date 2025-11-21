@@ -153,7 +153,7 @@ namespace Glitch.IO
 
             for (int i = 0; i < value.Length; i++)
             {
-                buffer.Append(value[i].ToString("X", numberFormat));
+                buffer.Append(value[i].ToString("X2", numberFormat));
             }
 
             return buffer.ToString();

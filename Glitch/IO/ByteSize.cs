@@ -1,5 +1,4 @@
-﻿using Glitch.Functional;
-using Glitch.Functional.Results;
+﻿using Glitch.Functional.Results;
 using Glitch.IO;
 using System.Numerics;
 
@@ -15,14 +14,31 @@ namespace Glitch.IO
           IMultiplyOperators<ByteSize, ByteSize, ByteSize>,
           IDivisionOperators<ByteSize, ByteSize, ByteSize>
     {
+        private enum Denomination
+        {
+            Bits,
+            Bytes,
+            Kilobytes,
+            Megabytes,
+            Gigabytes,
+            Terabytes
+        }
+
         private const int SizeMultiplier = 1024;
         
-        public const int BitsInByte = 8;
-        public const int BytesInKilobyte = SizeMultiplier;
-        public const int BytesInMegabyte = BytesInKilobyte * SizeMultiplier;
-        public const int BytesInGigabyte = BytesInMegabyte * SizeMultiplier;
+        public const long BitsInByte = 8;
+        public const long BytesInKilobyte = SizeMultiplier;
+        public const long BytesInMegabyte = BytesInKilobyte * SizeMultiplier;
+        public const long BytesInGigabyte = BytesInMegabyte * SizeMultiplier;
+        public const long BytesInTerabyte = BytesInGigabyte * SizeMultiplier;
 
         public static readonly ByteSize Zero = new(0);
+
+        public static readonly ByteSize OneByte = FromBytes(1);
+        public static readonly ByteSize OneKilobyte = FromKilobytes(1);
+        public static readonly ByteSize OneMegabyte = FromMegabytes(1);
+        public static readonly ByteSize OneGigabyte = FromGigabytes(1);
+        public static readonly ByteSize OneTerabyte = FromTerabytes(1);
 
         private readonly long value;
 
@@ -41,24 +57,28 @@ namespace Glitch.IO
         public double Kilobytes => (double)value / BytesInKilobyte;
         public double Megabytes => (double)value / BytesInMegabyte;
         public double Gigabytes => (double)value / BytesInGigabyte;
+        public double Terabytes => (double)value / BytesInTerabyte;
 
         public static ByteSize FromBits(long value) => new(value / BitsInByte);
         public static ByteSize FromBytes(long value) => new(value);
         public static ByteSize FromKilobytes(double value) => new(value * BytesInKilobyte);
         public static ByteSize FromMegabytes(double value) => new(value * BytesInMegabyte);
         public static ByteSize FromGigabytes(double value) => new(value * BytesInGigabyte);
+        public static ByteSize FromTerabytes(double value) => new(value * BytesInTerabyte);
 
         public ByteSize AddBits(long bits) => FromBits(Bits + bits);
         public ByteSize AddBytes(long bytes) => FromBits(Bytes + bytes);
         public ByteSize AddKilobytes(double kilobytes) => FromKilobytes(Kilobytes + kilobytes);
         public ByteSize AddMegabytes(double megabytes) => FromMegabytes(Megabytes + megabytes);
         public ByteSize AddGigabytes(double gigabytes) => FromGigabytes(Gigabytes + gigabytes);
+        public ByteSize AddTerabytes(double terabytes) => FromTerabytes(Terabytes + Terabytes);
 
         public ByteSize SubtractBits(long bits) => AddBits(-bits);
         public ByteSize SubtractBytes(long bytes) => AddBytes(-bytes);
         public ByteSize SubtractKilobytes(double kilobytes) => AddKilobytes(-kilobytes);
         public ByteSize SubtractMegabytes(double megabytes) => AddMegabytes(-megabytes);
         public ByteSize SubtractGigabytes(double gigabytes) => AddGigabytes(-gigabytes);
+        public ByteSize SubtractTerabytes(double terabytes) => AddTerabytes(-terabytes);
 
         public bool Equals(ByteSize other) => value.Equals(other.value);
 
@@ -108,10 +128,14 @@ namespace Glitch.IO
         public static ByteSize operator *(ByteSize left, ByteSize right)
             => FromBytes(left.Bytes * right.Bytes);
 
+        public static ByteSize operator *(ByteSize left, int right)
+            => FromBytes(left.Bytes * right);
 
         public static ByteSize operator /(ByteSize left, ByteSize right)
             => FromBytes(left.Bytes / right.Bytes);
 
+        public static ByteSize operator /(long left, ByteSize right)
+            => FromBytes(left / right.Bytes);
 
         private double GetValue(Denomination denomination)
         {
@@ -126,22 +150,13 @@ namespace Glitch.IO
             };
         }
 
-        private enum Denomination
-        {
-            Bits,
-            Bytes,
-            Kilobytes,
-            Megabytes,
-            Gigabytes
-        }
-
-
         //Size specifiers
         //Bi bits
         //By bytes
         //Kb kilobytes
         //Mb megabytes
         //Gb gigabytes
+        //Tb terabytes
 
         //Supported numerics
         //B binary
@@ -157,7 +172,8 @@ namespace Glitch.IO
                 ["BY"] = Denomination.Bytes,
                 ["KB"] = Denomination.Kilobytes,
                 ["MB"] = Denomination.Megabytes,
-                ["GB"] = Denomination.Gigabytes
+                ["GB"] = Denomination.Gigabytes,
+                ["TB"] = Denomination.Terabytes
             };
 
             private static readonly char[] SupportedNumberFormats = ['B', 'D', 'F', 'N', 'X'];
@@ -209,32 +225,5 @@ namespace Glitch.IO
                 }
             }
         }
-    }
-
-    public static class ByteSizeExtensions
-    {
-        public static ByteSize Average(this IEnumerable<ByteSize> source)
-            => ByteSize.FromBytes(Convert.ToInt64(source.Average(s => s.Bytes)));
-
-        public static ByteSize Average<T>(this IEnumerable<T> source, Func<T, ByteSize> selector)
-            => source.Select(selector).Average();
-
-        public static ByteSize Min(this IEnumerable<ByteSize> source)
-            => ByteSize.FromBytes(source.Select(s => s.Bytes).Min());
-
-        public static ByteSize Min<T>(this IEnumerable<T> source, Func<T, ByteSize> selector)
-            => source.Select(selector).Min();
-
-        public static ByteSize Max(this IEnumerable<ByteSize> source)
-            => ByteSize.FromBytes(source.Select(s => s.Bytes).Max());
-        
-        public static ByteSize Max<T>(this IEnumerable<T> source, Func<T, ByteSize> selector)
-            => source.Select(selector).Max();
-
-        public static ByteSize Sum(this IEnumerable<ByteSize> source)
-            => ByteSize.FromBytes(source.Select(s => s.Bytes).Sum());
-
-        public static ByteSize Sum<T>(this IEnumerable<T> source, Func<T, ByteSize> selector)
-            => source.Select(selector).Sum();
     }
 }
