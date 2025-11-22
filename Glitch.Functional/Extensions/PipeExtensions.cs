@@ -4,13 +4,8 @@ using System.Diagnostics;
 namespace Glitch.Functional
 {
     [DebuggerStepThrough]
-    public static class ObjectExtensions
+    public static class PipeExtensions
     {
-        extension<T>(T _)
-        {
-            public Unit Ignore() => Unit.Value;
-        }
-
         extension<T, TResult>(T self)
         {
             public TResult PipeInto(Func<T, TResult> func) => func(self);

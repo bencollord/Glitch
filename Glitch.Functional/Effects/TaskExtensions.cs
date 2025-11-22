@@ -1,8 +1,6 @@
-﻿using Glitch.Functional.Attributes;
-
-namespace Glitch.Functional
+﻿
+namespace Glitch.Functional.Effects
 {
-    [MonadExtension(typeof(Task<>))]
     public static partial class TaskExtensions
     {
         public static async Task<TResult> Select<T, TResult>(this Task<T> task, Func<T, TResult> mapper)

@@ -1,4 +1,4 @@
-﻿using Glitch.Functional.Results;
+﻿using Glitch.Functional.Core;
 using System.Collections.Immutable;
 
 namespace Glitch.Functional

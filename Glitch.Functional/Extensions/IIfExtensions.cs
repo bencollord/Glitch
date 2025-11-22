@@ -1,4 +1,7 @@
-﻿using Glitch.Functional.Results;
+﻿using Glitch.Functional.Collections;
+using Glitch.Functional.Core;
+using Glitch.Functional.Effects;
+using Glitch.Functional.Errors;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
