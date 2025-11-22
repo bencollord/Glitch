@@ -1,4 +1,6 @@
-﻿using Glitch.IO;
+﻿using Glitch.Functional.Core;
+using Glitch.Functional.Optics;
+using Glitch.IO;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;

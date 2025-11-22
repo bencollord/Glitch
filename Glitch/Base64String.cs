@@ -1,5 +1,4 @@
-﻿using Glitch.Functional.Results;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text;
 
 namespace Glitch

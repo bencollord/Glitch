@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Glitch.Functional\Glitch.Functional.csproj" />
     <ProjectReference Include="..\Glitch\Glitch.csproj" />
   </ItemGroup>
 
