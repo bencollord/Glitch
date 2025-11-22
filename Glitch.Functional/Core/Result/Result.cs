@@ -183,6 +183,10 @@ public abstract partial record Result<T, E>
     public Result<TResult, E> Zip<TOther, TResult>(Result<TOther, E> other, Func<T, TOther, TResult> zipper)
         => AndThen(_ => other, zipper);
 
+    public T Unwrap() => IfFail(e => throw new InvalidOperationException(ErrorMessages.BadUnwrap(e)));
+
+    public E UnwrapError() => Match(e => throw new InvalidOperationException(ErrorMessages.BadUnwrap(e)), Identity);
+
     [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public abstract override string ToString();
 }

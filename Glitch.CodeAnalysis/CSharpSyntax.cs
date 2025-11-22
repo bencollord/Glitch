@@ -1,3 +1,4 @@
+using Glitch.Functional.Extensions;
 using Glitch.IO;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

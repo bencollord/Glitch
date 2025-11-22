@@ -1,7 +1,4 @@
-﻿using Glitch.Functional;
-using Glitch.Functional.Results;
-
-namespace Glitch.Reflection
+﻿namespace Glitch.Reflection
 {
     public static class SignaturePrintingExtensions
     {
@@ -29,31 +26,37 @@ namespace Glitch.Reflection
 
         public static string Signature(this Type type)
         {
-            var builtIn = SpecialTypeNames.TryGetValue(type);
+            if (SpecialTypeNames.TryGetValue(type, out var name))
+            {
+                return name; 
+            }
             
-            var nullable = from t in Maybe(Nullable.GetUnderlyingType(type))
-                           let s = t.Signature() + "?"
-                           select s;
+            if (Nullable.GetUnderlyingType(type) is Type t)
+            {
+                return t.Signature() + "?";
+            }
 
-            var array = from t in Some(type)
-                        where t.IsArray
-                        from e in Maybe(t.GetElementType())
-                        select e.Signature() + "[]";
+            if (type.IsArray)
+            {
+                return type.GetElementType() + "[]";
+            }
 
-            var pointer = from t in Some(type)
-                          where t.IsPointer
-                          from e in Maybe(t.GetElementType())
-                          select e.Signature() + "*";
+            if (type.IsPointer)
+            {
+                return type.GetElementType()!.Signature() + "*";
+            }
 
-            var generic = from t in Some(type)
-                          where t.IsGenericType
-                          let args = t.GetGenericArguments()
-                                      .Select(a => a.Signature())
-                                      .Join(", ")
-                          let endName = t.Name.IndexOf('`')
-                          select $"{t.Name.Substring(0, endName)}<{args}>";
+            if (type.IsGenericType)
+            {
+                var args = type.GetGenericArguments()
+                               .Select(a => a.Signature())
+                               .Join(", ");
+                var endName = type.Name.IndexOf('`');
 
-            return builtIn | nullable | array | pointer | generic | type.Name;
+                return $"{type.Name.Substring(0, endName)}<{args}>";
+            }
+
+            return type.Name;
         }
     }
 }

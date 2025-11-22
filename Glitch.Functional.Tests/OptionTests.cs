@@ -1,10 +1,12 @@
 ﻿using FluentAssertions;
 using Glitch.Functional;
-using Glitch.Functional.Results;
-using static Glitch.Functional.FN;
+using Glitch.Functional.Core;
+using Glitch.Functional.Extensions;
 
 namespace Glitch.Test.Functional
 {
+    using static Option;
+
     public class OptionTests
     {
         [Fact]

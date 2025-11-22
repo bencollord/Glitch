@@ -1,5 +1,7 @@
 ﻿using Glitch.CodeAnalysis.Builders;
-using Glitch.Functional.Results;
+using Glitch.Functional.Collections;
+using Glitch.Functional.Core;
+using Glitch.Functional.Extensions;
 using Glitch.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -86,12 +88,11 @@ namespace Glitch.CodeAnalysis
 
         public static PropertyDeclarationSyntax PropertyDeclaration(PropertyInfo property)
         {
-            var getMethod = Maybe(property.GetMethod);
-            var setMethod = Maybe(property.SetMethod);
+            var getMethod = Option.Maybe(property.GetMethod);
+            var setMethod = Option.Maybe(property.SetMethod);
 
             var method = getMethod.Or(setMethod)
-                .OkayOrElse(_ => new ArgumentException("Property must provide accessors"))
-                .Unwrap();
+                .IfNone(_ => throw new ArgumentException("Property must provide accessors"));
 
             var modifiers = GetMethodModifiers(method);
 
@@ -119,7 +120,7 @@ namespace Glitch.CodeAnalysis
             var setAccessor = setMethod.Select(_ => AccessorDeclaration(SyntaxKind.SetAccessorDeclaration))
                                        .Select(s => setterModifiers.Select(m => s.WithModifiers(m)).IfNone(s));
 
-            var accessors = Sequence(getAccessor, setAccessor)
+            var accessors = Sequence.Of(getAccessor, setAccessor)
                 .Somes()
                 .Select(a => a.WithSemicolonToken(
                     Token(SyntaxKind.SemicolonToken)

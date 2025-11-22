@@ -1,16 +1,13 @@
-﻿using Glitch.Functional;
-using Glitch.Functional.Results;
-
-namespace Glitch.IO.Abstractions
+﻿namespace Glitch.IO.Abstractions
 {
     public interface IFile : IFileSystemNode
     {
-        Option<string> Stem { get; }
+        string Stem { get; }
         string Extension { get; }
-        Option<IDirectory> Directory { get; }
+        IDirectory? Directory { get; }
         ByteSize Length { get; }
 
-        string Checksum();
+        Checksum Checksum();
 
         Stream Open();
         Stream OpenRead();

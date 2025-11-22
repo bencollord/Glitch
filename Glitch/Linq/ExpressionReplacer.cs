@@ -1,5 +1,4 @@
-﻿using Glitch.Functional;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace Glitch.Linq
@@ -17,9 +16,12 @@ namespace Glitch.Linq
         [return: NotNullIfNotNull(nameof(node))]
         public override Expression? Visit(Expression? node)
         {
-            return Maybe(node)
-                .AndThen(expr => replacementMap.TryGetValue(expr))
-                .DefaultIfNone(() => base.Visit(node));
+            if (node is not null && replacementMap.TryGetValue(node, out Expression? value))
+            {
+                return base.Visit(value);
+            }
+
+            return base.Visit(node);
         }
     }
 }

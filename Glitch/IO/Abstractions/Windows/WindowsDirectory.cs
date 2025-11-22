@@ -1,6 +1,4 @@
-﻿using Glitch.Functional;
-using Glitch.Functional.Results;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace Glitch.IO.Abstractions.Windows
 {
@@ -17,8 +15,8 @@ namespace Glitch.IO.Abstractions.Windows
             this.directory = directory;
         }
 
-        public Option<IDirectory> Parent => Maybe(directory.Parent)
-                                                .Select<IDirectory>(e => new WindowsDirectory(e));
+        public IDirectory? Parent => 
+            directory.Parent is DirectoryInfo d ? new WindowsDirectory(d) : null;
 
         public IEnumerable<IFileSystemNode> Children() 
             => directory.EnumerateFileSystemInfos().Select(Wrap);

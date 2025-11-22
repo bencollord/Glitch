@@ -1,8 +1,8 @@
-﻿using Glitch.Functional;
-using Glitch.Functional.Results;
-using Glitch.Linq;
+﻿using Glitch.Linq;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Collections
 {
@@ -10,9 +10,12 @@ namespace Glitch.Collections
     {
         public static ImmutableMultiMap<TKey, TValue> Create<TKey, TValue>(IReadOnlyMultiMap<TKey, TValue> multiMap)
             where TKey : notnull
-            => multiMap.Keys.Select(k => KeyValuePair.Create(k, multiMap[k].ToImmutableList() as IImmutableList<TValue>))
-                            .ToImmutableDictionary()
-                            .PipeInto(dict => new ImmutableMultiMap<TKey, TValue>(dict));
+        {
+            var dict = multiMap.Keys.Select(k => KeyValuePair.Create(k, multiMap[k].ToImmutableList() as IImmutableList<TValue>))
+                                    .ToImmutableDictionary();
+
+            return new ImmutableMultiMap<TKey, TValue>(dict);
+        }
 
         public static ImmutableMultiMap<TKey, TValue>.Builder CreateBuilder<TKey, TValue>(IEqualityComparer<TKey>? keyComparer) 
             where TKey : notnull
@@ -35,8 +38,9 @@ namespace Glitch.Collections
             ArgumentNullException.ThrowIfNull(keySelector, nameof(keySelector));
             ArgumentNullException.ThrowIfNull(elementSelector, nameof(elementSelector));
 
-            return source.ToLookup(keySelector, elementSelector, keyComparer)
-                         .PipeInto(Create);
+            var lookup = source.ToLookup(keySelector, elementSelector, keyComparer);
+
+            return Create(lookup);
         }
 
         public static ImmutableMultiMap<TKey, TSource> ToImmutableMultiMap<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
@@ -65,8 +69,7 @@ namespace Glitch.Collections
                 return existingMultiMap.WithComparer(keyComparer);
             }
 
-            return source.GroupBy(s => s.Key, s => s.Value, keyComparer)
-                         .PipeInto(s => Create(s, keyComparer));
+            return Create(source.GroupBy(s => s.Key, s => s.Value, keyComparer), keyComparer);
         }
 
         public static ImmutableMultiMap<TKey, TValue> ToImmutableMultiMap<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> source) 
@@ -113,10 +116,11 @@ namespace Glitch.Collections
 
         public ImmutableMultiMap<TKey, TValue> Add(TKey key, TValue value)
         {
-            return TryGetList(key)
-                .Select(list => list.Add(value))
-                .Select(list => SetList(key, list))
-                .IfNone(this);
+            var dict = TryGetList(key, out var existing)
+                     ? dictionary.SetItem(key, existing.Add(value))
+                     : dictionary.SetItem(key, [value]);
+
+            return new(dict);
         }
 
         public ImmutableMultiMap<TKey, TValue> Add(TKey key, params TValue[] values) => AddRange(key, values);
@@ -124,10 +128,13 @@ namespace Glitch.Collections
         public ImmutableMultiMap<TKey, TValue> AddRange(TKey key, IEnumerable<TValue> values) => AddRange(key, ImmutableList.CreateRange(values));
 
         public ImmutableMultiMap<TKey, TValue> AddRange(TKey key, IImmutableList<TValue> list)
-            => TryGetList(key)
-                   .Select(existing => dictionary.SetItem(key, existing.AddRange(list)))
-                   .IfNone(() => dictionary.Add(key, list))
-                   .PipeInto(dict => new ImmutableMultiMap<TKey, TValue>(dict));
+        {
+            var dict = TryGetList(key, out var existing)
+                     ? dictionary.SetItem(key, existing.AddRange(list))
+                     : dictionary.SetItem(key, list);
+
+            return new(dict);
+        }
 
         public ImmutableMultiMap<TKey, TValue> Clear() => new(dictionary.Clear());
 
@@ -150,26 +157,21 @@ namespace Glitch.Collections
         
         public ImmutableMultiMap<TKey, TValue> SetList(TKey key, IImmutableList<TValue> list) => new(dictionary.SetItem(key, list));
 
-        public Option<TKey> TryGetKey(TKey key) => TryGetKey(key, out TKey actualKey) ? actualKey : None;
-
         public bool TryGetKey(TKey key, out TKey actualKey) => dictionary.TryGetKey(key, out actualKey);
 
-        public Option<TValue> TryGetValue(TKey key, int index) 
-            => from list in TryGetList(key)
-               where list.Count > index
-               select list[index];
-
-        public bool TryGetValue(TKey key, int index, out TValue value)
+        public bool TryGetValue(TKey key, int index, [NotNullWhen(true)] out TValue? value)
         {
-            var option = TryGetValue(key, index);
-            value = option.UnwrapOrDefault()!; // Might be null, but the compiler will complain for every client if
-                                               // we don't shut it up now. You know the deal if you see a method
-            return option.IsSome;              // with this convention.
+            if(TryGetList(key, out var list) && list.Count > index)
+            {
+                value = list[index];
+                return value != null;
+            }
+
+            value = default;
+            return false;
         }
 
-        public Option<IImmutableList<TValue>> TryGetList(TKey key) => TryGetList(key, out var list) ? Some(list!) : None;
-        
-        public bool TryGetList(TKey key, out IImmutableList<TValue> list) => dictionary.TryGetValue(key, out list!);
+        public bool TryGetList(TKey key, [NotNullWhen(true)] out IImmutableList<TValue>? list) => dictionary.TryGetValue(key, out list);
 
         IEnumerable<IImmutableList<TValue>> IReadOnlyDictionary<TKey, IImmutableList<TValue>>.Values => dictionary.Values;
         int IReadOnlyCollection<KeyValuePair<TKey, IImmutableList<TValue>>>.Count => dictionary.Count;

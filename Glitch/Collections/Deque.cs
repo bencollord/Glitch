@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Collections
 {
@@ -20,29 +21,41 @@ namespace Glitch.Collections
 
         bool ICollection<T>.IsReadOnly => false;
 
-        public Option<T> TryPeekFront() => Maybe(items.First).Select(x => x.Value);
+        public bool TryPeekFront([NotNullWhen(true)] out T? value) => TryGetNodeValue(items.First, out value);
 
-        public Option<T> TryPeekBack() => Maybe(items.Last).Select(x => x.Value);
+        public bool TryPeekBack([NotNullWhen(true)] out T? value) => TryGetNodeValue(items.Last, out value);
 
         public void Unshift(T item) 
             => items.AddFirst(item ?? throw new ArgumentNullException(nameof(item)));
 
-        public T Shift() => TryShift()
-            .ExpectOrElse(EmptyDequeError)
-            .Unwrap();
+        public T Shift() => TryShift(out T? value) ? value : throw EmptyDequeError();
 
-        public Option<T> TryShift() 
-            => TryPeekFront().Do(_ => items.RemoveFirst());
+        public bool TryShift([NotNullWhen(true)] out T? value)
+        {
+            if (TryPeekFront(out value))
+            {
+                items.RemoveFirst();
+                return true;
+            }
+
+            return false;
+        }
 
         public void Push(T item)
             => items.AddLast(item ?? throw new ArgumentNullException(nameof(item)));
 
-        public T Pop() => TryPop()
-            .ExpectOrElse(EmptyDequeError)
-            .Unwrap();
+        public T Pop() => TryPop(out T? value) ? value : throw EmptyDequeError();
 
-        public Option<T> TryPop() 
-            => TryPeekBack().Do(_ => items.RemoveLast());
+        public bool TryPop([NotNullWhen(true)] out T? value)
+        {
+            if (TryPeekBack(out value))
+            {
+                items.RemoveLast();
+                return true;
+            }
+
+            return false;
+        }
 
         public IEnumerator<T> GetEnumerator() => items.GetEnumerator();
 
@@ -58,6 +71,19 @@ namespace Glitch.Collections
 
         bool ICollection<T>.Remove(T item) => items.Remove(item);
 
-        private Error EmptyDequeError() => new ApplicationError("Deque is empty");
+        private Exception EmptyDequeError() => new InvalidOperationException("Deque is empty");
+
+        private bool TryGetNodeValue(LinkedListNode<T>? node, [NotNullWhen(true)] out T? value)
+        {
+            if (node is null || node.Value is null)
+            {
+                value = default;
+                return false;
+            }
+
+            value = node.Value;
+
+            return true;
+        }
     }
 }

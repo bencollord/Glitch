@@ -1,8 +1,4 @@
-﻿using Glitch.Functional;
-using Glitch.Text;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.IO
 {

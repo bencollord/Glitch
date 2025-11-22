@@ -1,9 +1,7 @@
 ﻿using Glitch.Functional;
-using Glitch.Functional.Results;
-using System;
+using Glitch.Functional.Effects;
+using Glitch.Functional.Errors;
 using System.Runtime.CompilerServices;
-using static Glitch.Functional.FN;
-using static Glitch.Functional.Results.Expected;
 
 namespace Glitch.Test.Functional
 {
@@ -38,7 +36,7 @@ namespace Glitch.Test.Functional
         {
             // Arrange
             var item = Effect<string>.Return("Test");
-            var func = Func<string, string>(s => throw new Exception("Failure"));
+            var func = new Func<string, string>(s => throw new Exception("Failure"));
 
             // Act
             var mapped = item.Select(func);
@@ -78,7 +76,7 @@ namespace Glitch.Test.Functional
         {
             // Arrange
             var item = Effect<string>.Return("Test");
-            var func = Func<string, Effect<string>>(s => throw new Exception("Failure"));
+            var func = new Func<string, Effect<string>>(s => throw new Exception("Failure"));
 
             // Act
             var mapped = item.AndThen(func);

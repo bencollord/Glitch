@@ -1,6 +1,4 @@
-﻿using Glitch.Functional;
-using Glitch.Functional.Results;
-using System.Data;
+﻿using System.Data;
 
 namespace Glitch.Data
 {
@@ -45,42 +43,6 @@ namespace Glitch.Data
 
             return (T)record.GetValue(ordinal);
         }
-
-        /// <summary>
-        /// Gets a record's value by name and casts it to the provided type if 
-        /// the provided name is included in the data set and the field is not
-        /// <see cref="DBNull"/>. Otherwise, returns <see cref="Option{T}.None"/>.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="record"></param>
-        /// <param name="ordinal"></param>
-        /// <exception cref="InvalidCastException">
-        /// If the value cannot be cast to <typeparamref name="T"/>.
-        /// </exception>
-        /// <returns></returns>
-        public static Option<T> TryGetValue<T>(this IDataRecord record, string name)
-            => Try(() => record.GetOrdinal(name))
-                   .Run().OkayOrNone()
-                   .AndThen(record.TryGetValue<T>);
-
-        /// <summary>
-        /// Gets a record's value by ordinal and casts it to the provided type if 
-        /// the provided ordinal is valid for the record and the field is not
-        /// <see cref="DBNull"/>. Otherwise, returns <see cref="Option{T}.None"/>.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="record"></param>
-        /// <param name="ordinal"></param>
-        /// <exception cref="InvalidCastException">
-        /// If the value cannot be cast to <typeparamref name="T"/>.
-        /// </exception>
-        /// <returns></returns>
-        public static Option<T> TryGetValue<T>(this IDataRecord record, int ordinal)
-            => from r in Some(record)
-               where ordinal >= 0 
-                  && ordinal < record.FieldCount
-               from v in Maybe(r.GetValue<T>(ordinal))
-               select v;
 
         /// <summary>
         /// Enumerates the field names included in the <paramref name="record"/>.

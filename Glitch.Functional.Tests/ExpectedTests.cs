@@ -1,10 +1,11 @@
 ﻿using FluentAssertions;
 using Glitch.Functional;
-using Glitch.Functional.Results;
-using static Glitch.Functional.Results.Expected;
+using Glitch.Functional.Errors;
 
 namespace Glitch.Test.Functional
 {
+    using static Expected;
+
     public class ExpectedTests
     {
         [Fact]

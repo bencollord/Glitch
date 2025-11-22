@@ -1,9 +1,5 @@
 ﻿using Glitch.Functional;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Glitch.Functional.Collections;
 
 namespace Glitch.Test.Functional
 {

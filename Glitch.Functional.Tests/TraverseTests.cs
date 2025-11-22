@@ -1,22 +1,20 @@
 ﻿using Glitch.Functional;
-using Glitch.Functional.Results;
-using System;
-using System.Runtime.CompilerServices;
-using static Glitch.Functional.Results.Expected;
+using Glitch.Functional.Collections;
+using Glitch.Functional.Core;
+using Glitch.Functional.Errors;
+using Glitch.Functional.Extensions;
 
 namespace Glitch.Test.Functional
 {
     public class TraverseTests
     {
         [Fact]
-        public void Result_IfOneFails_AllFail()
+        public void Expected_IfOneFails_AllFail()
         {
             // Arrange
-            var successfulResults = Enumerable.Select(Sequence.Range(1, 10)
-, Okay)
-                .ToList();
+            var successfulResults = Sequence.Range(1, 10).Select(Expected.Okay).ToList();
 
-            var failedResult = Fail<int>("Bad result");
+            var failedResult = Expected.Fail<int>("Bad result");
 
             // Act
             successfulResults.Add(failedResult);

@@ -1,12 +1,14 @@
-﻿using Glitch.Text;
+﻿using Glitch.Functional.Core;
+using Glitch.Functional.Extensions;
+using Glitch.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Glitch.Functional.Results;
 
 namespace Glitch.CodeAnalysis.Rewriters
 {
     using static CSharpSyntax;
+    using static Option;
 
     public class WhitespaceNormalizer : CSharpSyntaxRewriter, IIndentable
     {

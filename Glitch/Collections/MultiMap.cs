@@ -1,9 +1,7 @@
-﻿using Glitch.Diagnostics;
-using Glitch.Functional;
-using Glitch.Functional.Results;
-using Glitch.Linq;
+﻿using Glitch.Linq;
 using System.Collections;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Collections
 {
@@ -86,10 +84,14 @@ namespace Glitch.Collections
 
         public IList<TValue> AddRange(TKey key, IList<TValue> list)
         {
-            return TryGetList(key)
-                .Do(existing => existing.AddRange(list))
-                .IfNone(() => dictionary.Add(key, list))
-                .UnwrapOr(list);
+            if(TryGetList(key, out var existing))
+            {
+                existing.AddRange(list);
+                return existing;
+            }
+
+            dictionary.Add(key, list);
+            return list;
         }
 
         public void Clear() => dictionary.Clear();
@@ -98,28 +100,22 @@ namespace Glitch.Collections
 
         public bool Remove(TKey key) => dictionary.Remove(key);
 
-        public Option<IList<TValue>> TryGetList(TKey key)
-            => TryGetList(key, out var list) ? Some(list) : None;
-
-        public Option<TValue> TryGetValue(TKey key, int index)
-            => TryGetValue(key, index, out var result) ? Some(result!) : None;
-
         public bool TryGetList(TKey key, out IList<TValue> list)
             => dictionary.TryGetValue(key, out list!); // We either ignore nulls here or deal with the "Mismatched type" warning.
 
-        public bool TryGetValue(TKey key, int index, out TValue value)
+        public bool TryGetValue(TKey key, int index, [NotNullWhen(true)] out TValue? value)
         {
             if (TryGetList(key, out IList<TValue> list) && list.Count < index)
             {
                 value = dictionary[key][index];
-                return true;
+                return value != null;
             }
 
             value = default!;
             return false;
         }
 
-        public Enumerator GetEnumerator() => new Enumerator(this);
+        public Enumerator GetEnumerator() => new(this);
 
         public Dictionary<TKey, IList<TValue>> ToDictionary() => new(dictionary, dictionary.Comparer);
 

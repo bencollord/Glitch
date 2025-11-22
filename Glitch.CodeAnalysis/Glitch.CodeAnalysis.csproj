@@ -22,9 +22,6 @@
 
   <ItemGroup>
     <Using Include="Glitch.Functional" />
-    <Using Include="Glitch.Functional.FN">
-      <Static>True</Static>
-    </Using>
   </ItemGroup>
 
 </Project>

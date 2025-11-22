@@ -1,10 +1,13 @@
-﻿using System.Collections.Immutable;
+﻿using Glitch.Functional.Collections;
+using Glitch.Functional.Core;
+using Glitch.Functional.Errors;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace Glitch.Functional.Results
+namespace Glitch.Functional.Extensions
 {
-    public static class TraverseExtensions
+    public static partial class TraverseExtensions
     {
         // Result
         // ========================================================================================
@@ -15,7 +18,8 @@ namespace Glitch.Functional.Results
             => source.Traverse(opt => opt.Select(traverse));
 
         public static Result<Sequence<TResult>, E> Traverse<T, E, TResult>(this IEnumerable<Result<T, E>> source, Func<T, int, TResult> traverse)
-            => source.Select((s, i) => s.PartialSelect(traverse).Apply(i))
+            => source//.Select((s, i) => s * traverse * Result.Okay(i)) // TODO See if we can make this work!!
+                     .Select((s, i) => s.Select(traverse.Curry()).Select(fn => fn(i)))
                      .Traverse();
 
         public static Result<Sequence<TResult>, E> Traverse<T, E, TResult>(this IEnumerable<T> source, Func<T, int, Result<TResult, E>> traverse)
@@ -38,12 +42,12 @@ namespace Glitch.Functional.Results
 
         public static Option<Sequence<TResult>> Traverse<T, TResult>(this IEnumerable<T> source, Func<T, Option<TResult>> traverse)
             => source.Aggregate(
-                Some(ImmutableList<TResult>.Empty),
+                Option.Some(ImmutableList<TResult>.Empty),
                 (list, item) => list.AndThen(_ => traverse(item), (lst, i) => lst.Add(i)),
                 list => list.Select(Sequence.From));
 
         public static Option<Sequence<TResult>> Traverse<T, TResult>(this IEnumerable<Option<T>> source, Func<T, int, TResult> traverse)
-            => source.Select((s, i) => s.PartialSelect(traverse).Apply(i))
+            => source.Select((s, i) => s.Select(traverse.Curry()).Select(fn => fn(i))) // TODO Make this work with operators!!
                      .Traverse();
 
         public static Option<Sequence<TResult>> Traverse<T, TResult>(this IEnumerable<T> source, Func<T, int, Option<TResult>> traverse)
@@ -63,7 +67,7 @@ namespace Glitch.Functional.Results
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Expected<Sequence<TResult>> Traverse<T, TResult>(this IEnumerable<Expected<T>> source, Func<T, int, TResult> traverse)
-            => source.Select((s, i) => s.PartialSelect(traverse).Apply(i))
+            => source.Select((s, i) => s.Select(traverse.Curry()).Select(fn => fn(i))) // TODO Make this work with operators!!
                      .Traverse();
 
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -21,10 +21,4 @@
     <Compile Remove="Data\ObjectResultStream`1 - Copy.cs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Using Include="Glitch.Functional.FN">
-      <Static>True</Static>
-    </Using>
-  </ItemGroup>
-
 </Project>

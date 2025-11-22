@@ -1,5 +1,4 @@
-﻿using Glitch.Functional;
-using Glitch.Functional.Results;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Collections
 {
@@ -16,14 +15,8 @@ namespace Glitch.Collections
 
         new IEnumerable<TValue> Values { get; }
 
-        Option<IEnumerable<TValue>> TryGetList(TKey key)
-            => TryGetList(key, out var list) ? Some(list) : None;
-
         bool TryGetList(TKey key, out IEnumerable<TValue> list);
 
-        Option<TValue> TryGetValue(TKey key, int index)
-            => TryGetValue(key, index, out var value) ? Some(value) : None;
-
-        bool TryGetValue(TKey key, int index, out TValue value);
+        bool TryGetValue(TKey key, int index, [NotNullWhen(true)] out TValue? value);
     }
 }

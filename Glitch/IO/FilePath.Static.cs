@@ -1,6 +1,4 @@
-﻿using Glitch.Functional;
-
-namespace Glitch.IO
+﻿namespace Glitch.IO
 {
     public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePath>
     {
