@@ -5,8 +5,10 @@ using System.Text;
 
 namespace Glitch.IO
 {
-    public sealed class Checksum : IEquatable<Checksum>, IFormattable
+    public readonly struct Checksum : IEquatable<Checksum>, IFormattable
     {
+        public static readonly Checksum Empty = new();
+
         private static readonly Dictionary<HashAlgorithmName, Func<HashAlgorithm>> FactoryMap = new()
         {
             [HashAlgorithmName.MD5]      = MD5.Create,
@@ -27,6 +29,8 @@ namespace Glitch.IO
             this.value = value;
             this.algorithmName = algorithmName;
         }
+
+        public HashAlgorithmName AlgorithmName => algorithmName;
 
         public static Checksum Compute(Stream stream, HashAlgorithmName algorithmName)
         {
@@ -65,15 +69,16 @@ namespace Glitch.IO
             return factory();
         }
 
-        public bool Equals(Checksum? other)
+        public bool Equals(Checksum other)
         {
-            if (ReferenceEquals(other, null)) return false;
-            if (ReferenceEquals(other, this)) return true;
+            if (value is null)
+                return other.value is null;
 
-            return BytesEqual(value, other.value);
+            return value.Length == other.value.Length
+                && value.SequenceEqual(other.value);
         }
 
-        public override bool Equals(object? obj) => Equals(obj as Checksum);
+        public override bool Equals(object? obj) => obj is Checksum other && Equals(other);
 
         public override int GetHashCode()
         {
@@ -128,13 +133,19 @@ namespace Glitch.IO
         /// <exception cref="NotImplementedException"></exception>
         public string ToString(string? format, IFormatProvider? formatProvider)
         {
+            if (this == Empty)
+            {
+                return "<Empty>";
+            }
+
             format ??= "g"; // Default format
 
             var output = format.ToLower() switch
             {
-                "G" => ToBase64().ToString(),
-                "U" => ToBase64().ToUrlSafeString(),
-                "X" => ToByteString(formatProvider),
+                "g" => ToHexString(formatProvider),
+                "b" => ToBase64().ToString(),
+                "u" => ToBase64().ToUrlSafeString(),
+                "x" => ToHexString(formatProvider),
                 _   => throw new FormatException($"Invalid format string '{format}")
             };
 
@@ -146,7 +157,7 @@ namespace Glitch.IO
         /// </summary>
         /// <param name="formatProvider"></param>
         /// <returns></returns>
-        private string ToByteString(IFormatProvider? formatProvider)
+        public string ToHexString(IFormatProvider? formatProvider = null)
         {
             var numberFormat = formatProvider?.GetFormat<NumberFormatInfo>();
             var buffer = new StringBuilder();
@@ -159,6 +170,8 @@ namespace Glitch.IO
             return buffer.ToString();
         }
 
-        private static bool BytesEqual(ReadOnlySpan<byte> x, ReadOnlySpan<byte> y) => x.Length == y.Length && x.SequenceEqual(y);
+        public static bool operator ==(Checksum x, Checksum y) => x.Equals(y);
+
+        public static bool operator !=(Checksum x, Checksum y) => !(x == y);
     }
 }

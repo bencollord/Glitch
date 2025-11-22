@@ -1,8 +1,5 @@
 ﻿using Glitch.Functional;
-using Glitch.Text;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 
 namespace Glitch.IO
 {
@@ -50,29 +47,29 @@ namespace Glitch.IO
         public FilePath ToRelativePath(string relativeTo) => new(Path.GetRelativePath(relativeTo, path));
         public FilePath ToRelativePath(FilePath relativeTo) => ToRelativePath(relativeTo.path);
 
-        public FilePath Append(string other) => new(Path.Combine(path, other));
+        public FilePath Append(string other) => new(Path.Join(path, other));
         public FilePath Append(FilePath other) => Append(other.path);
-        public FilePath Append(string path1, string path2) => new(Path.Combine(path, path1, path2));
+        public FilePath Append(string path1, string path2) => new(Path.Join(path, path1, path2));
         public FilePath Append(FilePath path1, FilePath path2) => Append(path1.path, path2.path);
-        public FilePath Append(string path1, string path2, string path3) => new(Path.Combine(path, path1, path2, path3));
+        public FilePath Append(string path1, string path2, string path3) => new(Path.Join(path, path1, path2, path3));
         public FilePath Append(FilePath path1, FilePath path2, FilePath path3) => Append(path1.path, path2.path, path3.path);
-        public FilePath Append(ReadOnlySpan<string> paths) => Append(Path.Combine(paths));
-        public FilePath Append(params IEnumerable<string> paths) => new(Path.Combine(paths.Prepend(path).ToArray()));
+        public FilePath Append(ReadOnlySpan<string> paths) => Append(Path.Join(paths));
+        public FilePath Append(params IEnumerable<string> paths) => new(Path.Join(paths.Prepend(path).ToArray()));
         public FilePath Append(params IEnumerable<FilePath> paths) => Append(paths.Select(p => p.path));
 
         public FilePath Concat(ReadOnlySpan<char> other)
-            => new(Path.Join(path.AsSpan(), other));
+            => new(string.Concat(path.AsSpan(), other));
         public FilePath Concat(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2)
-            => new(Path.Join(path.AsSpan(), path1, path2));
+            => new(string.Concat(path.AsSpan(), path1, path2));
         public FilePath Concat(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, ReadOnlySpan<char> path3)
-            => new(Path.Join(path.AsSpan(), path1, path2, path3));
-        public FilePath Concat(string other) => new(Path.Join(path, other));
+            => new(string.Concat(path.AsSpan(), path1, path2, path3));
+        public FilePath Concat(string other) => new(string.Concat(path, other));
         public FilePath Concat(FilePath other) => Concat(other.path);
-        public FilePath Concat(string path1, string path2) => new(Path.Join(path, path1, path2));
+        public FilePath Concat(string path1, string path2) => new(string.Concat(path, path1, path2));
         public FilePath Concat(FilePath path1, FilePath path2) => Concat(path1.path, path2.path);
-        public FilePath Concat(string path1, string path2, string path3) => new(Path.Join(path, path1, path2, path3));
+        public FilePath Concat(string path1, string path2, string path3) => new(string.Concat(path, path1, path2, path3));
         public FilePath Concat(FilePath path1, FilePath path2, FilePath path3) => Concat(path1.path, path2.path, path3.path);
-        public FilePath Concat(params IEnumerable<string> paths) => new(Path.Join(paths.Prepend(path).ToArray()));
+        public FilePath Concat(params IEnumerable<string> paths) => new(string.Concat(paths.Prepend(path).ToArray()));
         public FilePath Concat(params IEnumerable<FilePath> paths) => Concat(paths.Select(p => p.path));
 
         public int CompareTo(FilePath? other)
