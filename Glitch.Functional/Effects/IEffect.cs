@@ -1,4 +1,4 @@
-using Glitch.Functional.Core;
+using Glitch.Functional;
 using Glitch.Functional.Errors;
 
 namespace Glitch.Functional.Effects
@@ -12,7 +12,7 @@ namespace Glitch.Functional.Effects
         virtual IEffect<TInput, TResult> AndThen<TElement, TResult>(Func<TOutput, IEffect<TInput, TElement>> bind, Func<TOutput, TElement, TResult> project)
             => AndThen(x => bind(x).Select(project.Curry(x)));
 
-        IEffect<TInput, TResult> Match<TResult>(Func<TOutput, TResult> okay, Func<Error, TResult> error);
+        IEffect<TInput, TResult> Match<TResult>(Func<TOutput, TResult> okay, Func<Error, TResult> fail);
 
         IEffect<TInput, TOutput> Catch<TException>(Func<TException, TOutput> map) where TException : Exception;
 

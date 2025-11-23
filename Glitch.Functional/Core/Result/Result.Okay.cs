@@ -1,4 +1,4 @@
-namespace Glitch.Functional.Core;
+namespace Glitch.Functional;
 
 public sealed record Okay<T, E>(T Value) : Result<T, E>
 {

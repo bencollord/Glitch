@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-namespace Glitch.Functional.Core
+namespace Glitch.Functional
 {
     /// <summary>
     /// Represents a value that may or may not exist and

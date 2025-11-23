@@ -1,4 +1,4 @@
-using Glitch.Functional.Core;
+using Glitch.Functional;
 using Glitch.Functional.Errors;
 
 namespace Glitch.Functional.Effects;
@@ -204,8 +204,8 @@ public partial class Effect<T>
     /// <param name="okay"></param>
     /// <param name="error"></param>
     /// <returns></returns>
-    public Effect<TResult> Match<TResult>(Func<T, TResult> okay, TResult error)
-        => new(inner.Match(okay, error));
+    public Effect<TResult> Match<TResult>(Func<T, TResult> okay, TResult fail)
+        => new(inner.Match(okay, fail));
 
     /// <summary>
     /// <inheritdoc cref="Effect{Unit, T}.Match{TResult}(Func{T, TResult}, Func{TResult})"/>
@@ -214,8 +214,8 @@ public partial class Effect<T>
     /// <param name="okay"></param>
     /// <param name="error"></param>
     /// <returns></returns>
-    public Effect<TResult> Match<TResult>(Func<T, TResult> okay, Func<TResult> error)
-        => new(inner.Match(okay, error));
+    public Effect<TResult> Match<TResult>(Func<T, TResult> okay, Func<TResult> fail)
+        => new(inner.Match(okay, fail));
 
     /// <summary>
     /// <inheritdoc cref="Effect{Unit, T}.Match{TResult}(Func{T, TResult}, Func{Error, TResult})"/>
@@ -224,8 +224,8 @@ public partial class Effect<T>
     /// <param name="okay"></param>
     /// <param name="error"></param>
     /// <returns></returns>
-    public TResult Match<TResult>(Func<T, TResult> okay, Func<Error, TResult> error)
-        => Run().Match(okay, error);
+    public TResult Match<TResult>(Func<T, TResult> okay, Func<Error, TResult> fail)
+        => Run().Match(okay, fail);
 
     /// <summary>
     /// <inheritdoc cref="Effect{Unit, T}.Cast{TResult}"/>

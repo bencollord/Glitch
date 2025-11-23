@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Glitch.Functional.Core.FN">
+    <Using Include="Glitch.Functional.FN">
       <Static>True</Static>
     </Using>
   </ItemGroup>

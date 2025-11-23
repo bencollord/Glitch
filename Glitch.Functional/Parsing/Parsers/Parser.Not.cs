@@ -1,4 +1,4 @@
-using Glitch.Functional.Core;
+using Glitch.Functional;
 using Glitch.Functional.Parsing.Input;
 using Glitch.Functional.Parsing.Results;
 
@@ -24,6 +24,6 @@ internal class NegatedParser<TToken, T> : Parser<TToken, Unit>
         return parser.Execute(input)
                      .Match(
                          okay: val => ParseResult<TToken, Unit>.Error($"Negated parser succeeded with {val}", input),
-                         error: _ => ParseResult.Okay(Unit.Value, input));
+                         fail: _ => ParseResult.Okay(Unit.Value, input));
     }
 }

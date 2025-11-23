@@ -1,4 +1,4 @@
-﻿using Glitch.Functional.Parsing.Input;
+using Glitch.Functional.Parsing.Input;
 
 namespace Glitch.Functional.Parsing.Results
 {
@@ -95,7 +95,7 @@ namespace Glitch.Functional.Parsing.Results
         public ParseResult<TToken, T> Guard(Func<T, bool> predicate, Func<T, Expectation<TToken>> ifFail)
             => AndThen(v => predicate(v) ? this : Error(ifFail(v), Remaining));
 
-        public abstract TResult Match<TResult>(Func<ParseSuccess<TToken, T>, TResult> okay, Func<ParseError<TToken, T>, TResult> error);
+        public abstract TResult Match<TResult>(Func<ParseSuccess<TToken, T>, TResult> okay, Func<ParseError<TToken, T>, TResult> fail);
 
         public static implicit operator ParseResult<TToken, T>(T value) => Okay(value, TokenSequence<TToken>.Empty);
 

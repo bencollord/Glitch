@@ -1,4 +1,4 @@
-namespace Glitch.Functional.Core
+namespace Glitch.Functional
 {
     /// <summary>
     /// Specifies that a type is a monad so that it can be found

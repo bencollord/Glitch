@@ -2,57 +2,93 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Glitch.CodeAnalysis.Rewriters
+namespace Glitch.CodeAnalysis.Rewriters;
+
+using static CSharpSyntax;
+
+public class NamespaceRewriter : CSharpSyntaxRewriter
 {
-    public class UsingDirectiveRewriter : CSharpSyntaxRewriter
+    private readonly ISet<string> remove;
+    private readonly IDictionary<string, string> replace = new Dictionary<string, string>();
+
+    public NamespaceRewriter(params HashSet<string> remove)
     {
-        private readonly ISet<string> directivesToRemove;
-        private readonly IDictionary<string, string> directivesToReplace = new Dictionary<string, string>();
+        this.remove = remove;
+    }
 
-        public UsingDirectiveRewriter(params HashSet<string> directivesToRemove)
+    public NamespaceRewriter(ISet<string> remove, IDictionary<string, string> replace)
+    {
+        this.remove = remove;
+        this.replace = replace;
+    }
+
+    public override SyntaxNode? VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
+    {
+        if (remove.Contains(node.Name.ToString()))
         {
-            this.directivesToRemove = directivesToRemove;
+            throw new InvalidOperationException($"Cannot remove name that is being used in a declaration. Name: {node}");
         }
 
-        public UsingDirectiveRewriter(ISet<string> directivesToRemove, IDictionary<string, string> directivesToReplace)
+        if (replace.ContainsKey(node.Name.ToString()))
         {
-            this.directivesToRemove = directivesToRemove;
-            this.directivesToReplace = directivesToReplace;
+            node = node.WithName(
+                ParseName(replace[node.Name.ToString()])
+                    .WithTriviaFrom(node.Name));
         }
 
-        public UsingDirectiveRewriter Remove(string directive)
+        return base.VisitNamespaceDeclaration(node);
+    }
+
+    public override SyntaxNode? VisitFileScopedNamespaceDeclaration(FileScopedNamespaceDeclarationSyntax node)
+    {
+        if (remove.Contains(node.Name.ToString()))
         {
-            directivesToReplace.Remove(directive);
-            directivesToRemove.Add(directive);
-            return this;
+            throw new InvalidOperationException($"Cannot remove name that is being used in a declaration. Name: {node}");
         }
 
-        public UsingDirectiveRewriter Replace(string oldDirective, string newDirective)
+        if (replace.ContainsKey(node.Name.ToString()))
         {
-            directivesToRemove.Remove(oldDirective);
-            directivesToReplace.Add(oldDirective, newDirective);
-            return this;
+            node = node.WithName(
+                ParseName(replace[node.Name.ToString()])
+                    .WithTriviaFrom(node.Name));
         }
 
-        public override SyntaxNode? VisitUsingDirective(UsingDirectiveSyntax node)
+        return base.VisitFileScopedNamespaceDeclaration(node);
+    }
+
+    public NamespaceRewriter Remove(string name)
+    {
+        replace.Remove(name);
+        remove.Add(name);
+        return this;
+    }
+
+    public NamespaceRewriter Replace(string oldName, string newName)
+    {
+        remove.Remove(oldName);
+        replace.Add(oldName, newName);
+        return this;
+    }
+
+    public override SyntaxNode? VisitUsingDirective(UsingDirectiveSyntax node)
+    {
+        if (node is null)
         {
-            if (node is null)
-            {
-                return null;
-            }
-
-            if (directivesToReplace.TryGetValue(node.Name?.ToString() ?? string.Empty, out string? newDirective))
-            {
-                return SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(newDirective))
-                    .WithTriviaFrom(node);
-            }
-
-            if (directivesToRemove.Contains(node.Name?.ToString() ?? string.Empty))
-            {
-                return null;
-            }
-
-            return base.VisitUsingDirective(node);
+            return null;
         }
+
+        if (replace.TryGetValue(node.Name?.ToString() ?? string.Empty, out string? newDirective))
+        {
+            return node.WithName(
+                ParseName(newDirective)
+                    .WithTriviaFrom(node.Name!));
+        }
+
+        if (remove.Contains(node.Name?.ToString() ?? string.Empty))
+        {
+            return null;
+        }
+
+        return base.VisitUsingDirective(node);
     }
 }

@@ -2,7 +2,7 @@ using Glitch.Functional.Errors;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace Glitch.Functional.Core
+namespace Glitch.Functional
 {
     // Instance operators
     public readonly partial struct Option<T>

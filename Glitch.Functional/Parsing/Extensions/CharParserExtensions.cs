@@ -1,6 +1,6 @@
 using Glitch.Functional.Parsing.Input;
 using Glitch.Functional.Parsing.Results;
-using Glitch.Functional.Core;
+using Glitch.Functional;
 using Glitch.Functional.Errors;
 
 namespace Glitch.Functional.Parsing

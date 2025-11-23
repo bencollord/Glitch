@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace Glitch.Functional.Core;
+namespace Glitch.Functional;
 
 using static FN;
 

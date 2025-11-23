@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Glitch.Functional.Core
+namespace Glitch.Functional
 {
     public readonly struct Unit : IEquatable<Unit>, IComparable<Unit>
     {

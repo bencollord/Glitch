@@ -1,4 +1,4 @@
-using Glitch.Functional.Core;
+using Glitch.Functional;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 

@@ -1,4 +1,4 @@
-namespace Glitch.Functional.Core
+namespace Glitch.Functional
 {
     public static partial class FN
     {
@@ -17,41 +17,38 @@ namespace Glitch.Functional.Core
     public static partial class FuncExtensions
     {
         // Compose forward, no argument
-        public static Func<TResult> Then<T, TResult>(this Func<T> f, Func<T, TResult> g)
-            => () => g(f());
-
-        extension<T, TResult>(Func<T> _)
+        extension<T, TResult>(Func<T> self)
         {
-            public static Func<TResult> operator >>(Func<T> f, Func<T, TResult> g)
-                => () => g(f());
+            public Func<TResult> Then(Func<T, TResult> g) => () => g(self());
+
+            public static Func<TResult> operator >>(Func<T> f, Func<T, TResult> g) => () => g(f());
         }
 
         // Compose back, no argument
-        public static Func<TResult> Before<T, TResult>(this Func<T, TResult> f, Func<T> g)
-            => () => f(g());
-
-        extension<T, TResult>(Func<T, TResult> _)
+        extension<T, TResult>(Func<T, TResult> self)
         {
-            public static Func<TResult> operator <<(Func<T, TResult> f, Func<T> g)
-                => () => f(g());
+            public Func<TResult> Before(Func<T> g) => () => self(g());
+
+            public static Func<TResult> operator <<(Func<T, TResult> f, Func<T> g) => () => f(g());
         }
 
         // Compose forward
-        public static Func<T1, TResult> Then<T1, T2, TResult>(this Func<T1, T2> f, Func<T2, TResult> g)
-            => x => g(f(x));
-
-        extension<T1, T2, TResult>(Func<T1, T2> _)
+        extension<T1, T2, TResult>(Func<T1, T2> self)
         {
+            public Func<T1, TResult> Then(Func<T2, TResult> g)
+                => x => g(self(x));
+
             public static Func<T1, TResult> operator >>(Func<T1, T2> f, Func<T2, TResult> g)
                 => x => g(f(x));
         }
 
         // Compose back
-        public static Func<T1, TResult> Before<T1, T2, TResult>(this Func<T2, TResult> f, Func<T1, T2> g)
-            => x => f(g(x));
-
-        extension<T1, T2, TResult>(Func<T2, TResult> _)
+        extension<T1, T2, TResult>(Func<T2, TResult> self)
         {
+            public Func<T1, TResult> Before(Func<T1, T2> g)
+                => x => self(g(x));
+
+
             public static Func<T1, TResult> operator <<(Func<T2, TResult> f, Func<T1, T2> g)
                 => x => f(g(x));
         }

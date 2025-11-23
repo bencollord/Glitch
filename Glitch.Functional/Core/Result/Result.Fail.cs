@@ -1,4 +1,4 @@
-namespace Glitch.Functional.Core;
+namespace Glitch.Functional;
 
 public sealed record Fail<T, E>(E Error) : Result<T, E>
 {

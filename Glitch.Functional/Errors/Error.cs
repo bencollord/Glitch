@@ -1,4 +1,4 @@
-using Glitch.Functional.Core;
+using Glitch.Functional;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.ExceptionServices;
 

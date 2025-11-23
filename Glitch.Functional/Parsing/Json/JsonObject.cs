@@ -1,5 +1,5 @@
 using Glitch.Functional;
-using Glitch.Functional.Core;
+using Glitch.Functional;
 using Glitch.Text;
 using System.Collections;
 using System.Collections.Immutable;

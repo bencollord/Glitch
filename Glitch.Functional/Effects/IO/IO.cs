@@ -1,4 +1,4 @@
-using Glitch.Functional.Core;
+using Glitch.Functional;
 using Glitch.Functional.Errors;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -116,12 +116,12 @@ public abstract partial class IO<T>
     public IO<T> Guard(Func<T, bool> predicate, Func<T, Error> error) => new GuardIO<T>(this, predicate, error);
 
     [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IO<TResult> Match<TResult>(Func<T, TResult> okay, Func<Error, TResult> error)
-        => Select(okay).Catch(error);
+    public IO<TResult> Match<TResult>(Func<T, TResult> okay, Func<Error, TResult> fail)
+        => Select(okay).Catch(fail);
 
     [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IO<Unit> Match(Action<T> okay, Action<Error> error)
-        => Match(okay.Return(), error.Return());
+    public IO<Unit> Match(Action<T> okay, Action<Error> fail)
+        => Match(okay.Return(), fail.Return());
 
     public IO<TResource> Use<TResource>(Func<T, TResource> acquire) => IO<TResource>.Use(Select(acquire));
 

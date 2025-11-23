@@ -1,4 +1,4 @@
-using Glitch.Functional.Core;
+using Glitch.Functional;
 using Glitch.Functional.Errors;
 
 namespace Glitch.Functional.Effects;
@@ -340,8 +340,8 @@ public partial class Effect<TEnv, T>
     /// <param name="okay"></param>
     /// <param name="error"></param>
     /// <returns></returns>
-    public Effect<TEnv, TResult> Match<TResult>(Func<T, TResult> okay, TResult error)
-        => Match(okay, _ => error);
+    public Effect<TEnv, TResult> Match<TResult>(Func<T, TResult> okay, TResult fail)
+        => Match(okay, _ => fail);
 
     /// <summary>
     /// If Ok, returns the result of the first function to the wrapped value.
@@ -351,8 +351,8 @@ public partial class Effect<TEnv, T>
     /// <param name="okay"></param>
     /// <param name="error"></param>
     /// <returns></returns>
-    public Effect<TEnv, TResult> Match<TResult>(Func<T, TResult> okay, Func<TResult> error)
-        => Match(okay, _ = error());
+    public Effect<TEnv, TResult> Match<TResult>(Func<T, TResult> okay, Func<TResult> fail)
+        => Match(okay, _ = fail());
 
     /// <summary>
     /// If Ok, returns the result of the first function to the wrapped value.
@@ -362,8 +362,8 @@ public partial class Effect<TEnv, T>
     /// <param name="okay"></param>
     /// <param name="error"></param>
     /// <returns></returns>
-    public Effect<TEnv, TResult> Match<TResult>(Func<T, TResult> okay, Func<Error, TResult> error) 
-        => new(input => Expected.Okay(thunk(input).Match(okay, error)));
+    public Effect<TEnv, TResult> Match<TResult>(Func<T, TResult> okay, Func<Error, TResult> fail) 
+        => new(input => Expected.Okay(thunk(input).Match(okay, fail)));
 
     /// <summary>
     /// Chooses one of two impure actions to run depending on the success or failure
@@ -374,7 +374,7 @@ public partial class Effect<TEnv, T>
     /// <param name="okay"></param>
     /// <param name="error"></param>
     /// <returns></returns>
-    public Effect<TEnv, T> Match(Action<T> okay, Action<Error> error)
+    public Effect<TEnv, T> Match(Action<T> okay, Action<Error> fail)
         => new(input =>
         {
             var result = thunk(input);
@@ -385,9 +385,9 @@ public partial class Effect<TEnv, T>
                     okay(val);
                     return result;
                 },
-                error: e =>
+                fail: e =>
                 {
-                    error(e);
+                    fail(e);
                     return result;
                 });
         });

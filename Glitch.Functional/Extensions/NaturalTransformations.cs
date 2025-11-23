@@ -1,11 +1,22 @@
-﻿using Glitch.Functional.Core;
+using Glitch.Functional;
 using Glitch.Functional.Errors;
 
 namespace Glitch.Functional.Extensions
 {
     public static class NaturalTransformations
     {
-        public static Option<T> OkayOrNone<T, E>(this Result<T, E> source) => source.Match(Option.Some, _ => Option.None);
-        public static Option<T> OkayOrNone<T>(this Expected<T> source) => source.Match(Option.Some, _ => Option.None);
+        extension<T, E>(Result<T, E> source)
+        {
+            public Option<T> OkayOrNone() => source.Match(Option.Some, _ => Option.None);
+
+            public Option<E> ErrorOrNone() => source.Match(_ => Option.None, Option.Some);
+        }
+
+        extension<T>(Expected<T> source)
+        {
+            public Option<T> OkayOrNone() => source.Match(Option.Some, _ => Option.None);
+
+            public Option<Error> ErrorOrNone() => source.Match(_ => Option.None, Option.Some);
+        }
     }
 }

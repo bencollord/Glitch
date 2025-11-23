@@ -1,4 +1,4 @@
-using Glitch.Functional.Core;
+using Glitch.Functional;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -153,8 +153,8 @@ namespace Glitch.Functional.Errors
         /// <param name="error"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TResult Match<TResult>(Func<T, TResult> okay, Func<Error, TResult> error)
-            => inner.Match(okay, error);
+        public TResult Match<TResult>(Func<T, TResult> okay, Func<Error, TResult> fail)
+            => inner.Match(okay, fail);
 
         /// <summary>
         /// Casts the wrapped value to <typeparamref name="TResult"/> if Ok,

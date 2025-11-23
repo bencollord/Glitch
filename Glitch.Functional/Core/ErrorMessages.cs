@@ -1,4 +1,4 @@
-﻿namespace Glitch.Functional.Core
+namespace Glitch.Functional
 {
     internal static class ErrorMessages
     {

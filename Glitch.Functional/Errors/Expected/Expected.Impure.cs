@@ -1,29 +1,27 @@
-using Glitch.Functional.Core;
-
 namespace Glitch.Functional.Errors
 {
-    public static partial class ExpectedExtensions
+    public partial record Expected<T>
     {
-        public static Expected<T> IfOkay<T>(this Expected<T> source, Action<T> action) =>
-            source.Match(action, Nop).Return(source);
+        public Expected<T> IfOkay(Action<T> action) =>
+            Match(action, Nop).Return(this);
 
-        public static Expected<T> IfOkay<T>(this Expected<T> source, Func<T, Unit> action) =>
-            source.IfOkay(action.ReturnVoid());
+        public Expected<T> IfOkay(Func<T, Unit> action) =>
+            IfOkay(action.ReturnVoid());
 
-        public static Expected<T> IfFail<T>(this Expected<T> source, Action<Error> action) =>
-            source.Match(Nop, action).Return(source);
+        public Expected<T> IfFail(Action<Error> action) =>
+            Match(Nop, action).Return(this);
 
-        public static Expected<T> IfFail<T>(this Expected<T> source, Func<Error, Unit> action) =>
-            source.IfFail(action.ReturnVoid());
+        public Expected<T> IfFail(Func<Error, Unit> action) =>
+            IfFail(action.ReturnVoid());
 
         // Alias for IfOkay
-        public static Expected<T> Do<T>(this Expected<T> source, Action<T> action) =>
-            source.Match(action, Nop).Return(source);
+        public Expected<T> Do(Action<T> action) =>
+            Match(action, Nop).Return(this);
 
-        public static Expected<T> Do<T>(this Expected<T> source, Func<T, Unit> action) =>
-            source.IfOkay(action.ReturnVoid());
+        public Expected<T> Do(Func<T, Unit> action) =>
+            IfOkay(action.ReturnVoid());
 
-        public static Unit Match<T>(this Expected<T> source, Action<T> okay, Action<Error> fail) =>
-            source.Match(okay.Return(), fail.Return());
+        public Unit Match(Action<T> okay, Action<Error> fail) =>
+            Match(okay.Return(), fail.Return());
     }
 }

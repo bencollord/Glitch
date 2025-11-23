@@ -1,4 +1,4 @@
-namespace Glitch.Functional.Core
+namespace Glitch.Functional
 {
     /// <summary>
     /// Static methods for <see cref="Option{T}"/>, mostly to simplify

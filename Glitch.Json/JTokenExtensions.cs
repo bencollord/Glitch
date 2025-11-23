@@ -1,5 +1,4 @@
 ﻿using Glitch.Functional;
-using Glitch.Functional.Core;
 using Glitch.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

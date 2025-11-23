@@ -1,5 +1,5 @@
 using Glitch.Functional.Parsing.Input;
-using Glitch.Functional.Core;
+using Glitch.Functional;
 
 namespace Glitch.Functional.Parsing.Results
 {

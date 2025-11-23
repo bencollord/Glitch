@@ -1,5 +1,5 @@
-﻿using Glitch.Functional.Collections;
-using Glitch.Functional.Core;
+using Glitch.Functional.Collections;
+using Glitch.Functional;
 using Glitch.Functional.Errors;
 using System.Collections.Immutable;
 using System.Diagnostics;

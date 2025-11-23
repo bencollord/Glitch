@@ -1,6 +1,6 @@
-﻿using Glitch.Functional.Errors;
+using Glitch.Functional.Errors;
 
-namespace Glitch.Functional.Core
+namespace Glitch.Functional
 {
     public static class StaticCast<T>
         where T : class

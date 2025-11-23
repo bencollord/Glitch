@@ -1,4 +1,4 @@
-namespace Glitch.Functional.Core
+namespace Glitch.Functional
 {
     public readonly record struct Fail<E>(E Error)
     {

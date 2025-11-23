@@ -1,6 +1,5 @@
 ﻿using Glitch.CodeAnalysis.Builders;
 using Glitch.Functional.Collections;
-using Glitch.Functional.Core;
 using Glitch.Functional.Extensions;
 using Glitch.Reflection;
 using Microsoft.CodeAnalysis;

@@ -1,4 +1,4 @@
-﻿using Glitch.Functional.Core;
+﻿using Glitch.Functional;
 using Glitch.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

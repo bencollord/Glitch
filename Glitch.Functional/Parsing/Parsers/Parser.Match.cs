@@ -5,12 +5,12 @@ namespace Glitch.Functional.Parsing;
 
 public abstract partial class Parser<TToken, T>
 {
-    public virtual Parser<TToken, TResult> Match<TResult>(Func<ParseSuccess<TToken, T>, TResult> okay, Func<ParseError<TToken, T>, TResult> error)
+    public virtual Parser<TToken, TResult> Match<TResult>(Func<ParseSuccess<TToken, T>, TResult> okay, Func<ParseError<TToken, T>, TResult> fail)
         => Match(ok => ParseResult.Okay(okay(ok), ok.Remaining),
-                 err => ParseResult.Okay(error(err), err.Remaining));
+                 err => ParseResult.Okay(fail(err), err.Remaining));
 
-    public virtual Parser<TToken, TResult> Match<TResult>(Func<ParseSuccess<TToken, T>, ParseResult<TToken, TResult>> okay, Func<ParseError<TToken, T>, ParseResult<TToken, TResult>> error)
-        => new MatchParser<TToken, T, TResult>(this, okay, error);
+    public virtual Parser<TToken, TResult> Match<TResult>(Func<ParseSuccess<TToken, T>, ParseResult<TToken, TResult>> okay, Func<ParseError<TToken, T>, ParseResult<TToken, TResult>> fail)
+        => new MatchParser<TToken, T, TResult>(this, okay, fail);
 }
 
 internal class MatchParser<TToken, T, TResult> : Parser<TToken, TResult>

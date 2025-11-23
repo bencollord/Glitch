@@ -1,4 +1,4 @@
-namespace Glitch.Functional.Core
+namespace Glitch.Functional
 {
     // TODO Remove duplication with Glitch
     public static class DynamicCast<T>
