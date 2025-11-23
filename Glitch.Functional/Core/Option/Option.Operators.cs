@@ -13,9 +13,6 @@ public readonly partial struct Option<T>
     public static bool operator false(Option<T> option) => option.IsNone;
 
     [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Option<T> operator &(Option<T> x, Option<T> y) => x.And(y);
-
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Option<T> operator ^(Option<T> x, Option<T> y) => x.Xor(y);
 
     [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
