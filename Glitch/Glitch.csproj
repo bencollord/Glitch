@@ -8,18 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Functional\**" />
+    <EmbeddedResource Remove="Functional\**" />
+    <None Remove="Functional\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Base64String - Copy.cs" />
     <Compile Remove="ByteSize - Copy.cs" />
     <Compile Remove="Collections\HashTable - Copy.cs" />
     <Compile Remove="Data\ObjectResultStream`1 - Copy %282%29.cs" />
     <Compile Remove="Data\ObjectResultStream`1 - Copy.cs" />
-    <Compile Remove="Functional\FN\FN.Parse.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Using Include="Glitch.Functional.FN">
-      <Static>True</Static>
-    </Using>
   </ItemGroup>
 
 </Project>

@@ -16,14 +16,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Glitch.Functional\Glitch.Functional.csproj" />
     <ProjectReference Include="..\Glitch\Glitch.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Glitch.Functional" />
-    <Using Include="Glitch.Functional.FN">
-      <Static>True</Static>
-    </Using>
   </ItemGroup>
 
 </Project>

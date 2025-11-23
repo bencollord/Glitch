@@ -1,6 +1,4 @@
-﻿using Glitch.Functional;
-using Glitch.Functional.Results;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Immutable;
 
 namespace Glitch.Collections
@@ -12,21 +10,21 @@ namespace Glitch.Collections
     {
         public class Builder : IMultiMap<TKey, TValue>
         {
-            private Option<ImmutableMultiMap<TKey, TValue>> immutable;
+            private ImmutableMultiMap<TKey, TValue>? immutable;
             private Lazy<MultiMap<TKey, TValue>> mutable;
-            private Option<IEqualityComparer<TKey>> keyComparer;
+            private IEqualityComparer<TKey>? keyComparer;
 
-            internal Builder(ImmutableMultiMap<TKey, TValue> immutable)
+            internal Builder(ImmutableMultiMap<TKey, TValue>? immutable)
             {
                 this.immutable = immutable;
                 mutable = new(InitMutable);
-                keyComparer = Maybe(immutable.Comparer);
+                keyComparer = immutable?.Comparer;
             }
 
-            internal Builder(IEqualityComparer<TKey> keyComparer)
+            internal Builder(IEqualityComparer<TKey>? keyComparer)
             {
-                this.keyComparer = Maybe(keyComparer);
-                immutable = Empty;
+                this.keyComparer = keyComparer;
+                immutable = null;
                 mutable = new(InitMutable);
             }
 
@@ -65,7 +63,7 @@ namespace Glitch.Collections
                 // If no properties have been accessed, the original never changed
                 if (!mutable.IsValueCreated)
                 {
-                    return immutable.IfNone(Empty);
+                    return immutable ?? Empty;
                 }
 
                 var dictionary = mutable.Value
@@ -92,10 +90,6 @@ namespace Glitch.Collections
 
             public bool Remove(TKey key) => mutable.Value.Remove(key);
 
-            public Option<IList<TValue>> TryGetList(TKey key) => mutable.Value.TryGetList(key);
-
-            public Option<TValue> TryGetValue(TKey key, int index) => mutable.Value.TryGetValue(key, index);
-
             public bool TryGetList(TKey key, out IList<TValue> list) => mutable.Value.TryGetList(key, out list);
 
             public bool TryGetValue(TKey key, int index, out TValue? value) => mutable.Value.TryGetValue(key, index, out value);
@@ -110,18 +104,17 @@ namespace Glitch.Collections
             private MultiMap<TKey, TValue> InitMutable()
             {
                 var comparer = keyComparer
-                    .OrElse(() => immutable.Select(i => i.Comparer))
-                    .IfNone(EqualityComparer<TKey>.Default);
-
+                    ?? immutable?.Comparer
+                    ?? EqualityComparer<TKey>.Default;
 
                 var map = new MultiMap<TKey, TValue>(comparer);
                 
-                if (immutable.IsNoneOr(i => i.dictionary.Count == 0))
+                if (immutable is null || immutable.dictionary.Count == 0)
                 {
                     return map;
                 }
 
-                foreach (var (key, list) in immutable.Iterate().SelectMany(i => i.dictionary))
+                foreach (var (key, list) in immutable.dictionary)
                 {
                     map.AddRange(key, list.ToList());
                 }

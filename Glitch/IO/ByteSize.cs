@@ -1,5 +1,4 @@
-﻿using Glitch.Functional.Results;
-using Glitch.IO;
+﻿using Glitch.IO;
 using System.Numerics;
 
 namespace Glitch.IO
@@ -178,10 +177,10 @@ namespace Glitch.IO
 
             private static readonly char[] SupportedNumberFormats = ['B', 'D', 'F', 'N', 'X'];
 
-            private readonly Denomination denomination;
-            private readonly Option<string> numberFormat;
+            private Denomination denomination;
+            private string? numberFormat;
 
-            private FormatSpecifier(Denomination denomination, Option<string> numberFormat)
+            private FormatSpecifier(Denomination denomination, string? numberFormat)
             {
                 this.denomination = denomination;
                 this.numberFormat = numberFormat;
@@ -191,30 +190,28 @@ namespace Glitch.IO
             {
                 if (format.Length == 2)
                 {
-                    return new FormatSpecifier(DenominationMap[format], None);
+                    return new FormatSpecifier(DenominationMap[format], null);
                 }
 
                 string denomination = format[..2];
-                var numberFormat = Some(format[2..].Trim())
-                    .Where(f => !string.IsNullOrEmpty(f));
+                var numberFormat = format[2..].Trim();
 
-                numberFormat.Do(ValidateNumberFormat);
+                if (!string.IsNullOrEmpty(numberFormat))
+                {
+                    ValidateNumberFormat(numberFormat);
+                }
 
                 return new FormatSpecifier(DenominationMap[denomination], numberFormat);
             }
 
             internal string Format(ByteSize byteSize, IFormatProvider? formatProvider)
             {
-                static bool IsFractionalFormat(string fmt)
-                    => fmt.StartsWith("F", StringComparison.OrdinalIgnoreCase)
-                    || fmt.StartsWith("N", StringComparison.OrdinalIgnoreCase);
-
-                // TODO Fix me
-                return numberFormat
-                    .Select(fmt => IsFractionalFormat(fmt) 
-                             ? byteSize.GetValue(denomination).ToString(fmt, formatProvider)
-                             : Convert.ToInt64(byteSize.GetValue(denomination)).ToString(fmt, formatProvider))
-                    .IfNone(byteSize.GetValue(denomination).ToString());
+                return numberFormat?[0].ToUpper() switch
+                {
+                    'F' => byteSize.GetValue(denomination).ToString(numberFormat, formatProvider),
+                    'N' => Convert.ToInt64(byteSize.GetValue(denomination)).ToString(numberFormat, formatProvider),
+                    _ => byteSize.GetValue(denomination).ToString()
+                };
             }
 
             private static void ValidateNumberFormat(string format)

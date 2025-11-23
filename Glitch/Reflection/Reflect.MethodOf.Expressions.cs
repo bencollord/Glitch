@@ -1,12 +1,5 @@
-﻿using Glitch.Functional;
-using Glitch.Functional.Results;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Glitch.Reflection
 {
@@ -17,16 +10,7 @@ namespace Glitch.Reflection
         public static MethodInfo MethodOf<T>(Expression<Action<T>> expression) => GetMethod(expression);
         public static MethodInfo MethodOf<T>(Expression<Func<T, object>> expression) => GetMethod(expression);
 
-        public static Expected<MethodInfo> TryMethodOf(Expression<Action> expression) => TryGetMethod(expression);
-        public static Expected<MethodInfo> TryMethodOf(Expression<Func<object>> expression) => TryGetMethod(expression);
-        public static Expected<MethodInfo> TryMethodOf<T>(Expression<Action<T>> expression) => TryGetMethod(expression);
-        public static Expected<MethodInfo> TryMethodOf<T>(Expression<Func<T, object>> expression) => TryGetMethod(expression);
-
         private static MethodInfo GetMethod(LambdaExpression expression)
-            => TryGetMethod(expression)
-                   .UnwrapOrElse(e => throw new ArgumentException(e.Message));
-
-        private static Expected<MethodInfo> TryGetMethod(LambdaExpression expression)
         {
             var body = new UnwrapMethodCallVisitor().Visit(expression.Body);
 
@@ -35,7 +19,7 @@ namespace Glitch.Reflection
                 return call.Method;
             }
 
-            return Expected.Fail($"Expression was not a valid method. Expression: {expression}");
+            throw new ArgumentException($"Expression was not a valid method. Expression: {expression}");
         }
 
         private class UnwrapMethodCallVisitor : ExpressionVisitor

@@ -100,6 +100,17 @@ namespace Glitch.Functional.Errors
             => inner.AndThen(x => bind(x).inner);
 
         /// <summary>
+        /// If Okay, applies the function to the wrapped value. Otherwise, returns
+        /// the current error wrapped in a new result type.
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="bind"></param>
+        /// <returns></returns>
+        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Expected<TResult> AndThen<TResult>(Func<T, Result<TResult, Error>> bind)
+            => inner.AndThen(x => bind(x));
+
+        /// <summary>
         /// BindMap operation, similar to the two arg overload of SelectMany.
         /// </summary>
         /// <typeparam name="TElement"></typeparam>
@@ -221,6 +232,8 @@ namespace Glitch.Functional.Errors
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Unwrap() => inner.IfFail(err => err.Throw<T>());
+
+        public Error UnwrapError() => inner.UnwrapError();
 
         public override string ToString() => inner.ToString();
     }

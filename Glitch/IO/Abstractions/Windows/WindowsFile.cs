@@ -1,13 +1,11 @@
-﻿using Glitch.Functional;
-using Glitch.Functional.Results;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 
 namespace Glitch.IO.Abstractions.Windows
 {
     public class WindowsFile : WindowsFileNode, IFile
     {
         private readonly FileInfo file;
-        private readonly Lazy<string> checksum;
+        private readonly Lazy<Checksum> checksum;
 
         public WindowsFile(string path)
             : this(new FileInfo(path)) { }
@@ -24,16 +22,16 @@ namespace Glitch.IO.Abstractions.Windows
 
         public string Extension => file.Extension;
 
-        public Option<IDirectory> Directory => Maybe(file.Directory)
-                                                   .Select<IDirectory>(d => new WindowsDirectory(d));
+        public IDirectory? Directory => 
+            file.Directory is DirectoryInfo d ? new WindowsDirectory(d) : null;
 
         public ByteSize Length => ByteSize.FromBytes(file.Length);
 
-        public Option<string> Stem => Maybe<string>(Path.Stem);
+        public string Stem => Path.Stem;
 
         public TextWriter AppendText() => file.AppendText();
 
-        public string Checksum() => checksum.Value;
+        public Checksum Checksum() => checksum.Value;
 
         public TextWriter CreateText() => file.CreateText();
 
@@ -85,14 +83,11 @@ namespace Glitch.IO.Abstractions.Windows
             stream.Write(text);
         }
 
-        private string ComputeHash()
+        private Checksum ComputeHash()
         {
             using var stream = OpenRead();
-            using var algorithm = MD5.Create();
 
-            var hash = algorithm.ComputeHash(stream);
-
-            return BitConverter.ToString(hash).Strip('-');
+            return IO.Checksum.Compute(stream, HashAlgorithmName.MD5);
         }
     }
 }

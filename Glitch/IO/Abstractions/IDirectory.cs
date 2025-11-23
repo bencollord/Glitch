@@ -1,11 +1,8 @@
-﻿using Glitch.Functional;
-using Glitch.Functional.Results;
-
-namespace Glitch.IO.Abstractions
+﻿namespace Glitch.IO.Abstractions
 {
     public interface IDirectory : IFileSystemNode
     {
-        Option<IDirectory> Parent { get; }
+        IDirectory? Parent { get; }
 
         IDirectory CreateSubdirectory(string path);
 

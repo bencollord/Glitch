@@ -1,4 +1,7 @@
-﻿using Glitch.IO;
+﻿using Glitch.Functional.Core;
+using Glitch.Functional.Extensions;
+using Glitch.Functional.Optics;
+using Glitch.IO;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -25,7 +28,7 @@ namespace Glitch.CodeAnalysis
         );
 
         public static readonly Prism<SyntaxNode, TypeDeclarationSyntax> SingleTypePrism =
-            Prism<SyntaxNode, CompilationUnitSyntax>.New(n => Maybe(n as CompilationUnitSyntax), (s, n) => n)
+            Prism<SyntaxNode, CompilationUnitSyntax>.New(n => Option.Maybe(n as CompilationUnitSyntax), (s, n) => n)
                 .Compose(NamespaceInRootPrism)
                 .Compose(TypeInNamespacePrism);
 

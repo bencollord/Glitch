@@ -1,15 +1,12 @@
-﻿using Glitch.Functional;
-using Glitch.Functional.Results;
-
-namespace Glitch
+﻿namespace Glitch
 {
     public static class StringExtensions
     {
         public static string TakeUntil(this string input, char c) => input.Substring(0, input.IndexOf(c));
 
-        public static string Capitalize(this string input) => Char.ToUpper(input[0]) + input.Substring(1);
+        public static string Capitalize(this string input) => char.ToUpper(input[0]) + input.Substring(1);
 
-        public static string Uncapitalize(this string input) => Char.ToLower(input[0]) + input.Substring(1);
+        public static string Uncapitalize(this string input) => char.ToLower(input[0]) + input.Substring(1);
 
         public static unsafe string Strip(this string input, char target)
         {
@@ -69,35 +66,18 @@ namespace Glitch
 
         public static T Parse<T>(this string input)
             where T : IParsable<T>
-            => input.TryParse<T>().Unwrap();
+            => input.Parse<T>(null);
 
         public static T Parse<T>(this string input, IFormatProvider? formatProvider)
             where T : IParsable<T>
-            => input.TryParse<T>(formatProvider).Unwrap();
+            => T.Parse(input, formatProvider);
 
-        public static Expected<T> TryParse<T>(this string input)
-            where T : IParsable<T>
-            => input.TryParse<T>(null);
-
-        public static Expected<T> TryParse<T>(this string input, IFormatProvider? formatProvider)
-            where T : IParsable<T>
-            => Try(() => T.Parse(input, formatProvider)).Run();
-
-        // ------
         public static T ParseEnum<T>(this string input)
             where T : struct, Enum
-            => input.TryParseEnum<T>().Unwrap();
+            => input.ParseEnum<T>(false);
 
         public static T ParseEnum<T>(this string input, bool ignoreCase)
             where T : struct, Enum
-            => input.TryParseEnum<T>(ignoreCase).Unwrap();
-
-        public static Expected<T> TryParseEnum<T>(this string input)
-            where T : struct, Enum
-            => input.TryParseEnum<T>(false);
-
-        public static Expected<T> TryParseEnum<T>(this string input, bool ignoreCase)
-            where T : struct, Enum
-            => Try(() => Enum.Parse<T>(input, ignoreCase)).Run();
+            => Enum.Parse<T>(input, ignoreCase);
     }
 }

@@ -1,6 +1,5 @@
-﻿using Glitch.Functional;
-using Glitch.Functional.Results;
-using System.Collections;
+﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Collections
 {
@@ -25,16 +24,20 @@ namespace Glitch.Collections
         {
             get
             {
-                return Either.ExpectOrElse(FindEntry(key)
-                    .Select(x => x.Value)
-, _ => Errors.KeyNotFound(key))
-                    .Unwrap();
+                return TryGetValue(key, out TValue? value) ? value : throw new KeyNotFoundException();
             }
             set
             {
-                FindEntry(key)
-                    .Do(e => e.Value = value)
-                    .IfNone(() => Add(key, value));
+                var entry = FindEntry(key);
+
+                if (entry is not null)
+                {
+                    entry.Value = value;
+                }
+                else
+                {
+                    Add(key, value);
+                }
             }
         }
 
@@ -152,22 +155,26 @@ namespace Glitch.Collections
             count = 0;
         }
 
-        public bool ContainsKey(TKey key) => FindEntry(key).IsSome;
+        public bool ContainsKey(TKey key) => FindEntry(key) is not null;
 
         public bool Contains(KeyValuePair<TKey, TValue> item)
         {
-            return FindEntry(item.Key)
-                .Where(e => EqualityComparer<TValue>.Default.Equals(e.Value, item.Value))
-                .IsSome;
+            return FindEntry(item.Key) is Entry e
+                && EqualityComparer<TValue>.Default.Equals(e.Value, item.Value);
         }
 
-        public bool TryGetValue(TKey key, out TValue value)
+        public bool TryGetValue(TKey key, [NotNullWhen(true)] out TValue? value)
         {
             var entry = FindEntry(key);
 
-            value = entry.Select(e => e.Value).DefaultIfNone()!;
+            if (entry is null || entry.Value is null)
+            {
+                value = default;
+                return false;
+            }
 
-            return entry.IsSome;
+            value = entry.Value;
+            return true;
         }
 
         IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() => GetEnumerator();
@@ -207,7 +214,7 @@ namespace Glitch.Collections
             }
         }
 
-        private Option<Entry> FindEntry(TKey key)
+        private Entry? FindEntry(TKey key)
         {
             int bucket = GetBucket(key);
             Entry? entry = entries[bucket];
@@ -222,7 +229,7 @@ namespace Glitch.Collections
                 entry = entry.Next;
             }
 
-            return None;
+            return null;
         }
 
         private int GetBucket(TKey key) => GetBucket(keyComparer.GetHashCode(key));
@@ -233,17 +240,15 @@ namespace Glitch.Collections
         {
             private Entry[] entries;
             private int cursor = 0;
-            private Option<Entry> current;
+            private Entry? current;
 
             internal Enumerator(HashTable<TKey, TValue> hashTable)
             {
                 entries = hashTable.entries!;
-                current = None;
+                current = null;
             }
 
-            public KeyValuePair<TKey, TValue> Current
-                => current.Select(e => e.ToKeyValuePair())
-                          .IfNone(default(KeyValuePair<TKey, TValue>));
+            public readonly KeyValuePair<TKey, TValue> Current => current?.ToKeyValuePair() ?? default;
 
             object IEnumerator.Current => Current;
 
@@ -254,25 +259,25 @@ namespace Glitch.Collections
                     return false;
                 }
 
-                current = current.AndThen(e => Maybe(e.Next));
+                current = current?.Next;
 
-                if (current.IsSome)
+                if (current is not null)
                 {
                     return true;
                 }
 
-                while (current.IsNone && cursor < entries.Length)
+                while (current is null && cursor < entries.Length)
                 {
                     current = entries[cursor++];
                 }
 
-                return current.IsSome;
+                return current is not null;
             }
 
             public void Dispose()
             {
-                entries = new Entry[0];
-                current = None;
+                entries = [];
+                current = null;
                 cursor = -1;
             }
 
@@ -284,7 +289,7 @@ namespace Glitch.Collections
                 }
 
                 cursor = 0;
-                current = None;
+                current = null;
             }
         }
 
