@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace Glitch.Functional.Errors
 {
     [Monad]
-    public partial record Expected<T>
+    public partial record Expected<T> : IResult<T, Error>
     {
         private Result<T, Error> inner;
 
@@ -20,9 +20,13 @@ namespace Glitch.Functional.Errors
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Expected<T> Fail(Error error) => new(Result.Fail<T, Error>(error));
 
+        public static Expected<T> From<E>(Result<T, E> result)
+            where E : Error
+            => new(result.SelectError(StaticCast<Error>.UpFrom));
+
         public bool IsOkay => inner.IsOkay;
 
-        public bool IsError => inner.IsError;
+        public bool IsFail => inner.IsFail;
 
         /// <summary>
         /// Retypes the instance as a <see cref="Result{T, Error}"/>.
@@ -226,7 +230,7 @@ namespace Glitch.Functional.Errors
         /// as an exception.
         /// </summary>
         /// <remarks>
-        /// Overrides the default implementation provided by <see cref="IEither{T, E}"/>
+        /// Overrides the default implementation provided by <see cref="IResult{T, E}"/>
         /// to ensure the exception thrown is the contained <see cref="Error"/> value.
         /// </remarks>
         /// <returns></returns>

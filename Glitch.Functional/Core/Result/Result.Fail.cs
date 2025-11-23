@@ -4,7 +4,7 @@ public sealed record Fail<T, E>(E Error) : Result<T, E>
 {
     public override bool IsOkay => false;
 
-    public override bool IsError => true;
+    public override bool IsFail => true;
 
     /// <inheritdoc />
     public override Result<TResult, E> And<TResult>(Result<TResult, E> other)

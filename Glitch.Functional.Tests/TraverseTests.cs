@@ -1,7 +1,7 @@
 ﻿using Glitch.Functional;
 using Glitch.Functional.Collections;
 using Glitch.Functional.Errors;
-using Glitch.Functional.Extensions;
+using Glitch.Functional.Extensions.Traverse;
 
 namespace Glitch.Test.Functional
 {
@@ -21,7 +21,7 @@ namespace Glitch.Test.Functional
             Expected<Sequence<int>> result = successfulResults.Traverse();
 
             // Assert
-            Assert.True(result.IsError);
+            Assert.True(result.IsFail);
             Assert.Equal("Bad result", result.UnwrapError().Message);
         }
     }

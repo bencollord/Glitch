@@ -166,36 +166,8 @@ public partial class Effect<T>
     public Effect<T> OrElse(Func<Error, Effect<T>> other)
         => new(inner.OrElse(err => other(err).inner));
 
-    public Effect<T> Filter(Func<T, bool> predicate)
+    public Effect<T> Where(Func<T, bool> predicate)
         => new(inner.Where(predicate));
-
-    /// <summary>
-    /// <inheritdoc cref="Effect{Unit, T}.Do(Action{T})"/>
-    /// </summary>
-    /// <param name="action"></param>
-    /// <returns></returns>
-    public Effect<T> Do(Action<T> action) => new(inner.Do(action));
-
-    /// <summary>
-    /// <inheritdoc cref="Effect{Unit, T}.IfOkay(Action{T})"/>
-    /// </summary>
-    /// <param name="action"></param>
-    /// <returns></returns>
-    public Effect<T> IfOkay(Action<T> action) => new(inner.IfOkay(action));
-
-    /// <summary>
-    /// <inheritdoc cref="Effect{Unit, T}.IfFail(Action)"/>
-    /// </summary>
-    /// <param name="action"></param>
-    /// <returns></returns>
-    public Effect<T> IfFail(Action action) => new(inner.IfFail(action));
-
-    /// <summary>
-    /// <inheritdoc cref="Effect{Unit, T}.IfFail(Action{Error})"/>
-    /// </summary>
-    /// <param name="action"></param>
-    /// <returns></returns>
-    public Effect<T> IfFail(Action<Error> action) => new(inner.IfFail(action));
 
     /// <summary>
     /// <inheritdoc cref="Effect{Unit, T}.Match{TResult}(Func{T, TResult}, TResult)"/>

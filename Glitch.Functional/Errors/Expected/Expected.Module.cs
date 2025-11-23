@@ -17,9 +17,11 @@ namespace Glitch.Functional.Errors
 
         public static Expected<T> Fail<T>(IEnumerable<Error> errors) => new Fail<T, Error>(Error.New(errors));
 
+        public static Expected<T> From<T, E>(Result<T, E> result) where E : Error => Expected<T>.From(result);
+
         public static bool IsOkay<T>(Expected<T> result) => result.IsOkay;
 
-        public static bool IsFail<T>(Expected<T> result) => result.IsError;
+        public static bool IsFail<T>(Expected<T> result) => result.IsFail;
 
         public static Expected<Unit> Guard(bool condition, Error error)
             => Guard(condition, Unit.Value, error);

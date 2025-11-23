@@ -7,11 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Either\**" />
     <Compile Remove="Parsing\Json\**" />
-    <EmbeddedResource Remove="Either\**" />
     <EmbeddedResource Remove="Parsing\Json\**" />
-    <None Remove="Either\**" />
     <None Remove="Parsing\Json\**" />
   </ItemGroup>
 

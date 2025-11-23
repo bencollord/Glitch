@@ -43,7 +43,7 @@ namespace Glitch.Test.Functional
             var result = mapped.Run();
 
             // Assert
-            Assert.True(result.IsError);
+            Assert.True(result.IsFail);
             Assert.Equal("Failure", result.UnwrapError().Message);
         }
 
@@ -83,7 +83,7 @@ namespace Glitch.Test.Functional
             var result = mapped.Run();
 
             // Assert
-            Assert.True(result.IsError);
+            Assert.True(result.IsFail);
             Assert.Equal("Failure", result.UnwrapError().Message);
         }
 
@@ -115,7 +115,7 @@ namespace Glitch.Test.Functional
             var result = mapped.Run();
 
             // Assert
-            Assert.True(result.IsError);
+            Assert.True(result.IsFail);
             Assert.Equal("Function failed", result.UnwrapError().Message);
         }
 
@@ -131,7 +131,7 @@ namespace Glitch.Test.Functional
             var result = mapped.Run();
 
             // Assert
-            Assert.True(result.IsError);
+            Assert.True(result.IsFail);
             Assert.Equal("Value failed", result.UnwrapError().Message);
         }
 
@@ -147,7 +147,7 @@ namespace Glitch.Test.Functional
             var result = mapped.Run();
 
             // Assert
-            Assert.True(result.IsError);
+            Assert.True(result.IsFail);
             Assert.Equal("Value failed", result.UnwrapError().Message);
         }
 
@@ -172,7 +172,7 @@ namespace Glitch.Test.Functional
             Effect<int> andThenResult  = okayItem.AndThen(bindResultFunc);
             Effect<int> andThenResult2 = okayItem.AndThen(bindResultFunc, bindProjectionFunc);
             Effect<int> andThenBiBind  = okayItem.Choose(bindFunc, bindErrFunc);
-            Effect<int> filter         = okayItem.Filter(filterFunc);
+            Effect<int> filter         = okayItem.Where(filterFunc);
             Effect<int> zipWith        = okayItem.Zip(Effect.Return(1), bindProjectionFunc);
 
             // These two items will only run for faulted items
@@ -198,7 +198,7 @@ namespace Glitch.Test.Functional
             Assert.All(fallibleItems, pair =>
             {
                 var r = pair.Value.Run();
-                Assert.True(r.IsError, $"{pair.Key} did not fail");
+                Assert.True(r.IsFail, $"{pair.Key} did not fail");
                 Assert.Equal("Failure", r.UnwrapError().Message);
             });
         }
@@ -236,7 +236,7 @@ namespace Glitch.Test.Functional
             Effect<int> andThen2       = okayItem.AndThen(bindFunc(nameof(andThen2)), bindProjectionFunc(nameof(andThen2)));
             Effect<int> andThenResult  = okayItem.AndThen(bindResultFunc(nameof(andThenResult)));
             Effect<int> andThenResult2 = okayItem.AndThen(bindResultFunc(nameof(andThenResult2)), bindProjectionFunc(nameof(andThenResult2)));
-            Effect<int> filter         = okayItem.Filter(filterFunc(nameof(filter)));
+            Effect<int> filter         = okayItem.Where(filterFunc(nameof(filter)));
             Effect<int> zipWith        = okayItem.Zip(Effect.Return(1), bindProjectionFunc(nameof(zipWith)));
 
              // These two items will only run for faulted items

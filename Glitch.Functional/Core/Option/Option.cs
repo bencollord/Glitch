@@ -11,7 +11,9 @@ namespace Glitch.Functional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [Monad]
-    public readonly partial struct Option<T> : IEquatable<Option<T>>, IComparable<Option<T>>
+    public readonly partial struct Option<T>
+        : IEquatable<Option<T>>,
+          IComparable<Option<T>>
     {
         public static readonly Option<T> None = new();
 
@@ -100,11 +102,6 @@ namespace Glitch.Functional
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<TResult> AndThen<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project)
-            => AndThen(x => bind(x).Select(y => project(x, y)));
-
-        /// <inheritdoc cref="AndThen{TElement, TResult}(Func{T, Option{TElement}}, Func{T, TElement, TResult})"/>
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TResult> SelectMany<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project)
             => AndThen(x => bind(x).Select(y => project(x, y)));
 
         /// <summary>
@@ -238,7 +235,7 @@ namespace Glitch.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Option<TResult> CastOrNone<TResult>() 
+        public Option<TResult> CastOrNone<TResult>()
             => AndThen(v => DynamicCast<TResult>.Try(v, out var r) ? Option.Some(r) : Option.None);
 
         /// <summary>

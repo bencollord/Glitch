@@ -6,7 +6,7 @@ namespace Glitch.Functional;
 using static FN;
 
 [Monad]
-public abstract partial record Result<T, E>
+public abstract partial record Result<T, E> : IResult<T, E>
 {
     private protected Result() { }
 
@@ -18,7 +18,7 @@ public abstract partial record Result<T, E>
 
     public abstract bool IsOkay { get; }
 
-    public abstract bool IsError { get; }
+    public abstract bool IsFail { get; }
 
     /// <summary>
     /// If the result is <see cref="Result.Success{T}" />, applies

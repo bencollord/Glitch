@@ -1,10 +1,8 @@
 namespace Glitch.Functional.Errors;
 
-public static partial class ExpectedExtensions
+public partial record Expected<T>
 {
-    extension<T, TElement, TResult>(Expected<T> self)
-    {
-        public Expected<TResult> SelectMany(Func<T, Expected<TElement>> bind, Func<T, TElement, TResult> project) =>
-            self.AndThen(bind, project);
-    }
+    public Expected<TResult> SelectMany<TElement, TResult>(Func<T, Expected<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(bind, project);
+    public Expected<TResult> SelectMany<TElement, E, TResult>(Func<T, Result<TElement, E>> bind, Func<T, TElement, TResult> project) where E : Error => AndThen(x => Expected.From(bind(x)), project);
+    public Expected<TResult> SelectMany<TElement, TResult>(Func<T, Okay<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => Expected.Okay(bind(x).Value), project);
 }

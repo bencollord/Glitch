@@ -117,14 +117,14 @@ public partial class Effect<TEnv, T>
         {
             var result = thunk(i);
 
-            if (result.IsError)
+            if (result.IsFail)
             {
                 return result;
             }
 
             var otherResult = other.thunk(i);
 
-            if (otherResult.IsError)
+            if (otherResult.IsFail)
             {
                 return otherResult.Cast<T>();
             }
@@ -262,38 +262,6 @@ public partial class Effect<TEnv, T>
         => Guard(predicate, _ => Error.Empty);
 
     /// <summary>
-    /// Executes an impure action against the value if Ok.
-    /// No op if fail.
-    /// </summary>
-    /// <param name="action"></param>
-    /// <returns></returns>
-    public Effect<TEnv, T> Do(Action<T> action) => IfOkay(action); // TODO Not sure how I feel about just aliasing methods like this.
-
-    /// <summary>
-    /// Executes an impure action against the value if Ok.
-    /// No op if fail.
-    /// </summary>
-    /// <param name="action"></param>
-    /// <returns></returns>
-    public Effect<TEnv, T> IfOkay(Action<T> action) => new(i => thunk(i).Do(action));
-
-    /// <summary>
-    /// Executes an impure action if failed.
-    /// No op if Ok.
-    /// </summary>
-    /// <param name="action"></param>
-    /// <returns></returns>
-    public Effect<TEnv, T> IfFail(Action action) => IfFail(_ => action());
-
-    /// <summary>
-    /// Executes an impure action if failed.
-    /// No op if Ok.
-    /// </summary>
-    /// <param name="action"></param>
-    /// <returns></returns>
-    public Effect<TEnv, T> IfFail(Action<Error> action) => Match(Nop, action);
-
-    /// <summary>
     /// Casts the wrapped value to <typeparamref name="TResult"/> if Ok,
     /// otherwise returns the current error wrapped in a new result type.
     /// </summary>
@@ -308,7 +276,7 @@ public partial class Effect<TEnv, T>
     public Effect<TEnv, TResult> CastOrElse<TResult>(Func<T, Error> error)
         => AndThen(x => 
                Effect.TryWith<TEnv, TResult>(_ => DynamicCast<TResult>.From(x))
-                     .IfFail(_ => error(x)));
+                     .OrElse(_ => Effect<TEnv, TResult>.Fail(error(x))));
 
     /// <summary>
     /// Combines another try into a try of a tuple.
