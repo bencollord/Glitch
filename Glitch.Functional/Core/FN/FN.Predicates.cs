@@ -6,6 +6,8 @@ namespace Glitch.Functional
 
         public static Func<T, bool> False<T>() => _ => false;
 
+        public static Func<T, bool> Predicate<T>(Func<T, bool> predicate) => predicate;
+
         public static Func<T, bool> And<T>(Func<T, bool> f, Func<T, bool> g) => x => f(x) && g(x);
         
         public static Func<T, bool> Or<T>(Func<T, bool> f, Func<T, bool> g) => x => f(x) || g(x);
