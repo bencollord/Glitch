@@ -28,7 +28,7 @@ public static partial class TraverseExtensions
 
         public Result<Sequence<TResult>, E> Traverse<E, TResult>(Func<T, Result<TResult, E>> traverse)
             => source.Aggregate(
-                Result<ImmutableList<TResult>, E>.Okay(ImmutableList<TResult>.Empty),
+                Result.Okay<ImmutableList<TResult>, E>(ImmutableList<TResult>.Empty),
                 (list, item) => list.AndThen(_ => traverse(item), (lst, i) => lst.Add(i)),
                 list => list.Select(Sequence.From));
 

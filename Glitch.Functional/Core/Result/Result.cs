@@ -1,3 +1,4 @@
+using Glitch.Functional.Validation;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -10,20 +11,14 @@ public abstract partial record Result<T, E> : IResult<T, E>
 {
     private protected Result() { }
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Result<T, E> Okay(T value) => new Okay<T, E>(value);
-
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Result<T, E> Fail(E error) => new Fail<T, E>(error);
-
     public abstract bool IsOkay { get; }
 
     public abstract bool IsFail { get; }
 
     /// <summary>
-    /// If the result is <see cref="Result.Success{T}" />, applies
+    /// If the result is <see cref="Okay{T, E}" />, applies
     /// the provided function to the value and returns it wrapped in a
-    /// new <see cref="Expected{T}" />. Otherwise, returns the current error
+    /// new <see cref="Result{T, E}" />. Otherwise, returns the current error
     /// wrapped in a new result type.
     /// </summary>
     /// <typeparam name="TResult"></typeparam>
@@ -37,8 +32,19 @@ public abstract partial record Result<T, E> : IResult<T, E>
     /// </summary>
     /// <param name="map"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public abstract Result<T, TNewError> SelectError<TNewError>(Func<E, TNewError> map);
+    public abstract Result<T, EResult> SelectError<EResult>(Func<E, EResult> map);
+
+    /// <summary>
+    /// Bifunctor map operation. 
+    /// If Okay, equivalent to <see cref="Select{TResult}(Func{T, TResult})"/> plus <see cref="CastError{EResult}"/>.
+    /// If Fail, equivalent to <see cref="SelectError{EResult}(Func{E, EResult})"/> plus <see cref="Cast{TResult}"/>.
+    /// </summary>
+    /// <typeparam name="TResult"></typeparam>
+    /// <typeparam name="EResult"></typeparam>
+    /// <param name="okay"></param>
+    /// <param name="fail"></param>
+    /// <returns></returns>
+    public abstract Result<TResult, EResult> BiSelect<TResult, EResult>(Func<T, TResult> okay, Func<E, EResult> fail);
 
     /// <summary>
     /// Applies a wrapped function to the wrapped value if both exist.
@@ -135,6 +141,18 @@ public abstract partial record Result<T, E> : IResult<T, E>
     /// <returns></returns>
     [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Result<TResult, E> Cast<TResult>() => Select(DynamicCast<TResult>.From);
+
+    /// <summary>
+    /// If Fail, casts the wrapped error to <typeparamref name="EResult"/>,
+    /// otherwise returns the current value wrapped in a new result type.
+    /// </summary>
+    /// <typeparam name="EResult"></typeparam>
+    /// <exception cref="InvalidCastException">
+    /// If the cast is not valid.
+    /// </exception>
+    /// <returns></returns>
+    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Result<T, EResult> CastError<EResult>() => SelectError(DynamicCast<EResult>.From);
 
     public Result<E, T> Flip() => Match(Result.Fail<E, T>, Result.Okay<E, T>);
 

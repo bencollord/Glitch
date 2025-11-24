@@ -13,9 +13,9 @@ namespace Glitch.Functional.Errors
 
         public static Fail<Error> Fail(IEnumerable<Error> errors) => Fail(Error.New(errors));
 
-        public static Expected<T> Fail<T>(Error error) => new Fail<T, Error>(error);
+        public static Expected<T> Fail<T>(Error error) => Result.Fail<T, Error>(error);
 
-        public static Expected<T> Fail<T>(IEnumerable<Error> errors) => new Fail<T, Error>(Error.New(errors));
+        public static Expected<T> Fail<T>(IEnumerable<Error> errors) => Result.Fail<T, Error>(Error.New(errors));
 
         public static Expected<T> From<T, E>(Result<T, E> result) where E : Error => Expected<T>.From(result);
 

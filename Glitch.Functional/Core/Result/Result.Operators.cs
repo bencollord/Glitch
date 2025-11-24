@@ -6,41 +6,27 @@ namespace Glitch.Functional;
 // Instance
 public partial record Result<T, E>
 {
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator true(Result<T, E> result) => result.IsOkay;
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator false(Result<T, E> result) => result.IsFail;
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Result<T, E> operator &(Result<T, E> x, Result<T, E> y) => x.And(y);
-
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Result<T, E> operator |(Result<T, E> x, Result<T, E> y) => x.Or(y);
     
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Result<T, E> operator |(Option<T> x, Result<T, E> y) => x.Or(y);
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator bool(Result<T, E> result) => result.IsOkay;
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator Result<T, E>(T value) => Okay(value);
+    public static implicit operator Result<T, E>(T value) => new Okay(value);
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator Result<T, E>(Okay<T> success) => Okay(success.Value);
+    public static implicit operator Result<T, E>(Okay<T> success) => new Okay(success.Value);
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator Result<T, E>(E error) => Fail(error);
+    public static implicit operator Result<T, E>(E error) => new Fail(error);
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator Result<T, E>(Fail<E> failure) => Fail(failure.Error);
+    public static implicit operator Result<T, E>(Fail<E> failure) => new Fail(failure.Error);
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static explicit operator T(Result<T, E> result)
         => result.Match(Identity, e => throw new InvalidCastException(ErrorMessages.InvalidCast<T>(e)));
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static explicit operator E(Result<T, E> result)
         => result.Match(v => throw new InvalidCastException(ErrorMessages.InvalidCast<E>(result)), Identity);
 }

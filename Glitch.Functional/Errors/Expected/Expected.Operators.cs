@@ -38,11 +38,11 @@ public partial record Expected<T>
     public static implicit operator Expected<T>(Result<T, Error> result) => new(result);
 
     [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator Result<T, Error>(Expected<T> result) => result.Match(Result<T, Error>.Okay, Result<T, Error>.Fail);
+    public static implicit operator Result<T, Error>(Expected<T> result) => result.Match(Result.Okay<T, Error>, Result.Fail<T, Error>);
 
     [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static explicit operator T(Expected<T> result)
-        => result.Match(FN.Identity, err => throw new InvalidCastException($"Cannot cast a faulted result to a value", err.AsException()));
+        => result.Match(Identity, err => throw new InvalidCastException($"Cannot cast a faulted result to a value", err.AsException()));
 
     [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static explicit operator Error(Expected<T> result)
