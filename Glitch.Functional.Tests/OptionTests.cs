@@ -10,7 +10,7 @@ namespace Glitch.Test.Functional
     public class OptionTests
     {
         [Fact]
-        public void Unwrap_ShouldThrowOptionSpecificException_AndBypassExtensionMethodDefault()
+        public void Unwrap_EmptyOption_ShouldThroughException()
         {
             // Arrange
             Option<int> option = None;
@@ -31,8 +31,8 @@ namespace Glitch.Test.Functional
             var traverse = items.Traverse(Some);
 
             // Assert
-            Assert.True(traverse.IsSome);
-            Assert.True(traverse.Unwrap().SequenceEqual(items));
+            traverse.IsSome.Should().BeTrue();
+            traverse.Unwrap().SequenceEqual(items).Should().BeTrue();
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace Glitch.Test.Functional
             var traverse = items.Traverse(someIfEven);
 
             // Act
-            Assert.True(traverse.IsNone);
+            traverse.IsNone.Should().BeTrue();
         }
 
         [Fact]
@@ -72,9 +72,15 @@ namespace Glitch.Test.Functional
             var failedValues = values.Traverse(stringifyIfEven);
             var failedOptions = options.Traverse(stringify);
 
-            Assert.False(failedValues.IsSome);
-            Assert.False(failedOptions.IsSome);
-            Assert.True(successfulOptions.Zip(successfulValues, (o, v) => o.SequenceEqual(v)));
+            failedValues.IsSome.Should().BeFalse();
+            failedOptions.IsSome.Should().BeFalse();
+            successfulOptions
+                .Zip(
+                    successfulValues, 
+                    (o, v) => o.SequenceEqual(v))
+                .Unwrap()
+                .Should()
+                .BeTrue();
         }
     }
 }

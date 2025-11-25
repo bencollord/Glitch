@@ -1,10 +1,10 @@
 using Glitch.Functional.Collections;
+using System.Diagnostics;
 
 namespace Glitch.Functional.Validation;
 
 public partial record Validated<T, E>
 {
-    // UNDONE Need to figure out how we actually want to accumulate errors here.
     public sealed record Fail(Sequence<E> Errors) : Validated<T, E>
     {
         public Fail(params IEnumerable<E> errors) : this(Sequence.From(errors)) { }
@@ -15,10 +15,11 @@ public partial record Validated<T, E>
 
         /// <inheritdoc />
         public override Validated<TResult, E> And<TResult>(Validated<TResult, E> other)
-            => new Validated<TResult, E>.Fail(Errors);
+            => other.Match(okay: _ => new Validated<TResult, E>.Fail(Errors),
+                           fail: e => new Validated<TResult, E>.Fail(Errors.Concat(e)));
 
         /// <inheritdoc />
-        public override Validated<TResult, E> AndThen<TResult>(Func<T, Validated<TResult, E>> mapper)
+        public override Validated<TResult, E> AndThen<TResult>(Func<T, Validated<TResult, E>> bind)
             => new Validated<TResult, E>.Fail(Errors);
 
         /// <inheritdoc />
@@ -28,6 +29,11 @@ public partial record Validated<T, E>
         /// <inheritdoc />
         public override Validated<T, EResult> SelectError<EResult>(Func<E, EResult> map)
             => new Validated<T, EResult>.Fail(Errors.Select(map));
+
+        /// <inheritdoc />
+        public override Validated<TResult, E> Apply<TResult>(Validated<Func<T, TResult>, E> function) =>
+            function.Match(okay: _ => new Validated<TResult, E>.Fail(Errors),
+                           fail: e => new Validated<TResult, E>.Fail(Errors.Concat(e)));
 
         /// <inheritdoc />
         public override Validated<TResult, EResult> BiSelect<TResult, EResult>(Func<T, TResult> _, Func<E, EResult> fail)
@@ -40,19 +46,30 @@ public partial record Validated<T, E>
         public override Validated<T, EResult> OrElse<EResult>(Func<Sequence<E>, Validated<T, EResult>> fail) => fail(Errors);
 
         /// <inheritdoc />
+        public override Validated<T, E> Coalesce(Validated<T, E> other) =>
+            (this, other) switch
+            {
+                (Okay, _) => this,
+                (_, Okay) => other,
+                (Fail(var e1), Fail(var e2)) => new Fail(e1.Concat(e2)),
+                _ => throw new UnreachableException(ErrorMessages.BadDiscriminatedUnion)
+            };
+
+        /// <inheritdoc />
         public override Validated<T, E> Guard(Func<T, bool> predicate, E _) => this;
 
+        /// <inheritdoc />
         public override Validated<T, E> Guard(Func<T, bool> predicate, Func<T, E> _) => this;
 
-        public override TResult Match<TResult>(Func<T, TResult> okay, Func<Sequence<E>, TResult> fail)
-        {
-            throw new NotImplementedException();
-        }
+        /// <inheritdoc />
+        public override TResult Match<TResult>(Func<T, TResult> okay, Func<Sequence<E>, TResult> fail) => fail(Errors);
 
-        public override Validated<TResult, E> Zip<TOther, TResult>(Validated<TOther, E> other, Func<T, TOther, TResult> zipper)
-        {
-            throw new NotImplementedException();
-        }
-        public override string ToString() => $"Error({Errors})";
+        /// <inheritdoc />
+        public override Validated<TResult, E> Zip<TOther, TResult>(Validated<TOther, E> other, Func<T, TOther, TResult> _) =>
+            other.Match(okay: _ => new Validated<TResult, E>.Fail(Errors),
+                        fail: e => new Validated<TResult, E>.Fail(Errors.Concat(e)));
+
+        /// <inheritdoc />
+        public override string ToString() => $"Error({Errors.Join(", ")})";
     }
 }

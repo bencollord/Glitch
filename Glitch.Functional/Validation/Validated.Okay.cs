@@ -30,6 +30,10 @@ public partial record Validated<T, E>
             => new Validated<TResult, EResult>.Okay(okay(Value));
 
         /// <inheritdoc />
+        public override Validated<TResult, E> Apply<TResult>(Validated<Func<T, TResult>, E> function) =>
+            function.Select(fn => fn(Value));
+
+        /// <inheritdoc />
         public override TResult Match<TResult>(Func<T, TResult> ifOkay, Func<Sequence<E>, TResult> _)
             => ifOkay(Value);
 
@@ -38,6 +42,9 @@ public partial record Validated<T, E>
 
         /// <inheritdoc />
         public override Validated<T, EResult> OrElse<EResult>(Func<Sequence<E>, Validated<T, EResult>> _) => new Validated<T, EResult>.Okay(Value);
+
+        /// <inheritdoc />
+        public override Validated<T, E> Coalesce(Validated<T, E> _) => this;
 
         /// <inheritdoc />
         public override Validated<T, E> Guard(Func<T, bool> predicate, E error)

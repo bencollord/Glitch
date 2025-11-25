@@ -219,11 +219,11 @@ namespace Glitch.Functional.Errors
         /// <typeparam name="TOther"></typeparam>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="other"></param>
-        /// <param name="zipper"></param>
+        /// <param name="zip"></param>
         /// <returns></returns>
         [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Expected<TResult> Zip<TOther, TResult>(Expected<TOther> other, Func<T, TOther, TResult> zipper)
-            => AndThen(_ => other, zipper);
+        public Expected<TResult> Zip<TOther, TResult>(Expected<TOther> other, Func<T, TOther, TResult> zip)
+            => AndThen(_ => other, zip);
 
         /// <summary>
         /// Returns the wrapped value if ok. Otherwise throws the wrapped error

@@ -9,7 +9,7 @@ namespace Glitch.Test.Functional
     public class ExpectedTests
     {
         [Fact]
-        public void Unwrap_Failed_ShouldThrowContainedException_AndBypassExtensionMethodDefault()
+        public void Unwrap_Failed_ShouldThrowContainedException()
         {
             // Arrange
             Expected<int> item = Fail(new KeyNotFoundException("The key wasn't found"));
