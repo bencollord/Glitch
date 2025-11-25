@@ -4,21 +4,15 @@ using System.Runtime.CompilerServices;
 
 namespace Glitch.Functional.Errors
 {
-    [Monad]
     public partial record Expected<T> : IResult<T, Error>
     {
         private Result<T, Error> inner;
 
-        private protected Expected(Result<T, Error> inner) 
+        // Prevent deriving from outside the type.
+        private Expected(Result<T, Error> inner) 
         {
             this.inner = inner;
         }
-
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Expected<T> Okay(T value) => new(Result.Okay<T, Error>(value));
-
-        [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Expected<T> Fail(Error error) => new(Result.Fail<T, Error>(error));
 
         public static Expected<T> From<E>(Result<T, E> result)
             where E : Error
