@@ -1,10 +1,10 @@
-﻿using System.Data;
+using System.Data;
 
-namespace Glitch.Data
+namespace Glitch.Data;
+
+public static class DataRecordExtensions
 {
-    public static class DataRecordExtensions
-    {
-        /// <summary>
+    /// <summary>
         /// Gets a record's value by name and casts it to the provided type.
         /// Returns null if the value is <see cref="DBNull"/>.
         /// </summary>
@@ -15,10 +15,10 @@ namespace Glitch.Data
         /// If <paramref name="fieldName"/> is not included in the data set.
         /// </exception>
         /// <returns></returns>
-        public static T? GetValue<T>(this IDataRecord record, string fieldName)
-            => record.GetValue<T>(record.GetOrdinal(fieldName));
+    public static T? GetValue<T>(this IDataRecord record, string fieldName)
+        => record.GetValue<T>(record.GetOrdinal(fieldName));
 
-        /// <summary>
+    /// <summary>
         /// Gets a record's value by ordinal and casts it to the provided type.
         /// Returns null if the value is <see cref="DBNull"/>.
         /// </summary>
@@ -32,31 +32,30 @@ namespace Glitch.Data
         /// If the value cannot be cast to <typeparamref name="T"/>.
         /// </exception>
         /// <returns></returns>
-        public static T? GetValue<T>(this IDataRecord record, int ordinal)
+    public static T? GetValue<T>(this IDataRecord record, int ordinal)
+    {
+        ArgumentNullException.ThrowIfNull(record);
+
+        if (record.IsDBNull(ordinal))
         {
-            ArgumentNullException.ThrowIfNull(record);
-
-            if (record.IsDBNull(ordinal))
-            {
-                return default;
-            }
-
-            return (T)record.GetValue(ordinal);
+            return default;
         }
 
-        /// <summary>
+        return (T)record.GetValue(ordinal);
+    }
+
+    /// <summary>
         /// Enumerates the field names included in the <paramref name="record"/>.
         /// </summary>
         /// <param name="record"></param>
         /// <returns></returns>
-        public static IEnumerable<string> GetFieldNames(this IDataRecord record)
-        {
-            ArgumentNullException.ThrowIfNull(record);
+    public static IEnumerable<string> GetFieldNames(this IDataRecord record)
+    {
+        ArgumentNullException.ThrowIfNull(record);
 
-            for (int i = 0; i < record.FieldCount; ++i)
-            {
-                yield return record.GetName(i);
-            }
+        for (int i = 0; i < record.FieldCount; ++i)
+        {
+            yield return record.GetName(i);
         }
     }
 }

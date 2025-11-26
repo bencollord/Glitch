@@ -1,122 +1,122 @@
-﻿using Glitch.Text;
+using Glitch.Text;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Glitch.IO
+namespace Glitch.IO;
+
+public readonly struct Checksum : IEquatable<Checksum>, IFormattable
 {
-    public readonly struct Checksum : IEquatable<Checksum>, IFormattable
+    public static readonly Checksum Empty = new();
+
+    private static readonly Dictionary<HashAlgorithmName, Func<HashAlgorithm>> FactoryMap = new()
     {
-        public static readonly Checksum Empty = new();
+        [HashAlgorithmName.MD5]  = MD5.Create,
+        [HashAlgorithmName.SHA1] = SHA1.Create,
+        [HashAlgorithmName.SHA256]   = SHA256.Create,
+        [HashAlgorithmName.SHA384]   = SHA384.Create,
+        [HashAlgorithmName.SHA512]   = SHA512.Create,
+        [HashAlgorithmName.SHA3_256] = SHA3_256.Create,
+        [HashAlgorithmName.SHA3_384] = SHA3_384.Create,
+        [HashAlgorithmName.SHA3_512] = SHA3_512.Create,
+    };
 
-        private static readonly Dictionary<HashAlgorithmName, Func<HashAlgorithm>> FactoryMap = new()
+    private readonly byte[] value;
+    private readonly HashAlgorithmName algorithmName;
+
+    public Checksum(byte[] value, HashAlgorithmName algorithmName)
+    {
+        this.value = value;
+        this.algorithmName = algorithmName;
+    }
+
+    public HashAlgorithmName AlgorithmName => algorithmName;
+
+    public static Checksum Compute(Stream stream, HashAlgorithmName algorithmName)
+    {
+        using var algorithm = CreateAlgorithm(algorithmName);
+
+        var checksum = algorithm.ComputeHash(stream);
+
+        return new Checksum(checksum, algorithmName);
+    }
+
+    public static Checksum Compute(byte[] bytes, HashAlgorithmName algorithmName)
+    {
+        using var algorithm = CreateAlgorithm(algorithmName);
+
+        var checksum = algorithm.ComputeHash(bytes);
+
+        return new Checksum(checksum, algorithmName);
+    }
+
+    public static async Task<Checksum> ComputeAsync(Stream stream, HashAlgorithmName algorithmName, CancellationToken cancellationToken = default)
+    {
+        using var algorithm = CreateAlgorithm(algorithmName);
+
+        var checksum = await algorithm.ComputeHashAsync(stream, cancellationToken);
+
+        return new Checksum(checksum, algorithmName);
+    }
+
+    private static HashAlgorithm CreateAlgorithm(HashAlgorithmName algorithmName)
+    {
+        if (!FactoryMap.TryGetValue(algorithmName, out var factory))
         {
-            [HashAlgorithmName.MD5]      = MD5.Create,
-            [HashAlgorithmName.SHA1]     = SHA1.Create,
-            [HashAlgorithmName.SHA256]   = SHA256.Create,
-            [HashAlgorithmName.SHA384]   = SHA384.Create,
-            [HashAlgorithmName.SHA512]   = SHA512.Create,
-            [HashAlgorithmName.SHA3_256] = SHA3_256.Create,
-            [HashAlgorithmName.SHA3_384] = SHA3_384.Create,
-            [HashAlgorithmName.SHA3_512] = SHA3_512.Create,
-        };
-
-        private readonly byte[] value;
-        private readonly HashAlgorithmName algorithmName;
-
-        public Checksum(byte[] value, HashAlgorithmName algorithmName)
-        {
-            this.value = value;
-            this.algorithmName = algorithmName;
+            throw new KeyNotFoundException($"Invalid hash algorithm {algorithmName}");
         }
 
-        public HashAlgorithmName AlgorithmName => algorithmName;
+        return factory();
+    }
 
-        public static Checksum Compute(Stream stream, HashAlgorithmName algorithmName)
-        {
-            using var algorithm = CreateAlgorithm(algorithmName);
+    public bool Equals(Checksum other)
+    {
+        if (value is null)
+            return other.value is null;
 
-            var checksum = algorithm.ComputeHash(stream);
+        return value.Length == other.value.Length
+            && value.SequenceEqual(other.value);
+    }
 
-            return new Checksum(checksum, algorithmName);
-        }
+    public override bool Equals(object? obj) => obj is Checksum other && Equals(other);
 
-        public static Checksum Compute(byte[] bytes, HashAlgorithmName algorithmName)
-        {
-            using var algorithm = CreateAlgorithm(algorithmName);
+    public override int GetHashCode()
+    {
+        var hashCode = new HashCode();
 
-            var checksum = algorithm.ComputeHash(bytes);
+        hashCode.Add(algorithmName);
+        hashCode.AddBytes(value);
 
-            return new Checksum(checksum, algorithmName);
-        }
+        return hashCode.ToHashCode();
+    }
 
-        public static async Task<Checksum> ComputeAsync(Stream stream, HashAlgorithmName algorithmName, CancellationToken cancellationToken = default)
-        {
-            using var algorithm = CreateAlgorithm(algorithmName);
+    public byte[] ToByteArray()
+    {
+        var copy = new byte[value.Length];
 
-            var checksum = await algorithm.ComputeHashAsync(stream, cancellationToken);
+        value.CopyTo(copy, 0);
 
-            return new Checksum(checksum, algorithmName);
-        }
+        return copy;
+    }
 
-        private static HashAlgorithm CreateAlgorithm(HashAlgorithmName algorithmName)
-        {
-            if (!FactoryMap.TryGetValue(algorithmName, out var factory))
-            {
-                throw new KeyNotFoundException($"Invalid hash algorithm {algorithmName}");
-            }
+    public Base64String ToBase64() => Base64String.Encode(value);
 
-            return factory();
-        }
-
-        public bool Equals(Checksum other)
-        {
-            if (value is null)
-                return other.value is null;
-
-            return value.Length == other.value.Length
-                && value.SequenceEqual(other.value);
-        }
-
-        public override bool Equals(object? obj) => obj is Checksum other && Equals(other);
-
-        public override int GetHashCode()
-        {
-            var hashCode = new HashCode();
-
-            hashCode.Add(algorithmName);
-            hashCode.AddBytes(value);
-
-            return hashCode.ToHashCode();
-        }
-
-        public byte[] ToByteArray()
-        {
-            var copy = new byte[value.Length];
-
-            value.CopyTo(copy, 0);
-
-            return copy;
-        }
-
-        public Base64String ToBase64() => Base64String.Encode(value);
-
-        /// <summary>
+    /// <summary>
         /// Formats the checksum into a base64 string.
         /// </summary>
         /// <returns></returns>
-        public override string ToString() => ToString("G", null);
+    public override string ToString() => ToString("G", null);
 
-        /// <summary>
+    /// <summary>
         /// <inheritdoc cref="ToString(string?, IFormatProvider?)"/>
         /// </summary>
         /// <param name="format">
         /// <inheritdoc cref="ToString(string?, IFormatProvider?)"/>
         /// </param>
         /// <returns></returns>
-        public string ToString(string? format) => ToString(format, null);
+    public string ToString(string? format) => ToString(format, null);
 
-        /// <summary>
+    /// <summary>
         /// Formats the checksum into a string using the provided <paramref name="format"/> specifier.
         /// </summary>
         /// <param name="format">
@@ -131,47 +131,46 @@ namespace Glitch.IO
         /// <param name="formatProvider"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public string ToString(string? format, IFormatProvider? formatProvider)
+    public string ToString(string? format, IFormatProvider? formatProvider)
+    {
+        if (this == Empty)
         {
-            if (this == Empty)
-            {
-                return "<Empty>";
-            }
-
-            format ??= "g"; // Default format
-
-            var output = format.ToLower() switch
-            {
-                "g" => ToHexString(formatProvider),
-                "b" => ToBase64().ToString(),
-                "u" => ToBase64().ToUrlSafeString(),
-                "x" => ToHexString(formatProvider),
-                _   => throw new FormatException($"Invalid format string '{format}")
-            };
-
-            return char.IsUpper(format[0]) ? $"{algorithmName} {output}" : output;
+            return "<Empty>";
         }
 
-        /// <summary>
+        format ??= "g"; // Default format
+
+        var output = format.ToLower() switch
+        {
+            "g" => ToHexString(formatProvider),
+            "b" => ToBase64().ToString(),
+            "u" => ToBase64().ToUrlSafeString(),
+            "x" => ToHexString(formatProvider),
+            _   => throw new FormatException($"Invalid format string '{format}")
+        };
+
+        return char.IsUpper(format[0]) ? $"{algorithmName} {output}" : output;
+    }
+
+    /// <summary>
         /// Converts the checksum value to a string of all of its bytes,
         /// </summary>
         /// <param name="formatProvider"></param>
         /// <returns></returns>
-        public string ToHexString(IFormatProvider? formatProvider = null)
+    public string ToHexString(IFormatProvider? formatProvider = null)
+    {
+        var numberFormat = formatProvider?.GetFormat<NumberFormatInfo>();
+        var buffer = new StringBuilder();
+
+        for (int i = 0; i < value.Length; i++)
         {
-            var numberFormat = formatProvider?.GetFormat<NumberFormatInfo>();
-            var buffer = new StringBuilder();
-
-            for (int i = 0; i < value.Length; i++)
-            {
-                buffer.Append(value[i].ToString("X2", numberFormat));
-            }
-
-            return buffer.ToString();
+            buffer.Append(value[i].ToString("X2", numberFormat));
         }
 
-        public static bool operator ==(Checksum x, Checksum y) => x.Equals(y);
-
-        public static bool operator !=(Checksum x, Checksum y) => !(x == y);
+        return buffer.ToString();
     }
+
+    public static bool operator ==(Checksum x, Checksum y) => x.Equals(y);
+
+    public static bool operator !=(Checksum x, Checksum y) => !(x == y);
 }

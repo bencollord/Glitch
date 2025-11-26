@@ -1,34 +1,33 @@
-﻿namespace Glitch.Glob.Internal.Ast
+namespace Glitch.Glob.Internal.Ast;
+
+internal class DirectoryWildcardSegment : Segment
 {
-    internal class DirectoryWildcardSegment : Segment
+    private Segment next;
+
+    internal DirectoryWildcardSegment(Segment next)
     {
-        private Segment next;
+        ArgumentNullException.ThrowIfNull(next, nameof(next));
+        this.next = next;
+    }
 
-        internal DirectoryWildcardSegment(Segment next)
+    public override string ToString() => "**";
+
+    internal override IEnumerable<FileSystemInfo> Expand(DirectoryInfo root)
+    {
+        foreach (var directory in root.EnumerateDirectories())
         {
-            ArgumentNullException.ThrowIfNull(next, nameof(next));
-            this.next = next;
-        }
+            var nextMatches = next.Expand(directory);
 
-        public override string ToString() => "**";
-
-        internal override IEnumerable<FileSystemInfo> Expand(DirectoryInfo root)
-        {
-            foreach (var directory in root.EnumerateDirectories())
+            // If there are no matches for the next segment, recurse into this directory and try again.
+            // TODO Max depth for security (if this wasn't just a side project).
+            if (!nextMatches.Any())
             {
-                var nextMatches = next.Expand(directory);
+                nextMatches = Expand(directory);
+            }
 
-                // If there are no matches for the next segment, recurse into this directory and try again.
-                // TODO Max depth for security (if this wasn't just a side project).
-                if (!nextMatches.Any())
-                {
-                    nextMatches = Expand(directory);
-                }
-
-                foreach (var match in nextMatches)
-                {
-                    yield return match;
-                }
+            foreach (var match in nextMatches)
+            {
+                yield return match;
             }
         }
     }

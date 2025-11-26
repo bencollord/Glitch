@@ -1,116 +1,116 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 
-namespace Glitch.IO
+namespace Glitch.IO;
+
+public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePath>
 {
-    public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePath>
+    private readonly string path;
+
+    public FilePath(string? path)
     {
-        private readonly string path;
+        this.path = path?.Replace(AltDirectorySeparatorChar, DirectorySeparatorChar) ?? string.Empty;
+    }
 
-        public FilePath(string? path)
+    public FilePath(FileSystemInfo fileOrDirectory)
+        : this(fileOrDirectory.FullName) { }
+
+    public FilePath Directory => new(Path.GetDirectoryName(path));
+    public FilePath FileName => new(Path.GetFileName(path));
+    public FilePath Stem => new(Path.GetFileNameWithoutExtension(path));
+    public FilePath Root => new(Path.GetPathRoot(path));
+    public bool EndsInDirectorySeparator => Path.EndsInDirectorySeparator(path);
+    public bool Exists => Path.Exists(path);
+    public bool IsEmpty => string.IsNullOrEmpty(path);
+    public bool IsFile => !FileName.IsEmpty;
+    public bool IsDirectory => !IsEmpty && FileName.IsEmpty;
+    public FilePath Extension => new(Path.GetExtension(path));
+    public bool HasExtension => Path.HasExtension(path);
+    public bool IsFullyQualified => Path.IsPathFullyQualified(path);
+    public bool IsRooted => Path.IsPathRooted(path);
+    public bool IsValid => !InvalidPathChars.Any(path.Contains) && !InvalidFileNameChars.Any(path.Contains);
+
+    public FilePath[] ToSegments()
+        => Array.ConvertAll(
+            path.Split([DirectorySeparatorChar, AltDirectorySeparatorChar], StringSplitOptions.RemoveEmptyEntries),
+            p => new FilePath(p));
+
+    public FilePath WithExtension(string extension)
+        => Extension != extension ? new(Path.ChangeExtension(path, extension)) : this;
+
+    public FilePath TrimEndingDirectorySeparator() => new(Path.TrimEndingDirectorySeparator(path));
+
+    public FilePath ToFullPath() => new(Path.GetFullPath(path));
+    public FilePath ToFullPath(string basePath) => new(Path.GetFullPath(path, basePath));
+    public FilePath ToFullPath(FilePath basePath) => ToFullPath(basePath.path);
+
+    public FilePath ToRelativePath(string relativeTo) => new(Path.GetRelativePath(relativeTo, path));
+    public FilePath ToRelativePath(FilePath relativeTo) => ToRelativePath(relativeTo.path);
+
+    public FilePath Append(string other) => new(Path.Join(path, other));
+    public FilePath Append(FilePath other) => Append(other.path);
+    public FilePath Append(string path1, string path2) => new(Path.Join(path, path1, path2));
+    public FilePath Append(FilePath path1, FilePath path2) => Append(path1.path, path2.path);
+    public FilePath Append(string path1, string path2, string path3) => new(Path.Join(path, path1, path2, path3));
+    public FilePath Append(FilePath path1, FilePath path2, FilePath path3) => Append(path1.path, path2.path, path3.path);
+    public FilePath Append(ReadOnlySpan<string> paths) => Append(Path.Join(paths));
+    public FilePath Append(params IEnumerable<string> paths) => new(Path.Join(paths.Prepend(path).ToArray()));
+    public FilePath Append(params IEnumerable<FilePath> paths) => Append(paths.Select(p => p.path));
+
+    public FilePath Concat(ReadOnlySpan<char> other)
+        => new(string.Concat(path.AsSpan(), other));
+    public FilePath Concat(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2)
+        => new(string.Concat(path.AsSpan(), path1, path2));
+    public FilePath Concat(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, ReadOnlySpan<char> path3)
+        => new(string.Concat(path.AsSpan(), path1, path2, path3));
+    public FilePath Concat(string other) => new(string.Concat(path, other));
+    public FilePath Concat(FilePath other) => Concat(other.path);
+    public FilePath Concat(string path1, string path2) => new(string.Concat(path, path1, path2));
+    public FilePath Concat(FilePath path1, FilePath path2) => Concat(path1.path, path2.path);
+    public FilePath Concat(string path1, string path2, string path3) => new(string.Concat(path, path1, path2, path3));
+    public FilePath Concat(FilePath path1, FilePath path2, FilePath path3) => Concat(path1.path, path2.path, path3.path);
+    public FilePath Concat(params IEnumerable<string> paths) => new(string.Concat(paths.Prepend(path).ToArray()));
+    public FilePath Concat(params IEnumerable<FilePath> paths) => Concat(paths.Select(p => p.path));
+
+    public int CompareTo(FilePath? other)
+    {
+        if (other is null)
         {
-            this.path = path?.Replace(AltDirectorySeparatorChar, DirectorySeparatorChar) ?? string.Empty;
+            return 1;
         }
 
-        public FilePath(FileSystemInfo fileOrDirectory)
-            : this(fileOrDirectory.FullName) { }
-
-        public FilePath Directory => new(Path.GetDirectoryName(path));
-        public FilePath FileName => new(Path.GetFileName(path));
-        public FilePath Stem => new(Path.GetFileNameWithoutExtension(path));
-        public FilePath Root => new(Path.GetPathRoot(path));
-        public bool EndsInDirectorySeparator => Path.EndsInDirectorySeparator(path);
-        public bool Exists => Path.Exists(path);
-        public bool IsEmpty => string.IsNullOrEmpty(path);
-        public bool IsFile => !FileName.IsEmpty;
-        public bool IsDirectory => !IsEmpty && FileName.IsEmpty;
-        public FilePath Extension => new(Path.GetExtension(path));
-        public bool HasExtension => Path.HasExtension(path);
-        public bool IsFullyQualified => Path.IsPathFullyQualified(path);
-        public bool IsRooted => Path.IsPathRooted(path);
-        public bool IsValid => !InvalidPathChars.Any(path.Contains) && !InvalidFileNameChars.Any(path.Contains);
-
-        public FilePath[] ToSegments()
-            => Array.ConvertAll(
-                path.Split([DirectorySeparatorChar, AltDirectorySeparatorChar], StringSplitOptions.RemoveEmptyEntries),
-                p => new FilePath(p));
-
-        public FilePath WithExtension(string extension)
-            => Extension != extension ? new(Path.ChangeExtension(path, extension)) : this;
-
-        public FilePath TrimEndingDirectorySeparator() => new(Path.TrimEndingDirectorySeparator(path));
-
-        public FilePath ToFullPath() => new(Path.GetFullPath(path));
-        public FilePath ToFullPath(string basePath) => new(Path.GetFullPath(path, basePath));
-        public FilePath ToFullPath(FilePath basePath) => ToFullPath(basePath.path);
-
-        public FilePath ToRelativePath(string relativeTo) => new(Path.GetRelativePath(relativeTo, path));
-        public FilePath ToRelativePath(FilePath relativeTo) => ToRelativePath(relativeTo.path);
-
-        public FilePath Append(string other) => new(Path.Join(path, other));
-        public FilePath Append(FilePath other) => Append(other.path);
-        public FilePath Append(string path1, string path2) => new(Path.Join(path, path1, path2));
-        public FilePath Append(FilePath path1, FilePath path2) => Append(path1.path, path2.path);
-        public FilePath Append(string path1, string path2, string path3) => new(Path.Join(path, path1, path2, path3));
-        public FilePath Append(FilePath path1, FilePath path2, FilePath path3) => Append(path1.path, path2.path, path3.path);
-        public FilePath Append(ReadOnlySpan<string> paths) => Append(Path.Join(paths));
-        public FilePath Append(params IEnumerable<string> paths) => new(Path.Join(paths.Prepend(path).ToArray()));
-        public FilePath Append(params IEnumerable<FilePath> paths) => Append(paths.Select(p => p.path));
-
-        public FilePath Concat(ReadOnlySpan<char> other)
-            => new(string.Concat(path.AsSpan(), other));
-        public FilePath Concat(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2)
-            => new(string.Concat(path.AsSpan(), path1, path2));
-        public FilePath Concat(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, ReadOnlySpan<char> path3)
-            => new(string.Concat(path.AsSpan(), path1, path2, path3));
-        public FilePath Concat(string other) => new(string.Concat(path, other));
-        public FilePath Concat(FilePath other) => Concat(other.path);
-        public FilePath Concat(string path1, string path2) => new(string.Concat(path, path1, path2));
-        public FilePath Concat(FilePath path1, FilePath path2) => Concat(path1.path, path2.path);
-        public FilePath Concat(string path1, string path2, string path3) => new(string.Concat(path, path1, path2, path3));
-        public FilePath Concat(FilePath path1, FilePath path2, FilePath path3) => Concat(path1.path, path2.path, path3.path);
-        public FilePath Concat(params IEnumerable<string> paths) => new(string.Concat(paths.Prepend(path).ToArray()));
-        public FilePath Concat(params IEnumerable<FilePath> paths) => Concat(paths.Select(p => p.path));
-
-        public int CompareTo(FilePath? other)
+        if (ReferenceEquals(other, this))
         {
-            if (other is null)
-            {
-                return 1;
-            }
-
-            if (ReferenceEquals(other, this))
-            {
-                return 0;
-            }
-
-            return path.CompareTo(other.path);
+            return 0;
         }
 
-        public bool Equals(FilePath? other)
+        return path.CompareTo(other.path);
+    }
+
+    public bool Equals(FilePath? other)
+    {
+        if (other is null)
         {
-            if (other is null)
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(other, this))
-            {
-                return true;
-            }
-
-            return path.Equals(other.path);
+            return false;
         }
 
-        public override bool Equals(object? obj) => Equals(obj as FilePath);
+        if (ReferenceEquals(other, this))
+        {
+            return true;
+        }
 
-        public override int GetHashCode() => path.GetHashCode();
+        return path.Equals(other.path);
+    }
 
-        public override string ToString() => path;
+    public override bool Equals(object? obj) => Equals(obj as FilePath);
+
+    public override int GetHashCode() => path.GetHashCode();
+
+    public override string ToString() => path;
 
 
-        public static implicit operator string(FilePath path) => path.path;
+    public static implicit operator string(FilePath path) => path.path;
 
-        /// <summary>
+    /// <summary>
         /// Implicit conversion operator from string to <see cref="FilePath"/>.
         /// </summary>
         /// <remarks>
@@ -119,69 +119,68 @@ namespace Glitch.IO
         /// this will make it easier to work with. 
         /// </remarks>
         /// <param name="path"></param>
-        public static implicit operator FilePath(string path) => new(path);
+    public static implicit operator FilePath(string path) => new(path);
 
-        public static implicit operator FilePath(FileSystemInfo? node) => new(node?.FullName);
+    public static implicit operator FilePath(FileSystemInfo? node) => new(node?.FullName);
 
-        public static implicit operator FileSystemInfo?(FilePath? path)
-            => path switch
-            {
-                FilePath p when p.IsFile => new FileInfo(p),
-                FilePath p when p.IsDirectory => new DirectoryInfo(p),
-                _ => null
-            };
+    public static implicit operator FileSystemInfo?(FilePath? path)
+        => path switch
+        {
+            FilePath p when p.IsFile => new FileInfo(p),
+            FilePath p when p.IsDirectory => new DirectoryInfo(p),
+            _ => null
+        };
 
-        public static explicit operator DirectoryInfo(FilePath path) => path.IsDirectory ? new(path) : throw new InvalidCastException($"Path '{path}' is not a valid directory");
+    public static explicit operator DirectoryInfo(FilePath path) => path.IsDirectory ? new(path) : throw new InvalidCastException($"Path '{path}' is not a valid directory");
 
-        public static explicit operator FileInfo(FilePath path) => path.IsFile ? new(path) : throw new InvalidCastException($"Path '{path}' is not a valid file");
+    public static explicit operator FileInfo(FilePath path) => path.IsFile ? new(path) : throw new InvalidCastException($"Path '{path}' is not a valid file");
 
-        public static bool operator ==(FilePath? left, FilePath? right) => left is null ? right == null : left.Equals(right);
+    public static bool operator ==(FilePath? left, FilePath? right) => left is null ? right == null : left.Equals(right);
 
-        public static bool operator !=(FilePath? left, FilePath? right) => !(left == right);
+    public static bool operator !=(FilePath? left, FilePath? right) => !(left == right);
 
-        [return: NotNullIfNotNull(nameof(left))]
-        [return: NotNullIfNotNull(nameof(right))]
-        public static FilePath? operator +(FilePath? left, string? right)
-            => right is null ? left : left + new FilePath(right);
+    [return: NotNullIfNotNull(nameof(left))]
+    [return: NotNullIfNotNull(nameof(right))]
+    public static FilePath? operator +(FilePath? left, string? right)
+        => right is null ? left : left + new FilePath(right);
 
-        [return: NotNullIfNotNull(nameof(left))]
-        [return: NotNullIfNotNull(nameof(right))]
-        public static FilePath? operator +(FilePath? left, FilePath? right)
-            => (left is not null && right is not null) ? new FilePath(left.path + right.path) : left ?? right;
+    [return: NotNullIfNotNull(nameof(left))]
+    [return: NotNullIfNotNull(nameof(right))]
+    public static FilePath? operator +(FilePath? left, FilePath? right)
+        => (left is not null && right is not null) ? new FilePath(left.path + right.path) : left ?? right;
 
-        [return: NotNullIfNotNull(nameof(left))]
-        [return: NotNullIfNotNull(nameof(right))]
-        public static FilePath? operator /(FilePath? left, string? right)
-            => right is null ? left : left / new FilePath(right);
+    [return: NotNullIfNotNull(nameof(left))]
+    [return: NotNullIfNotNull(nameof(right))]
+    public static FilePath? operator /(FilePath? left, string? right)
+        => right is null ? left : left / new FilePath(right);
 
-        [return: NotNullIfNotNull(nameof(left))]
-        [return: NotNullIfNotNull(nameof(right))]
-        public static FilePath? operator /(FilePath? left, FilePath? right)
-            => (left is not null && right is not null) ? left.Append(right) : left ?? right;
+    [return: NotNullIfNotNull(nameof(left))]
+    [return: NotNullIfNotNull(nameof(right))]
+    public static FilePath? operator /(FilePath? left, FilePath? right)
+        => (left is not null && right is not null) ? left.Append(right) : left ?? right;
 
-        [return: NotNullIfNotNull(nameof(node))]
-        [return: NotNullIfNotNull(nameof(path))]
-        public static FileSystemInfo? operator +(FileSystemInfo? node, FilePath? path) => node?.Path / path;
+    [return: NotNullIfNotNull(nameof(node))]
+    [return: NotNullIfNotNull(nameof(path))]
+    public static FileSystemInfo? operator +(FileSystemInfo? node, FilePath? path) => node?.Path / path;
 
-        [return: NotNullIfNotNull(nameof(node))]
-        [return: NotNullIfNotNull(nameof(path))]
-        public static FileSystemInfo? operator /(FileSystemInfo? node, FilePath? path) => node?.Path / path;
+    [return: NotNullIfNotNull(nameof(node))]
+    [return: NotNullIfNotNull(nameof(path))]
+    public static FileSystemInfo? operator /(FileSystemInfo? node, FilePath? path) => node?.Path / path;
 
-        public static bool operator <(FilePath? left, FilePath? right) 
-            => left is null ? right is not null : left.CompareTo(right) < 0;
+    public static bool operator <(FilePath? left, FilePath? right) 
+        => left is null ? right is not null : left.CompareTo(right) < 0;
 
-        public static bool operator <=(FilePath? left, FilePath? right) 
-            => left is null || left.CompareTo(right) <= 0;
+    public static bool operator <=(FilePath? left, FilePath? right) 
+        => left is null || left.CompareTo(right) <= 0;
 
-        public static bool operator >(FilePath? left, FilePath? right) 
-            => left is not null && left.CompareTo(right) > 0;
+    public static bool operator >(FilePath? left, FilePath? right) 
+        => left is not null && left.CompareTo(right) > 0;
 
-        public static bool operator >=(FilePath? left, FilePath? right) 
-            => left is null ? right is null : left.CompareTo(right) >= 0;
+    public static bool operator >=(FilePath? left, FilePath? right) 
+        => left is null ? right is null : left.CompareTo(right) >= 0;
 
 #pragma warning disable CA1859, IDE0051 // Use concrete types when possible for improved performance, Remove unused private members.
-        // For LinqPad
-        private object ToDump() => this.path;
+    // For LinqPad
+    private object ToDump() => this.path;
 #pragma warning restore CA1859, IDE0051 // Use concrete types when possible for improved performance, Remove unused private members.
-    }
 }

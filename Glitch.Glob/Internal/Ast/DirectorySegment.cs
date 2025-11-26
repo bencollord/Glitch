@@ -1,37 +1,36 @@
-﻿namespace Glitch.Glob.Internal.Ast
+namespace Glitch.Glob.Internal.Ast;
+
+internal class DirectorySegment : Segment
 {
-    internal class DirectorySegment : Segment
+    private GlobNode node;
+    private Segment next;
+
+    internal DirectorySegment(GlobNode node, Segment next)
     {
-        private GlobNode node;
-        private Segment next;
+        this.node = node;
+        this.next = next;
+    }
 
-        internal DirectorySegment(GlobNode node, Segment next)
+    public override string ToString() => node.ToString();
+
+    internal override IEnumerable<FileSystemInfo> Expand(DirectoryInfo root)
+    {
+        foreach (var directory in root.EnumerateDirectories())
         {
-            this.node = node;
-            this.next = next;
-        }
-
-        public override string ToString() => node.ToString();
-
-        internal override IEnumerable<FileSystemInfo> Expand(DirectoryInfo root)
-        {
-            foreach (var directory in root.EnumerateDirectories())
+            if (IsMatch(directory))
             {
-                if (IsMatch(directory))
+                foreach (var nextMatch in next.Expand(directory))
                 {
-                    foreach (var nextMatch in next.Expand(directory))
-                    {
-                        yield return nextMatch;
-                    }
+                    yield return nextMatch;
                 }
             }
         }
+    }
 
-        protected bool IsMatch(DirectoryInfo directory)
-        {
-            var match = node.Match(directory.Name);
+    protected bool IsMatch(DirectoryInfo directory)
+    {
+        var match = node.Match(directory.Name);
 
-            return match.IsSuccess && match.Length == directory.Name.Length;
-        }
+        return match.IsSuccess && match.Length == directory.Name.Length;
     }
 }

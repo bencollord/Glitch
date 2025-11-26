@@ -1,18 +1,17 @@
-﻿namespace Glitch.Text
+namespace Glitch.Text;
+
+public class IndentationScope : IDisposable
 {
-    public class IndentationScope : IDisposable
+    private IIndentable inner;
+
+    public IndentationScope(IIndentable inner)
     {
-        private IIndentable inner;
+        this.inner = inner;
+        inner.Indentation++;
+    }
 
-        public IndentationScope(IIndentable inner)
-        {
-            this.inner = inner;
-            inner.Indentation++;
-        }
-
-        public void Dispose()
-        {
-            inner.Indentation--;
-        }
+    public void Dispose()
+    {
+        inner.Indentation--;
     }
 }

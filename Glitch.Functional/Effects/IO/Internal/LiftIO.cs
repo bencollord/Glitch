@@ -1,14 +1,13 @@
-namespace Glitch.Functional.Effects
+namespace Glitch.Functional.Effects;
+
+internal class LiftIO<T> : IO<T>
 {
-    internal class LiftIO<T> : IO<T>
+    private Func<IOEnv, T> runIO;
+
+    internal LiftIO(Func<IOEnv, T> runIO)
     {
-        private Func<IOEnv, T> runIO;
-
-        internal LiftIO(Func<IOEnv, T> runIO)
-        {
-            this.runIO = runIO;
-        }
-
-        protected override Task<T> RunIOAsync(IOEnv env) => Task.FromResult(runIO(env));
+        this.runIO = runIO;
     }
+
+    protected override Task<T> RunIOAsync(IOEnv env) => Task.FromResult(runIO(env));
 }

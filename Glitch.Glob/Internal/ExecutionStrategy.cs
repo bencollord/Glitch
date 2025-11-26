@@ -1,7 +1,6 @@
-﻿namespace Glitch.Glob.Internal
+namespace Glitch.Glob.Internal;
+
+internal abstract class ExecutionStrategy
 {
-    internal abstract class ExecutionStrategy
-    {
-        internal abstract IEnumerable<FileSystemInfo> Execute(DirectoryInfo root);
-    }
+    internal abstract IEnumerable<FileSystemInfo> Execute(DirectoryInfo root);
 }

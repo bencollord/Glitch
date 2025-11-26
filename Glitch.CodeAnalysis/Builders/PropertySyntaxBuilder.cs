@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -7,30 +7,29 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace Glitch.CodeAnalysis.Builders
+namespace Glitch.CodeAnalysis.Builders;
+
+using static CSharpSyntax;
+
+public class PropertySyntaxBuilder : SyntaxBuilder<PropertyDeclarationSyntax>
 {
-    using static CSharpSyntax;
+    private TypeSyntax type;
+    private SyntaxToken identifier;
 
-    public class PropertySyntaxBuilder : SyntaxBuilder<PropertyDeclarationSyntax>
+    public PropertySyntaxBuilder(TypeSyntax type, string name)
     {
-        private TypeSyntax type;
-        private SyntaxToken identifier;
+        this.type = type;
+        identifier = Identifier(name);
+    }
 
-        public PropertySyntaxBuilder(TypeSyntax type, string name)
-        {
-            this.type = type;
-            identifier = Identifier(name);
-        }
+    public PropertySyntaxBuilder(PropertyDeclarationSyntax property)
+    {
+        identifier = property.Identifier;
+        type = property.Type;
+    }
 
-        public PropertySyntaxBuilder(PropertyDeclarationSyntax property)
-        {
-            identifier = property.Identifier;
-            type = property.Type;
-        }
-
-        public override PropertyDeclarationSyntax Build()
-        {
-            return PropertyDeclaration(type, identifier);
-        }
+    public override PropertyDeclarationSyntax Build()
+    {
+        return PropertyDeclaration(type, identifier);
     }
 }

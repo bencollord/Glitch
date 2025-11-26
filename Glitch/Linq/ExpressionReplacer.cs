@@ -1,27 +1,26 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
-namespace Glitch.Linq
+namespace Glitch.Linq;
+
+public class ExpressionReplacer : ExpressionVisitor
 {
-    public class ExpressionReplacer : ExpressionVisitor
+    private readonly Dictionary<Expression, Expression> replacementMap = new();
+
+    public ExpressionReplacer Replace(Expression original, Expression replacement)
     {
-        private readonly Dictionary<Expression, Expression> replacementMap = new();
+        replacementMap[original] = replacement;
+        return this;
+    }
 
-        public ExpressionReplacer Replace(Expression original, Expression replacement)
+    [return: NotNullIfNotNull(nameof(node))]
+    public override Expression? Visit(Expression? node)
+    {
+        if (node is not null && replacementMap.TryGetValue(node, out Expression? value))
         {
-            replacementMap[original] = replacement;
-            return this;
+            return base.Visit(value);
         }
 
-        [return: NotNullIfNotNull(nameof(node))]
-        public override Expression? Visit(Expression? node)
-        {
-            if (node is not null && replacementMap.TryGetValue(node, out Expression? value))
-            {
-                return base.Visit(value);
-            }
-
-            return base.Visit(node);
-        }
+        return base.Visit(node);
     }
 }

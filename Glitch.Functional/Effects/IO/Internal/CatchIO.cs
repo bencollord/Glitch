@@ -1,37 +1,36 @@
 using Glitch.Functional;
 using Glitch.Functional.Errors;
 
-namespace Glitch.Functional.Effects
+namespace Glitch.Functional.Effects;
+
+internal class CatchIO<T> : IO<T>
 {
-    internal class CatchIO<T> : IO<T>
+    private IO<T> source;
+    private Func<Error, IO<T>> next;
+    private Option<Func<Error, bool>> filter;
+
+    public CatchIO(IO<T> source, Func<Error, IO<T>> next, Func<Error, bool>? filter = null)
     {
-        private IO<T> source;
-        private Func<Error, IO<T>> next;
-        private Option<Func<Error, bool>> filter;
-
-        public CatchIO(IO<T> source, Func<Error, IO<T>> next, Func<Error, bool>? filter = null)
-        {
-            this.source = source;
-            this.next = next;
-            this.filter = Option.Maybe(filter);
-        }
-
-        protected override async Task<T> RunIOAsync(IOEnv env)
-        {
-            try
-            {
-                return await source.RunAsync(env).ConfigureAwait(false);
-            }
-            catch (ErrorException err) when (IsMatch(err.Error))
-            {
-                return await next(err.Error).RunAsync(env).ConfigureAwait(false);
-            }
-            catch (Exception e) when (IsMatch(e))
-            {
-                return await next(e).RunAsync(env).ConfigureAwait(false);
-            }
-        }
-
-        private bool IsMatch(Error err) => filter.IsSomeAnd(fn => fn(err)) || filter.IsNone;
+        this.source = source;
+        this.next = next;
+        this.filter = Option.Maybe(filter);
     }
+
+    protected override async Task<T> RunIOAsync(IOEnv env)
+    {
+        try
+        {
+            return await source.RunAsync(env).ConfigureAwait(false);
+        }
+        catch (ErrorException err) when (IsMatch(err.Error))
+        {
+            return await next(err.Error).RunAsync(env).ConfigureAwait(false);
+        }
+        catch (Exception e) when (IsMatch(e))
+        {
+            return await next(e).RunAsync(env).ConfigureAwait(false);
+        }
+    }
+
+    private bool IsMatch(Error err) => filter.IsSomeAnd(fn => fn(err)) || filter.IsNone;
 }

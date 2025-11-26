@@ -1,7 +1,6 @@
-namespace Glitch.Functional
+namespace Glitch.Functional;
+
+public readonly struct OptionNone 
 {
-    public readonly struct OptionNone 
-    {
-        public static readonly OptionNone Value = new();
-    }
+    public static readonly OptionNone Value = new();
 }

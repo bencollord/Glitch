@@ -1,9 +1,8 @@
-﻿namespace Glitch.Glob.Internal.Ast
-{
-    internal abstract class Segment
-    {
-        public abstract override string ToString();
+namespace Glitch.Glob.Internal.Ast;
 
-        internal abstract IEnumerable<FileSystemInfo> Expand(DirectoryInfo root);
-    }
+internal abstract class Segment
+{
+    public abstract override string ToString();
+
+    internal abstract IEnumerable<FileSystemInfo> Expand(DirectoryInfo root);
 }

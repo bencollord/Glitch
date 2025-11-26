@@ -1,186 +1,185 @@
-﻿namespace Glitch.Incomplete
+namespace Glitch.Incomplete;
+
+public class RedBlackTree<T>
 {
-    public class RedBlackTree<T>
+    private IComparer<T> comparer;
+    private Node? root;
+
+    public RedBlackTree() 
+        : this(Comparer<T>.Default) { }
+
+    public RedBlackTree(IComparer<T> comparer)
     {
-        private IComparer<T> comparer;
-        private Node? root;
+        this.comparer = comparer;
+    }
 
-        public RedBlackTree() 
-            : this(Comparer<T>.Default) { }
+    public Node? Root => root;
 
-        public RedBlackTree(IComparer<T> comparer)
+    public IEnumerable<Node> PreOrder() => PreOrder(root);
+    public IEnumerable<Node> InOrder() => InOrder(root);
+    public IEnumerable<Node> PostOrder() => PostOrder(root);
+    public IEnumerable<Node> LevelOrder() => LevelOrder(root);
+
+    public void Add(T value)
+    {
+        if (root is null)
         {
-            this.comparer = comparer;
+            root = new Node(Color.Black, value);
+            return;
         }
 
-        public Node? Root => root;
+        root = Insert(root, value);
+    }
 
-        public IEnumerable<Node> PreOrder() => PreOrder(root);
-        public IEnumerable<Node> InOrder() => InOrder(root);
-        public IEnumerable<Node> PostOrder() => PostOrder(root);
-        public IEnumerable<Node> LevelOrder() => LevelOrder(root);
+    public void Remove(T value) => root = Delete(root, value);
 
-        public void Add(T value)
+    private Node Insert(Node? node, T value)
+    {
+        if (node is null)
         {
-            if (root is null)
-            {
-                root = new Node(Color.Black, value);
-                return;
-            }
-
-            root = Insert(root, value);
+            return new Node(Color.Red, value);
         }
 
-        public void Remove(T value) => root = Delete(root, value);
+        int compared = comparer.Compare(node.Value, value);
 
-        private Node Insert(Node? node, T value)
+        if (compared > 0)
         {
-            if (node is null)
-            {
-                return new Node(Color.Red, value);
-            }
-
-            int compared = comparer.Compare(node.Value, value);
-
-            if (compared > 0)
-            {
-                node.Left = Insert(node.Left, value);
-            }
-
-            if (compared < 0)
-            {
-                node.Right = Insert(node.Right, value);
-            }
-
-            throw new ArgumentException($"{value} has already been added");
+            node.Left = Insert(node.Left, value);
         }
 
-        private Node? Delete(Node? node, T value)
+        if (compared < 0)
         {
-            if (node is null)
-            {
-                return null;
-            }
-
-            int compared = comparer.Compare(node.Value, value);
-
-            if (compared > 0)
-            {
-                node.Left = Delete(node.Left, value);
-            }
-
-            if (compared < 0)
-            {
-                node.Right = Delete(node.Right, value);
-            }
-
-            if (node.Left is null && node.Right is null)
-            {
-                return null;
-            }
-
-            if (node.Left is not null && node.Right is not null)
-            {
-                throw new NotImplementedException("Still haven't implemented in order successor replacement");
-            }
-
-            return node.Left ?? node.Right;
+            node.Right = Insert(node.Right, value);
         }
 
-        private IEnumerable<Node> PreOrder(Node? node)
+        throw new ArgumentException($"{value} has already been added");
+    }
+
+    private Node? Delete(Node? node, T value)
+    {
+        if (node is null)
         {
-            if (node is null)
-            {
-                yield break;
-            }
-
-            yield return node;
-
-            foreach (var child in PreOrder(node.Left).Concat(PreOrder(node.Right)))
-            {
-                yield return child;
-            }
+            return null;
         }
 
-        private IEnumerable<Node> InOrder(Node? node)
+        int compared = comparer.Compare(node.Value, value);
+
+        if (compared > 0)
         {
-            if (node is null)
-            {
-                yield break;
-            }
-
-            foreach (var child in InOrder(node.Left))
-            {
-                yield return child;
-            }
-
-            yield return node;
-
-            foreach (var child in InOrder(node.Right))
-            {
-                yield return child;
-            }
+            node.Left = Delete(node.Left, value);
         }
 
-        private IEnumerable<Node> PostOrder(Node? node)
+        if (compared < 0)
         {
-            if (node is null)
-            {
-                yield break;
-            }
-
-            foreach (var child in PostOrder(node.Left).Concat(PostOrder(node.Right)))
-            {
-                yield return child;
-            }
-
-            yield return node;
+            node.Right = Delete(node.Right, value);
         }
 
-        private IEnumerable<Node> LevelOrder(Node? node)
+        if (node.Left is null && node.Right is null)
         {
-            if (node is null)
-            {
-                yield break;
-            }
-
-            var queue = new Queue<Node>();
-
-            queue.Enqueue(node);
-
-            do
-            {
-                var current = queue.Dequeue();
-
-                if (current.Left != null)
-                {
-                    queue.Enqueue(current.Left);
-                }
-
-                if (current.Right != null)
-                {
-                    queue.Enqueue(current.Right);
-                }
-
-                yield return current;
-            }
-            while (queue.Count > 0);
+            return null;
         }
 
-        public enum Color { Black, Red }
-
-        public class Node
+        if (node.Left is not null && node.Right is not null)
         {
-            internal Node(Color color, T value)
+            throw new NotImplementedException("Still haven't implemented in order successor replacement");
+        }
+
+        return node.Left ?? node.Right;
+    }
+
+    private IEnumerable<Node> PreOrder(Node? node)
+    {
+        if (node is null)
+        {
+            yield break;
+        }
+
+        yield return node;
+
+        foreach (var child in PreOrder(node.Left).Concat(PreOrder(node.Right)))
+        {
+            yield return child;
+        }
+    }
+
+    private IEnumerable<Node> InOrder(Node? node)
+    {
+        if (node is null)
+        {
+            yield break;
+        }
+
+        foreach (var child in InOrder(node.Left))
+        {
+            yield return child;
+        }
+
+        yield return node;
+
+        foreach (var child in InOrder(node.Right))
+        {
+            yield return child;
+        }
+    }
+
+    private IEnumerable<Node> PostOrder(Node? node)
+    {
+        if (node is null)
+        {
+            yield break;
+        }
+
+        foreach (var child in PostOrder(node.Left).Concat(PostOrder(node.Right)))
+        {
+            yield return child;
+        }
+
+        yield return node;
+    }
+
+    private IEnumerable<Node> LevelOrder(Node? node)
+    {
+        if (node is null)
+        {
+            yield break;
+        }
+
+        var queue = new Queue<Node>();
+
+        queue.Enqueue(node);
+
+        do
+        {
+            var current = queue.Dequeue();
+
+            if (current.Left != null)
             {
-                Color = color;
-                Value = value;
+                queue.Enqueue(current.Left);
             }
 
-            public T Value { get; internal set; }
-            public Color Color { get; internal set; }
-            public Node? Left { get; internal set; }
-            public Node? Right { get; internal set; }
+            if (current.Right != null)
+            {
+                queue.Enqueue(current.Right);
+            }
+
+            yield return current;
         }
+        while (queue.Count > 0);
+    }
+
+    public enum Color { Black, Red }
+
+    public class Node
+    {
+        internal Node(Color color, T value)
+        {
+            Color = color;
+            Value = value;
+        }
+
+        public T Value { get; internal set; }
+        public Color Color { get; internal set; }
+        public Node? Left { get; internal set; }
+        public Node? Right { get; internal set; }
     }
 }

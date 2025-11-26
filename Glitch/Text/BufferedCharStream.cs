@@ -1,261 +1,260 @@
-﻿using System.Text;
+using System.Text;
 
-namespace Glitch.Text
+namespace Glitch.Text;
+
+public sealed class BufferedCharStream : CharStream
 {
-    public sealed class BufferedCharStream : CharStream
+    private const int DefaultBufferSize = 5;
+    private const char NullChar = '\0';
+
+    private TextReader stream;
+    private Buffer buffer;
+    private bool isEof = false;
+
+    public BufferedCharStream(TextReader stream)
     {
-        private const int DefaultBufferSize = 5;
-        private const char NullChar = '\0';
+        this.stream = stream;
+        buffer = new Buffer(DefaultBufferSize);
+    }
 
-        private TextReader stream;
-        private Buffer buffer;
-        private bool isEof = false;
+    public override bool IsEof => isEof;
 
-        public BufferedCharStream(TextReader stream)
+    public override char Peek()
+    {
+        if (!buffer.IsEmpty)
         {
-            this.stream = stream;
-            buffer = new Buffer(DefaultBufferSize);
+            return buffer[0];
         }
 
-        public override bool IsEof => isEof;
+        char next = ReadNextChar();
 
-        public override char Peek()
+        if (!IsEof)
         {
-            if (!buffer.IsEmpty)
-            {
-                return buffer[0];
-            }
-
-            char next = ReadNextChar();
-
-            if (!IsEof)
-            {
-                buffer.Add(next);
-            }
-
-            return next;
+            buffer.Add(next);
         }
 
-        public override char Read()
-        {
-            if (!buffer.IsEmpty)
-            {
-                return buffer.Take();
-            }
+        return next;
+    }
 
-            return ReadNextChar();
+    public override char Read()
+    {
+        if (!buffer.IsEmpty)
+        {
+            return buffer.Take();
         }
 
-        public override string ReadToEnd()
-        { 
-            // TODO Check for performance and best practices, this is quick and dirty.
-            var remaining = stream.ReadToEnd();
-            var output = new StringBuilder(buffer.Count + remaining.Length);
+        return ReadNextChar();
+    }
 
-            while (!buffer.IsEmpty)
-            {
-                output.Append(buffer.Take());
-            }
+    public override string ReadToEnd()
+    { 
+        // TODO Check for performance and best practices, this is quick and dirty.
+        var remaining = stream.ReadToEnd();
+        var output = new StringBuilder(buffer.Count + remaining.Length);
 
-            output.Append(remaining);
-
-            return output.ToString();
+        while (!buffer.IsEmpty)
+        {
+            output.Append(buffer.Take());
         }
 
-        public override void Dispose()
+        output.Append(remaining);
+
+        return output.ToString();
+    }
+
+    public override void Dispose()
+    {
+        stream.Dispose();
+    }
+
+    private char ReadNextChar()
+    {
+        if (IsEof)
         {
-            stream.Dispose();
+            return NullChar;
         }
 
-        private char ReadNextChar()
+        int next = stream.Read();
+
+        if (next < 0)
         {
-            if (IsEof)
-            {
-                return NullChar;
-            }
-
-            int next = stream.Read();
-
-            if (next < 0)
-            {
-                isEof = true;
-                return NullChar;
-            }
-
-            return (char)next;
+            isEof = true;
+            return NullChar;
         }
 
-        private class Buffer
-        {
-            private char[] buffer;
-            private int head;
-            private int tail;
+        return (char)next;
+    }
 
-            internal Buffer(int size)
+    private class Buffer
+    {
+        private char[] buffer;
+        private int head;
+        private int tail;
+
+        internal Buffer(int size)
+        {
+            buffer = new char[size];
+            head = 0;
+            tail = -1;
+        }
+
+        private Buffer(Buffer copy)
+        {
+            buffer = new char[copy.buffer.Length];
+            copy.buffer.CopyTo(buffer, 0);
+            head = copy.head;
+            tail = copy.tail;
+        }
+
+        internal int Count => tail - head + 1;
+        internal int Capacity => buffer.Length;
+        internal bool IsEmpty => tail < head;
+        internal bool IsFull => Count == Capacity;
+        internal char this[int index] => buffer[Translate(head + index)];
+
+        private int Read => Translate(head);
+        private int Write => Translate(tail + 1);
+
+        internal void Add(char c)
+        {
+            if (IsFull)
             {
-                buffer = new char[size];
+                head++;
+            }
+
+            buffer[Translate(++tail)] = c;
+        }
+
+        internal void Add(char[] characters)
+        {
+            // If there's an overflow, just replace our buffer
+            // with enough characters to fill it, starting from the right,
+            // as if the entire array had been added one-by-one.
+            if (characters.Length >= Capacity)
+            {
+                int startIndex = characters.Length - Capacity;
+                Array.Copy(characters, startIndex, buffer, 0, Capacity);
                 head = 0;
-                tail = -1;
+                tail = Capacity - 1;
+                return;
             }
 
-            private Buffer(Buffer copy)
+            int firstWriteCount = Capacity - Write;
+            int freeSpace = Capacity - Count;
+            int overflow = characters.Length - freeSpace;
+
+            if (firstWriteCount >= characters.Length)
             {
-                buffer = new char[copy.buffer.Length];
-                copy.buffer.CopyTo(buffer, 0);
-                head = copy.head;
-                tail = copy.tail;
+                Array.Copy(characters, 0, buffer, Write, characters.Length);
+            }
+            else
+            {
+                // Copy first segment starting at Write
+                Array.Copy(characters, 0, buffer, Write, firstWriteCount);
+
+                // Copy remaining characters starting at the beginning of the buffer
+                Array.Copy(characters, firstWriteCount, buffer, 0, characters.Length - firstWriteCount);
             }
 
-            internal int Count => tail - head + 1;
-            internal int Capacity => buffer.Length;
-            internal bool IsEmpty => tail < head;
-            internal bool IsFull => Count == Capacity;
-            internal char this[int index] => buffer[Translate(head + index)];
+            tail += characters.Length;
 
-            private int Read => Translate(head);
-            private int Write => Translate(tail + 1);
-
-            internal void Add(char c)
+            if (overflow > 0)
             {
-                if (IsFull)
-                {
-                    head++;
-                }
+                head += overflow;
+            }
+        }
 
-                buffer[Translate(++tail)] = c;
+        internal char Take()
+        {
+            if (IsEmpty)
+            {
+                throw new InvalidOperationException("Buffer is empty");
             }
 
-            internal void Add(char[] characters)
+            return buffer[Translate(head++)];
+        }
+
+        internal char Take(int lookahead)
+        {
+            if (lookahead > Count)
             {
-                // If there's an overflow, just replace our buffer
-                // with enough characters to fill it, starting from the right,
-                // as if the entire array had been added one-by-one.
-                if (characters.Length >= Capacity)
-                {
-                    int startIndex = characters.Length - Capacity;
-                    Array.Copy(characters, startIndex, buffer, 0, Capacity);
-                    head = 0;
-                    tail = Capacity - 1;
-                    return;
-                }
-
-                int firstWriteCount = Capacity - Write;
-                int freeSpace = Capacity - Count;
-                int overflow = characters.Length - freeSpace;
-
-                if (firstWriteCount >= characters.Length)
-                {
-                    Array.Copy(characters, 0, buffer, Write, characters.Length);
-                }
-                else
-                {
-                    // Copy first segment starting at Write
-                    Array.Copy(characters, 0, buffer, Write, firstWriteCount);
-
-                    // Copy remaining characters starting at the beginning of the buffer
-                    Array.Copy(characters, firstWriteCount, buffer, 0, characters.Length - firstWriteCount);
-                }
-
-                tail += characters.Length;
-
-                if (overflow > 0)
-                {
-                    head += overflow;
-                }
+                throw new ArgumentOutOfRangeException(nameof(lookahead));
             }
 
-            internal char Take()
+            head += lookahead;
+            return Take();
+        }
+
+        internal void Clear()
+        {
+            head = 0;
+            tail = -1;
+        }
+
+        internal void EnsureCapacity(int size)
+        {
+            if (size > Capacity)
             {
-                if (IsEmpty)
-                {
-                    throw new InvalidOperationException("Buffer is empty");
-                }
+                // Expand
+                var newBuffer = new char[size];
 
-                return buffer[Translate(head++)];
-            }
+                CopyTo(newBuffer, 0);
 
-            internal char Take(int lookahead)
-            {
-                if (lookahead > Count)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(lookahead));
-                }
-
-                head += lookahead;
-                return Take();
-            }
-
-            internal void Clear()
-            {
+                // Reset the head and tail
+                tail -= head;
                 head = 0;
-                tail = -1;
+                buffer = newBuffer;
+            }
+        }
+
+        internal Buffer Clone() => new Buffer(this);
+
+        internal void CopyTo(char[] array, int index)
+        {
+            if (IsEmpty)
+            {
+                return;
             }
 
-            internal void EnsureCapacity(int size)
+            if (Read < Write)
             {
-                if (size > Capacity)
-                {
-                    // Expand
-                    var newBuffer = new char[size];
+                Array.Copy(buffer, Read, array, index, Count);
+            }
+            else
+            {
+                int firstCopyCount = Capacity - Read;
 
-                    CopyTo(newBuffer, 0);
+                Array.Copy(buffer, Read, array, index, firstCopyCount);
+                Array.Copy(buffer, 0, array, index + firstCopyCount, Count - firstCopyCount);
+            }
+        }
 
-                    // Reset the head and tail
-                    tail -= head;
-                    head = 0;
-                    buffer = newBuffer;
-                }
+        private int Translate(int index) => index % Capacity;
+
+        private IEnumerable<ArraySegment<char>> GetSegments()
+        {
+            if (IsEmpty)
+            {
+                yield return new ArraySegment<char>(buffer, 0, 0);
+                yield break;
             }
 
-            internal Buffer Clone() => new Buffer(this);
-
-            internal void CopyTo(char[] array, int index)
+            if (Read < Write)
             {
-                if (IsEmpty)
-                {
-                    return;
-                }
-
-                if (Read < Write)
-                {
-                    Array.Copy(buffer, Read, array, index, Count);
-                }
-                else
-                {
-                    int firstCopyCount = Capacity - Read;
-
-                    Array.Copy(buffer, Read, array, index, firstCopyCount);
-                    Array.Copy(buffer, 0, array, index + firstCopyCount, Count - firstCopyCount);
-                }
+                yield return new ArraySegment<char>(buffer, Read, Count);
+                yield break;
             }
 
-            private int Translate(int index) => index % Capacity;
+            int firstSegmentCount = Capacity - Read;
 
-            private IEnumerable<ArraySegment<char>> GetSegments()
+            yield return new ArraySegment<char>(buffer, Read, firstSegmentCount);
+
+            int nextCount = Count - firstSegmentCount;
+
+            // Edge case where an empty segment will be yielded if both pointers are at 0
+            if (nextCount > 0)
             {
-                if (IsEmpty)
-                {
-                    yield return new ArraySegment<char>(buffer, 0, 0);
-                    yield break;
-                }
-
-                if (Read < Write)
-                {
-                    yield return new ArraySegment<char>(buffer, Read, Count);
-                    yield break;
-                }
-
-                int firstSegmentCount = Capacity - Read;
-
-                yield return new ArraySegment<char>(buffer, Read, firstSegmentCount);
-
-                int nextCount = Count - firstSegmentCount;
-
-                // Edge case where an empty segment will be yielded if both pointers are at 0
-                if (nextCount > 0)
-                {
-                    yield return new ArraySegment<char>(buffer, 0, nextCount);
-                }
+                yield return new ArraySegment<char>(buffer, 0, nextCount);
             }
         }
     }

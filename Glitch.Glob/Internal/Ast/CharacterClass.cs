@@ -1,41 +1,40 @@
-﻿namespace Glitch.Glob.Internal.Ast
+namespace Glitch.Glob.Internal.Ast;
+
+internal abstract class CharacterClass : GlobNode
 {
-    internal abstract class CharacterClass : GlobNode
+    internal static CharacterClass Negate(CharacterClass node)
     {
-        internal static CharacterClass Negate(CharacterClass node)
+        if (node is NegatedCharacterClass negated)
         {
-            if (node is NegatedCharacterClass negated)
-            {
-                return negated.Inner;
-            }
-
-            return new NegatedCharacterClass(node);
+            return negated.Inner;
         }
 
-        public override string ToString() => $"[{RawText}]";
+        return new NegatedCharacterClass(node);
+    }
 
-        protected abstract string RawText { get; }
+    public override string ToString() => $"[{RawText}]";
 
-        internal sealed override GlobMatch Match(string input, int pos)
-            => IsMatch(input[pos]) ? GlobMatch.Success(1) : GlobMatch.Failure;
+    protected abstract string RawText { get; }
 
-        protected abstract bool IsMatch(char c);
+    internal sealed override GlobMatch Match(string input, int pos)
+        => IsMatch(input[pos]) ? GlobMatch.Success(1) : GlobMatch.Failure;
 
-        private class NegatedCharacterClass : CharacterClass
+    protected abstract bool IsMatch(char c);
+
+    private class NegatedCharacterClass : CharacterClass
+    {
+        internal NegatedCharacterClass(CharacterClass inner)
         {
-            internal NegatedCharacterClass(CharacterClass inner)
-            {
-                ArgumentNullException.ThrowIfNull(inner, nameof(inner));
-                Inner = inner;
-            }
-
-            internal CharacterClass Inner { get; }
-
-            public override string ToString() => $"[!{RawText}]";
-
-            protected override string RawText => Inner.RawText;
-
-            protected override bool IsMatch(char c) => !Inner.IsMatch(c);
+            ArgumentNullException.ThrowIfNull(inner, nameof(inner));
+            Inner = inner;
         }
+
+        internal CharacterClass Inner { get; }
+
+        public override string ToString() => $"[!{RawText}]";
+
+        protected override string RawText => Inner.RawText;
+
+        protected override bool IsMatch(char c) => !Inner.IsMatch(c);
     }
 }

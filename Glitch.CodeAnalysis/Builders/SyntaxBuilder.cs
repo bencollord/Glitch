@@ -1,10 +1,9 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 
-namespace Glitch.CodeAnalysis.Builders
+namespace Glitch.CodeAnalysis.Builders;
+
+public abstract class SyntaxBuilder<TNode>
+    where TNode : SyntaxNode
 {
-    public abstract class SyntaxBuilder<TNode>
-        where TNode : SyntaxNode
-    {
-        public abstract TNode Build();
-    }
+    public abstract TNode Build();
 }

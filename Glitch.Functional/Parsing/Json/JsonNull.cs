@@ -1,16 +1,15 @@
-﻿using Glitch.Text;
+using Glitch.Text;
 
-namespace Glitch.Functional.Parsing.Json
+namespace Glitch.Functional.Parsing.Json;
+
+public record JsonNull : JsonValue
 {
-    public record JsonNull : JsonValue
+    public static readonly JsonNull Value = new();
+
+    private JsonNull() { }
+
+    protected internal override void WriteTo(IndentedStringBuilder buffer)
     {
-        public static readonly JsonNull Value = new();
-
-        private JsonNull() { }
-
-        protected internal override void WriteTo(IndentedStringBuilder buffer)
-        {
-            buffer.Append("null");
-        }
+        buffer.Append("null");
     }
 }

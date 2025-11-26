@@ -1,10 +1,9 @@
-﻿namespace Glitch.CodeAnalysis.Builders
+namespace Glitch.CodeAnalysis.Builders;
+
+public enum TypeDeclarationKind
 {
-    public enum TypeDeclarationKind
-    {
-        Class,
-        Interface,
-        Struct,
-        Record,
-    }
+    Class,
+    Interface,
+    Struct,
+    Record,
 }

@@ -1,12 +1,11 @@
-﻿namespace Glitch.Reflection
+namespace Glitch.Reflection;
+
+public enum AccessModifier
 {
-    public enum AccessModifier
-    {
-        Private,
-        PrivateProtected,
-        Protected,
-        ProtectedInternal,
-        Internal,
-        Public
-    }
+    Private,
+    PrivateProtected,
+    Protected,
+    ProtectedInternal,
+    Internal,
+    Public
 }

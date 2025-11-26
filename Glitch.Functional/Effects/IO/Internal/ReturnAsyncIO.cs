@@ -1,15 +1,14 @@
 
-namespace Glitch.Functional.Effects
+namespace Glitch.Functional.Effects;
+
+internal class ReturnAsyncIO<T> : IO<T>
 {
-    internal class ReturnAsyncIO<T> : IO<T>
+    private Task<T> value;
+
+    internal ReturnAsyncIO(Task<T> value)
     {
-        private Task<T> value;
-
-        internal ReturnAsyncIO(Task<T> value)
-        {
-            this.value = value;
-        }
-
-        protected override async Task<T> RunIOAsync(IOEnv env) => await value.ConfigureAwait(false);
+        this.value = value;
     }
+
+    protected override async Task<T> RunIOAsync(IOEnv env) => await value.ConfigureAwait(false);
 }

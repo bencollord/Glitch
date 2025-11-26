@@ -1,7 +1,6 @@
-﻿namespace Glitch.Functional.Parsing.Json
+namespace Glitch.Functional.Parsing.Json;
+
+public abstract record JsonValue : JsonNode
 {
-    public abstract record JsonValue : JsonNode
-    {
-        public override IEnumerable<JsonNode> Children() => [];
-    }
+    public override IEnumerable<JsonNode> Children() => [];
 }

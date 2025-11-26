@@ -1,7 +1,6 @@
-﻿namespace Glitch.Text
+namespace Glitch.Text;
+
+public interface IIndentable
 {
-    public interface IIndentable
-    {
-        Indentation Indentation { get; set; }
-    }
+    Indentation Indentation { get; set; }
 }

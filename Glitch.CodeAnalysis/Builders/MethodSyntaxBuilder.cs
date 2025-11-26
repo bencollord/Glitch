@@ -1,35 +1,34 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 
-namespace Glitch.CodeAnalysis.Builders
+namespace Glitch.CodeAnalysis.Builders;
+
+using static CSharpSyntax;
+
+public class MethodSyntaxBuilder : SyntaxBuilder<MethodDeclarationSyntax>
 {
-    using static CSharpSyntax;
+    private TypeSyntax returnType;
+    private SyntaxToken identifier;
+    private List<ParameterSyntax> parameters = [];
 
-    public class MethodSyntaxBuilder : SyntaxBuilder<MethodDeclarationSyntax>
+    public MethodSyntaxBuilder(TypeSyntax returnType, SyntaxToken identifier)
     {
-        private TypeSyntax returnType;
-        private SyntaxToken identifier;
-        private List<ParameterSyntax> parameters = [];
-
-        public MethodSyntaxBuilder(TypeSyntax returnType, SyntaxToken identifier)
+        if (!identifier.IsKind(SyntaxKind.IdentifierToken))
         {
-            if (!identifier.IsKind(SyntaxKind.IdentifierToken))
-            {
-                throw new ArgumentException($"Invalid identifier: {identifier.Kind()}");
-            }
-
-            this.returnType = returnType;
-            this.identifier = identifier;
+            throw new ArgumentException($"Invalid identifier: {identifier.Kind()}");
         }
 
-        public override MethodDeclarationSyntax Build()
-        {
-            return MethodDeclaration(returnType, identifier)
-                .WithParameterList(
-                    ParameterList(
-                        SeparatedList(parameters)));
-        }
+        this.returnType = returnType;
+        this.identifier = identifier;
+    }
+
+    public override MethodDeclarationSyntax Build()
+    {
+        return MethodDeclaration(returnType, identifier)
+            .WithParameterList(
+                ParameterList(
+                    SeparatedList(parameters)));
     }
 }

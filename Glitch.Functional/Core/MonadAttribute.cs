@@ -1,6 +1,6 @@
-namespace Glitch.Functional
-{
-    /// <summary>
+namespace Glitch.Functional;
+
+/// <summary>
     /// Specifies that a type is a monad so that it can be found
     /// by code gen scripts when adding extensions that apply to
     /// all monadic types.
@@ -11,6 +11,5 @@ namespace Glitch.Functional
     /// or IIf that work for all of them. Types marked with this attribute
     /// will be included in any generation scripts.
     /// </remarks>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface)]
-    public class MonadAttribute : Attribute;
-}
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface)]
+public class MonadAttribute : Attribute;

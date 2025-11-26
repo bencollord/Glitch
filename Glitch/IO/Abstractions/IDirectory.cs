@@ -1,19 +1,18 @@
-﻿namespace Glitch.IO.Abstractions
+namespace Glitch.IO.Abstractions;
+
+public interface IDirectory : IFileSystemNode
 {
-    public interface IDirectory : IFileSystemNode
-    {
-        IDirectory? Parent { get; }
+    IDirectory? Parent { get; }
 
-        IDirectory CreateSubdirectory(string path);
+    IDirectory CreateSubdirectory(string path);
 
-        IFile CreateFile(string name);
+    IFile CreateFile(string name);
 
-        IEnumerable<IFileSystemNode> Children();
+    IEnumerable<IFileSystemNode> Children();
 
-        IEnumerable<IFileSystemNode> Descendants();
+    IEnumerable<IFileSystemNode> Descendants();
 
-        IEnumerable<IDirectory> Directories();
+    IEnumerable<IDirectory> Directories();
 
-        IEnumerable<IFile> Files();
-    }
+    IEnumerable<IFile> Files();
 }

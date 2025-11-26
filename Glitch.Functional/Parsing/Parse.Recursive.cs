@@ -1,14 +1,14 @@
-﻿using Glitch.Functional.Parsing.Parsers;
+using Glitch.Functional.Parsing.Parsers;
 
-namespace Glitch.Functional.Parsing
+namespace Glitch.Functional.Parsing;
+
+public static partial class Parse
 {
-    public static partial class Parse
-    {
-        public static Parser<TToken, T> Reference<TToken, T>(Func<Parser<TToken, T>> function) => Reference(new Lazy<Parser<TToken, T>>(function));
-        
-        public static Parser<TToken, T> Reference<TToken, T>(Lazy<Parser<TToken, T>> lazy) => new LazyParser<TToken, T>(lazy);
-        
-        /// <summary>
+    public static Parser<TToken, T> Reference<TToken, T>(Func<Parser<TToken, T>> function) => Reference(new Lazy<Parser<TToken, T>>(function));
+    
+    public static Parser<TToken, T> Reference<TToken, T>(Lazy<Parser<TToken, T>> lazy) => new LazyParser<TToken, T>(lazy);
+    
+    /// <summary>
         /// Returns a parser that self-references, allowing recursion.
         /// </summary>
         /// <remarks>
@@ -19,13 +19,12 @@ namespace Glitch.Functional.Parsing
         /// <typeparam name="T"></typeparam>
         /// <param name="function"></param>
         /// <returns></returns>
-        public static Parser<TToken, T> Recursive<TToken, T>(Func<Parser<TToken, T>, Parser<TToken, T>> function)
-        {
-            Parser<TToken, T> result = null!;
+    public static Parser<TToken, T> Recursive<TToken, T>(Func<Parser<TToken, T>, Parser<TToken, T>> function)
+    {
+        Parser<TToken, T> result = null!;
 
-            result = Reference(() => function(result));
+        result = Reference(() => function(result));
 
-            return result;
-        }
+        return result;
     }
 }

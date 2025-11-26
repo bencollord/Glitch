@@ -1,22 +1,21 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 
-namespace Glitch.Collections
+namespace Glitch.Collections;
+
+public interface IReadOnlyMultiMap<TKey, TValue> 
+    : IEnumerable<KeyValuePair<TKey, TValue>>,
+      IReadOnlyDictionary<TKey, IEnumerable<TValue>>
+        where TKey : notnull
 {
-    public interface IReadOnlyMultiMap<TKey, TValue> 
-        : IEnumerable<KeyValuePair<TKey, TValue>>,
-          IReadOnlyDictionary<TKey, IEnumerable<TValue>>
-            where TKey : notnull
-    {
-        TValue this[TKey key, int index] { get; }
+    TValue this[TKey key, int index] { get; }
 
-        int KeyCount { get; }
+    int KeyCount { get; }
 
-        int ValueCount { get; }
+    int ValueCount { get; }
 
-        new IEnumerable<TValue> Values { get; }
+    new IEnumerable<TValue> Values { get; }
 
-        bool TryGetList(TKey key, out IEnumerable<TValue> list);
+    bool TryGetList(TKey key, out IEnumerable<TValue> list);
 
-        bool TryGetValue(TKey key, int index, [NotNullWhen(true)] out TValue? value);
-    }
+    bool TryGetValue(TKey key, int index, [NotNullWhen(true)] out TValue? value);
 }

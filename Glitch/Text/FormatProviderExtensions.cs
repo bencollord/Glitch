@@ -1,11 +1,10 @@
-﻿namespace Glitch.Text
+namespace Glitch.Text;
+
+public static class FormatProviderExtensions
 {
-    public static class FormatProviderExtensions
+    public static T? GetFormat<T>(this IFormatProvider formatProvider)
+        where T : class
     {
-        public static T? GetFormat<T>(this IFormatProvider formatProvider)
-            where T : class
-        {
-            return formatProvider.GetFormat(typeof(T)) as T;
-        }
+        return formatProvider.GetFormat(typeof(T)) as T;
     }
 }

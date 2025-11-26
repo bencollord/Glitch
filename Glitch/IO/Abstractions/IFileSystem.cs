@@ -1,11 +1,10 @@
-﻿namespace Glitch.IO.Abstractions
+namespace Glitch.IO.Abstractions;
+
+public interface IFileSystem
 {
-    public interface IFileSystem
-    {
-        string Name { get; }
+    string Name { get; }
 
-        IFile GetFile(string path);
+    IFile GetFile(string path);
 
-        IDirectory GetDirectory(string path);
-    }
+    IDirectory GetDirectory(string path);
 }

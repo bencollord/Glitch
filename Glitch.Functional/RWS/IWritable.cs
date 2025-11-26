@@ -1,12 +1,11 @@
-﻿namespace Glitch.Functional
+namespace Glitch.Functional;
+
+public interface IWritable<W>
+    where W : IWritable<W>
 {
-    public interface IWritable<W>
-        where W : IWritable<W>
-    {
-        public static abstract W Empty { get; }
+    public static abstract W Empty { get; }
 
-        W Append(W output);
+    W Append(W output);
 
-        public static virtual W operator +(IWritable<W> writable, W output) => writable.Append(output);
-    }
+    public static virtual W operator +(IWritable<W> writable, W output) => writable.Append(output);
 }

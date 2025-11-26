@@ -1,34 +1,33 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
-namespace Glitch.Diagnostics
+namespace Glitch.Diagnostics;
+
+public class BenchmarkCase
 {
-    public class BenchmarkCase
+    private string name;
+    private Action action;
+
+    public BenchmarkCase(string name, Action action)
     {
-        private string name;
-        private Action action;
+        this.name = name;
+        this.action = action;
+    }
 
-        public BenchmarkCase(string name, Action action)
+    public string Name => name;
+
+    public BenchmarkCaseResult Run(uint iterations)
+    {
+        var timer = new Stopwatch();
+        var times = new List<TimeSpan>();
+
+        for (int i = 0; i < iterations; i++)
         {
-            this.name = name;
-            this.action = action;
+            timer.Restart();
+            action();
+            timer.Stop();
+            times.Add(timer.Elapsed);
         }
 
-        public string Name => name;
-
-        public BenchmarkCaseResult Run(uint iterations)
-        {
-            var timer = new Stopwatch();
-            var times = new List<TimeSpan>();
-
-            for (int i = 0; i < iterations; i++)
-            {
-                timer.Restart();
-                action();
-                timer.Stop();
-                times.Add(timer.Elapsed);
-            }
-
-            return new BenchmarkCaseResult(Name, times);
-        }
+        return new BenchmarkCaseResult(Name, times);
     }
 }

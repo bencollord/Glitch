@@ -1,20 +1,19 @@
-﻿using Glitch.Functional;
+using Glitch.Functional;
 
-namespace Glitch.Functional.Parsing.Input
+namespace Glitch.Functional.Parsing.Input;
+
+public record ByteSequence : ArrayTokenSequence<byte>
 {
-    public record ByteSequence : ArrayTokenSequence<byte>
+    private byte[] source;
+
+    public ByteSequence(byte[] source)
+        : base(source)
     {
-        private byte[] source;
+        this.source = source;
+    }
 
-        public ByteSequence(byte[] source)
-            : base(source)
-        {
-            this.source = source;
-        }
-
-        protected override string DisplayRemainder()
-        {
-            return string.Join(' ', source.Skip(Position + 1).Select(x => x.ToString("X")));
-        }
+    protected override string DisplayRemainder()
+    {
+        return string.Join(' ', source.Skip(Position + 1).Select(x => x.ToString("X")));
     }
 }

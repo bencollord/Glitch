@@ -3,43 +3,42 @@ using Glitch.Functional.Parsing.Results;
 using Glitch.Functional;
 using Glitch.Functional.Extensions;
 
-namespace Glitch.Functional.Parsing.Parsers
+namespace Glitch.Functional.Parsing.Parsers;
+
+internal class OneOfParser<TToken, T> : Parser<TToken, T>
 {
-    internal class OneOfParser<TToken, T> : Parser<TToken, T>
+    private readonly IEnumerable<Parser<TToken, T>> parsers;
+
+    internal OneOfParser(params IEnumerable<Parser<TToken, T>> parsers)
     {
-        private readonly IEnumerable<Parser<TToken, T>> parsers;
+        this.parsers = parsers;
+    }
 
-        internal OneOfParser(params IEnumerable<Parser<TToken, T>> parsers)
+    public override Parser<TToken, T> Or(Parser<TToken, T> other) 
+        => new OneOfParser<TToken, T>([.. parsers, other]);
+
+    public override ParseResult<TToken, T> Execute(TokenSequence<TToken> input)
+    {
+        var expectations = new List<Expectation<TToken>>();
+
+        foreach (var parser in parsers)
         {
-            this.parsers = parsers;
-        }
+            var result = parser.Execute(input);
 
-        public override Parser<TToken, T> Or(Parser<TToken, T> other) 
-            => new OneOfParser<TToken, T>([.. parsers, other]);
-
-        public override ParseResult<TToken, T> Execute(TokenSequence<TToken> input)
-        {
-            var expectations = new List<Expectation<TToken>>();
-
-            foreach (var parser in parsers)
+            if (result.IsOkay)
             {
-                var result = parser.Execute(input);
-
-                if (result.IsOkay)
-                {
-                    return result;
-                }
-
-                expectations.Add(result.Expectation);
+                return result;
             }
 
-            var expectation = new Expectation<TToken>
-            {
-                Label = "One of " + expectations.Select(x => x.Label).Somes().PipeInto(e => string.Join(", ", e)),
-                Expected = expectations.SelectMany(e => e.Expected)
-            };
-
-            return ParseResult.Error<TToken, T>(expectation, input);
+            expectations.Add(result.Expectation);
         }
+
+        var expectation = new Expectation<TToken>
+        {
+            Label = "One of " + expectations.Select(x => x.Label).Somes().PipeInto(e => string.Join(", ", e)),
+            Expected = expectations.SelectMany(e => e.Expected)
+        };
+
+        return ParseResult.Error<TToken, T>(expectation, input);
     }
 }

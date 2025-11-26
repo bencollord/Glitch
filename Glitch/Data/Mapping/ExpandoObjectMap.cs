@@ -1,25 +1,24 @@
-﻿using System.Data;
+using System.Data;
 using System.Dynamic;
 
-namespace Glitch.Data.Mapping
+namespace Glitch.Data.Mapping;
+
+internal class ExpandoObjectMap : ITypeMap
 {
-    internal class ExpandoObjectMap : ITypeMap
+    public Type ElementType => typeof(ExpandoObject);
+
+    public bool CanMaterialize(IDataRecord record) => true;
+
+    public object Materialize(IDataRecord record)
     {
-        public Type ElementType => typeof(ExpandoObject);
+        var obj = new ExpandoObject();
+        var dict = obj as IDictionary<string, object>;
 
-        public bool CanMaterialize(IDataRecord record) => true;
-
-        public object Materialize(IDataRecord record)
+        for (int i = 0; i < record.FieldCount; ++i)
         {
-            var obj = new ExpandoObject();
-            var dict = obj as IDictionary<string, object>;
-
-            for (int i = 0; i < record.FieldCount; ++i)
-            {
-                dict.Add(record.GetName(i), record.GetValue(i));
-            }
-
-            return obj;
+            dict.Add(record.GetName(i), record.GetValue(i));
         }
+
+        return obj;
     }
 }

@@ -1,12 +1,11 @@
-﻿namespace Glitch.Glob.Internal.Ast
+namespace Glitch.Glob.Internal.Ast;
+
+public enum GlobTokenType
 {
-    public enum GlobTokenType
-    {
-        Literal,
-        CharacterClass,
-        CharacterWildcard,
-        StringWildcard,
-        DirectoryWildcard,
-        PathSeparator
-    }
+    Literal,
+    CharacterClass,
+    CharacterWildcard,
+    StringWildcard,
+    DirectoryWildcard,
+    PathSeparator
 }

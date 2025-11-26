@@ -1,18 +1,17 @@
-﻿using System.Collections;
+using System.Collections;
 
-namespace Glitch.Diagnostics
+namespace Glitch.Diagnostics;
+
+public class BenchmarkResult : IEnumerable<BenchmarkCaseResult>
 {
-    public class BenchmarkResult : IEnumerable<BenchmarkCaseResult>
+    private IEnumerable<BenchmarkCaseResult> cases;
+
+    internal BenchmarkResult(IEnumerable<BenchmarkCaseResult> cases)
     {
-        private IEnumerable<BenchmarkCaseResult> cases;
-
-        internal BenchmarkResult(IEnumerable<BenchmarkCaseResult> cases)
-        {
-            this.cases = cases;
-        }
-
-        public IEnumerator<BenchmarkCaseResult> GetEnumerator() => cases.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        this.cases = cases;
     }
+
+    public IEnumerator<BenchmarkCaseResult> GetEnumerator() => cases.GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
