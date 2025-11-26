@@ -178,5 +178,10 @@ namespace Glitch.IO
 
         public static bool operator >=(FilePath? left, FilePath? right) 
             => left is null ? right is null : left.CompareTo(right) >= 0;
+
+#pragma warning disable CA1859, IDE0051 // Use concrete types when possible for improved performance, Remove unused private members.
+        // For LinqPad
+        private object ToDump() => this.path;
+#pragma warning restore CA1859, IDE0051 // Use concrete types when possible for improved performance, Remove unused private members.
     }
 }
