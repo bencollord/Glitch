@@ -15,11 +15,10 @@ namespace Glitch.Functional.Parsing.Json
             this.properties = properties.ToImmutableList();
         }
 
-        public JsonNode this[string name]
-            => Property(name)
-                   .Select(p => p.Value)
-                   .ExpectOrElse(_ => new KeyNotFoundException(name))
-                   .Unwrap();
+        public JsonNode this[string name] =>
+            Property(name)
+                .Select(p => p.Value)
+                .IfNone(_ => throw new KeyNotFoundException(name));
 
         public JsonObject Add(string name, JsonNode value) => Add(new JsonProperty(name, value));
         public JsonObject Add(JsonProperty property) => this with { properties = properties.Add(property), };

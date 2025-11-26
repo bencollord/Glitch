@@ -7,12 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Parsing\Json\**" />
-    <EmbeddedResource Remove="Parsing\Json\**" />
-    <None Remove="Parsing\Json\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Remove="Effects\IO\IO.File.cs" />
   </ItemGroup>
 
