@@ -102,38 +102,21 @@ public abstract partial record Validated<T, E> : IResult<T, Sequence<E>>
         => AndThen(x => bind(x).Select(y => project(x, y)));
 
     /// <summary>
-    /// Returns the current result if Okay, otherwise returns the other result.
-    /// This method will <b>not</b> aggregate errors. It's used for when you only care
-    /// about the results of one or the other and as such allows a retyping of the error type.
-    /// 
-    /// If you want to get one or the other with the errors merged if both fail, use
-    /// the <see cref="Coalesce(Validated{T, E})"/> method.
+    /// If Okay, returns this. If <paramref name="other"/> is Okay, <paramref name="other"/>.
+    /// If both fail, returns the combined errors.
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    public abstract Validated<T, EResult> Or<EResult>(Validated<T, EResult> other);
+    public abstract Validated<T, E> Or(Validated<T, E> other);
 
     /// <summary>
-    /// If Okay, returns this. If <paramref name="other"/> is Okay, returns other.
-    /// If both fail, combines the errors of this and other into a new result.
-    /// </summary>
-    /// <remarks>
-    /// This is an experimental API and may be changed or removed. I'm not sure about the name, the fact that
-    /// I'm using the addition operator for it, or indeed whether or not it's useful to have this method instead
-    /// of simply having <see cref="Or{EResult}(Validated{T, EResult})"/> aggregate errors. We'll see after
-    /// I've spent some time actually using this type.
-    /// </remarks>
-    /// <param name="other"></param>
-    /// <returns></returns>
-    public abstract Validated<T, E> Coalesce(Validated<T, E> other); // DESIGN Not sure about the name of this method
-
-    /// <summary>
-    /// Returns the current result if Ok, otherwise applies the provided
-    /// function to the current error and returns the result.
+    /// Returns the current result if Okay, otherwise applies the provided
+    /// function to the current error set and if the result also fails,
+    /// returns the combined errors.
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    public abstract Validated<T, EResult> OrElse<EResult>(Func<Sequence<E>, Validated<T, EResult>> other);
+    public abstract Validated<T, E> OrElse(Func<Sequence<E>, Validated<T, E>> other);
 
     /// <summary>
     /// If Okay, returns <paramref name="okay"/> applied to the wrapped value.

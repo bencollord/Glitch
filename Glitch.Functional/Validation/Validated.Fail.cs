@@ -40,20 +40,12 @@ public partial record Validated<T, E>
             => new Validated<TResult, EResult>.Fail(Errors.Select(fail));
 
         /// <inheritdoc />
-        public override Validated<T, EResult> Or<EResult>(Validated<T, EResult> other) => other;
+        public override Validated<T, E> Or(Validated<T, E> other) =>
+            other.Match(okay: _ => other,
+                        fail: e => new Fail(Errors.Concat(e)));
 
         /// <inheritdoc />
-        public override Validated<T, EResult> OrElse<EResult>(Func<Sequence<E>, Validated<T, EResult>> fail) => fail(Errors);
-
-        /// <inheritdoc />
-        public override Validated<T, E> Coalesce(Validated<T, E> other) =>
-            (this, other) switch
-            {
-                (Okay, _) => this,
-                (_, Okay) => other,
-                (Fail(var e1), Fail(var e2)) => new Fail(e1.Concat(e2)),
-                _ => throw new UnreachableException(ErrorMessages.BadDiscriminatedUnion)
-            };
+        public override Validated<T, E> OrElse(Func<Sequence<E>, Validated<T, E>> fail) => Or(fail(Errors));
 
         /// <inheritdoc />
         public override Validated<T, E> Guard(Func<T, bool> predicate, E _) => this;
