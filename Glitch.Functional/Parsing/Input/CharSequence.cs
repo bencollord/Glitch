@@ -13,8 +13,8 @@ public record CharSequence : TokenSequence<char>
     }
 
     /// <summary>
-        /// <inheritdoc />
-        /// </summary>
+    /// <inheritdoc />
+    /// </summary>
     public override char Current => !IsEnd ? sourceText[cursor] : '\0';
 
     public override int Position => cursor;

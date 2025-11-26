@@ -111,14 +111,14 @@ public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePat
     public static implicit operator string(FilePath path) => path.path;
 
     /// <summary>
-        /// Implicit conversion operator from string to <see cref="FilePath"/>.
-        /// </summary>
-        /// <remarks>
-        /// The conversion is implicit since the static <see cref="Path"/> class
-        /// and all of the types in the System.IO namespace expect a string, so
-        /// this will make it easier to work with. 
-        /// </remarks>
-        /// <param name="path"></param>
+    /// Implicit conversion operator from string to <see cref="FilePath"/>.
+    /// </summary>
+    /// <remarks>
+    /// The conversion is implicit since the static <see cref="Path"/> class
+    /// and all of the types in the System.IO namespace expect a string, so
+    /// this will make it easier to work with. 
+    /// </remarks>
+    /// <param name="path"></param>
     public static implicit operator FilePath(string path) => new(path);
 
     public static implicit operator FilePath(FileSystemInfo? node) => new(node?.FullName);
@@ -167,16 +167,16 @@ public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePat
     [return: NotNullIfNotNull(nameof(path))]
     public static FileSystemInfo? operator /(FileSystemInfo? node, FilePath? path) => node?.Path / path;
 
-    public static bool operator <(FilePath? left, FilePath? right) 
+    public static bool operator <(FilePath? left, FilePath? right)
         => left is null ? right is not null : left.CompareTo(right) < 0;
 
-    public static bool operator <=(FilePath? left, FilePath? right) 
+    public static bool operator <=(FilePath? left, FilePath? right)
         => left is null || left.CompareTo(right) <= 0;
 
-    public static bool operator >(FilePath? left, FilePath? right) 
+    public static bool operator >(FilePath? left, FilePath? right)
         => left is not null && left.CompareTo(right) > 0;
 
-    public static bool operator >=(FilePath? left, FilePath? right) 
+    public static bool operator >=(FilePath? left, FilePath? right)
         => left is null ? right is null : left.CompareTo(right) >= 0;
 
 #pragma warning disable CA1859, IDE0051 // Use concrete types when possible for improved performance, Remove unused private members.

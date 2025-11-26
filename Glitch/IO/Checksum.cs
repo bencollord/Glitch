@@ -11,8 +11,8 @@ public readonly struct Checksum : IEquatable<Checksum>, IFormattable
 
     private static readonly Dictionary<HashAlgorithmName, Func<HashAlgorithm>> FactoryMap = new()
     {
-        [HashAlgorithmName.MD5]  = MD5.Create,
-        [HashAlgorithmName.SHA1] = SHA1.Create,
+        [HashAlgorithmName.MD5]      = MD5.Create,
+        [HashAlgorithmName.SHA1]     = SHA1.Create,
         [HashAlgorithmName.SHA256]   = SHA256.Create,
         [HashAlgorithmName.SHA384]   = SHA384.Create,
         [HashAlgorithmName.SHA512]   = SHA512.Create,
@@ -102,35 +102,35 @@ public readonly struct Checksum : IEquatable<Checksum>, IFormattable
     public Base64String ToBase64() => Base64String.Encode(value);
 
     /// <summary>
-        /// Formats the checksum into a base64 string.
-        /// </summary>
-        /// <returns></returns>
+    /// Formats the checksum into a base64 string.
+    /// </summary>
+    /// <returns></returns>
     public override string ToString() => ToString("G", null);
 
     /// <summary>
-        /// <inheritdoc cref="ToString(string?, IFormatProvider?)"/>
-        /// </summary>
-        /// <param name="format">
-        /// <inheritdoc cref="ToString(string?, IFormatProvider?)"/>
-        /// </param>
-        /// <returns></returns>
+    /// <inheritdoc cref="ToString(string?, IFormatProvider?)"/>
+    /// </summary>
+    /// <param name="format">
+    /// <inheritdoc cref="ToString(string?, IFormatProvider?)"/>
+    /// </param>
+    /// <returns></returns>
     public string ToString(string? format) => ToString(format, null);
 
     /// <summary>
-        /// Formats the checksum into a string using the provided <paramref name="format"/> specifier.
-        /// </summary>
-        /// <param name="format">
-        /// The format specifier that will be used to format the string.
-        /// 
-        /// 'g' or a null format string will return the value base64 encoded.
-        /// 'u' will return it base64url encoded.
-        /// 'x' will return a string with the hexadecimal values of the checksum's bytes.
-        /// 
-        /// Capitalizing the letter will prepend the algorithm name to the output string.
-        /// </param>
-        /// <param name="formatProvider"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
+    /// Formats the checksum into a string using the provided <paramref name="format"/> specifier.
+    /// </summary>
+    /// <param name="format">
+    /// The format specifier that will be used to format the string.
+    /// 
+    /// 'g' or a null format string will return the value base64 encoded.
+    /// 'u' will return it base64url encoded.
+    /// 'x' will return a string with the hexadecimal values of the checksum's bytes.
+    /// 
+    /// Capitalizing the letter will prepend the algorithm name to the output string.
+    /// </param>
+    /// <param name="formatProvider"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
     public string ToString(string? format, IFormatProvider? formatProvider)
     {
         if (this == Empty)
@@ -146,17 +146,17 @@ public readonly struct Checksum : IEquatable<Checksum>, IFormattable
             "b" => ToBase64().ToString(),
             "u" => ToBase64().ToUrlSafeString(),
             "x" => ToHexString(formatProvider),
-            _   => throw new FormatException($"Invalid format string '{format}")
+            _ => throw new FormatException($"Invalid format string '{format}")
         };
 
         return char.IsUpper(format[0]) ? $"{algorithmName} {output}" : output;
     }
 
     /// <summary>
-        /// Converts the checksum value to a string of all of its bytes,
-        /// </summary>
-        /// <param name="formatProvider"></param>
-        /// <returns></returns>
+    /// Converts the checksum value to a string of all of its bytes,
+    /// </summary>
+    /// <param name="formatProvider"></param>
+    /// <returns></returns>
     public string ToHexString(IFormatProvider? formatProvider = null)
     {
         var numberFormat = formatProvider?.GetFormat<NumberFormatInfo>();

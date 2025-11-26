@@ -7,9 +7,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Glitch.CodeAnalysis;
 
 /// <summary>
-    /// Wrapper around <see cref="SyntaxFactory"/> to allow adding convenience
-    /// methods while using a unified interface.
-    /// </summary>
+/// Wrapper around <see cref="SyntaxFactory"/> to allow adding convenience
+/// methods while using a unified interface.
+/// </summary>
 public static partial class CSharpSyntax
 {
     // TODO Move the rest of the convenience methods that aren't simple passthroughs to this file instead of .Wrappers

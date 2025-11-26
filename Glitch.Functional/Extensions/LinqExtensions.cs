@@ -1,25 +1,24 @@
 using Glitch.Functional;
-using Glitch.Functional;
 using Glitch.Functional.Errors;
 
 namespace Glitch.Functional.Extensions;
 
-using static Option;
 using static Expected;
+using static Option;
 
 public static class LinqExtensions
 {
     /// <summary>
-        /// Zips two sequences together into a tuple containing both elements. 
-        /// When one sequence is longer than the other, <see cref="None"/> 
-        /// is returned for the corresponding other item. The resulting sequence will
-        /// be the length of the longest sequence.
-        /// </summary>
-        /// <typeparam name="TSource"></typeparam>
-        /// <typeparam name="TOther"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="other"></param>
-        /// <returns></returns>
+    /// Zips two sequences together into a tuple containing both elements. 
+    /// When one sequence is longer than the other, <see cref="None"/> 
+    /// is returned for the corresponding other item. The resulting sequence will
+    /// be the length of the longest sequence.
+    /// </summary>
+    /// <typeparam name="TSource"></typeparam>
+    /// <typeparam name="TOther"></typeparam>
+    /// <param name="source"></param>
+    /// <param name="other"></param>
+    /// <returns></returns>
     public static IEnumerable<(Option<TSource> First, Option<TOther> Second)> LongZip<TSource, TOther>(this IEnumerable<TSource> source, IEnumerable<TOther> other)
     {
         using var src = source.GetEnumerator();
@@ -40,18 +39,18 @@ public static class LinqExtensions
     }
 
     /// <summary>
-        /// Zips two sequences together using the provided <paramref name="zipper"/> function.
-        /// If one of the sequences is shorter than the other, <paramref name="zipper"/> will receive 
-        /// <see cref="None"/> for the corresponding argument. The resulting sequence will be the 
-        /// length of the longest sequence.
-        /// </summary>
-        /// <typeparam name="TSource"></typeparam>
-        /// <typeparam name="TOther"></typeparam>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="other"></param>
-        /// <param name="zipper"></param>
-        /// <returns></returns>
+    /// Zips two sequences together using the provided <paramref name="zipper"/> function.
+    /// If one of the sequences is shorter than the other, <paramref name="zipper"/> will receive 
+    /// <see cref="None"/> for the corresponding argument. The resulting sequence will be the 
+    /// length of the longest sequence.
+    /// </summary>
+    /// <typeparam name="TSource"></typeparam>
+    /// <typeparam name="TOther"></typeparam>
+    /// <typeparam name="TResult"></typeparam>
+    /// <param name="source"></param>
+    /// <param name="other"></param>
+    /// <param name="zipper"></param>
+    /// <returns></returns>
     public static IEnumerable<TResult> LongZip<TSource, TOther, TResult>(this IEnumerable<TSource> source, IEnumerable<TOther> other, Func<Option<TSource>, Option<TOther>, TResult> zipper)
         => source.LongZip(other).Select(x => zipper(x.First, x.Second));
 

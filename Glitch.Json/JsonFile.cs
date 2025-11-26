@@ -6,8 +6,8 @@ using Newtonsoft.Json.Linq;
 namespace Glitch.Json;
 
 /// <summary>
-    /// Decorator for a <see cref="FileInfo"/> that adds JSON capabilities.
-    /// </summary>
+/// Decorator for a <see cref="FileInfo"/> that adds JSON capabilities.
+/// </summary>
 public class JsonFile : IEquatable<JsonFile>, IComparable<JsonFile>
 {
     protected const Formatting DefaultFormatting = Formatting.Indented;
@@ -32,27 +32,27 @@ public class JsonFile : IEquatable<JsonFile>, IComparable<JsonFile>
     public FilePath Path => file.Path;
 
     /// <summary>
-        /// Creates a new instance of <see cref="JsonFile"/>
-        /// from the provided <paramref name="path"/>
-        /// </summary>
-        /// <remarks>
-        /// Simply calls the constructor under the hood. Mostly for convenience
-        /// when using higher-order functions like Linq.
-        /// </remarks>
-        /// <param name="path"></param>
-        /// <returns></returns>
+    /// Creates a new instance of <see cref="JsonFile"/>
+    /// from the provided <paramref name="path"/>
+    /// </summary>
+    /// <remarks>
+    /// Simply calls the constructor under the hood. Mostly for convenience
+    /// when using higher-order functions like Linq.
+    /// </remarks>
+    /// <param name="path"></param>
+    /// <returns></returns>
     public static JsonFile Create(FilePath path) => new(path);
 
     /// <summary>
-        /// Creates a new instance of <see cref="JsonFile"/>
-        /// from the provided <paramref name="file"/>
-        /// </summary>
-        /// <remarks>
-        /// Simply calls the constructor under the hood. Mostly for convenience
-        /// when using higher-order functions like Linq.
-        /// </remarks>
-        /// <param name="file"></param>
-        /// <returns></returns>
+    /// Creates a new instance of <see cref="JsonFile"/>
+    /// from the provided <paramref name="file"/>
+    /// </summary>
+    /// <remarks>
+    /// Simply calls the constructor under the hood. Mostly for convenience
+    /// when using higher-order functions like Linq.
+    /// </remarks>
+    /// <param name="file"></param>
+    /// <returns></returns>
     public static JsonFile Create(FileInfo file) => new(file);
 
     public virtual JsonReader OpenRead() => new JsonTextReader(file.OpenText());

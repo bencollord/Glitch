@@ -12,10 +12,10 @@ public record ArrayTokenSequence<TToken> : TokenSequence<TToken>
     }
 
     /// <summary>
-        /// <inheritdoc />
-        /// </summary>
+    /// <inheritdoc />
+    /// </summary>
     public override TToken Current => !IsEnd ? tokens[cursor] : default!; // Suppress null warnings. It's the caller's responsibility to check the IsEnd property.
-    
+
     public override int Position => cursor;
 
     public override bool IsEnd => cursor >= tokens.Length;

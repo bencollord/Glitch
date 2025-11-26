@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Glitch.Functional.Core;
+﻿namespace Glitch.Functional.Core;
 
 /// <summary>
 /// An arity 2 discriminated union. 

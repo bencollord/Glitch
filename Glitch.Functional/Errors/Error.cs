@@ -23,7 +23,7 @@ public abstract partial record Error : IEquatable<Error>
     public virtual string Message { get; init; }
 
     public virtual Option<Error> Inner { get; init; }
-    
+
     public virtual bool IsException => false;
 
     public static Error New(string message) => New(0, message);
@@ -47,58 +47,58 @@ public abstract partial record Error : IEquatable<Error>
         };
 
     /// <summary>
-        /// Converts the <paramref name="value"/> into an <see cref="Error"/>
-        /// based on the type of <typeparamref name="T"/> using the following rules:
-        /// 
-        /// <list type="table">
-        ///   <item>
-        ///     <term><see cref="Error"/></term>
-        ///     <description>The error as-is</description>
-        ///   </item>
-        /// 
-        ///   <item>
-        ///     <term><see cref="Exception"/></term>
-        ///     <description>The exception wrapped in an <see cref="ExceptionError"/></description>
-        ///   </item>
-        ///   
-        ///   <item>
-        ///     <term>A <see langword="string"/></term>
-        ///     <description>An <see cref="ApplicationError"/> with the string as its message.</description>
-        ///   </item>
-        ///   
-        ///   <item>
-        ///     <term><see cref="IEnumerable{Error}">Multiple errors</see></term>
-        ///     <description>An <see cref="AggregateError"/>.</description>
-        ///   </item>
-        ///   
-        ///   <item>
-        ///     <term><see langword="null"/> or <see cref="Unit"/></term>
-        ///     <description>An <see cref="EmptyError"/>.</description>
-        ///   </item>
-        ///   
-        ///   <item>
-        ///     <term>Anything else</term>
-        ///     <description>An <see cref="Unexpected{T}"/> instance.</description>
-        ///   </item>
-        /// </list>
-        /// </summary>
-        /// <remarks>
-        /// This is an experimental API that may be removed. It does not account for the error
-        /// potentially being wrapped in a monad like an <see cref="Option{T}"/> or <see cref="Result{,}"/>.
-        /// </remarks>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="value"></param>
-        /// <returns></returns>
+    /// Converts the <paramref name="value"/> into an <see cref="Error"/>
+    /// based on the type of <typeparamref name="T"/> using the following rules:
+    /// 
+    /// <list type="table">
+    ///   <item>
+    ///     <term><see cref="Error"/></term>
+    ///     <description>The error as-is</description>
+    ///   </item>
+    /// 
+    ///   <item>
+    ///     <term><see cref="Exception"/></term>
+    ///     <description>The exception wrapped in an <see cref="ExceptionError"/></description>
+    ///   </item>
+    ///   
+    ///   <item>
+    ///     <term>A <see langword="string"/></term>
+    ///     <description>An <see cref="ApplicationError"/> with the string as its message.</description>
+    ///   </item>
+    ///   
+    ///   <item>
+    ///     <term><see cref="IEnumerable{Error}">Multiple errors</see></term>
+    ///     <description>An <see cref="AggregateError"/>.</description>
+    ///   </item>
+    ///   
+    ///   <item>
+    ///     <term><see langword="null"/> or <see cref="Unit"/></term>
+    ///     <description>An <see cref="EmptyError"/>.</description>
+    ///   </item>
+    ///   
+    ///   <item>
+    ///     <term>Anything else</term>
+    ///     <description>An <see cref="Unexpected{T}"/> instance.</description>
+    ///   </item>
+    /// </list>
+    /// </summary>
+    /// <remarks>
+    /// This is an experimental API that may be removed. It does not account for the error
+    /// potentially being wrapped in a monad like an <see cref="Option{T}"/> or <see cref="Result{,}"/>.
+    /// </remarks>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="value"></param>
+    /// <returns></returns>
     public static Error From<T>(T value)
     {
         return value switch
         {
-            Error err           => err,
-            Exception ex        => new ExceptionError(ex),
-            string msg          => new ApplicationError(msg),
+            Error              err  => err,
+            Exception          ex   => new ExceptionError(ex),
+            string             msg  => new ApplicationError(msg),
             IEnumerable<Error> errs => new AggregateError(errs),
-            null or Unit        => Empty,
-            var val             => new Unexpected<T>(val)
+            null or Unit            => Empty,
+            var                val  => new Unexpected<T>(val)
         };
     }
 

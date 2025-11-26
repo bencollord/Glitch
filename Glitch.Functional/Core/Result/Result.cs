@@ -1,6 +1,4 @@
 using Glitch.Functional.Validation;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 namespace Glitch.Functional;
 
@@ -54,7 +52,6 @@ public abstract partial record Result<T, E> : IResult<T, E>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="function"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Result<TResult, E> Apply<TResult>(Result<Func<T, TResult>, E> function)
         => AndThen(v => function.Select(fn => fn(v)));
 
@@ -65,7 +62,6 @@ public abstract partial record Result<T, E> : IResult<T, E>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="other"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public abstract Result<TResult, E> And<TResult>(Result<TResult, E> other);
 
     public Result<TResult, E> And<TResult>(Okay<TResult> other)
@@ -78,7 +74,6 @@ public abstract partial record Result<T, E> : IResult<T, E>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="bind"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public abstract Result<TResult, E> AndThen<TResult>(Func<T, Result<TResult, E>> bind);
 
     /// <summary>
@@ -89,7 +84,6 @@ public abstract partial record Result<T, E> : IResult<T, E>
     /// <param name="bind"></param>
     /// <param name="project"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Result<TResult, E> AndThen<TElement, TResult>(Func<T, Result<TElement, E>> bind, Func<T, TElement, TResult> project)
         => AndThen(x => bind(x).Select(y => project(x, y)));
 
@@ -98,7 +92,6 @@ public abstract partial record Result<T, E> : IResult<T, E>
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public abstract Result<T, EResult> Or<EResult>(Result<T, EResult> other);
 
     /// <summary>
@@ -107,10 +100,8 @@ public abstract partial record Result<T, E> : IResult<T, E>
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public abstract Result<T, EResult> OrElse<EResult>(Func<E, Result<T, EResult>> other);
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TResult Match<TResult>(Func<T, TResult> okay, TResult fail) => Match(okay, _ => fail);
 
     /// <summary>
@@ -121,7 +112,6 @@ public abstract partial record Result<T, E> : IResult<T, E>
     /// <param name="okay"></param>
     /// <param name="fail"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public abstract TResult Match<TResult>(Func<T, TResult> okay, Func<E, TResult> fail);
 
     public T IfFail(Func<E, T> fallback) => Match(Identity, fallback);
@@ -139,7 +129,6 @@ public abstract partial record Result<T, E> : IResult<T, E>
     /// which will not throw.
     /// </exception>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Result<TResult, E> Cast<TResult>() => Select(DynamicCast<TResult>.From);
 
     /// <summary>
@@ -151,7 +140,6 @@ public abstract partial record Result<T, E> : IResult<T, E>
     /// If the cast is not valid.
     /// </exception>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Result<T, EResult> CastError<EResult>() => SelectError(DynamicCast<EResult>.From);
 
     public Result<E, T> Flip() => Match(Result.Fail<E, T>, Result.Okay<E, T>);
@@ -163,17 +151,13 @@ public abstract partial record Result<T, E> : IResult<T, E>
     /// </summary>
     /// <param name="predicate"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public abstract Result<T, E> Guard(Func<T, bool> predicate, E error);
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public abstract Result<T, E> Guard(Func<T, bool> predicate, Func<T, E> error);
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Result<T, E> Guard(bool condition, E error)
         => Guard(_ => condition, error);
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Result<T, E> Guard(bool condition, Func<T, E> error)
         => Guard(_ => condition, error);
 
@@ -183,7 +167,6 @@ public abstract partial record Result<T, E> : IResult<T, E>
     /// <typeparam name="TOther"></typeparam>
     /// <param name="other"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Result<(T, TOther), E> Zip<TOther>(Result<TOther, E> other)
         => Zip(other, (x, y) => (x, y));
 
@@ -197,7 +180,6 @@ public abstract partial record Result<T, E> : IResult<T, E>
     /// <param name="other"></param>
     /// <param name="zipper"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Result<TResult, E> Zip<TOther, TResult>(Result<TOther, E> other, Func<T, TOther, TResult> zipper)
         => AndThen(_ => other, zipper);
 
@@ -205,6 +187,5 @@ public abstract partial record Result<T, E> : IResult<T, E>
 
     public E UnwrapError() => Match(e => throw new InvalidOperationException(ErrorMessages.BadUnwrap(e)), Identity);
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public abstract override string ToString();
 }

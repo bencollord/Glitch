@@ -1,16 +1,15 @@
 using Glitch.Functional.Parsing.Results;
-using Glitch.Functional;
 
 namespace Glitch.Functional.Parsing;
 
 public abstract partial class Parser<TToken, T>
 {
     /// <summary>
-        /// Returns a new parser that returns an <see cref="Option{T}"/>
-        /// on success and a successful result containing
-        /// <see cref="Option{T}.None"/> on failure.
-        /// </summary>
-        /// <returns></returns>
+    /// Returns a new parser that returns an <see cref="Option{T}"/>
+    /// on success and a successful result containing
+    /// <see cref="Option{T}.None"/> on failure.
+    /// </summary>
+    /// <returns></returns>
     public virtual Parser<TToken, Option<T>> Maybe()
         => Match(ok => ParseResult.Okay(Option.Some(ok.Value), ok.Remaining),
                  err => ParseResult.Okay(Option<T>.None, err.Remaining));

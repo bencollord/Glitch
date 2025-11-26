@@ -5,8 +5,8 @@ namespace Glitch.Functional.Parsing.Results;
 using static Option;
 
 /// <summary>
-    /// Factory methods for <see cref="Expectation{TToken}"/>.
-    /// </summary>
+/// Factory methods for <see cref="Expectation{TToken}"/>.
+/// </summary>
 public static class Expectation
 {
     public static Expectation<TToken> Labeled<TToken>(string message) => new() { Label = message };

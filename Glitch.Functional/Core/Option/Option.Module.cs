@@ -1,9 +1,9 @@
 namespace Glitch.Functional;
 
 /// <summary>
-    /// Static methods for <see cref="Option{T}"/>, mostly to simplify
-    /// syntax when passing higher order functions.
-    /// </summary>
+/// Static methods for <see cref="Option{T}"/>, mostly to simplify
+/// syntax when passing higher order functions.
+/// </summary>
 public static partial class Option
 {
     public static OptionNone None => OptionNone.Value;

@@ -1,6 +1,5 @@
 namespace Glitch.Functional;
 
-// TODO Remove duplication with Glitch
 public static class DynamicCast<T>
 {
     public static T From<TFrom>(TFrom obj)
@@ -10,17 +9,15 @@ public static class DynamicCast<T>
             _ => (T)(dynamic)obj!,
         };
 
-    public static bool Try<TFrom>(TFrom obj, out T result)
+    public static Option<T> Try<TFrom>(TFrom obj)
     {
         try
         {
-            result = From(obj);
-            return true;
+            return Option.Some(From(obj));
         }
         catch
         {
-            result = default!;
-            return false;
+            return Option.None;
         }
     }
 }

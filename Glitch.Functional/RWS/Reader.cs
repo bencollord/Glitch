@@ -1,5 +1,3 @@
-using Glitch.Functional;
-
 namespace Glitch.Functional;
 
 [Monad]
@@ -19,26 +17,26 @@ public class Reader<TEnv, T>
     public static Reader<TEnv, T> Asks(Func<TEnv, T> runner) => new(runner);
 
     /// <summary>
-        /// Maps the reader's input value such that the Run method now
-        /// takes a new environment type as input.
-        /// </summary>
-        /// <typeparam name="TNewEnv"></typeparam>
-        /// <param name="map"></param>
-        /// <returns></returns>
+    /// Maps the reader's input value such that the Run method now
+    /// takes a new environment type as input.
+    /// </summary>
+    /// <typeparam name="TNewEnv"></typeparam>
+    /// <param name="map"></param>
+    /// <returns></returns>
     public Reader<TNewEnv, T> With<TNewEnv>(Func<TNewEnv, TEnv> map)
         => new(newEnv => Run(map(newEnv)));
 
     /// <summary>
-        /// Returns a new reader that maps its input value before
-        /// running the current reader.
-        /// </summary>
-        /// <remarks>
-        /// I'm not sure why the naming convention I've seen in other code uses
-        /// Local rather than overloading With for environment mappings that don't
-        /// take a type.
-        /// </remarks>
-        /// <param name="map"></param>
-        /// <returns></returns>
+    /// Returns a new reader that maps its input value before
+    /// running the current reader.
+    /// </summary>
+    /// <remarks>
+    /// I'm not sure why the naming convention I've seen in other code uses
+    /// Local rather than overloading With for environment mappings that don't
+    /// take a type.
+    /// </remarks>
+    /// <param name="map"></param>
+    /// <returns></returns>
     public Reader<TEnv, T> Local(Func<TEnv, TEnv> map)
         => With(map);
 

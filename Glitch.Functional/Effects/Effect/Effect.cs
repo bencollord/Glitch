@@ -1,4 +1,3 @@
-using Glitch.Functional;
 using Glitch.Functional.Errors;
 
 namespace Glitch.Functional.Effects;

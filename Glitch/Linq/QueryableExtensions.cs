@@ -48,7 +48,7 @@ public static class QueryableExtensions
 
         var selectorType = typeof(Func<,>).MakeGenericType(pairType, typeof(TResult));
         var selectorBody = replacer.Visit(resultSelector.Body);
-        var selector = Expression.Lambda(selectorType, selectorBody, pairParameter);
+        var selector     = Expression.Lambda(selectorType, selectorBody, pairParameter);
         var selectMethod = QueryableMethods.Select.MakeGenericMethod(pairType, typeof(TResult));
         var selectCall   = Expression.Call(null, selectMethod, query.Expression, selector);
 

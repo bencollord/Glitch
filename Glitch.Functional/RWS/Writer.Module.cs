@@ -1,5 +1,3 @@
-using Glitch.Functional;
-
 namespace Glitch.Functional;
 
 public static class Writer
@@ -59,7 +57,7 @@ public static class Writer<W>
 {
     /// <inheritdoc cref="Writer{W, T}.Return(T)"/>
     public static Writer<W, T> Return<T>(T value) => Writer<W, T>.Return(value);
-    
+
     /// <inheritdoc cref="Writer{W, T}.Write(T, W)"/>
     public static Writer<W, T> Write<T>(T value, W output)
         => new(w => (value, w + output));
@@ -73,32 +71,32 @@ public static class Writer<W>
         => Write(result.Value, result.Output);
 
     /// <summary>
-        /// Returns a writer which appends the provided <paramref name="item"/>
-        /// to its output stream.
-        /// </summary>
-        /// <param name="item"></param>
-        /// <returns></returns>
+    /// Returns a writer which appends the provided <paramref name="item"/>
+    /// to its output stream.
+    /// </summary>
+    /// <param name="item"></param>
+    /// <returns></returns>
     public static Writer<W, Unit> Tell(W item)
         => new(w => (Unit.Value, w + item));
 
     /// <summary>
-        /// Takes a writer that returns a value and a function over the output
-        /// and returns a new writer that applies the function to it's output
-        /// before appending it to the stream.
-        /// </summary>
-        /// <remarks>
-        /// This function is in Paul Louth's library and I'm not exactly sure what the use case is.
-        /// It appears to basically run a writer that includes a censor delegate in its result
-        /// and then combine it, but I'm not sure what would be creating such a writer like the
-        /// one in the <paramref name="writer">parameters</paramref>. It also notably doesn't
-        /// pass the current output stream into <paramref name="writer"/>'s Run() method.
-        /// 
-        /// This module is being written as a learning experience, so I'll put it in and see if I
-        /// can discover what it's for.
-        /// </remarks>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="writer"></param>
-        /// <returns></returns>
+    /// Takes a writer that returns a value and a function over the output
+    /// and returns a new writer that applies the function to it's output
+    /// before appending it to the stream.
+    /// </summary>
+    /// <remarks>
+    /// This function is in Paul Louth's library and I'm not exactly sure what the use case is.
+    /// It appears to basically run a writer that includes a censor delegate in its result
+    /// and then combine it, but I'm not sure what would be creating such a writer like the
+    /// one in the <paramref name="writer">parameters</paramref>. It also notably doesn't
+    /// pass the current output stream into <paramref name="writer"/>'s Run() method.
+    /// 
+    /// This module is being written as a learning experience, so I'll put it in and see if I
+    /// can discover what it's for.
+    /// </remarks>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="writer"></param>
+    /// <returns></returns>
     public static Writer<W, T> Pass<T>(Writer<W, (T Value, Func<W, W> Function)> writer)
         => new(w =>
         {

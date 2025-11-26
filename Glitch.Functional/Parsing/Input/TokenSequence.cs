@@ -7,15 +7,15 @@ public abstract record TokenSequence<TToken>
     public static readonly TokenSequence<TToken> Empty = EmptyTokenSequence<TToken>.Singleton;
 
     /// <summary>
-        /// The current token in the sequence.
-        /// Invalid if the sequence is at its end.
-        /// </summary>
-        /// <remarks>
-        /// The return value of this property is undefined if <see cref="IsEnd"/>
-        /// is true. Inheritors are free to return an empty value, null, or throw an
-        /// exception depending on the implementation. It's the caller's responsibility
-        /// to check the <see cref="IsEnd"/> property.
-        /// </remarks>
+    /// The current token in the sequence.
+    /// Invalid if the sequence is at its end.
+    /// </summary>
+    /// <remarks>
+    /// The return value of this property is undefined if <see cref="IsEnd"/>
+    /// is true. Inheritors are free to return an empty value, null, or throw an
+    /// exception depending on the implementation. It's the caller's responsibility
+    /// to check the <see cref="IsEnd"/> property.
+    /// </remarks>
     public abstract TToken Current { get; }
 
     public abstract int Position { get; }
