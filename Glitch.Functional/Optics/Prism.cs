@@ -2,70 +2,22 @@ using Glitch.Functional;
 
 namespace Glitch.Functional.Optics;
 
-public static partial class Prism
-{
-    /// <summary>
-    /// <inheritdoc cref="Prism{TFocus, TValue}.New(System.Func{TFocus, Option{TValue}}, System.Func{TFocus, TValue, TFocus})"/>
-    /// </summary>
-    /// <typeparam name="TFocus"></typeparam>
-    /// <typeparam name="TValue"></typeparam>
-    /// <param name="get"></param>
-    /// <param name="set"></param>
-    /// <returns></returns>
-    public static Prism<TFocus, TValue> New<TFocus, TValue>(Func<TFocus, Option<TValue>> get, Func<TFocus, TValue, TFocus> set) 
-        => Prism<TFocus, TValue>.New(get, set);
-
-    /// <summary>
-    /// <inheritdoc cref="Prism{TFocus, TValue}.New(System.Func{TFocus, Option{TValue}}, System.Func{TFocus, TValue, TValue, TFocus})"/>
-    /// </summary>
-    /// <typeparam name="TFocus"></typeparam>
-    /// <typeparam name="TValue"></typeparam>
-    /// <param name="get"></param>
-    /// <param name="set"></param>
-    /// <returns></returns>
-    public static Prism<TFocus, TValue> New<TFocus, TValue>(Func<TFocus, Option<TValue>> get, Func<TFocus, TValue, TValue, TFocus> set)
-        => Prism<TFocus, TValue>.New(get, set);
-}
-
-public static class Prism<TFocus>
-{
-    /// <summary>
-    /// <inheritdoc cref="Prism{TFocus, TValue}.New(System.Func{TFocus, Option{TValue}}, System.Func{TFocus, TValue, TFocus})"/>
-    /// </summary>
-    /// <typeparam name="TValue"></typeparam>
-    /// <param name="get"></param>
-    /// <param name="set"></param>
-    /// <returns></returns>
-    public static Prism<TFocus, TValue> New<TValue>(Func<TFocus, Option<TValue>> get, Func<TFocus, TValue, TFocus> set) 
-        => Prism<TFocus, TValue>.New(get, set);
-
-    /// <summary>
-    /// <inheritdoc cref="Prism{TFocus, TValue}.New(System.Func{TFocus, Option{TValue}}, System.Func{TFocus, TValue, TValue, TFocus})"/>
-    /// </summary>
-    /// <typeparam name="TValue"></typeparam>
-    /// <param name="get"></param>
-    /// <param name="set"></param>
-    /// <returns></returns>
-    public static Prism<TFocus, TValue> New<TValue>(Func<TFocus, Option<TValue>> get, Func<TFocus, TValue, TValue, TFocus> set)
-        => Prism<TFocus, TValue>.New(get, set);
-}
-
 public record Prism<TFocus, TValue>
 {
-    private readonly Func<TFocus, Option<TValue>> getter;
-    private readonly Func<TFocus, TValue, TFocus> setter;
+    private readonly Func<TFocus, Option<TValue>> get;
+    private readonly Func<TFocus, TValue, TFocus> set;
 
-    public Prism(Func<TFocus, Option<TValue>> getter, Func<TFocus, TValue, TFocus> setter)
+    public Prism(Func<TFocus, Option<TValue>> get, Func<TFocus, TValue, TFocus> set)
     {
-        this.getter = getter;
-        this.setter = setter;
+        this.get = get;
+        this.set = set;
     }
 
-    public Prism(Func<TFocus, Option<TValue>> getter, Func<TFocus, TValue, TValue, TFocus> setter)
+    public Prism(Func<TFocus, Option<TValue>> get, Func<TFocus, TValue, TValue, TFocus> set)
     {
-        this.getter = getter;
-        this.setter = (focus, value) => getter(focus)
-            .Select(old => setter(focus, old, value))
+        this.get = get;
+        this.set = (focus, value) => get(focus)
+            .Select(old => set(focus, old, value))
             .IfNone(focus);
     }
 
@@ -88,9 +40,9 @@ public record Prism<TFocus, TValue>
     public static Prism<TFocus, TValue> New(Func<TFocus, Option<TValue>> get, Func<TFocus, TValue, TValue, TFocus> set)
         => new(get, set);
 
-    public Option<TValue> Get(TFocus focus) => getter(focus);
+    public Option<TValue> Get(TFocus focus) => get(focus);
 
-    public TFocus Set(TFocus focus, TValue value) => setter(focus, value);
+    public TFocus Set(TFocus focus, TValue value) => set(focus, value);
 
     public Func<TValue, TFocus> Set(TFocus focus) => v => Set(focus, v);
 
@@ -107,6 +59,9 @@ public record Prism<TFocus, TValue>
 
     public Prism<TFocus, TDeeper> Compose<TDeeper>(Func<TValue, Option<TDeeper>> get, Func<TValue, TDeeper, TValue> set)
         => Compose(new Prism<TValue, TDeeper>(get, set));
+
+    public Prism<TFocus, TDeeper> Compose<TDeeper>(Lens<TValue, TDeeper> lens)
+        => Compose((Prism<TValue, TDeeper>)lens);
 
     public Prism<TFocus, TDeeper> Compose<TDeeper>(Prism<TValue, TDeeper> next)
         => new(focus => Get(focus).AndThen(next.Get),

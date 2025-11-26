@@ -4,13 +4,13 @@ namespace Glitch.Functional.Errors;
 
 public partial record Expected<T>
 {
-    public static implicit operator Expected<T>(T value) => Okay(value);
+    public static implicit operator Expected<T>(T value) => new Okay(value);
 
-    public static implicit operator Expected<T>(Okay<T> success) => Okay(success.Value);
+    public static implicit operator Expected<T>(Okay<T> success) => new Okay(success.Value);
 
-    public static implicit operator Expected<T>(Error error) => Fail(error);
+    public static implicit operator Expected<T>(Error error) => new Fail(error);
 
-    public static implicit operator Expected<T>(Fail<Error> failure) => Fail(failure.Error);
+    public static implicit operator Expected<T>(Fail<Error> failure) => new Fail(failure.Error);
 
     public static implicit operator Expected<T>(Result<T, Error> result) => new(result);
 

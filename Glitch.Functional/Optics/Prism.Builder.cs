@@ -1,5 +1,3 @@
-using Glitch.Functional;
-
 namespace Glitch.Functional.Optics;
 
 public static partial class Prism
