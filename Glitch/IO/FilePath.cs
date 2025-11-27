@@ -21,8 +21,6 @@ public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePat
     public bool EndsInDirectorySeparator => Path.EndsInDirectorySeparator(path);
     public bool Exists => Path.Exists(path);
     public bool IsEmpty => string.IsNullOrEmpty(path);
-    public bool IsFile => !FileName.IsEmpty;
-    public bool IsDirectory => !IsEmpty && FileName.IsEmpty;
     public FilePath Extension => new(Path.GetExtension(path));
     public bool HasExtension => Path.HasExtension(path);
     public bool IsFullyQualified => Path.IsPathFullyQualified(path);
@@ -123,18 +121,6 @@ public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePat
 
     public static implicit operator FilePath(FileSystemInfo? node) => new(node?.FullName);
 
-    public static implicit operator FileSystemInfo?(FilePath? path)
-        => path switch
-        {
-            FilePath p when p.IsFile => new FileInfo(p),
-            FilePath p when p.IsDirectory => new DirectoryInfo(p),
-            _ => null
-        };
-
-    public static explicit operator DirectoryInfo(FilePath path) => path.IsDirectory ? new(path) : throw new InvalidCastException($"Path '{path}' is not a valid directory");
-
-    public static explicit operator FileInfo(FilePath path) => path.IsFile ? new(path) : throw new InvalidCastException($"Path '{path}' is not a valid file");
-
     public static bool operator ==(FilePath? left, FilePath? right) => left is null ? right == null : left.Equals(right);
 
     public static bool operator !=(FilePath? left, FilePath? right) => !(left == right);
@@ -159,14 +145,6 @@ public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePat
     public static FilePath? operator /(FilePath? left, FilePath? right)
         => (left is not null && right is not null) ? left.Append(right) : left ?? right;
 
-    [return: NotNullIfNotNull(nameof(node))]
-    [return: NotNullIfNotNull(nameof(path))]
-    public static FileSystemInfo? operator +(FileSystemInfo? node, FilePath? path) => node?.Path / path;
-
-    [return: NotNullIfNotNull(nameof(node))]
-    [return: NotNullIfNotNull(nameof(path))]
-    public static FileSystemInfo? operator /(FileSystemInfo? node, FilePath? path) => node?.Path / path;
-
     public static bool operator <(FilePath? left, FilePath? right)
         => left is null ? right is not null : left.CompareTo(right) < 0;
 
@@ -178,9 +156,4 @@ public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePat
 
     public static bool operator >=(FilePath? left, FilePath? right)
         => left is null ? right is null : left.CompareTo(right) >= 0;
-
-#pragma warning disable CA1859, IDE0051 // Use concrete types when possible for improved performance, Remove unused private members.
-    // For LinqPad
-    private object ToDump() => this.path;
-#pragma warning restore CA1859, IDE0051 // Use concrete types when possible for improved performance, Remove unused private members.
 }

@@ -1,15 +1,8 @@
-using Glitch.Functional;
-using Glitch.Functional.Effects;
-
 namespace Glitch.Functional.Parsing;
 
 // Instance
 public abstract partial class Parser<TToken, T>
 {
-    public static Parser<TToken, T> operator |(Parser<TToken, T> x, Parser<TToken, T> y) => x.Or(y);
-
-    public static Parser<TToken, T> operator >>(Parser<TToken, T> x, Parser<TToken, T> y) => x.Then(y);
-    public static Parser<TToken, T> operator >>(Parser<TToken, T> x, Parser<TToken, Unit> y) => x.Then(v => y.Select(_ => v));
 }
 
 // Extensions
@@ -17,6 +10,10 @@ public static partial class ParserExtensions
 {
     extension<TToken, T>(Parser<TToken, T> self)
     {
+        public static Parser<TToken, T> operator |(Parser<TToken, T> x, Parser<TToken, T> y) => x.Or(y);
+        
+        public static Parser<TToken, T> operator >>(Parser<TToken, T> x, Parser<TToken, Unit> other) => x.Then(other, (x, _) => x);
+
         public static Parser<TToken, T> operator >>(Parser<TToken, T> x, Func<T, Parser<TToken, Unit>> bind) => x.Then(bind, (x, _) => x);
     }
 

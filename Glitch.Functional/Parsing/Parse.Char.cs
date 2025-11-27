@@ -21,6 +21,9 @@ public static partial class Parse
     public static Parser<char, string> LineBreak => from cr in Char('\r').Maybe()
                                                     from lf in Char('\n')
                                                     select Environment.NewLine;
+
+    public static Parser<char, Unit> SkipWhitespace => Whitespace.ZeroOrMoreTimes().IgnoreResult();
+
     public static TokenParser<char> Char(char c) => Satisfy(x => x == c, Expectation.Expected(c));
 
     public static TokenParser<char> Char(Func<char, bool> predicate) => Satisfy(predicate);

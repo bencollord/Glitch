@@ -7,12 +7,9 @@ namespace Glitch.Functional.Parsing;
 
 public abstract partial class Parser<TToken, T>
 {
-    public virtual Parser<TToken, IEnumerable<T>> AtLeastOnce()
-    {
-        return from once in Select(ImmutableList.Create)
-               from tail in ZeroOrMoreTimes()
-               select once.Concat(tail);
-    }
+    public virtual Parser<TToken, IEnumerable<T>> AtLeastOnce() => AtLeast(1);
+
+    public virtual Parser<TToken, IEnumerable<T>> AtLeast(int times) => new RepeatParser<TToken, T>(this, min: times);
 
     public virtual Parser<TToken, IEnumerable<T>> ZeroOrMoreTimes() => new RepeatParser<TToken, T>(this);
 

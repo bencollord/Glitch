@@ -5,27 +5,18 @@ namespace Glitch.Functional.Parsing;
 
 public static partial class Parse
 {
-    public static Parser<TToken, ParseState<TToken>> State<TToken, T>(Parser<TToken, T> parser) => new StateParser<TToken, T>(parser);
+    public static Parser<TToken, TokenSequence<TToken>> State<TToken>() => new StateParser<TToken>();
 
     /// <summary>
     /// A parser that returns the current <see cref="ParseState{TToken}"/> without consuming input.
     /// </summary>
     /// <typeparam name="TToken"></typeparam>
     /// <typeparam name="T"></typeparam>
-    private class StateParser<TToken, T> : Parser<TToken, ParseState<TToken>>
+    private class StateParser<TToken> : Parser<TToken, TokenSequence<TToken>>
     {
-        private Parser<TToken, T> parser;
-
-        internal StateParser(Parser<TToken, T> parser)
+        public override ParseResult<TToken, TokenSequence<TToken>> Execute(TokenSequence<TToken> input)
         {
-            this.parser = parser;
-        }
-
-        public override ParseResult<TToken, ParseState<TToken>> Execute(TokenSequence<TToken> input)
-        {
-            var result = parser.Lookahead().Execute(input);
-
-            return ParseResult.Okay<TToken, ParseState<TToken>>(new(result.Expectation, input));
+            return ParseResult.Okay(input, input);
         }
     }
 }

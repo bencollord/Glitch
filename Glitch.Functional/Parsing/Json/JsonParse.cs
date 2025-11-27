@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Glitch.Functional.Parsing;
+
 namespace Glitch.Functional.Parsing.Json;
 
 using static Parse;
@@ -18,10 +20,9 @@ public static class JsonParse
 
     public static Parser<char, string> QuotedString
         => from quote in SingleQuote | DoubleQuote
-           from text in Parse.AnyChar
-                             .Except(quote)
-                             .ZeroOrMoreTimes()
-                             .AsString()
+           from text in AnyChar.Except(quote)
+                               .ZeroOrMoreTimes()
+                               .AsString()
            from unquote in Parse.Token(quote)
            select text;
 
