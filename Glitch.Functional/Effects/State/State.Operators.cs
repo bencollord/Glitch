@@ -2,24 +2,24 @@ namespace Glitch.Functional.Effects;
 
 public static partial class StateExtensions
 {
-    extension<S, T>(IStateful<S, T> self)
+    extension<S, T>(State<S, T> self)
     {
-        public static IStateful<S, T> operator >>>(IStateful<S, T> x, Func<T, IStateful<S, Unit>> bind) => x.AndThen(bind, (x, _) => x);
+        public static State<S, T> operator >>>(State<S, T> x, Func<T, State<S, Unit>> bind) => x.AndThen(bind, (x, _) => x);
     }
 
-    extension<S, T, TResult>(IStateful<S, T> self)
+    extension<S, T, TResult>(State<S, T> self)
     {
         // Map
-        public static IStateful<S, TResult> operator *(IStateful<S, T> x, Func<T, TResult> map) => x.Select(map);
-        public static IStateful<S, TResult> operator *(Func<T, TResult> map, IStateful<S, T> x) => x.Select(map);
+        public static State<S, TResult> operator *(State<S, T> x, Func<T, TResult> map) => x.Select(map);
+        public static State<S, TResult> operator *(Func<T, TResult> map, State<S, T> x) => x.Select(map);
 
         // Apply
-        public static IStateful<S, TResult> operator *(IStateful<S, T> x, IStateful<S, Func<T, TResult>> apply) => x.Apply(apply);
-        public static IStateful<S, TResult> operator *(IStateful<S, Func<T, TResult>> apply, IStateful<S, T> x) => x.Apply(apply);
+        public static State<S, TResult> operator *(State<S, T> x, State<S, Func<T, TResult>> apply) => x.Apply(apply);
+        public static State<S, TResult> operator *(State<S, Func<T, TResult>> apply, State<S, T> x) => x.Apply(apply);
 
         // Bind
-        public static IStateful<S, TResult> operator >>>(IStateful<S, T> x, Func<T, IStateful<S, TResult>> bind) => x.AndThen(bind);
+        public static State<S, TResult> operator >>>(State<S, T> x, Func<T, State<S, TResult>> bind) => x.AndThen(bind);
 
-        public static IStateful<S, TResult> operator >>>(IStateful<S, T> x, IStateful<S, TResult> y) => x.Then(y);
+        public static State<S, TResult> operator >>>(State<S, T> x, State<S, TResult> y) => x.Then(y);
     }
 }

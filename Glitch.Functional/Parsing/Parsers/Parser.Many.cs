@@ -1,7 +1,7 @@
 using Glitch.Functional;
+using Glitch.Functional.Extensions;
 using Glitch.Functional.Parsing.Input;
 using Glitch.Functional.Parsing.Results;
-using System.Collections.Immutable;
 
 namespace Glitch.Functional.Parsing;
 
@@ -37,8 +37,7 @@ internal class RepeatParser<TToken, T> : Parser<TToken, IEnumerable<T>>
     public override ParseResult<TToken, IEnumerable<T>> Execute(TokenSequence<TToken> input)
     {
         var remaining = input;
-        var items = new List<T>();
-        int count = 0;
+        var results = new List<ParseResult<TToken, T>>();
 
         while (!remaining.IsEnd)
         {
@@ -49,23 +48,41 @@ internal class RepeatParser<TToken, T> : Parser<TToken, IEnumerable<T>>
                 break;
             }
 
-            count++;
-
-            if (max.IsSomeAnd(m => count > m))
+            if (max.IsSomeAnd(m => results.Count + 1 > m))
             {
-                return ParseResult<TToken>.Error<IEnumerable<T>>($"Expected no more than {max.Unwrap()} items, found {count}", input);
+                return ParseResult<TToken>.Error<IEnumerable<T>>(
+                    result.Expectation with 
+                    { 
+                        Label = $"Expected no more than {max.Unwrap()} items, found {results.Count}" 
+                    }, 
+                    input);
             }
 
-            items.Add((T)result);
+            results.Add(result);
             remaining = result.Remaining;
         }
 
-        if (min.IsSomeAnd(m => count < m))
+        if (min.IsSomeAnd(m => results.Count < m))
         {
-            return ParseResult<TToken>.Error<IEnumerable<T>>($"Expected {count} times, found only {items.Count} times", remaining);
+            var messageTemplate = $"Expected '{{0}}' {min.Unwrap()} times, found only {results.Count} times";
+
+            var expectation = results
+                .LastOrNone()
+                .Match(some: r => r.Expectation with 
+                             { 
+                                 Label = string.Format(messageTemplate, r.Expectation.Label) 
+                             },
+                       none: _ => Expectation.Labeled<TToken>(
+                           "Unexpected end of input. " + 
+                           string.Format(messageTemplate, typeof(T))));
+
+            return ParseResult<TToken>.Error<IEnumerable<T>>(expectation, remaining);
         }
 
-        return ParseResult.Okay(items.AsEnumerable(), remaining);
+        return ParseResult.Okay(
+            results.Cast<ParseSuccess<TToken, T>>() 
+                   .Select(r => r.Value), 
+            remaining);
     }
 }
 

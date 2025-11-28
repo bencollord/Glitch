@@ -9,7 +9,7 @@ public static partial class RWSExtensions
         public static RWS<TEnv, S, W, T> operator >>>(RWS<TEnv, S, W, T> x, RWS<TEnv, S, W, Unit> y) => x.Then(y);
         public static RWS<TEnv, S, W, T> operator >>>(RWS<TEnv, S, W, T> x, Reader<TEnv, Unit> y) => x.Then(y);
         public static RWS<TEnv, S, W, T> operator >>>(RWS<TEnv, S, W, T> x, Writer<W, Unit> y) => x.Then(y);
-        public static RWS<TEnv, S, W, T> operator >>>(RWS<TEnv, S, W, T> x, IStateful<S, Unit> y) => x.Then(y);
+        public static RWS<TEnv, S, W, T> operator >>>(RWS<TEnv, S, W, T> x, State<S, Unit> y) => x.Then(y);
     }
 
     extension<TEnv, S, W, T, TResult>(RWS<TEnv, S, W, T> self)
@@ -34,7 +34,7 @@ public static partial class RWSExtensions
         public static RWS<TEnv, S, W, TResult> operator >>>(RWS<TEnv, S, W, T> x, Writer<W, TResult> y) => x.Then(y);
         public static RWS<TEnv, S, W, TResult> operator >>>(RWS<TEnv, S, W, T> x, Func<T, Writer<W, TResult>> y) => x.AndThen(y);
         
-        public static RWS<TEnv, S, W, TResult> operator >>>(RWS<TEnv, S, W, T> x, IStateful<S, TResult> y) => x.Then(y);
-        public static RWS<TEnv, S, W, TResult> operator >>>(RWS<TEnv, S, W, T> x, Func<T, IStateful<S, TResult>> y) => x.AndThen(y);
+        public static RWS<TEnv, S, W, TResult> operator >>>(RWS<TEnv, S, W, T> x, State<S, TResult> y) => x.Then(y);
+        public static RWS<TEnv, S, W, TResult> operator >>>(RWS<TEnv, S, W, T> x, Func<T, State<S, TResult>> y) => x.AndThen(y);
     }
 }

@@ -12,6 +12,6 @@ public partial class RWS<TEnv, S, W, T>
     public RWS<TEnv, S, W, TResult> SelectMany<TElement, TResult>(Func<T, Writer<W, TElement>> bind, Func<T, TElement, TResult> project)
         => AndThen(bind, project);
 
-    public RWS<TEnv, S, W, TResult> SelectMany<TElement, TResult>(Func<T, IStateful<S, TElement>> bind, Func<T, TElement, TResult> project)
+    public RWS<TEnv, S, W, TResult> SelectMany<TElement, TResult>(Func<T, State<S, TElement>> bind, Func<T, TElement, TResult> project)
         => AndThen(bind, project);
 }

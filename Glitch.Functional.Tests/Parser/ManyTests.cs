@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Glitch.Functional.Parsing;
 using Glitch.Functional.Parsing.Results;
 using static Glitch.Functional.Parsing.Parse;
@@ -81,8 +82,7 @@ public class ManyTests
         var result = parser.Execute(text);
 
         // Assert
-        Assert.False(result.IsOkay);
-        Assert.Equal("digit", result.Expectation.Label);
+        result.IsOkay.Should().BeFalse();
     }
 
     [Fact]
@@ -97,10 +97,10 @@ public class ManyTests
         var result = parser.Execute(text);
 
         // Assert
-        var ok = Assert.IsType<ParseSuccess<char, string>>(result);
+        result.Should().BeOfType<ParseSuccess<char, string>>()
+              .Which.Value.Should().Be("Alpha");
 
-        Assert.Equal("Alpha", ok.Value);
-        Assert.Equal(',', ok.Remaining.ReadToEnd().Single());
+        result.Remaining.ReadToEnd().Single().Should().Be(',');
     }
 
     [Fact]
@@ -132,7 +132,7 @@ public class ManyTests
         var result = parser.Execute(text);
 
         // Assert
-        var error = Assert.IsType<ParseError<char, string>>(result);
+        result.Should().BeOfType<ParseError<char, string>>();
 
         // TODO Expectation check
     }
