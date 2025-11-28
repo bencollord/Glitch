@@ -40,15 +40,22 @@ public class FileScopedNamespaceRewriter : CSharpSyntaxRewriter
         var semicolon = Token(SyntaxKind.SemicolonToken)
             .WithTrailingTrivia(CarriageReturnLineFeed, CarriageReturnLineFeed);
 
-        var members = node.Members.Select(Visit).Cast<MemberDeclarationSyntax>();
-
-        return FileScopedNamespaceDeclaration(name)
+        var newNode = FileScopedNamespaceDeclaration(name)
             .WithNamespaceKeyword(keyword)
             .WithSemicolonToken(semicolon)
-            .WithMembers(List(members))
+            .WithMembers(List(node.Members))
             .WithAttributeLists(node.AttributeLists)
             .WithModifiers(node.Modifiers)
             .WithExterns(node.Externs)
-            .WithUsings(node.Usings);
+            .WithUsings(node.Usings)
+
+            // For some stupid reason, the final two close brace tokens in 
+            // classes with extension blocks are considered trailing trivia of the
+            // the namespace declaration. They're attached to the syntax nodes just fine,
+            // but calling ToString or WriteTo without doing this will render the code
+            // with the braces missing.
+            .WithTrailingTrivia(node.GetTrailingTrivia());
+
+        return base.VisitFileScopedNamespaceDeclaration(newNode);
     }
 }

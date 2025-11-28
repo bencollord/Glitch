@@ -1,6 +1,4 @@
-using Glitch.Functional;
-
-namespace Glitch.Functional;
+namespace Glitch.Functional.Effects;
 
 public static partial class RWS
 {

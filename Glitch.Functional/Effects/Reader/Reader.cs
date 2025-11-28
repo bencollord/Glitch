@@ -1,4 +1,4 @@
-namespace Glitch.Functional;
+namespace Glitch.Functional.Effects;
 
 [Monad]
 public class Reader<TEnv, T>

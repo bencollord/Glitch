@@ -1,4 +1,4 @@
-namespace Glitch.Functional;
+namespace Glitch.Functional.Effects;
 
 public interface IStateful<S, T>
 {

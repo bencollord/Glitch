@@ -1,4 +1,4 @@
-namespace Glitch.Functional;
+namespace Glitch.Functional.Effects;
 
 [Monad]
 public partial class RWS<TEnv, S, W, T>

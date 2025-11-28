@@ -1,4 +1,4 @@
-namespace Glitch.Functional;
+namespace Glitch.Functional.Effects;
 
 public partial class RWS<TEnv, S, W, T>
     where W : IWritable<W>

@@ -1,4 +1,4 @@
-namespace Glitch.Functional;
+namespace Glitch.Functional.Effects;
 
 public record StateResult<S, T>(S State, T Value)
 {

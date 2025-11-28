@@ -1,4 +1,4 @@
-namespace Glitch.Functional;
+namespace Glitch.Functional.Effects;
 
 public record RWSInput<TEnv, S, W>(TEnv Env, S State, W Output)
     where W : IWritable<W>
