@@ -1,5 +1,3 @@
-using Glitch.Functional;
-
 namespace Glitch.Functional;
 
 public static class State<S>

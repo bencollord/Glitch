@@ -1,20 +1,27 @@
-using Glitch.Functional;
-
 namespace Glitch.Functional;
 
 public static partial class State
 {
-    public static IStateful<S, TResult> Select<S, T, TResult>(this IStateful<S, T> source, Func<T, TResult> map)
-        => new MapState<S, T, TResult>(source, map);
+    extension<S, T>(IStateful<S, T> source)
+    {
+        public IStateful<S, TResult> Select<TResult>(Func<T, TResult> map)
+            => new MapState<S, T, TResult>(source, map);
 
-    public static IStateful<S, TResult> AndThen<S, T, TResult>(this IStateful<S, T> source, Func<T, IStateful<S, TResult>> bind)
-        => new BindState<S, T, TResult>(source, bind);
+        public IStateful<S, TResult> Apply<TResult>(IStateful<S, Func<T, TResult>> apply)
+            => apply.AndThen(fn => source.Select(fn));
 
-    public static IStateful<S, TResult> AndThen<S, T, TElement, TResult>(this IStateful<S, T> source, Func<T, IStateful<S, TElement>> bind, Func<T, TElement, TResult> project)
-        => source.AndThen(x => bind(x).Select(project.Curry(x)));
+        public IStateful<S, TResult> Then<TResult>(IStateful<S, TResult> next)
+            => source.AndThen(_ => next);
 
-    public static IStateful<S, TResult> SelectMany<S, T, TElement, TResult>(this IStateful<S, T> source, Func<T, IStateful<S, TElement>> bind, Func<T, TElement, TResult> project)
-        => source.AndThen(bind, project);
+        public IStateful<S, TResult> AndThen<TResult>(Func<T, IStateful<S, TResult>> bind)
+            => new BindState<S, T, TResult>(source, bind);
+
+        public IStateful<S, TResult> AndThen<TElement, TResult>(Func<T, IStateful<S, TElement>> bind, Func<T, TElement, TResult> project)
+            => source.AndThen(x => bind(x).Select(project.Curry(x)));
+
+        public IStateful<S, TResult> SelectMany<TElement, TResult>(Func<T, IStateful<S, TElement>> bind, Func<T, TElement, TResult> project)
+            => source.AndThen(bind, project);
+    }
 
     private class MapState<S, T, TResult> : IStateful<S, TResult>
     {

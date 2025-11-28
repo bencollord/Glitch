@@ -1,5 +1,3 @@
-using Glitch.Functional;
-
 namespace Glitch.Functional;
 
 [Monad]
@@ -46,6 +44,9 @@ public partial class RWS<TEnv, S, W, T>
              return bind(v).Run((input.Env, s, w));
          });
 
+    public RWS<TEnv, S, W, TResult> Apply<TResult>(RWS<TEnv, S, W, Func<T, TResult>> apply)
+        => apply.AndThen(fn => Select(fn));
+
     public RWS<TEnv, S, W, TResult> AndThen<TElement, TResult>(Func<T, RWS<TEnv, S, W, TElement>> bind, Func<T, TElement, TResult> project)
         => AndThen(x => bind(x).Select(project.Curry(x)));
 
@@ -56,28 +57,4 @@ public partial class RWS<TEnv, S, W, T>
     public RWSResult<S, W, T> Run(TEnv env, S state, W output) => Run((env, state, output));
 
     public static implicit operator RWS<TEnv, S, W, T>(T value) => Return(value);
-
-    public static RWS<TEnv, S, W, T> operator >>(RWS<TEnv, S, W, T> x, RWS<TEnv, S, W, T> y)
-        => x.Then(y);
-
-    public static RWS<TEnv, S, W, T> operator >>(RWS<TEnv, S, W, T> x, RWS<TEnv, S, W, Unit> y)
-        => x.Then(y);
-
-    public static RWS<TEnv, S, W, T> operator >>(RWS<TEnv, S, W, T> x, Reader<TEnv, T> y)
-        => x.Then(y);
-
-    public static RWS<TEnv, S, W, T> operator >>(RWS<TEnv, S, W, T> x, Reader<TEnv, Unit> y)
-        => x.Then(y);
-
-    public static RWS<TEnv, S, W, T> operator >>(RWS<TEnv, S, W, T> x, Writer<W, T> y)
-        => x.Then(y);
-
-    public static RWS<TEnv, S, W, T> operator >>(RWS<TEnv, S, W, T> x, Writer<W, Unit> y)
-        => x.Then(y);
-
-    public static RWS<TEnv, S, W, T> operator >>(RWS<TEnv, S, W, T> x, IStateful<S, T> y)
-        => x.Then(y);
-
-    public static RWS<TEnv, S, W, T> operator >>(RWS<TEnv, S, W, T> x, IStateful<S, Unit> y)
-        => x.Then(y);
 }

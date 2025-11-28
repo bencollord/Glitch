@@ -57,6 +57,9 @@ public class Reader<TEnv, T>
              return value;
          });
 
+    public Reader<TEnv, TResult> Apply<TResult>(Reader<TEnv, Func<T, TResult>> apply)
+        => apply.AndThen(fn => Select(fn));
+
     public Reader<TEnv, TResult> AndThen<TResult>(Func<T, Reader<TEnv, TResult>> bind)
          => new(env => bind(Run(env)).Run(env));
 
@@ -69,10 +72,4 @@ public class Reader<TEnv, T>
     public T Run(TEnv env) => runner(env);
 
     public static implicit operator Reader<TEnv, T>(T value) => Return(value);
-
-    public static Reader<TEnv, T> operator >>(Reader<TEnv, T> x, Reader<TEnv, T> y)
-        => x.Then(y);
-
-    public static Reader<TEnv, T> operator >>(Reader<TEnv, T> x, Reader<TEnv, Unit> y)
-        => x.Then(y);
 }

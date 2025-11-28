@@ -123,6 +123,9 @@ public class Writer<W, T>
              return (value, nextOutput);
          });
 
+    public Writer<W, TResult> Apply<TResult>(Writer<W, Func<T, TResult>> apply)
+        => apply.AndThen(fn => Select(fn));
+
     public Writer<W, TResult> AndThen<TResult>(Func<T, Writer<W, TResult>> bind)
          => new(w =>
          {
@@ -141,10 +144,4 @@ public class Writer<W, T>
     public WriteResult<W, T> Run(W runningTotal) => runner(runningTotal);
 
     public static implicit operator Writer<W, T>(T value) => Return(value);
-
-    public static Writer<W, T> operator >>(Writer<W, T> x, Writer<W, T> y)
-        => x.Then(y);
-
-    public static Writer<W, T> operator >>(Writer<W, T> x, Writer<W, Unit> y)
-        => x.Then(y);
 }
