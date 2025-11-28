@@ -1,7 +1,4 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-
-namespace Glitch.Functional.Validation;
+namespace Glitch.Functional;
 
 public static partial class ResultExtensions
 {

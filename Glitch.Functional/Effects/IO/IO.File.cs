@@ -2,7 +2,6 @@ using Glitch.IO;
 
 namespace Glitch.Functional.Effects;
 
-// UNDONE Bring this back when it's safe to reference Glitch again.
 public static partial class IO
 {
     public static IO<FileStream> OpenRead(FileInfo file) => Use(f => file.OpenRead());

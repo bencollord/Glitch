@@ -1,6 +1,3 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-
 namespace Glitch.Functional.Validation;
 
 public static partial class ValidatedExtensions
@@ -8,7 +5,7 @@ public static partial class ValidatedExtensions
     extension<T, E>(Validated<T, E> self)
     {
         // Unit bind
-        public static Validated<T, E> operator >>(Validated<T, E> x, Func<T, Validated<Unit, E>> bind) => x.AndThen(bind, (x, _) => x);
+        public static Validated<T, E> operator >>>(Validated<T, E> x, Func<T, Validated<Unit, E>> bind) => x.AndThen(bind, (x, _) => x);
     }
 
     extension<T, E, TResult>(Validated<T, E> self)
@@ -22,7 +19,7 @@ public static partial class ValidatedExtensions
         public static Validated<TResult, E> operator *(Validated<Func<T, TResult>, E> apply, Validated<T, E> x) => x.Apply(apply);
 
         // Bind
-        public static Validated<TResult, E> operator >>(Validated<T, E> x, Func<T, Validated<TResult, E>> bind) => x.AndThen(bind);
+        public static Validated<TResult, E> operator >>>(Validated<T, E> x, Func<T, Validated<TResult, E>> bind) => x.AndThen(bind);
     }
 
     extension<T1, T2, E, TResult>(Validated<T1, E> self)

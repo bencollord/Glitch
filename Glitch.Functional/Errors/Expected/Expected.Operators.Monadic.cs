@@ -1,14 +1,10 @@
-using Glitch.Functional;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-
 namespace Glitch.Functional.Errors;
 
 public static partial class ExpectedExtensions
 {
     extension<T>(Expected<T> self)
     {
-        public static Expected<T> operator >>(Expected<T> x, Func<T, Expected<Unit>> bind) => x.AndThen(bind, (x, _) => x);
+        public static Expected<T> operator >>>(Expected<T> x, Func<T, Expected<Unit>> bind) => x.AndThen(bind, (x, _) => x);
     }
 
     extension<T, TResult>(Expected<T> self)
@@ -22,7 +18,7 @@ public static partial class ExpectedExtensions
         public static Expected<TResult> operator *(Expected<Func<T, TResult>> apply, Expected<T> x) => x.Apply(apply);
 
         // Bind
-        public static Expected<TResult> operator >>(Expected<T> x, Func<T, Expected<TResult>> bind) => x.AndThen(bind);
+        public static Expected<TResult> operator >>>(Expected<T> x, Func<T, Expected<TResult>> bind) => x.AndThen(bind);
     }
 
     extension<T1, T2, TResult>(Expected<T1> self)

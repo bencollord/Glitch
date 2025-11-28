@@ -5,7 +5,7 @@ public static partial class OptionExtensions
 {
     extension<T>(Option<T> self)
     {
-        public static Option<T> operator >>(Option<T> x, Func<T, Option<Unit>> bind) => x.AndThen(bind, (x, _) => x);
+        public static Option<T> operator >>>(Option<T> x, Func<T, Option<Unit>> bind) => x.AndThen(bind, (x, _) => x);
     }
 
     extension<T, TResult>(Option<T> self)
@@ -19,7 +19,7 @@ public static partial class OptionExtensions
         public static Option<TResult> operator *(Option<Func<T, TResult>> apply, Option<T> x) => x.Apply(apply);
 
         // Bind
-        public static Option<TResult> operator >>(Option<T> x, Func<T, Option<TResult>> bind) => x.AndThen(bind);
+        public static Option<TResult> operator >>>(Option<T> x, Func<T, Option<TResult>> bind) => x.AndThen(bind);
     }
 
     extension<T1, T2, TResult>(Option<T1> self)

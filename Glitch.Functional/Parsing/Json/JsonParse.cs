@@ -26,11 +26,11 @@ public static class JsonParse
            from unquote in Parse.Token(quote)
            select text;
 
-    public static Parser<char, char> ArrayStart => Char('[') >> SkipWhitespace;
-    public static Parser<char, char> ArrayEnd => Char(']') >> SkipWhitespace;
-    public static Parser<char, char> ObjectStart => Char('{') >> SkipWhitespace;
-    public static Parser<char, char> ObjectEnd => Char('}') >> SkipWhitespace;
-    public static Parser<char, char> Comma => Char(',') >> SkipWhitespace;
+    public static Parser<char, char> ArrayStart => Char('[') >>> SkipWhitespace;
+    public static Parser<char, char> ArrayEnd => Char(']') >>> SkipWhitespace;
+    public static Parser<char, char> ObjectStart => Char('{') >>> SkipWhitespace;
+    public static Parser<char, char> ObjectEnd => Char('}') >>> SkipWhitespace;
+    public static Parser<char, char> Comma => Char(',') >>> SkipWhitespace;
 
     public static Parser<char, JsonValue> String =>
         QuotedString.Select<JsonValue>(s => new JsonString(s));

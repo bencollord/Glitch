@@ -1,6 +1,3 @@
-using Glitch.Functional;
-using Glitch.Functional.Errors;
-
 namespace Glitch.Functional.Random;
 
 public static partial class RandExtensions
@@ -16,6 +13,6 @@ public static partial class RandExtensions
         public static Rand<TResult> operator *(Rand<Func<T, TResult>> apply, Rand<T> x) => x.Apply(apply);
 
         // Bind
-        public static Rand<TResult> operator >>(Rand<T> x, Func<T, Rand<TResult>> bind) => x.AndThen(bind);
+        public static Rand<TResult> operator >>>(Rand<T> x, Func<T, Rand<TResult>> bind) => x.AndThen(bind);
     }
 }

@@ -1,8 +1,4 @@
-using Glitch.Functional.Validation;
-
 namespace Glitch.Functional;
-
-using static FN;
 
 [Monad]
 public abstract partial record Result<T, E> : IResult<T, E>
@@ -14,7 +10,7 @@ public abstract partial record Result<T, E> : IResult<T, E>
     public abstract bool IsFail { get; }
 
     /// <summary>
-    /// If the result is <see cref="Okay{T, E}" />, applies
+    /// If the result is <see cref="Result{T, E}.Okay" />, applies
     /// the provided function to the value and returns it wrapped in a
     /// new <see cref="Result{T, E}" />. Otherwise, returns the current error
     /// wrapped in a new result type.
@@ -114,10 +110,6 @@ public abstract partial record Result<T, E> : IResult<T, E>
     /// <returns></returns>
     public abstract TResult Match<TResult>(Func<T, TResult> okay, Func<E, TResult> fail);
 
-    public T IfFail(Func<E, T> fallback) => Match(Identity, fallback);
-
-    public T IfFail(T fallback) => Match(Identity, fallback);
-
     /// <summary>
     /// If Okay, casts the wrapped value to <typeparamref name="TResult"/>,
     /// otherwise returns the current error wrapped in a new result type.
@@ -182,10 +174,6 @@ public abstract partial record Result<T, E> : IResult<T, E>
     /// <returns></returns>
     public Result<TResult, E> Zip<TOther, TResult>(Result<TOther, E> other, Func<T, TOther, TResult> zipper)
         => AndThen(_ => other, zipper);
-
-    public T Unwrap() => IfFail(e => throw new InvalidOperationException(ErrorMessages.BadUnwrap(e)));
-
-    public E UnwrapError() => Match(e => throw new InvalidOperationException(ErrorMessages.BadUnwrap(e)), Identity);
 
     public abstract override string ToString();
 }

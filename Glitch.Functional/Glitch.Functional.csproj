@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Effects\IO\IO.File.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Glitch\Glitch.csproj" />
   </ItemGroup>
 

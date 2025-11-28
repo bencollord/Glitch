@@ -18,12 +18,11 @@ public abstract partial class IO<T>
 }
 
 // Extensions
-// Extensions
 public static partial class IOExtensions
 {
     extension<T>(IO<T> self)
     {
-        public static IO<T> operator >>(IO<T> x, Func<T, IO<Unit>> bind) => x.AndThen(bind, (x, _) => x);
+        public static IO<T> operator >>>(IO<T> x, Func<T, IO<Unit>> bind) => x.AndThen(bind, (x, _) => x);
     }
 
     extension<T, TResult>(IO<T> self)
@@ -37,8 +36,8 @@ public static partial class IOExtensions
         public static IO<TResult> operator *(IO<Func<T, TResult>> apply, IO<T> x) => x.Apply(apply);
 
         // Bind
-        public static IO<TResult> operator >>(IO<T> x, Func<T, IO<TResult>> bind) => x.AndThen(bind);
+        public static IO<TResult> operator >>>(IO<T> x, Func<T, IO<TResult>> bind) => x.AndThen(bind);
 
-        public static IO<TResult> operator >>(IO<T> x, IO<TResult> y) => x.Then(y);
+        public static IO<TResult> operator >>>(IO<T> x, IO<TResult> y) => x.Then(y);
     }
 }

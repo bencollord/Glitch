@@ -1,13 +1,10 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-
 namespace Glitch.Functional;
 
 public static partial class ResultExtensions
 {
     extension<T, E>(Result<T, E> self)
     {
-        public static Result<T, E> operator >>(Result<T, E> x, Func<T, Result<Unit, E>> bind) => x.AndThen(bind, (x, _) => x);
+        public static Result<T, E> operator >>>(Result<T, E> x, Func<T, Result<Unit, E>> bind) => x.AndThen(bind, (x, _) => x);
     }
 
     extension<T, E, TResult>(Result<T, E> self)
@@ -21,7 +18,7 @@ public static partial class ResultExtensions
         public static Result<TResult, E> operator *(Result<Func<T, TResult>, E> apply, Result<T, E> x) => x.Apply(apply);
 
         // Bind
-        public static Result<TResult, E> operator >>(Result<T, E> x, Func<T, Result<TResult, E>> bind) => x.AndThen(bind);
+        public static Result<TResult, E> operator >>>(Result<T, E> x, Func<T, Result<TResult, E>> bind) => x.AndThen(bind);
     }
 
     extension<T1, T2, E, TResult>(Result<T1, E> self)

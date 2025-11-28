@@ -55,7 +55,7 @@ public static partial class EffectExtensions
 {
     extension<TEnv, T>(Effect<TEnv, T> self)
     {
-        public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Func<T, Effect<TEnv, Unit>> bind) => x.AndThen(bind, (x, _) => x);
+        public static Effect<TEnv, T> operator >>>(Effect<TEnv, T> x, Func<T, Effect<TEnv, Unit>> bind) => x.AndThen(bind, (x, _) => x);
     }
 
     extension<TEnv, T, TResult>(Effect<TEnv, T> self)
@@ -69,8 +69,8 @@ public static partial class EffectExtensions
         public static Effect<TEnv, TResult> operator *(Effect<TEnv, Func<T, TResult>> apply, Effect<TEnv, T> x) => x.Apply(apply);
 
         // Bind
-        public static Effect<TEnv, TResult> operator >>(Effect<TEnv, T> x, Func<T, Effect<TEnv, TResult>> bind) => x.AndThen(bind);
+        public static Effect<TEnv, TResult> operator >>>(Effect<TEnv, T> x, Func<T, Effect<TEnv, TResult>> bind) => x.AndThen(bind);
 
-        public static Effect<TEnv, TResult> operator >>(Effect<TEnv, T> x, Effect<TEnv, TResult> y) => x.Then(y);
+        public static Effect<TEnv, TResult> operator >>>(Effect<TEnv, T> x, Effect<TEnv, TResult> y) => x.Then(y);
     }
 }
