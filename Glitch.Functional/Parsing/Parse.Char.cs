@@ -16,11 +16,22 @@ public static partial class Parse
 
     public static TokenParser<char> Tab => Char('\t');
     
-    public static TokenParser<char> Space => Char(' ');
+    public static TokenParser<char> SingleSpace => Char(' ');
+
+    public static Parser<char, char> NonBreakingSpace => Char(c => char.IsWhiteSpace(c) && !Environment.NewLine.Contains(c));
+
+    public static Parser<char, string> NonBreakingSpaces => NonBreakingSpace.AtLeastOnce().AsString();
 
     public static Parser<char, string> LineBreak => from cr in Char('\r').Maybe()
                                                     from lf in Char('\n')
                                                     select Environment.NewLine;
+
+    public static Parser<char, Unit> EndOfInput =>
+        from state in State<char>()
+        from check in state.IsEnd
+                    ? Parser<char>.Return(Unit.Value)
+                    : Parser<char>.Fail<Unit>("Expected EOF")
+        select Unit.Value;
 
     public static Parser<char, Unit> SkipWhitespace => Whitespace.ZeroOrMoreTimes().IgnoreResult();
 

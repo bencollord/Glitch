@@ -7,6 +7,8 @@ namespace Glitch.Functional.Parsing;
 
 public abstract partial class Parser<TToken, T>
 {
+    public virtual Parser<TToken, IEnumerable<T>> Once() => Times(1);
+
     public virtual Parser<TToken, IEnumerable<T>> AtLeastOnce() => AtLeast(1);
 
     public virtual Parser<TToken, IEnumerable<T>> AtLeast(int times) => new RepeatParser<TToken, T>(this, min: times);

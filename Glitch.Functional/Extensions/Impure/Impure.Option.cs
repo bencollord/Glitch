@@ -23,17 +23,16 @@ public static partial class ImpureExtensions
         public Option<T> IfNone(Action<Unit> action) =>
             self.Match(Nop, action).Return(self);
 
-        // Alias for IfSome
         public Option<T> Do(Action<T> action) =>
             self.Match(action, Nop).Return(self);
 
         public Option<T> Do(Func<T, Unit> action) =>
             self.IfSome(action.ReturnVoid());
 
-        public Unit Match(Action<T> okay, Action fail) =>
-            self.Match(okay.Return(), fail.Return());
+        public Unit Match(Action<T> some, Action none) =>
+            self.Match(some.Return(), none.Return());
 
-        public Unit Match(Action<T> okay, Action<Unit> fail) =>
-            self.Match(okay.Return(), fail.Return());
+        public Unit Match(Action<T> some, Action<Unit> none) =>
+            self.Match(some.Return(), none.Return());
     }
 }

@@ -1,4 +1,5 @@
 using Glitch.Functional;
+using System.Collections;
 using System.Collections.Immutable;
 
 namespace Glitch.Functional;
@@ -60,6 +61,25 @@ public static class CollectionExtensions
     public static Option<T> TryPeek<T>(this Queue<T> queue)
     {
         return queue.TryPeek(out var value) ? value : None;
+    }
+
+    /// <summary>
+    /// Forces enumeration of the enumerable, consuming it.
+    /// </summary>
+    /// <remarks>
+    /// This method is useful when you have a sequence of lazily evauated
+    /// monads or delegates that have side effects you want to execute 
+    /// even though you don't neeed anything out of the sequence.
+    /// </remarks>
+    /// <param name="source"></param>
+    /// <returns>Unit</returns>
+    public static Unit Consume(this IEnumerable source)
+    {
+        foreach (var _ in source)
+        {
+        }
+
+        return Unit.Value;
     }
 
     public static IEnumerable<T> ForEach<T>(this IEnumerable<T> source, Func<T, Unit> action)

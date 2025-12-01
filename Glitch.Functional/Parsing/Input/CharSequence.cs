@@ -42,5 +42,8 @@ public record CharSequence : TokenSequence<char>
 
     public override IEnumerable<char> ReadToEnd() => sourceText.Substring(cursor);
 
-    protected override string DisplayRemainder() => sourceText.Substring(cursor + 1);
+    protected override string DisplayRemainder() 
+        => cursor == sourceText.Length 
+         ? "(EOF)" 
+         : sourceText.Substring(cursor + 1);
 }

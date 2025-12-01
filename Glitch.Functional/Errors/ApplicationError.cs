@@ -1,5 +1,3 @@
-using Glitch.Functional;
-
 namespace Glitch.Functional.Errors;
 
 using static Option;
