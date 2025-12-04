@@ -4,6 +4,9 @@ namespace Glitch.CodeAnalysis;
 
 public static class SyntaxTreeExtensions
 {
-    public static SyntaxTree WithRoot(this SyntaxTree tree, SyntaxNode root)
-        => tree.WithRootAndOptions(root, tree.Options);
+    extension(SyntaxTree tree)
+    {
+        public SyntaxTree WithRoot(SyntaxNode root) =>
+        tree.WithRootAndOptions(root, tree.Options);
+    }
 }

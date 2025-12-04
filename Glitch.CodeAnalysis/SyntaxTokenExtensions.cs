@@ -3,8 +3,11 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Glitch.CodeAnalysis;
 
-internal static class SyntaxTokenExtensions
+public static class SyntaxTokenExtensions
 {
+    public static SyntaxTokenList ToTokenList(this IEnumerable<SyntaxToken> tokens) =>
+        SyntaxFactory.TokenList(tokens);
+
     internal static bool IsAccessModifier(this SyntaxToken token)
     {
         return token.IsKind(SyntaxKind.PublicKeyword)

@@ -8,7 +8,9 @@ public static partial class ResultExtensions
 {
     extension<T, E>(IResult<T, E> source)
     {
-        public T Unwrap() => source.Match(Identity, err => BadUnwrap(err).Throw<T>());
+        public T Unwrap() => source.Match(
+            okay: Identity,
+            err => BadUnwrap(err).Throw<T>());
 
         public E UnwrapError() => source.Match(val => BadUnwrapError(val).Throw<E>(), Identity);
 

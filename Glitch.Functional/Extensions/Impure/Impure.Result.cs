@@ -18,6 +18,9 @@ public static partial class ImpureExtensions
         public Result<T, E> IfFail(Action<E> action) =>
             self.Match(Nop, action).Return(self);
 
+        public Result<T, E> IfFail(Func<E, Unit> action) =>
+            self.Match(Unit.Ignore, action).Return(self);
+
         // Alias for IfOkay
         public Result<T, E> Do(Action<T> action) =>
             self.Match(action, Nop).Return(self);

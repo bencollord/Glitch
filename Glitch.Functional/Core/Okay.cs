@@ -4,6 +4,8 @@ public readonly record struct Okay<T>(T Value)
 {
     public Result<T, E> ToResult<E>() => Result.Okay<T, E>(Value);
 
+    public Option<T> ToOption() => Option.Some(Value);
+
     // Linq
     public Okay<TResult> Select<TResult>(Func<T, TResult> selector) => new(selector(Value));
 

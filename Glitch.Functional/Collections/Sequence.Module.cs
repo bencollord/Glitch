@@ -8,7 +8,7 @@ public static partial class Sequence
 
     public static Sequence<T> Empty<T>() => Sequence<T>.Empty;
 
-    public static Sequence<T> Single<T>(T item) => new([item]);
+    public static Sequence<T> Singleton<T>(T item) => new([item]);
 
     public static Sequence<T> From<T>(IEnumerable<T> items) => new(items);
 

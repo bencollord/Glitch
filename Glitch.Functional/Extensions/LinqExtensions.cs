@@ -6,7 +6,7 @@ namespace Glitch.Functional.Extensions;
 using static Expected;
 using static Option;
 
-public static class LinqExtensions
+public static partial class LinqExtensions
 {
     /// <summary>
     /// Zips two sequences together into a tuple containing both elements. 
