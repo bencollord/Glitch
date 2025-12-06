@@ -6,18 +6,11 @@ namespace Glitch.Functional.Effects;
 
 public static class IEffectExtensions
 {
-    [DebuggerStepThrough]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IEffect<TInput, TResult> Select<TInput, TOutput, TResult>(this IEffect<TInput, TOutput> result, Func<TOutput, TResult> map)
-        => result.Select(map);
+    extension<TInput, TOutput>(IEffect<TInput, TOutput> source)
+    {
+        public IEffect<TInput, TResult> SelectMany<TElement, TResult>(Func<TOutput, IEffect<TInput, TElement>> bind, Func<TOutput, TElement, TResult> projection) => 
+            source.AndThen(v => bind(v).Select(x => projection(v, x)));
 
-    [DebuggerStepThrough]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IEffect<TInput, TResult> SelectMany<TInput, TOutput, TResult>(this IEffect<TInput, TOutput> result, Func<TOutput, IEffect<TInput, TResult>> bind)
-        => result.AndThen(bind);
-
-    [DebuggerStepThrough]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IEffect<TInput, TResult> SelectMany<TInput, TOutput, TElement, TResult>(this IEffect<TInput, TOutput> result, Func<TOutput, IEffect<TInput, TElement>> bind, Func<TOutput, TElement, TResult> projection)
-        => result.AndThen(v => bind(v).Select(x => projection(v, x)));
+        public IEffect<TInput, TOutput> Do(Action<TOutput> action) => source.Select(x => action.Return(x)(x));
+    }
 }
