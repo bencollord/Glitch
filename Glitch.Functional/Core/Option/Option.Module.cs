@@ -17,9 +17,14 @@ public static partial class Option
          ? Some(value.Value)
          : None;
 
+    // Function syntax for methods
+    // UNDONE
     public static bool IsSome<T>(Option<T> option) => option.IsSome;
     public static bool IsNone<T>(Option<T> option) => option.IsNone;
 
     public static Option<T> Where<T>(T? value, Func<T, bool> predicate) => Maybe(value).Where(predicate);
     public static Option<T> Where<T>(T? value, Func<T, bool> predicate) where T : struct => Maybe(value).Where(predicate);
+
+    public static (Option<TLeft> Left, Option<TRight> Right) Unzip<TLeft, TRight>(Option<(TLeft Left, TRight Right)> option) =>
+        (option.Select(x => x.Left), option.Select(x => x.Right));
 }
