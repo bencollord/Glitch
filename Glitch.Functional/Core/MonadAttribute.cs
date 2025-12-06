@@ -11,5 +11,5 @@ namespace Glitch.Functional;
 /// or IIf that work for all of them. Types marked with this attribute
 /// will be included in any generation scripts.
 /// </remarks>
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface | AttributeTargets.Delegate)]
 public class MonadAttribute : Attribute;

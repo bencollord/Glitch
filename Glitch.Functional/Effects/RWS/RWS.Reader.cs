@@ -14,7 +14,7 @@ public partial class RWS<TEnv, S, W, T>
 {
     public static RWS<TEnv, S, W, T> Asks(Func<TEnv, T> runner) => new(input => (input.State, runner(input.Env), input.Output));
 
-    public static RWS<TEnv, S, W, T> Lift(Reader<TEnv, T> reader) => new(input => (input.State, reader.Run(input.Env), input.Output));
+    public static RWS<TEnv, S, W, T> Lift(Reader<TEnv, T> reader) => new(input => (input.State, reader(input.Env), input.Output));
 
     /// <inheritdoc cref="Reader{TEnv, T}.With{TNewEnv}(Func{TNewEnv, TEnv})"/>
     public RWS<TNewEnv, S, W, T> With<TNewEnv>(Func<TNewEnv, TEnv> map)
