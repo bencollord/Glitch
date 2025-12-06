@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace Glitch.CodeAnalysis.Rewriters;
 
-using static CSharpSyntax;
+using static SyntaxFactory;
 
 public class FileScopedNamespaceRewriter : CSharpSyntaxRewriter
 {

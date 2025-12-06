@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace Glitch.CodeAnalysis.Builders;
 
-using static CSharpSyntax;
+using static SyntaxFactory;
 
 internal class TokenListBuilder : IEnumerable<SyntaxToken>
 {

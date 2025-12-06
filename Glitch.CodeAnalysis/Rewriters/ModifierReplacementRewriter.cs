@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Glitch.CodeAnalysis.Rewriters;
 
-using static CSharpSyntax;
+using static SyntaxFactory;
 using static Option;
 
 public class ModifierReplacementRewriter : CSharpSyntaxRewriter

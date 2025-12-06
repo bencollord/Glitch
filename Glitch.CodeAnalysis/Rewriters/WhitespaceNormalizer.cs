@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Glitch.CodeAnalysis.Rewriters;
 
-using static CSharpSyntax;
+using static SyntaxFactory;
 using static Option;
 
 public class WhitespaceNormalizer : CSharpSyntaxRewriter, IIndentable
@@ -212,7 +212,7 @@ public class WhitespaceNormalizer : CSharpSyntaxRewriter, IIndentable
 
         using (new IndentationScope(this))
         {
-            var indentTrivia = Whitespace(Indentation.ToString());
+            var indentTrivia = Whitespace(Indentation);
             
             updated = updated.WithStatements(
                 List(
@@ -246,8 +246,5 @@ public class WhitespaceNormalizer : CSharpSyntaxRewriter, IIndentable
     }
 
     private static SyntaxTrivia Whitespace(Indentation indentation)
-        => Whitespace(indentation.ToString());
-
-    private static SyntaxTrivia Whitespace(string value)
-        => CSharpSyntax.Whitespace(value);
+        => SyntaxFactory.Whitespace(indentation.ToString());
 }

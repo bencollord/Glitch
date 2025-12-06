@@ -25,6 +25,6 @@ public static class SyntaxNodeExtensions
     extension<TNode>(IEnumerable<TNode> nodes) where TNode : SyntaxNode
     {
         public SyntaxList<TNode> ToSyntaxList() =>
-            CSharpSyntax.List(nodes);
+            SyntaxFactory.List(nodes);
     }
 }

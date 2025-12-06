@@ -7,7 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.CodeAnalysis.Builders;
 
-using static CSharpSyntax;
+using static SyntaxFactory;
 
 public class TypeSyntaxBuilder
 {
@@ -64,7 +64,7 @@ public class TypeSyntaxBuilder
     public TypeSyntaxBuilder Record()
     {
         declarationKind = TypeDeclarationKind.Record;
-        declarationFactory = RecordDeclaration;
+        declarationFactory = SyntaxFactory.RecordDeclaration;
         return this;
     }
 
@@ -123,7 +123,7 @@ public class TypeSyntaxBuilder
 
     public PropertySyntaxBuilder Property(Type type, string name)
     {
-        var property = new PropertySyntaxBuilder(TypeName(type), name);
+        var property = new PropertySyntaxBuilder(SyntaxFactory.TypeName(type), name);
         AddProperty(property);
         return property;
     }

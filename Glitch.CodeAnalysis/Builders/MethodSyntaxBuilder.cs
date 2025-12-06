@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Glitch.CodeAnalysis.Builders;
 
-using static CSharpSyntax;
+using static SyntaxFactory;
 
 public class MethodSyntaxBuilder : SyntaxBuilder<MethodDeclarationSyntax>
 {
