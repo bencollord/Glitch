@@ -11,7 +11,9 @@ public static partial class ParserExtensions
     extension<TToken, T>(Parser<TToken, T> self)
     {
         public static Parser<TToken, T> operator |(Parser<TToken, T> x, Parser<TToken, T> y) => x.Or(y);
-        
+
+        public static Parser<TToken, Unit> operator !(Parser<TToken, T> x) => x.Not();
+
         public static Parser<TToken, T> operator >>>(Parser<TToken, T> x, Parser<TToken, Unit> other) => x.Then(other, (x, _) => x);
 
         public static Parser<TToken, T> operator >>>(Parser<TToken, T> x, Func<T, Parser<TToken, Unit>> bind) => x.Then(bind, (x, _) => x);

@@ -1,4 +1,4 @@
-namespace Glitch.Collections;
+namespace Glitch.Collections.Extensions.Standard;
 
 /// <summary>
 /// Specifies the behavior for duplicate keys

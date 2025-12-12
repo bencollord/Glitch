@@ -279,6 +279,12 @@ public readonly partial struct Option<T>
     [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T? UnwrapOrDefault(T? fallback) => IsSome ? value : fallback;
 
+    public bool TryUnwrap([NotNullWhen(true)] out T? result)
+    {
+        result = UnwrapOrDefault();
+        return IsSome;
+    }
+
     /// <summary>
     /// Returns the wrapped value if it exists, otherwise returns the fallback value.
     /// </summary>

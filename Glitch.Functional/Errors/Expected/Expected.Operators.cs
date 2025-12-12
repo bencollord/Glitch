@@ -16,6 +16,8 @@ public partial record Expected<T>
 
     public static implicit operator Result<T, Error>(Expected<T> result) => result.Match(Result.Okay<T, Error>, Result.Fail<T, Error>);
 
+    public static implicit operator Result<T, Exception>(Expected<T> result) => result.Match(Result.Okay<T, Exception>, err => Result.Fail(err.AsException()));
+    
     public static explicit operator T(Expected<T> result)
         => result.Match(Identity, err => throw new InvalidCastException($"Cannot cast a faulted result to a value", err.AsException()));
 

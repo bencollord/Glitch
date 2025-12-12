@@ -2,13 +2,12 @@ namespace Glitch.Linq;
 
 public static partial class EnumerableExtensions
 {
-    public static IEnumerable<TResult> Cartesian<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TSource, TResult> projection)
+    extension<TSource>(IEnumerable<TSource> source)
     {
-        return source.CrossJoin(source, projection);
-    }
+        public IEnumerable<TResult> Cartesian<TResult>(Func<TSource, TSource, TResult> projection) => source.CrossJoin(source, projection);
 
-    public static IEnumerable<TResult> CrossJoin<TSource, TOther, TResult>(this IEnumerable<TSource> source, IEnumerable<TOther> other, Func<TSource, TOther, TResult> projection)
-    {
-        return source.SelectMany(_ => other, projection);
+        public IEnumerable<(TSource First, TOther Second)> CrossJoin<TOther, TResult>(IEnumerable<TOther> other) => source.CrossJoin(other, (x, y) => (x, y));
+        
+        public IEnumerable<TResult> CrossJoin<TOther, TResult>(IEnumerable<TOther> other, Func<TSource, TOther, TResult> projection) => source.SelectMany(_ => other, projection);
     }
 }

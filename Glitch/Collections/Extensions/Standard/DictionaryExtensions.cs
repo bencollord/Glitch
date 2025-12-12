@@ -1,21 +1,7 @@
-namespace Glitch.Collections;
+namespace Glitch.Collections.Extensions.Standard;
 
-public static class CollectionExtensions
+public static class DictionaryExtensions
 {
-    public static void AddRange<T>(this ICollection<T> collection, IEnumerable<T> items)
-    {
-        if (collection is List<T> list)
-        {
-            list.AddRange(items);
-            return;
-        }
-
-        foreach (var item in items)
-        {
-            collection.Add(item);
-        }
-    }
-
     public static void Merge<TKey, TValue, TMerge>(this IDictionary<TKey, TValue> dictionary, IDictionary<TKey, TMerge> other)
         where TMerge : TValue
         => dictionary.Merge(other, MergeOption.Strict);

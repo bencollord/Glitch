@@ -124,6 +124,33 @@ public abstract partial record Result<T, E> : IResult<T, E>
     public Result<TResult, E> Cast<TResult>() => Select(DynamicCast<TResult>.From);
 
     /// <summary>
+    /// Casts the wrapped value to <typeparamref name="TResult"/>.
+    /// If the cast fails, returns a <see cref="Result{TResult, E}.Fail"/>
+    /// with the provided <paramref name="error"/>.
+    /// </summary>
+    /// <typeparam name="TResult"></typeparam>
+    /// <param name="error"></param>
+    /// <returns></returns>
+    public Result<TResult, E> CastOr<TResult>(E error) =>
+        AndThen(x => DynamicCast<TResult>.Try(x).OkayOr(error));
+
+    public T IfFail(Func<E, T> fallback) => Match(Identity, fallback);
+
+    public T IfFail(T fallback) => Match(Identity, fallback);
+
+    /// <summary>
+    /// Casts the wrapped value to <typeparamref name="TResult"/>.
+    /// If the cast fails, returns a <see cref="Result{TResult, E}.Fail"/>
+    /// with the result provided <paramref name="error"/> function applied to 
+    /// the wrapped value of this result.
+    /// </summary>
+    /// <typeparam name="TResult"></typeparam>
+    /// <param name="error"></param>
+    /// <returns></returns>
+    public Result<TResult, E> CastOrElse<TResult>(Func<T, E> error) =>
+        AndThen(x => DynamicCast<TResult>.Try(x).OkayOrElse(_ => error(x)));
+
+    /// <summary>
     /// If Fail, casts the wrapped error to <typeparamref name="EResult"/>,
     /// otherwise returns the current value wrapped in a new result type.
     /// </summary>
