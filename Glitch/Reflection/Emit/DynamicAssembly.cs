@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace Glitch.Reflection;
+namespace Glitch.Reflection.Emit;
 
 public class DynamicAssembly
 {

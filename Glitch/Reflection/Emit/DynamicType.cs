@@ -1,13 +1,14 @@
+using Glitch.Reflection;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 
-namespace Glitch.Reflection;
+namespace Glitch.Reflection.Emit;
 
 public class DynamicType
 {
-    private const string       BackingFieldTemplate= "m_{0}";
-    private const string       GetterTemplate      = "get_{0}";
+    private const string           BackingFieldTemplate= "m_{0}";
+    private const string           GetterTemplate      = "get_{0}";
     private const MethodAttributes DefaultMethodAttributes = MethodAttributes.Public | MethodAttributes.HideBySig;
     private const MethodAttributes GetterAttributes    = DefaultMethodAttributes | MethodAttributes.SpecialName;
     private const MethodAttributes OperatorAttributes  = DefaultMethodAttributes | MethodAttributes.Static | MethodAttributes.SpecialName;

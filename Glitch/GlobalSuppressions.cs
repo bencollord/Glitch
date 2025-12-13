@@ -5,4 +5,4 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Style", "IDE0290:Use primary constructor", Justification = "<Pending>", Scope = "member", Target = "~M:Glitch.IO.Checksum.#ctor(System.Byte[],System.Security.Cryptography.HashAlgorithmName)")]
+[assembly: SuppressMessage("Style", "IDE0290:Use primary constructor", Justification = "Primary constructors are not mandatory and should not cause noise from the compiler")]

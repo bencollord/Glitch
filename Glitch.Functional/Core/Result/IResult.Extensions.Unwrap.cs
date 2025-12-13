@@ -14,7 +14,7 @@ public static partial class ResultExtensions
 
         public E UnwrapError() => source.Match(val => BadUnwrapError(val).Throw<E>(), Identity);
 
-        public bool TryUnwrap([NotNullWhen(true)] out T? result)
+        public bool TryUnwrap([MaybeNullWhen(false)] out T result)
         {
             if (source.IsOkay)
             {
@@ -22,11 +22,11 @@ public static partial class ResultExtensions
                 return true;
             }
 
-            result = default!;
+            result = default;
             return false;
         }
 
-        public bool TryUnwrapError([NotNullWhen(true)] out E result)
+        public bool TryUnwrapError([MaybeNullWhen(false)] out E result)
         {
             if (source.IsFail)
             {
@@ -34,7 +34,7 @@ public static partial class ResultExtensions
                 return true;
             }
 
-            result = default!;
+            result = default;
             return false;
         }
 

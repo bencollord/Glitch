@@ -4,10 +4,23 @@ namespace Glitch.Text;
 
 public static class StringBuilderExtensions
 {
-    public static string Flush(this StringBuilder buffer)
+    extension(StringBuilder buffer)
     {
-        var text = buffer.ToString();
-        buffer.Clear();
-        return text;
+        public StringBuilder AppendIf(bool condition, string text)
+        {
+            if (condition)
+            {
+                buffer.Append(text);
+            }
+
+            return buffer;
+        }
+
+        public string Flush()
+        {
+            var text = buffer.ToString();
+            buffer.Clear();
+            return text;
+        }
     }
 }
