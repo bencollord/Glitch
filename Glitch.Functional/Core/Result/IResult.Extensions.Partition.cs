@@ -13,7 +13,7 @@ public static partial class ResultExtensions
     {
         public IEnumerable<T> Successes() => self.Where(r => r.IsOkay).Select(r => r.Unwrap());
 
-        public IEnumerable<E> Errors() => self.Where(r => r.IsFail).Select(r => r.UnwrapError());
+        public IEnumerable<E> Errors() => self.Where(r => r.IsOkay).Select(r => r.UnwrapError());
 
         public (IEnumerable<T> Successes, IEnumerable<E> Errors) Partition() => (self.Successes(), self.Errors());
     }

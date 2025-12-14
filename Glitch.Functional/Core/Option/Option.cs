@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Glitch.Functional;
 
@@ -13,7 +12,8 @@ namespace Glitch.Functional;
 [Monad]
 public readonly partial struct Option<T>
     : IEquatable<Option<T>>,
-      IComparable<Option<T>>
+      IComparable<Option<T>>,
+      IMaybe<T>
 {
     public static readonly Option<T> None = new();
 
@@ -35,11 +35,11 @@ public readonly partial struct Option<T>
 
     public bool IsNone => !hasValue;
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
+    bool IMaybe<T>.HasValue => IsSome;
+
     public bool IsSomeAnd(Func<T, bool> predicate)
         => Select(predicate).IfNone(false);
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsNoneOr(Func<T, bool> predicate)
         => Select(predicate).IfNone(true);
 
@@ -51,7 +51,6 @@ public readonly partial struct Option<T>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="map"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Option<TResult> Select<TResult>(Func<T, TResult> map)
         => IsSome ? new Option<TResult>(map(value!)) : new Option<TResult>();
 
@@ -62,7 +61,6 @@ public readonly partial struct Option<T>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="function"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Option<TResult> Apply<TResult>(Option<Func<T, TResult>> function)
         => AndThen(v => function.Select(fn => fn(v)));
 
@@ -72,7 +70,6 @@ public readonly partial struct Option<T>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="other"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Option<TResult> And<TResult>(Option<TResult> other)
         => IsSome ? other : new Option<TResult>();
 
@@ -83,7 +80,6 @@ public readonly partial struct Option<T>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="bind"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Option<TResult> AndThen<TResult>(Func<T, Option<TResult>> bind)
         => IsSome ? bind(value!) : new Option<TResult>();
 
@@ -100,7 +96,6 @@ public readonly partial struct Option<T>
     /// <param name="bind"></param>
     /// <param name="project"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Option<TResult> AndThen<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project)
         => AndThen(x => bind(x).Select(y => project(x, y)));
 
@@ -110,10 +105,8 @@ public readonly partial struct Option<T>
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Option<T> Or(Option<T> other) => IsSome ? this : other;
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Result<T, E> Or<E>(Result<T, E> other) => Match(Result.Okay<T, E>, other);
 
     /// <summary>
@@ -123,7 +116,6 @@ public readonly partial struct Option<T>
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Option<T> Xor(Option<T> other)
     {
         if (IsSome && other.IsNone)
@@ -145,7 +137,6 @@ public readonly partial struct Option<T>
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Option<T> OrElse(Func<Option<T>> other)
         => IsSome ? this : other();
 
@@ -155,7 +146,6 @@ public readonly partial struct Option<T>
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Option<T> OrElse(Func<Unit, Option<T>> other)
         => IsSome ? this : other(default);
 
@@ -166,7 +156,6 @@ public readonly partial struct Option<T>
     /// </summary>
     /// <param name="predicate"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Option<T> Where(Func<T, bool> predicate)
     {
         if (IsSomeAnd(predicate))
@@ -183,7 +172,6 @@ public readonly partial struct Option<T>
     /// <typeparam name="TOther"></typeparam>
     /// <param name="other"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Option<(T Left, TOther Right)> Zip<TOther>(Option<TOther> other)
         => Zip(other, (x, y) => (x, y));
 
@@ -195,7 +183,6 @@ public readonly partial struct Option<T>
     /// <param name="other"></param>
     /// <param name="zipper"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Option<TResult> Zip<TOther, TResult>(Option<TOther> other, Func<T, TOther, TResult> zipper)
         => AndThen(x => other.Select(y => zipper(x, y)));
 
@@ -207,7 +194,6 @@ public readonly partial struct Option<T>
     /// <param name="some"></param>
     /// <param name="none"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TResult Match<TResult>(Func<T, TResult> some, TResult none)
         => Select(some).IfNone(none);
 
@@ -219,11 +205,9 @@ public readonly partial struct Option<T>
     /// <param name="some"></param>
     /// <param name="none"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TResult Match<TResult>(Func<T, TResult> some, Func<TResult> none)
         => IsSome ? some(value!) : none();
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TResult Match<TResult>(Func<T, TResult> some, Func<Unit, TResult> none)
         => Match(some, () => none(default));
 
@@ -234,7 +218,6 @@ public readonly partial struct Option<T>
     /// </summary>
     /// <typeparam name="TResult"></typeparam>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Option<TResult> CastOrNone<TResult>() => AndThen(DynamicCast<TResult>.Try);
 
     /// <summary>
@@ -245,11 +228,9 @@ public readonly partial struct Option<T>
     /// </summary>
     /// <typeparam name="TResult"></typeparam>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Option<TResult> Cast<TResult>()
         => Select(DynamicCast<TResult>.From);
 
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Option<TResult> OfType<TResult>()
         => AndThen(v => v is TResult r ? Option.Some(r) : Option.None);
 
@@ -257,7 +238,6 @@ public readonly partial struct Option<T>
     /// Returns the wrapped value if it exists. Otherwise throws an exception.
     /// </summary>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Unwrap() => IsSome ? value! : throw new InvalidOperationException("Attempted to unwrap an empty option");
 
     /// <summary>
@@ -265,7 +245,6 @@ public readonly partial struct Option<T>
     /// of <typeparamref name="T"/>.
     /// </summary>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T? UnwrapOrDefault() => IsSome ? value : default;
 
     /// <summary>
@@ -276,7 +255,6 @@ public readonly partial struct Option<T>
     /// </remarks>
     /// <param name="fallback"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T? UnwrapOrDefault(T? fallback) => IsSome ? value : fallback;
 
     public bool TryUnwrap([NotNullWhen(true)] out T? result)
@@ -290,7 +268,6 @@ public readonly partial struct Option<T>
     /// </summary>
     /// <param name="fallback"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T IfNone(T fallback) => Match(val => val, () => fallback);
 
     /// <summary>
@@ -299,8 +276,9 @@ public readonly partial struct Option<T>
     /// </summary>
     /// <param name="fallback"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T IfNone(Func<T> fallback) => Match(val => val, fallback);
+
+    T IMaybe<T>.UnwrapOrElse(Func<T> fallback) => IfNone(fallback);
 
     /// <summary>
     /// Returns the wrapped value if exists. Otherwise, returns the result
@@ -308,7 +286,6 @@ public readonly partial struct Option<T>
     /// </summary>
     /// <param name="fallback"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T IfNone(Func<Unit, T> fallback) => Match(val => val, fallback);
 
     /// <summary>
@@ -318,7 +295,6 @@ public readonly partial struct Option<T>
     /// </summary>
     /// <param name="error"></param>
     /// <returns></returns>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Result<T, E> OkayOr<E>(E error) => IsSome ? Result.Okay(value!) : Result.Fail(error);
 
     /// <summary>
@@ -327,7 +303,6 @@ public readonly partial struct Option<T>
     /// the result of the provided error function.
     /// </summary>
     /// <param name="error"></param>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Result<T, E> OkayOrElse<E>(Func<E> function) => IsSome ? Result.Okay(value!) : Result.Fail(function());
 
     /// <summary>
@@ -336,7 +311,6 @@ public readonly partial struct Option<T>
     /// the result of the provided error function.
     /// </summary>
     /// <param name="error"></param>
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Result<T, E> OkayOrElse<E>(Func<Unit, E> function) => IsSome ? Result.Okay(value!) : Result.Fail(function(default));
 
     public bool Equals(Option<T> other)

@@ -1,13 +1,15 @@
 namespace Glitch.Functional;
 
 [Monad]
-public abstract partial record Result<T, E> : IResult<T, E>
+public abstract partial record Result<T, E> : IResult<T, E>, IMaybe<T>
 {
     private protected Result() { }
 
     public abstract bool IsOkay { get; }
 
     public abstract bool IsFail { get; }
+
+    bool IMaybe<T>.HasValue => IsOkay;
 
     /// <summary>
     /// If the result is <see cref="Result{T, E}.Okay" />, applies
@@ -203,4 +205,6 @@ public abstract partial record Result<T, E> : IResult<T, E>
         => AndThen(_ => other, zipper);
 
     public abstract override string ToString();
+
+    T IMaybe<T>.UnwrapOrElse(Func<T> fallback) => Match(Identity, _ => fallback());
 }
