@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace Glitch.Reflection;
 
-public static class SignaturePrintingExtensions
+public static partial class SignaturePrintingExtensions
 {
     private static Dictionary<Type, string> SpecialTypeNames = new()
     {
@@ -30,7 +30,7 @@ public static class SignaturePrintingExtensions
         [typeof(decimal)] = "decimal",
     };
 
-    private static readonly Regex CamelCap = new(@"(?!^)(?=[A-Z])");
+    private static readonly Regex CamelCap = CamelCapsRegex();
 
     public static string Signature(this Type type)
     {
@@ -206,4 +206,7 @@ public static class SignaturePrintingExtensions
     }
 
     private static string PrintAccessModifier(AccessModifier access) => CamelCap.Replace(access.ToString(), " ").ToLower();
+    
+    [GeneratedRegex(@"(?!^)(?=[A-Z])")]
+    private static partial Regex CamelCapsRegex();
 }
