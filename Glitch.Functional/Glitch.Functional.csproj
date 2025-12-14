@@ -7,6 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Errors\Outcome\**" />
+    <Compile Remove="Validation\**" />
+    <EmbeddedResource Remove="Errors\Outcome\**" />
+    <EmbeddedResource Remove="Validation\**" />
+    <None Remove="Errors\Outcome\**" />
+    <None Remove="Validation\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Glitch\Glitch.csproj" />
   </ItemGroup>
 
