@@ -9,5 +9,5 @@ public interface IResult<T, E> : IMaybe<T>
 
     TResult Match<TResult>(Func<T, TResult> okay, Func<E, TResult> fail);
 
-    T IMaybe<T>.UnwrapOrElse(Func<T> fallback) => Match(Identity, _ => fallback());
+    TResult IMaybe<T>.Match<TResult>(Func<T, TResult> some, Func<TResult> none) => Match(okay: some, fail: (E _) => none());
 }

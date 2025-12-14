@@ -257,7 +257,7 @@ public readonly partial struct Option<T>
     /// <returns></returns>
     public T? UnwrapOrDefault(T? fallback) => IsSome ? value : fallback;
 
-    public bool TryUnwrap([NotNullWhen(true)] out T? result)
+    public bool TryUnwrap([MaybeNullWhen(false)] out T result)
     {
         result = UnwrapOrDefault();
         return IsSome;
@@ -277,8 +277,6 @@ public readonly partial struct Option<T>
     /// <param name="fallback"></param>
     /// <returns></returns>
     public T IfNone(Func<T> fallback) => Match(val => val, fallback);
-
-    T IMaybe<T>.UnwrapOrElse(Func<T> fallback) => IfNone(fallback);
 
     /// <summary>
     /// Returns the wrapped value if exists. Otherwise, returns the result

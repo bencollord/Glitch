@@ -1,7 +1,4 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-
-namespace Glitch.Functional.Validation;
+namespace Glitch.Functional.Errors;
 
 public static partial class RecoverableExtensions
 {

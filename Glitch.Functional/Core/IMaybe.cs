@@ -1,8 +1,8 @@
 namespace Glitch.Functional;
 
-public interface IMaybe<T>
+public interface IMaybe<out T>
 {
     public abstract bool HasValue { get; }
 
-    public abstract T UnwrapOrElse(Func<T> fallback);
+    public abstract TResult Match<TResult>(Func<T, TResult> some, Func<TResult> none);
 }

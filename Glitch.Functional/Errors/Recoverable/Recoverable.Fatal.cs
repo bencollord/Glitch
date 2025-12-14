@@ -1,6 +1,4 @@
-using Glitch.Functional.Collections;
-
-namespace Glitch.Functional.Validation;
+namespace Glitch.Functional.Errors;
 
 public partial record Recoverable<T, E>
 {

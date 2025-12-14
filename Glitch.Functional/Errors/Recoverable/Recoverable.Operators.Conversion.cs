@@ -1,8 +1,4 @@
-using Glitch.Functional.Collections;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-
-namespace Glitch.Functional.Validation;
+namespace Glitch.Functional.Errors;
 
 public partial record Recoverable<T, E>
 {

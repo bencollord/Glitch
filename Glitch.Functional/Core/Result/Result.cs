@@ -206,5 +206,5 @@ public abstract partial record Result<T, E> : IResult<T, E>, IMaybe<T>
 
     public abstract override string ToString();
 
-    T IMaybe<T>.UnwrapOrElse(Func<T> fallback) => Match(Identity, _ => fallback());
+    TResult IMaybe<T>.Match<TResult>(Func<T, TResult> some, Func<TResult> none) => Match(some, _ => none());
 }

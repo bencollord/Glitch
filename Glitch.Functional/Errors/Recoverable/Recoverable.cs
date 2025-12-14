@@ -1,6 +1,4 @@
-using Glitch.Functional.Collections;
-
-namespace Glitch.Functional.Validation;
+namespace Glitch.Functional.Errors;
 
 using static FN;
 
@@ -205,5 +203,6 @@ public abstract partial record Recoverable<T, E> : IMaybe<T>
     /// <returns></returns>
     public abstract override string ToString();
 
-    T IMaybe<T>.UnwrapOrElse(Func<T> fallback) => IfFatal(_ => fallback());
+    TResult IMaybe<T>.Match<TResult>(Func<T, TResult> some, Func<TResult> none) =>
+        Match(some, (v, e) => some(v), _ => none());
 }

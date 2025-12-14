@@ -1,6 +1,3 @@
-using Glitch.Functional.Collections;
-using System.Collections.Immutable;
-
 namespace Glitch.Functional.Effects;
 
 public static partial class Effect
