@@ -1,7 +1,7 @@
-using Glitch.Functional.Parsing.Input;
-using Glitch.Functional.Parsing.Results;
+using Glitch.Functional.Parsing.Legacy.Input;
+using Glitch.Functional.Parsing.Legacy.Results;
 using static Glitch.Functional.Option;
-using static Glitch.Functional.Parsing.Parse;
+using static Glitch.Functional.Parsing.Legacy.Parse;
 
 namespace Glitch.Functional.Tests.Parser;
 

@@ -1,5 +1,5 @@
-using Glitch.Functional.Parsing;
-using static Glitch.Functional.Parsing.Parse;
+using Glitch.Functional.Parsing.Legacy;
+using static Glitch.Functional.Parsing.Legacy.Parse;
 
 namespace Glitch.Test.Functional;
 
