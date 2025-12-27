@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ParseResult.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Glitch.Functional\Glitch.Functional.csproj" />
   </ItemGroup>
 

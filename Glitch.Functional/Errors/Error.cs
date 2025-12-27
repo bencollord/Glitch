@@ -20,7 +20,7 @@ public abstract partial record Error : IEquatable<Error>
 
     public virtual int Code { get; }
 
-    public virtual string Message { get; init; }
+    public virtual string Message { get; }
 
     public virtual Option<Error> Inner { get; init; }
 

@@ -152,7 +152,8 @@ public readonly partial struct Option<T>
     /// <summary>
     /// If this <see cref="Option{T}"/> contains a value, checks
     /// the value against the provided <paramref name="predicate"/>
-    /// and returns an empty <see cref="Option{T}" /> if it returns false.
+    /// and returns an empty <see cref="Option{T}" /> if it returns 
+    /// <see langword="false"/>.
     /// </summary>
     /// <param name="predicate"></param>
     /// <returns></returns>
@@ -165,6 +166,16 @@ public readonly partial struct Option<T>
 
         return None;
     }
+
+    /// <summary>
+    /// If this <see cref="Option{T}"/> contains a value, checks
+    /// the value against the provided <paramref name="predicate"/>
+    /// and returns an empty <see cref="Option{T}" /> if it returns 
+    /// <see langword="true"/>.
+    /// </summary>
+    /// <param name="predicate"></param>
+    /// <returns></returns>
+    public Option<T> Except(Func<T, bool> predicate) => Where(!predicate);
 
     /// <summary>
     /// Combines another option into an option of a tuple.
