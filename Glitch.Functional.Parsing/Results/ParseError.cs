@@ -54,9 +54,9 @@ public record ParseError : Error
     public override string Message => kind switch
     {
         ParseErrorKind.Message                                 => Label,
-        ParseErrorKind.Unexpected when Expectations.Length > 0 => $"Unexpected '{Label}'. Expected: {FormatExpectations()}",
-        ParseErrorKind.Expected   when label.IsSome            => $"Unexpected '{Label}'. Expected: {FormatExpectations()}",
-        ParseErrorKind.Unexpected                              => $"Unexpected '{Label}'",
+        ParseErrorKind.Unexpected when Expectations.Length > 0 => $"Unexpected {Label}. Expected: {FormatExpectations()}",
+        ParseErrorKind.Expected   when label.IsSome            => $"Unexpected {Label}. Expected: {FormatExpectations()}",
+        ParseErrorKind.Unexpected                              => $"Unexpected {Label}",
         ParseErrorKind.Expected                                => $"Expected: {FormatExpectations()}",
         ParseErrorKind.Empty                                   => kind.ToString(),
         ParseErrorKind.Unknown                                 => "An unknown error has occurred",
@@ -65,22 +65,25 @@ public record ParseError : Error
     };
 
     public static new ParseError New(string message) => new(ParseErrorKind.Message, message);
-    
-    public static ParseError Unexpected<TToken>(TToken token) => new(ParseErrorKind.Unexpected, token?.ToString() ?? string.Empty);
+
+    public static ParseError Unexpected<TToken>(TToken token) => Unexpected(token, ImmutableArray<string>.Empty);
+    public static ParseError Unexpected<TToken>(TToken token, IEnumerable<TToken> expected) => Unexpected(token, expected.Select(e => $"'{e}'"));
     public static ParseError Unexpected<TToken>(TToken token, IEnumerable<string> expected) => Unexpected(token, [.. expected]);
-    public static ParseError Unexpected<TToken>(TToken token, ImmutableArray<string> expected) => new(ParseErrorKind.Unexpected, token?.ToString() ?? string.Empty, expected);
+    public static ParseError Unexpected<TToken>(TToken token, ImmutableArray<string> expected) => new(ParseErrorKind.Unexpected, $"'{token}'", expected);
 
     public static ParseError Expected(params IEnumerable<string> expected) => Expected([.. expected]);
     public static ParseError Expected(ImmutableArray<string> expected) => new(ParseErrorKind.Expected, None, expected);
     public static ParseError Expected(ImmutableArray<string> expected, string found) => new(ParseErrorKind.Expected, found, expected);
+
+    public override Exception AsException() => new ParseException(this);
 
     private string FormatExpectations()
     {
         return Expectations switch
         {
             [var single]             => single,
-            [var one, var two]       => $"'{one}' or '{two}'",
-            [.. var items, var last] => $"{items.Select(i => $"'{i}'").Join(", ")}, or '{last}'",
+            [var one, var two]       => $"{one} or {two}",
+            [.. var items, var last] => $"{items.Join(", ")}, or {last}",
             []                       => string.Empty
         };
     }

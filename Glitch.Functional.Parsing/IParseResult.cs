@@ -1,19 +1,8 @@
-using System.Collections.Immutable;
+using Glitch.Functional.Parsing.Results;
 
 namespace Glitch.Functional.Parsing;
 
-public interface IParseResult<TToken, out T>
+public interface IParseResult<TToken, out T> : IResult<T, ParseError>
 {
-    bool IsOkay { get; }
-
-    // TODO Replace these two fields with ParseState
     ITokenSequence<TToken> Remaining { get; init; }
-    ImmutableArray<string> Expectations { get; init; }
-
-    IParseResult<TToken, TResult> Select<TResult>(Func<T, TResult> map);
-
-    virtual IParseResult<TToken, TResult> Cast<TResult>() => Select(DynamicCast<TResult>.From);
-
-    // UNDONE
-    //public abstract TResult Match<TResult>(Func<ParseSuccess<TToken, T>, TResult> okay, Func<ParseError<TToken, T>, TResult> fail);
 }

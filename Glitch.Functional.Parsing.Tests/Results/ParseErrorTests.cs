@@ -6,6 +6,20 @@ namespace Glitch.Functional.Parsing.Tests.Results;
 public class ParseErrorTests
 {
     [Fact]
+    public void AsException_ReturnsParseException()
+    {
+        // Arrange
+        var error = ParseError.New("Invalid parse");
+
+        // Act
+        var exception = error.AsException();
+
+        // Assert
+        exception.Should().BeOfType<ParseException>()
+                 .Which.Error.Should().Be(error);
+    }
+
+    [Fact]
     public void Message_DisplaysLabelAsMessage()
     {
         // Arrange
@@ -35,7 +49,7 @@ public class ParseErrorTests
     public void Unexpected_NoExpectations_DisplaysUnexpectedTokenAsMessage()
     {
         // Arrange
-        var message = "Unexpected 'C'";
+        var message = "Unexpected C";
 
         // Act
         var error = ParseError.Unexpected('C');
@@ -49,7 +63,7 @@ public class ParseErrorTests
     public void Unexpected_WithExpectations_DisplaysLabelAsUnexpected_AndExpectationsAsMessage()
     {
         // Arrange
-        var message = "Unexpected 'C'. Expected: 'A' or 'B'";
+        var message = "Unexpected C. Expected: A or B";
 
         // Act
         var error = ParseError.Unexpected('C', ["A", "B"]);
@@ -63,7 +77,7 @@ public class ParseErrorTests
     public void Expected_WithLabel_DisplaysLabelAsUnexpected_AndExpectationsAsMessage()
     {
         // Arrange
-        var message = "Unexpected 'C'. Expected: 'A' or 'B'";
+        var message = "Unexpected C. Expected: A or B";
 
         // Act
         var error = ParseError.Expected(["A", "B"], found: "C");
@@ -77,7 +91,7 @@ public class ParseErrorTests
     public void Expected_WithoutLabel_DisplaysExpectationsAsMessage()
     {
         // Arrange
-        var message = "Expected: 'A' or 'B'";
+        var message = "Expected: A or B";
 
         // Act
         var error = ParseError.Expected("A", "B");

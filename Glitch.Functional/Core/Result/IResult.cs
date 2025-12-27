@@ -1,6 +1,6 @@
 namespace Glitch.Functional;
 
-public interface IResult<T, E> : IMaybe<T>
+public interface IResult<out T, out E> : IMaybe<T>
 {
     bool IsOkay { get; }
     bool IsFail { get; }
