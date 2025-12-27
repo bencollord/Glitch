@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace Glitch.Functional.Parsing;
+namespace Glitch.Functional.Parsing.Legacy;
 
 public static partial class ParseExtensions
 {

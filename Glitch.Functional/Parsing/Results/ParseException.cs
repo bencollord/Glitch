@@ -1,4 +1,4 @@
-namespace Glitch.Functional.Parsing.Results;
+namespace Glitch.Functional.Parsing.Legacy.Results;
 
 public class ParseException : Exception
 {

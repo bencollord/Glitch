@@ -1,6 +1,6 @@
 using Glitch.Functional;
 
-namespace Glitch.Functional.Parsing.Results;
+namespace Glitch.Functional.Parsing.Legacy.Results;
 
 using static Option;
 

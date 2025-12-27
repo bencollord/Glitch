@@ -1,4 +1,4 @@
-namespace Glitch.Functional.Parsing;
+namespace Glitch.Functional.Parsing.Legacy;
 
 public abstract partial class Parser<TToken, T>
 {

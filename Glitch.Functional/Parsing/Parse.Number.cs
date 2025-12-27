@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Glitch.Functional.Parsing;
+namespace Glitch.Functional.Parsing.Legacy;
 
 public static partial class Parse
 {

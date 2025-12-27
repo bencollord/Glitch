@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Glitch.Functional.Parsing;
+using Glitch.Functional.Parsing.Legacy;
 
-namespace Glitch.Functional.Parsing.Json;
+namespace Glitch.Functional.Parsing.Legacy.Json;
 
 using static Parse;
 

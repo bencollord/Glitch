@@ -1,10 +1,10 @@
 using Glitch.Functional;
-using Glitch.Functional.Parsing.Input;
-using Glitch.Functional.Parsing.Results;
+using Glitch.Functional.Parsing.Legacy.Input;
+using Glitch.Functional.Parsing.Legacy.Results;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace Glitch.Functional.Parsing;
+namespace Glitch.Functional.Parsing.Legacy;
 
 public abstract partial class Parser<TToken, T>
 {

@@ -1,6 +1,6 @@
 
 
-namespace Glitch.Functional.Parsing.Input;
+namespace Glitch.Functional.Parsing.Legacy.Input;
 
 public record EmptyTokenSequence<TToken> : TokenSequence<TToken>
 {

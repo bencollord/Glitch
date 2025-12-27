@@ -4,7 +4,7 @@ using Glitch.Text;
 using System.Collections;
 using System.Collections.Immutable;
 
-namespace Glitch.Functional.Parsing.Json;
+namespace Glitch.Functional.Parsing.Legacy.Json;
 
 public record JsonObject : JsonNode, IEnumerable<JsonProperty>
 {

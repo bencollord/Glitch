@@ -1,6 +1,6 @@
-using Glitch.Functional.Parsing.Results;
+using Glitch.Functional.Parsing.Legacy.Results;
 
-namespace Glitch.Functional.Parsing;
+namespace Glitch.Functional.Parsing.Legacy;
 
 public static partial class Parse
 {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Glitch.Functional.Parsing.Json;
+namespace Glitch.Functional.Parsing.Legacy.Json;
 
 public abstract record JsonNode
 {

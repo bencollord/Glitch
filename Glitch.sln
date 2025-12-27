@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.5.33627.172
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Glitch", "Glitch\Glitch.csproj", "{564E8F4D-169A-42AC-891D-E5AA32AB5E4D}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Glitch.Functional.Tests", "Glitch.Functional.Tests\Glitch.Functional.Tests.csproj", "{7BE88C92-BDC4-3FA5-60C6-F2A065130DF2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Glitch.Json", "Glitch.Json\Glitch.Json.csproj", "{B01FABF7-AB0F-4F62-B4D4-26B0840EC184}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Glitch.Functional.Parsing", "Glitch.Functional.Parsing\Glitch.Functional.Parsing.csproj", "{25019C9F-1D55-4884-8867-1CB0EDAD312D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{B01FABF7-AB0F-4F62-B4D4-26B0840EC184}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B01FABF7-AB0F-4F62-B4D4-26B0840EC184}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B01FABF7-AB0F-4F62-B4D4-26B0840EC184}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25019C9F-1D55-4884-8867-1CB0EDAD312D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25019C9F-1D55-4884-8867-1CB0EDAD312D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25019C9F-1D55-4884-8867-1CB0EDAD312D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25019C9F-1D55-4884-8867-1CB0EDAD312D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,9 +1,9 @@
 using Glitch.Functional;
 using Glitch.Functional.Extensions;
-using Glitch.Functional.Parsing.Input;
-using Glitch.Functional.Parsing.Results;
+using Glitch.Functional.Parsing.Legacy.Input;
+using Glitch.Functional.Parsing.Legacy.Results;
 
-namespace Glitch.Functional.Parsing;
+namespace Glitch.Functional.Parsing.Legacy;
 
 public abstract partial class Parser<TToken, T>
 {

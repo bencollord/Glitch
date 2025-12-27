@@ -1,6 +1,6 @@
 using Glitch.Text;
 
-namespace Glitch.Functional.Parsing.Json;
+namespace Glitch.Functional.Parsing.Legacy.Json;
 
 public record JsonString(string Value) : JsonValue
 {

@@ -1,4 +1,4 @@
-namespace Glitch.Functional.Parsing.Input;
+namespace Glitch.Functional.Parsing.Legacy.Input;
 
 public record ArrayTokenSequence<TToken> : TokenSequence<TToken>
 {

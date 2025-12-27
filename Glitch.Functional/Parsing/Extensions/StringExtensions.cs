@@ -1,4 +1,4 @@
-namespace Glitch.Functional.Parsing.Extensions;
+namespace Glitch.Functional.Parsing.Legacy.Extensions;
 
 public static class StringExtensions
 {

@@ -1,4 +1,4 @@
-namespace Glitch.Functional.Parsing;
+namespace Glitch.Functional.Parsing.Legacy;
 
 using static Parse;
  

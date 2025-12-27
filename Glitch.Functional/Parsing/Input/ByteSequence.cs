@@ -1,6 +1,6 @@
 using Glitch.Functional;
 
-namespace Glitch.Functional.Parsing.Input;
+namespace Glitch.Functional.Parsing.Legacy.Input;
 
 public record ByteSequence : ArrayTokenSequence<byte>
 {

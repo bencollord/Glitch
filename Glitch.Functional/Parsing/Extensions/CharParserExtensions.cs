@@ -1,9 +1,9 @@
-using Glitch.Functional.Parsing.Input;
-using Glitch.Functional.Parsing.Results;
+using Glitch.Functional.Parsing.Legacy.Input;
+using Glitch.Functional.Parsing.Legacy.Results;
 using Glitch.Functional;
 using Glitch.Functional.Errors;
 
-namespace Glitch.Functional.Parsing;
+namespace Glitch.Functional.Parsing.Legacy;
 
 public static partial class ParserExtensions
 {

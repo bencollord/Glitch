@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Glitch.Functional.Parsing.Input;
+namespace Glitch.Functional.Parsing.Legacy.Input;
 
 public abstract record TokenSequence<TToken>
 {

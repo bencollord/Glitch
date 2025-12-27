@@ -1,7 +1,7 @@
 using Glitch.Functional;
-using Glitch.Functional.Parsing.Input;
+using Glitch.Functional.Parsing.Legacy.Input;
 
-namespace Glitch.Functional.Parsing.Results;
+namespace Glitch.Functional.Parsing.Legacy.Results;
 
 public record ParseSuccess<TToken, T> : ParseResult<TToken, T>
 {
