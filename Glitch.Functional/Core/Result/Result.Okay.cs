@@ -28,8 +28,8 @@ public partial record Result<T, E>
             => new Result<TResult, EResult>.Okay(okay(Value));
 
         /// <inheritdoc />
-        public override TResult Match<TResult>(Func<T, TResult> ifOkay, Func<E, TResult> _)
-            => ifOkay(Value);
+        public override TResult Match<TResult>(Func<T, TResult> okay, Func<E, TResult> _)
+            => okay(Value);
 
         /// <inheritdoc />
         public override Result<T, EResult> Or<EResult>(Result<T, EResult> other) => new Result<T, EResult>.Okay(Value);

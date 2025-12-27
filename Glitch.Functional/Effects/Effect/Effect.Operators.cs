@@ -8,6 +8,8 @@ public partial class Effect<T>
 {
     public static implicit operator Effect<T>(Expected<T> result) => Return(result);
 
+    public static implicit operator Effect<T>(Okay<T> result) => Return(result.Value);
+
     public static implicit operator Effect<T>(T value) => Return(value);
 
     public static implicit operator Effect<T>(Error error) => Fail(error);

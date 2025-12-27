@@ -1,3 +1,5 @@
+using Glitch.Functional.Extensions;
+
 namespace Glitch.Functional;
 
 /// <summary>
@@ -19,6 +21,8 @@ public static partial class Option
 
     // Function syntax for methods
     // UNDONE
+    public static IEnumerable<T> Somes<T>(IEnumerable<Option<T>> options) => options.Somes();
+
     public static bool IsSome<T>(Option<T> option) => option.IsSome;
     public static bool IsNone<T>(Option<T> option) => option.IsNone;
 
@@ -27,4 +31,6 @@ public static partial class Option
 
     public static (Option<TLeft> Left, Option<TRight> Right) Unzip<TLeft, TRight>(Option<(TLeft Left, TRight Right)> option) =>
         (option.Select(x => x.Left), option.Select(x => x.Right));
+
+    public static T IfNone<T>(Option<T> option, T none) => option.IfNone(none);
 }

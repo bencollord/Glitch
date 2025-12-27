@@ -26,4 +26,10 @@ public static partial class OptionExtensions
 
         public static Option<TResult> operator &(Option<T> x, TResult y) => x.And(Option.Some(y));
     }
+
+    extension<T, E>(Option<T> self)
+    {
+        // Natural transformation
+        public static Result<T, E> operator |(Option<T> x, Fail<E> y) => x.OkayOr(y.Error);
+    }
 }
