@@ -14,9 +14,9 @@ public static partial class Parse
 
     public static ITokenParser<char> Tab => Char('\t');
     
-    public static ITokenParser<char> SingleSpace => Char(' ');
+    public static ITokenParser<char> Space => Char(' ');
 
-    public static IParser<char, char> NonBreakingSpace => Char(c => char.IsWhiteSpace(c) && !Environment.NewLine.Contains(c));
+    public static IParser<char, char> NonBreakingSpace => Char(c => char.IsWhiteSpace(c) && !Environment.NewLine.Contains(c), "non-breaking space");
 
     //public static IParser<char, string> NonBreakingSpaces => NonBreakingSpace.AtLeastOnce().AsString();
 
@@ -37,5 +37,7 @@ public static partial class Parse
 
     public static ITokenParser<char> Char(Func<char, bool> predicate) => Satisfy(predicate);
 
-    //public static ITokenParser<char> OneOf(string chars) => OneOf(chars.AsEnumerable());
+    public static ITokenParser<char> Char(Func<char, bool> predicate, string label) => Satisfy(predicate, label);
+
+    public static ITokenParser<char> OneOf(string chars) => Char(chars.Contains, $"One of '{chars}'"); // DESIGN This error message will differ from other OneOf methods
 }

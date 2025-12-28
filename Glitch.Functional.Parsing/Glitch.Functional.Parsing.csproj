@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Parsers\Undone\**" />
+    <EmbeddedResource Remove="Parsers\Undone\**" />
+    <None Remove="Parsers\Undone\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Glitch.Functional\Glitch.Functional.csproj" />
   </ItemGroup>
 

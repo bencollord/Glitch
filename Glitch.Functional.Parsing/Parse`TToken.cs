@@ -1,11 +1,11 @@
-using Glitch.Functional.Parsing.Results;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Functional.Parsing;
 
 using static Option;
 
-public static partial class Parse<TToken>
+// TODO Decide whether this or the non-generic Parse class should be the canonical source for token parsers.
+public static class Parse<TToken>
 {
     public static ITokenParser<TToken> Any => Satisfy(_ => true);
 

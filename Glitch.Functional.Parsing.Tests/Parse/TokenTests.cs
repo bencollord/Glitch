@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Glitch.Functional.Parsing.Tests.Parse;
 
-public class SatisfyTests
+public class TokenTests
 {
     [Fact]
     public void Satisfy_MatchingToken_Succeeds()
@@ -68,5 +68,23 @@ public class SatisfyTests
         // Assert
         result.Should().BeOfType<ParseFailure<byte, byte>>()
               .Which.Error.Should().BeEquivalentTo(ParseError.Unexpected(6, [4]));
+    }
+
+    [Fact]
+    public void OneOf_IsMatch_Succeeds()
+    {
+        // Arrange
+        // Act
+        // Assert
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void OneOf_NoMatch_Fails()
+    {
+        // Arrange
+        // Act
+        // Assert
+        throw new NotImplementedException();
     }
 }
