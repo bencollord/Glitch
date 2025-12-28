@@ -14,7 +14,5 @@ public static partial class Parse
 
     public static ITokenParser<TToken> Token<TToken>(TToken token) => Satisfy<TToken>(t => t!.Equals(token)).WithLabel($"'{token}'");
 
-    // UNDONE
-    //public static Parser<TToken, Unit> Not<TToken, T>(Parser<TToken, T> parser)
-    //    => parser.Not();
+    public static IParser<TToken, Unit> Not<TToken, T>(IParser<TToken, T> parser) => parser.Not();
 }

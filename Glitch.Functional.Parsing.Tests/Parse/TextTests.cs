@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Glitch.Functional.Parsing.Tests.Parse;
 
-public class CharTests
+public class TextTests
 {
     [Fact]
     public void AnyChar_Succeeds()
@@ -51,6 +51,24 @@ public class CharTests
     [InlineData('\r')]
     [InlineData('\n')]
     public void NonBreakingSpace_LineBreak_Fails(char character)
+    {
+        // Arrange
+        // Act
+        // Assert
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Literal_ExactMatch_Succeeds()
+    {
+        // Arrange
+        // Act
+        // Assert
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Literal_NonExactMatch_Fails()
     {
         // Arrange
         // Act

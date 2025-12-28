@@ -13,6 +13,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Parsers\ReturnParser - Copy.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Glitch.Functional\Glitch.Functional.csproj" />
   </ItemGroup>
 

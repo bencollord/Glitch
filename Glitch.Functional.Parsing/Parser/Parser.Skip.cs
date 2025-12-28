@@ -8,6 +8,8 @@ public static partial class Parser
     {
         public IParser<TToken, Unit> Skip() => source.Maybe().Discard();
 
+        public IParser<TToken, Unit> SkipAll() => source.ZeroOrMoreTimes().Discard();
+
         public IParser<TToken, Unit> SkipUntil<TStop>(IParser<TToken, TStop> stop) => source.Until(stop).Skip();
 
         // UNDONE SkipMany, Skip(count), SkipWhile(predicate)
