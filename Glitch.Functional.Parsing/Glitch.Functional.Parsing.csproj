@@ -7,12 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Parser\Undone\**" />
-    <EmbeddedResource Remove="Parser\Undone\**" />
-    <None Remove="Parser\Undone\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Remove="Parsers\ReturnParser - Copy.cs" />
   </ItemGroup>
 

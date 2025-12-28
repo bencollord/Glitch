@@ -1,12 +1,11 @@
-using Glitch.Functional.Collections;
 using Glitch.Functional.Parsing.Legacy;
 using Glitch.Functional.Parsing.Results;
 
 namespace Glitch.Functional.Parsing;
 
-public static partial class Parse
+public partial class Parse : Parse<char>
 {
-    public static ITokenParser<char> AnyChar => Any<char>();
+    public static ITokenParser<char> AnyChar => Any;
 
     public static ITokenParser<char> Letter => Char(char.IsLetter).WithLabel("letter");
     
@@ -35,13 +34,6 @@ public static partial class Parse
     public static IParser<char, string> LineBreak => from cr in Char('\r').Maybe()
                                                      from lf in Char('\n')
                                                      select Environment.NewLine;
-
-    public static IParser<char, Unit> EndOfInput =>
-        from state in State<char>()
-        from check in state.IsEnd
-                    ? Parse<char>.Return(Unit.Value)
-                    : Parse<char>.Error<Unit>(ParseError.New("Expected EOF"))
-        select Unit.Value;
 
     public static IParser<char, Unit> SkipWhitespace => Whitespace.SkipAll();
 

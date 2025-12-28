@@ -2,7 +2,16 @@ using Glitch.Functional.Parsing.Input;
 
 namespace Glitch.Functional.Parsing;
 
-public static partial class Parser
+/// <summary>
+/// Extensions for parsing to a result and throwing on failure.
+/// </summary>
+/// <remarks>
+/// This is semantically part of <see cref="Parser"/>, but the naming collision
+/// with <see cref="Parsing.Parse{TToken}"/> is making the rest of the methods in that
+/// class a giant pain in the neck to implement. I could always qualify the name, but
+/// I'd rather not.
+/// </remarks>
+public static partial class ParseExtensions
 {
     extension<T>(IParser<char, T> source)
     {

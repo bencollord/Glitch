@@ -3,7 +3,7 @@ using Glitch.Functional.Parsing.Results;
 namespace Glitch.Functional.Parsing;
 
 internal class SequenceParser<TToken, T, TCollection> : IParser<TToken, TCollection>
-    where TCollection : IEnumerable<TToken>
+    where TCollection : IEnumerable<T>
 {
     private readonly IEnumerable<IParser<TToken, T>> parsers;
     private readonly Func<IEnumerable<T>, TCollection> collector;

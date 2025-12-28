@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace Glitch.Functional.Parsing;
 
-public static partial class Parse
+public partial class Parse
 {
     private static readonly Func<int, Func<string, int>> parseInt = radix => input => Convert.ToInt32(input, radix);
 

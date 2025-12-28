@@ -9,33 +9,13 @@ public static partial class Parser
 {
     extension<TToken, T>(IParser<TToken, T> source)
     {
-        public IParser<TToken, T> Or(IParser<TToken, T> other) => OneOf(source, other);
+        public IParser<TToken, T> Or(IParser<TToken, T> other) => Parse<TToken>.OneOf(source, other);
 
         public IParser<TToken, TResult> Apply<TResult>(IParser<TToken, Func<T, TResult>> apply) => source.Then(x => apply.Select(y => y(x)));
 
         public IParser<TToken, T> Except<TOther>(IParser<TToken, TOther> other) => other.Not().Then(source);
 
         public IParser<TToken, Unit> Not() => new NegatedParser<TToken, T>(source);
-
-        public IParser<TToken, T> Before([DisallowNull] TToken token) => source.Before(Token(token));
-
-        public IParser<TToken, T> Before<TOther>(IParser<TToken, TOther> parser) => source.Then(parser, (me, _) => me);
-
-        public IParser<TToken, T> After([DisallowNull] TToken token) => source.After(Token(token));
-
-        public IParser<TToken, T> After<TOther>(IParser<TToken, TOther> parser) => parser.Then(source, (_, me) => me);
-
-        public IParser<TToken, T> Between<TSeparator>(TToken separator) => source.Between(separator, separator);
-
-        public IParser<TToken, T> Between<TStart, TStop>(TStart start, TStop stop) => source.Between(Token(start), Token(stop));
-
-        public IParser<TToken, T> Between<TSeparator>(IParser<TToken, TSeparator> separator) => source.Between(separator, separator);
-
-        public IParser<TToken, T> Between<TStart, TStop>(IParser<TToken, TStart> start, IParser<TToken, TStop> stop) =>
-            from s in start
-            from x in source
-            from e in stop
-            select x;
 
         public IParser<TToken, TOther> Then<TOther>(IParser<TToken, TOther> other) => source.Then(_ => other);
 
