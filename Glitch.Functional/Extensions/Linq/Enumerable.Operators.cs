@@ -8,7 +8,12 @@ public static partial class LinqExtensions
     extension<T>(IEnumerable<T> self)
     {
         public static IEnumerable<T> operator +(IEnumerable<T> x, IEnumerable<T> y) => x.Concat(y);
+        public static IEnumerable<T> operator +(T x, IEnumerable<T> y) => y.Prepend(x);
+        public static IEnumerable<T> operator +(IEnumerable<T> x, T y) => x.Append(y);
+        
         public static IEnumerable<T> operator -(IEnumerable<T> x, IEnumerable<T> y) => x.Except(y);
+        public static IEnumerable<T> operator -(IEnumerable<T> x, T y) => x.Except([y]);
+
         public static IEnumerable<T> operator |(IEnumerable<T> x, IEnumerable<T> y) => x.Union(y);
         public static IEnumerable<T> operator &(IEnumerable<T> x, IEnumerable<T> y) => x.Intersect(y);
         public static IEnumerable<T> operator ^(IEnumerable<T> x, IEnumerable<T> y) => x.Union(y).Except(x.Intersect(y));

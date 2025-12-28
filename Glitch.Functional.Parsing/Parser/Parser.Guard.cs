@@ -1,6 +1,9 @@
 using Glitch.Functional.Parsing.Results;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Functional.Parsing;
+
+using static Parse;
 
 public static partial class Parser
 {

@@ -1,5 +1,3 @@
-using Glitch.Functional.Parsing.Results;
-
 namespace Glitch.Functional.Parsing;
 
 public static partial class Parser

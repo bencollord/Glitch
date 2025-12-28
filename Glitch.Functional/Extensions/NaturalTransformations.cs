@@ -10,7 +10,7 @@ public static class NaturalTransformations
         public IEnumerable<T> Iterate() => source.Match(Enumerable.Singleton, Enumerable.Empty<T>);
     }
 
-    extension<T, E>(Result<T, E> source)
+    extension<T, E>(IResult<T, E> source)
     {
         public Option<T> OkayOrNone() => source.Match(Option.Some, _ => Option.None);
 

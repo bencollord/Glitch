@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Parsers\Undone\**" />
-    <EmbeddedResource Remove="Parsers\Undone\**" />
-    <None Remove="Parsers\Undone\**" />
+    <Compile Remove="Parser\Undone\**" />
+    <EmbeddedResource Remove="Parser\Undone\**" />
+    <None Remove="Parser\Undone\**" />
   </ItemGroup>
 
   <ItemGroup>
