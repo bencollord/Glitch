@@ -3,9 +3,6 @@ using Glitch.Functional;
 using Glitch.Functional.Parsing;
 using Glitch.Functional.Parsing.Input;
 using Glitch.Functional.Parsing.Results;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Glitch.Functional.Parsing.Tests.Modules;
 

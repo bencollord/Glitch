@@ -2,6 +2,11 @@ namespace Glitch.Functional.Parsing;
 
 public static partial class Parser
 {
+    extension<T>(IParser<char, T> source)
+    {
+        public IParser<char, T> Lexeme() => Parse.Lexeme(source);
+    }
+
     extension(IParser<char, char> source)
     {
         /// <summary>

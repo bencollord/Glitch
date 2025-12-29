@@ -1,5 +1,5 @@
-using Glitch.Functional.Parsing.Legacy;
 using Glitch.Functional.Parsing.Results;
+using System.Globalization;
 
 namespace Glitch.Functional.Parsing;
 
@@ -20,11 +20,12 @@ public partial class Parse
 
     public static IParser<char, string> Numeric => Digit.AtLeastOnce();
 
-    public static IParser<char, string> Hex
-        => Digit.Or(OneOf("ABCDEF")) // TODO Case-insensitive
-                .Or(OneOf("abcdef"))
-                .AtLeastOnce()
-                .After(Literal("0x").Maybe());
+    public static IParser<char, string> Hex =>
+        Digit.Or(OneOf("ABCDEF")) // TODO Case-insensitive
+             .Or(OneOf("abcdef"))
+             .AtLeastOnce();
+
+    public static IParser<char, string> Binary => OneOf("01").AtLeastOnce();
 
     public static ITokenParser<char> Tab => Char('\t');
     
@@ -57,4 +58,6 @@ public partial class Parse
                    .Select(chars => new string([.. chars]))
                    .WithExpected(text);
     }
+
+    public static IParser<char, T> Lexeme<T>(IParser<char, T> parser) => NonBreakingSpace.SkipAll() >> parser >> NonBreakingSpace.SkipAll();
 }

@@ -1,11 +1,6 @@
 using Glitch.Text;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Glitch.Functional.Parsing.Legacy.Json;
+namespace Glitch.Functional.Parsing.Json;
 
 public abstract record JsonNode
 {

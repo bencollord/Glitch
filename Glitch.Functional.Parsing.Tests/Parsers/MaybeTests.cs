@@ -1,10 +1,5 @@
 ﻿using FluentAssertions;
-using Glitch.Functional.Parsing.Input;
 using Glitch.Functional.Parsing.Results;
-using System;
-using System.Collections.Generic;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
 
 namespace Glitch.Functional.Parsing.Tests.Parsers;
 

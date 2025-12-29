@@ -9,10 +9,13 @@
   <ItemGroup>
     <Compile Remove="Errors\Outcome\**" />
     <Compile Remove="Errors\Recoverable - Error Sequence\**" />
+    <Compile Remove="Parsing\**" />
     <EmbeddedResource Remove="Errors\Outcome\**" />
     <EmbeddedResource Remove="Errors\Recoverable - Error Sequence\**" />
+    <EmbeddedResource Remove="Parsing\**" />
     <None Remove="Errors\Outcome\**" />
     <None Remove="Errors\Recoverable - Error Sequence\**" />
+    <None Remove="Parsing\**" />
   </ItemGroup>
 
   <ItemGroup>

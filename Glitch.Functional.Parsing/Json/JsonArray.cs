@@ -2,7 +2,7 @@ using Glitch.Text;
 using System.Collections;
 using System.Collections.Immutable;
 
-namespace Glitch.Functional.Parsing.Legacy.Json;
+namespace Glitch.Functional.Parsing.Json;
 
 public record JsonArray : JsonNode, IEnumerable<JsonNode>
 {

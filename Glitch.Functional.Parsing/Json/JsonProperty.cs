@@ -1,6 +1,6 @@
 using Glitch.Text;
 
-namespace Glitch.Functional.Parsing.Legacy.Json;
+namespace Glitch.Functional.Parsing.Json;
 
 public record JsonProperty(string Name, JsonNode Value) : JsonNode
 {

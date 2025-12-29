@@ -1,10 +1,6 @@
 ﻿using FluentAssertions;
-using Glitch.Functional.Parsing.Input;
-using Glitch.Functional.Parsing.Results;
 using Glitch.Functional;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Glitch.Functional.Parsing.Results;
 
 namespace Glitch.Functional.Parsing.Tests.Parsers;
 

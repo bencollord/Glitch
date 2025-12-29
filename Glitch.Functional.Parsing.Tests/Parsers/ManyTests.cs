@@ -8,6 +8,86 @@ using static Parse;
 public class ManyTests
 {
     [Fact]
+    public void ZeroOrMoreTimes_MultipleMatches_ReturnsAllMatches()
+    {
+        // Arrange
+        var text = "Alpha";
+
+        var parser = Letter.ZeroOrMoreTimes();
+
+        // Act
+        var result = parser.Parse(text);
+
+        // Assert
+        result.Should().Be(text);
+    }
+
+    [Fact]
+    public void ZeroOrMoreTimes_NoMatches_Succeeds_WithoutConsumingInput()
+    {
+        // Arrange
+        var text = "Alpha";
+
+        var parser = Digit.ZeroOrMoreTimes();
+
+        // Act
+        var result = parser.Execute(text);
+
+        // Assert
+        result.IsOkay.Should().BeTrue();
+        result.Remaining.Position.Should().Be(0);
+        result.Remaining.ReadToEnd().Should().BeOfType<string>()
+              .Which.Should().Be(text);
+    }
+
+    [Fact]
+    public void AtLeastOnce_MultipleMatches_ReturnsAllMatches()
+    {
+        // Arrange
+        var text = "Alpha";
+
+        var parser = Letter.AtLeastOnce();
+
+        // Act
+        var result = parser.Parse(text);
+
+        // Assert
+        result.Should().Be(text);
+    }
+
+    [Fact]
+    public void AtLeastOnce_OneMatch_Succeeds_OnlyConsumesAndReturnsMatch()
+    {
+        // Arrange
+        var text = "A1 Steak Sauce";
+
+        var parser = Letter.AtLeastOnce();
+
+        // Act
+        var result = parser.Execute(text);
+
+        // Assert
+        result.IsOkay.Should().BeTrue();
+        result.Remaining.ReadToEnd().Should().BeOfType<string>()
+              .Which.Should().BeEquivalentTo(text[1..]);
+    }
+
+    [Fact]
+    public void AtLeastOnce_NoMatches_Fails()
+    {
+        // Arrange
+        var text = "Alpha";
+
+        var parser = Digit.AtLeastOnce();
+
+        // Act
+        var result = parser.Execute(text);
+
+        // Assert
+        result.IsOkay.Should().BeFalse();
+    }
+
+    [Fact]
     public void ZeroOrMoreTimes_Succeeds_ReturnsItems()
     {
         // Arrange

@@ -1,4 +1,4 @@
-namespace Glitch.Functional.Parsing.Legacy.Json;
+namespace Glitch.Functional.Parsing.Json;
 
 public abstract record JsonValue : JsonNode
 {

@@ -38,4 +38,6 @@ public partial class Parse
 
     /// <inheritdoc cref="Parse{TToken}.Rec{T}(Func{IParser{TToken, T}, IParser{TToken, T}})"/>
     public static IParser<char, T> Rec<T>(Func<IParser<char, T>, IParser<char, T>> function) => Parse<char>.Rec(function);
+
+    public static IParser<char, T> Trace<T>(IParser<char, T> parser) => parser.Trace();
 }

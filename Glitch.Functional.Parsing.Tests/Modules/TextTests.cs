@@ -1,10 +1,6 @@
 ﻿using FluentAssertions;
 using Glitch.Functional.Parsing.Input;
 using Glitch.Functional.Parsing.Results;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Glitch.Functional.Parsing.Tests.Modules;
 
@@ -23,6 +19,23 @@ public class TextTests
 
         // Assert
         result.Should().Be('T');
+    }
+
+    [Fact]
+    public void AnyChar_ZeroOrMoreTimes_ReturnsAndConsumesWholeString()
+    {
+        // Arrange
+        var text = "Foo, Bar, Baz";
+        var parser = AnyChar.ZeroOrMoreTimes();
+
+        // Act
+        var result = parser.Execute(text);
+
+        // Assert
+        result.Should().BeOfType<ParseSuccess<char, string>>()
+              .Which.Value.Should().Be(text);
+
+        result.Remaining.IsEnd.Should().BeTrue();
     }
 
     [Theory]
@@ -113,5 +126,41 @@ public class TextTests
         // Assert
         result.Should().BeOfType<ParseFailure<char, string>>()
               .Which.Error.Message.Should().Be("Unexpected 'h'. Expected: Hello there");
+    }
+
+    [Fact]
+    public void Char_Succeeds_ConsumesOneChar()
+    {
+        // Arrange
+        var text = new CharSequence("Test");
+        var parser = Char('T');
+
+        // Act
+        var result = parser.Execute(text);
+
+        // Assert
+        var ok = result.Should().BeOfType<ParseSuccess<char, char>>()
+                       .Which.Value.Should().Be('T');
+        
+        result.Remaining.ReadToEnd().Should().BeOfType<string>()
+              .Which.Should().BeEquivalentTo("est");
+    }
+
+    [Fact]
+    public void Char_Fails_DoesNotConsume()
+    {
+        // Arrange
+        var text = new CharSequence("Test");
+        var parser = Char('C');
+
+        // Act
+        var result = parser.Execute(text);
+
+        // Assert
+        result.Should().BeOfType<ParseFailure<char, char>>()
+              .Which.Error.Message.Should().Be("Unexpected 'T'. Expected: 'C'");
+
+        result.Remaining.ReadToEnd().Should().BeOfType<string>()
+              .Which.Should().BeEquivalentTo("Test");
     }
 }

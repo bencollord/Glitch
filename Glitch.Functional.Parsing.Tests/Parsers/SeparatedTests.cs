@@ -1,17 +1,51 @@
 ﻿using FluentAssertions;
-using Glitch.Functional.Parsing.Input;
 using Glitch.Functional.Parsing.Results;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Glitch.Functional.Parsing.Tests.Parsers;
 
 using static Parse;
-using static System.Net.Mime.MediaTypeNames;
 
 public class SeparatedTests
 {
+    [Fact]
+    public void SeparatedBy_WithStringSeparator_Succeeds()
+    {
+        // Arrange
+        var separator = ", ";
+        var csv = "Foo, Bar, Baz";
+
+        var parser = Letter.AtLeastOnce()
+                           .SeparatedBy(Literal(separator))
+                           .AtLeastOnce();
+
+        // Act
+        var result = parser.Parse(csv);
+
+        // Assert
+        result.Should().BeEquivalentTo(csv.Split(separator));
+    }
+
+    [Fact]
+    public void SeparatedBy_WithSpecificNumberOfTimes_Succeeds_WhenCountMatches()
+    {
+        // Arrange
+        var separator = ", ";
+        var csv = "Foo, Bar, Baz";
+
+        var parser = Letter.AtLeastOnce()
+                           .SeparatedBy(Literal(separator))
+                           .Times(3);
+
+        // Act
+        var result = parser.Parse(csv).ToArray();
+
+        // Assert
+        result[0].Should().Be("Foo");
+        result[1].Should().Be("Bar");
+        result[2].Should().Be("Baz");
+        result.Length.Should().Be(3);
+    }
+
     [Fact]
     public void ZeroOrMoreTimes_Succeeds_ReturnsItems()
     {

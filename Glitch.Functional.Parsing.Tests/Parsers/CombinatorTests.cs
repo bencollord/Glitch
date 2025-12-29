@@ -1,9 +1,5 @@
 ﻿using FluentAssertions;
-using Glitch.Functional.Parsing.Input;
 using Glitch.Functional.Parsing.Results;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Glitch.Functional.Parsing.Tests.Parsers;
 
@@ -113,6 +109,68 @@ public class CombinatorTests
         // Assert
         result.IsFail(out var err).Should().BeTrue();
         err!.Message.Should().Be("Unexpected 'h'. Expected: Jon");
+    }
+
+    [Fact]
+    public void Before_MatchComesBeforeToken_Succeeds()
+    {
+        // Arrange
+        var csv = "Alpha,";
+
+        var parser = Letter.AtLeastOnce()
+                           .Before(',');
+        // Act
+        var result = parser.Parse(csv);
+
+        // Assert
+        result.Should().Be("Alpha");
+    }
+
+    [Fact]
+    public void Before_NoMatchForOther_Fails()
+    {
+        // Arrange
+        var csv = "Alpha";
+
+        var parser = Letter.AtLeastOnce()
+                           .Before(',');
+        // Act
+        var result = parser.Execute(csv);
+
+        // Assert
+        result.IsFail(out var err).Should().BeTrue();
+        err!.Message.Should().Contain("Expected: ','");
+    }
+
+    [Fact]
+    public void After_MatchComesAfterToken_Succeeds()
+    {
+        // Arrange
+        var csv = ",Bravo";
+
+        var parser = Letter.AtLeastOnce()
+                           .After(',');
+        // Act
+        var result = parser.Parse(csv);
+
+        // Assert
+        result.Should().Be("Bravo");
+    }
+
+    [Fact]
+    public void After_NoMatchForOther_Fails()
+    {
+        // Arrange
+        var csv = "Bravo";
+
+        var parser = Letter.AtLeastOnce()
+                           .Before(',');
+        // Act
+        var result = parser.Execute(csv);
+
+        // Assert
+        result.IsFail(out var err).Should().BeTrue();
+        err!.Message.Should().Contain("Expected: ','");
     }
 
     [Fact]
