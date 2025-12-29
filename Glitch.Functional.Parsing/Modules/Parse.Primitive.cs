@@ -1,4 +1,5 @@
 using Glitch.Functional.Extensions;
+using Glitch.Functional.Parsing.Input;
 using Glitch.Functional.Parsing.Results;
 
 namespace Glitch.Functional.Parsing;
@@ -11,6 +12,8 @@ public partial class Parse<TToken>
                     ? Return(Unit.Value)
                     : Error<Unit>(ParseError.FromMessage("Expected EOF"))
         select Unit.Value;
+
+    public static IParser<TToken, T> Lift<T>(ParseRunner<TToken, T> func) => new LiftParser<TToken, T>(func);
 
     public static IParser<TToken, T> Return<T>(T value) => State.Then(s => Return(ParseResult.Okay(value, s)));
 

@@ -16,6 +16,7 @@ public static partial class ReaderExtensions
 
     extension<TEnv, T>(Reader<TEnv, T> self)
     {
+        public Func<TEnv, T> AsFunc() => env => self(env);
 
         /// <summary>
         /// Maps the reader's input value such that the Run method now

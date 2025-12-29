@@ -18,6 +18,8 @@ public partial class Parse
 
     public static IParser<char, Unit> EndOfInput => Parse<char>.EndOfInput;
 
+    public static IParser<char, T> Lift<T>(ParseRunner<char, T> runner) => Parse<char>.Lift(runner);
+
     public static IParser<char, T> Return<T>(T value) => Parse<char>.Return(value);
 
     public static IParser<char, T> Return<T>(IParseResult<char, T> result) => Parse<char>.Return(result);
