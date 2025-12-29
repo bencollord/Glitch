@@ -2,6 +2,7 @@ using Glitch.Functional;
 using Glitch.Functional.Extensions;
 using Glitch.Functional.Parsing.Results;
 using System.Collections.Immutable;
+using System.Diagnostics;
 
 namespace Glitch.Functional.Parsing;
 
@@ -49,7 +50,14 @@ internal record ManyParser<TToken, T, TCollection> : IManyParser<TToken, T, TCol
 
             if (max.IsSomeAnd(m => items.Count + 1 > m))
             {
-                var error = ParseError.Unexpected(value, expected: [$"No more than {max.Unwrap()} items"]);
+                // HACK This is just to keep myself from being frustrated using this library in LinqPad for now.
+                // What really needs to happen is that expectation hints need to be included in successful results,
+                // but that would require a bunch of refactoring I don't want to do at 6 PM on a Sunday.
+                var values = items
+                    .Select(x => x?.ToString() ?? throw new InvalidOperationException("If parsers are returning null, I did something very, very wrong"))
+                    .ToImmutableArray();
+
+                var error = ParseError.Expected(new Expectation(values, min, max));
 
                 return ParseResult<TToken>.Error<TCollection>(error, input);
             }
@@ -61,15 +69,9 @@ internal record ManyParser<TToken, T, TCollection> : IManyParser<TToken, T, TCol
         if (min.IsSomeAnd(m => items.Count < m))
         {
             // TODO Find a way to get label for successful result for better error messages.
-            var expected = lastError.Iterate()
-                .SelectMany(x => x.Expectations)
-                .Prepend($"At least {min.Unwrap()} times, found only {items.Count}")
-                .ToImmutableArray();
-
-            var error = lastError.IfNone(_ => ParseError.Unexpected("End of input")) with
-            {
-                Expectations = expected
-            };
+            var error = lastError
+                .Match(some: x => x with { Expectations = x.Expectations.Times(min, max) },
+                       none: _ => ParseError.Unexpected("End of input"));
 
             return ParseResult<TToken>.Error<TCollection>(error, input);
         }

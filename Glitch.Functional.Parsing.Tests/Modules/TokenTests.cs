@@ -76,17 +76,31 @@ public class TokenTests
     public void OneOf_IsMatch_Succeeds()
     {
         // Arrange
+        var input = "Dog";
+
+        var parser = Parse.OneOf("ABCD");
+
         // Act
+        var result = parser.Execute(input);
+
         // Assert
-        throw new NotImplementedException();
+        result.Should().BeOfType<ParseSuccess<char, char>>()
+              .Which.Value.Should().Be('D');
     }
 
     [Fact]
     public void OneOf_NoMatch_Fails()
     {
         // Arrange
+        var input = "Dog";
+
+        var parser = Parse.OneOf("Cat");
+
         // Act
+        var result = parser.Execute(input);
+
         // Assert
-        throw new NotImplementedException();
+        result.Should().BeOfType<ParseFailure<char, char>>()
+              .Which.Error.Message.Should().Be("Unexpected 'D'. Expected: One of 'C', 'a', 't'");
     }
 }

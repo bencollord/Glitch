@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace Glitch.Functional.Parsing;
 
 public static partial class Parser
@@ -5,8 +7,6 @@ public static partial class Parser
     extension<TToken, T, TCollection>(IManyParser<TToken, T, TCollection> source)
         where TCollection : IEnumerable<T>
     {
-        public IParser<TToken, TCollection> Once() => source.Times(1);
-
         public IParser<TToken, TCollection> AtLeastOnce() => source.AtLeast(1);
     }
 
@@ -25,7 +25,7 @@ public static partial class Parser
 
         public IManyParser<TToken, T, IEnumerable<T>> Many() => new ManyParser<TToken, T, IEnumerable<T>>(source, FN.Identity);
 
-        public IParser<TToken, IEnumerable<T>> Once() => source.Many().Once();
+        public IParser<TToken, IEnumerable<T>> Once() => source.Select(x => Enumerable.Repeat(x, 1));
 
         public IParser<TToken, IEnumerable<T>> AtLeastOnce() => source.Many().AtLeastOnce();
 

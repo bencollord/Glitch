@@ -17,7 +17,7 @@ public static partial class Parser
 
         public IManyParser<char, char, string> Many() => new ManyParser<char, char, string>(source, AsString);
 
-        public IParser<char, string> Once() => source.Many().Once();
+        public IParser<char, string> Once() => source.Select(x => new string([x]));
         
         public IParser<char, string> AtLeastOnce() => source.Many().AtLeastOnce();
         

@@ -13,7 +13,7 @@ internal class OneOfParser<TToken, T> : IParser<TToken, T>
 
     public IParseResult<TToken, T> Execute(ITokenSequence<TToken> input)
     {
-        var expectations = new List<string>();
+        var expectations = Expectation.None;
 
         foreach (var parser in parsers)
         {
@@ -21,7 +21,7 @@ internal class OneOfParser<TToken, T> : IParser<TToken, T>
 
             if (result.IsFail(out var error))
             {
-                expectations.AddRange(error.Expectations);
+                expectations += error.Expectations;
             }
             else
             {

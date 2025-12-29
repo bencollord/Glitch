@@ -19,19 +19,25 @@ internal class SeparatedParser<TToken, T, TSeparator, TCollection> : IManyParser
     }
 
     public IParser<TToken, TCollection> AtLeast(int times) =>
-        from once in parser
-        from rest in separator
-            .Then(parser)
-            .AtLeast(times - 1)
-        from last in parser.Maybe()
-        let items = once + rest + last.Iterate()
-        select collector(items);
+        Parser.SelectError(
+            from once in parser
+            from rest in separator
+                .Then(parser)
+                .AtLeast(times - 1)
+            let items = once + rest
+            select collector(items),
+            err => err with { Expectations = err.Expectations.Times(times, Option.None) });
 
     public IParser<TToken, TCollection> AtMost(int times) =>
         // TODO Add support for allowing/disallowing a terminating separator
-        from items in parser.Before(separator).AtMost(times - 1)
-        from last in parser.AtMost(1)
-        select collector(items + last);
+        Parser.SelectError(
+            from once in parser.Maybe()
+            from rest in separator
+                .Then(parser)
+                .AtMost(times - 1)
+            let items = once.Iterate() + rest
+            select collector(items),
+            err => err with { Expectations = err.Expectations.Times(Option.None, times) });
 
     public IParser<TToken, TCollection> ZeroOrMoreTimes() =>
         // TODO Add support for allowing/disallowing a terminating separator
@@ -40,10 +46,12 @@ internal class SeparatedParser<TToken, T, TSeparator, TCollection> : IManyParser
               .Then(parser.Maybe(), (items, lastOpt) => items + lastOpt.Iterate())
               .Select(collector);
 
-    public IParser<TToken, TCollection> Times(int count)
-        => from once in parser
-           from rest in separator.Then(parser).Times(count - 1)
-           select collector(once + rest);
+    public IParser<TToken, TCollection> Times(int count) =>
+         Parser.SelectError(
+            from once in parser
+            from rest in separator.Then(parser).Times(count - 1)
+            select collector(once + rest),
+            err => err with { Expectations = err.Expectations.Times(count) });
 
     public IParseResult<TToken, TCollection> Execute(ITokenSequence<TToken> input)
     {

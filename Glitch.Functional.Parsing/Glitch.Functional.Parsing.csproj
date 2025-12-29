@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Compile Remove="Parsers\ReturnParser - Copy.cs" />
+    <Compile Remove="Results\ParseError - Copy.cs" />
   </ItemGroup>
 
   <ItemGroup>

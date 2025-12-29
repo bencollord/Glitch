@@ -31,7 +31,12 @@ internal class UntilParser<TToken, T, TStop> : IParser<TToken, IEnumerable<T>>
 
             var result = parser.Execute(remaining);
 
-            items.Add((T)result);
+            if (result.IsFail)
+            {
+                return result.Select(DynamicCast<IEnumerable<T>>.From); // Too lazy to add a Cast method to this.
+            }
+
+            items.Add(result.Unwrap());
             remaining = result.Remaining;
         }
 
