@@ -14,7 +14,7 @@ public static class ParseResult
 
     public static IParseResult<TToken, T> Okay<TToken, T>(T value, ParseState<TToken> state) => ParseResult<TToken>.Okay(value, state);
 
-    public static IParseResult<TToken, T> Error<TToken, T>(string message, ITokenSequence<TToken> remaining) => Error<TToken, T>(ParseError.New(message), remaining);
+    public static IParseResult<TToken, T> Error<TToken, T>(string message, ITokenSequence<TToken> remaining) => Error<TToken, T>(ParseError.FromMessage(message), remaining);
 
     public static IParseResult<TToken, T> Error<TToken, T>(ParseError error) => ParseResult<TToken>.Error<T>(error);
 

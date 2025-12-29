@@ -5,7 +5,7 @@ namespace Glitch.Functional.Parsing;
 
 using static Option;
 
-public partial class Parse<TToken>
+public static partial class Parse<TToken>
 {
     public static ITokenParser<TToken> Any => Satisfy(_ => true);
 

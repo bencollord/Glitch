@@ -6,7 +6,7 @@ public class ParseException : Exception
     {
     }
 
-    public ParseException(string message, Exception? innerException = null) : this(ParseError.New(message), innerException)
+    public ParseException(string message, Exception? innerException = null) : this(ParseError.FromMessage(message), innerException)
     {
     }
 

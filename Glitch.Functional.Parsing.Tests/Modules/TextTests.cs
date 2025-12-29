@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Glitch.Functional.Parsing.Tests.Parse;
+namespace Glitch.Functional.Parsing.Tests.Modules;
 
 public class TextTests
 {

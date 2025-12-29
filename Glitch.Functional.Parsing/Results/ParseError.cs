@@ -7,9 +7,9 @@ namespace Glitch.Functional.Parsing.Results;
 
 using static Option;
 
-public record ParseError : Error
+public record ParseError
 {
-    public static readonly new ParseError Empty = new(ParseErrorKind.Empty);
+    public static readonly ParseError Empty = new(ParseErrorKind.Empty);
 
     public static readonly ParseError Unknown = new(ParseErrorKind.Unknown);
 
@@ -49,33 +49,43 @@ public record ParseError : Error
         init => expectations = value; 
     }
 
-    public override int Code => (int)kind;
+    public string Message => kind switch
+        {
+            ParseErrorKind.Message                                 => Label,
+            ParseErrorKind.Unexpected when Expectations.Length > 0 => $"Unexpected {Label}. Expected: {FormatExpectations()}",
+            ParseErrorKind.Expected   when label.IsSome            => $"Unexpected {Label}. Expected: {FormatExpectations()}",
+            ParseErrorKind.Unexpected                              => $"Unexpected {Label}",
+            ParseErrorKind.Expected                                => $"Expected: {FormatExpectations()}",
+            ParseErrorKind.Empty                                   => kind.ToString(),
+            ParseErrorKind.Unknown                                 => "An unknown error has occurred",
 
-    public override string Message => kind switch
-    {
-        ParseErrorKind.Message                                 => Label,
-        ParseErrorKind.Unexpected when Expectations.Length > 0 => $"Unexpected {Label}. Expected: {FormatExpectations()}",
-        ParseErrorKind.Expected   when label.IsSome            => $"Unexpected {Label}. Expected: {FormatExpectations()}",
-        ParseErrorKind.Unexpected                              => $"Unexpected {Label}",
-        ParseErrorKind.Expected                                => $"Expected: {FormatExpectations()}",
-        ParseErrorKind.Empty                                   => kind.ToString(),
-        ParseErrorKind.Unknown                                 => "An unknown error has occurred",
+            _ => throw new UnreachableException($"A case for {nameof(ParseErrorKind)}.{kind} was unhanlded. Label: {label}, Expectations: {FormatExpectations()}")
+        };
 
-        _ => throw new UnreachableException($"A case for {nameof(ParseErrorKind)}.{kind} was unhanlded. Label: {label}, Expectations: {FormatExpectations()}")
-    };
-
-    public static new ParseError New(string message) => new(ParseErrorKind.Message, message);
+    public static ParseError FromMessage(string message) => new(ParseErrorKind.Message, message);
 
     public static ParseError Unexpected<TToken>(TToken token) => Unexpected(token, ImmutableArray<string>.Empty);
-    public static ParseError Unexpected<TToken>(TToken token, IEnumerable<TToken> expected) => Unexpected(token, expected.Select(e => $"'{e}'"));
+    public static ParseError Unexpected<TToken>(TToken token, IEnumerable<TToken> expected) => Unexpected(token, expected.Select(FormatToken));
     public static ParseError Unexpected<TToken>(TToken token, IEnumerable<string> expected) => Unexpected(token, [.. expected]);
-    public static ParseError Unexpected<TToken>(TToken token, ImmutableArray<string> expected) => new(ParseErrorKind.Unexpected, $"'{token}'", expected);
+    public static ParseError Unexpected<TToken>(TToken token, ImmutableArray<string> expected) => new(ParseErrorKind.Unexpected, FormatToken(token), expected);
 
     public static ParseError Expected(params IEnumerable<string> expected) => Expected([.. expected]);
     public static ParseError Expected(ImmutableArray<string> expected) => new(ParseErrorKind.Expected, None, expected);
     public static ParseError Expected(ImmutableArray<string> expected, string found) => new(ParseErrorKind.Expected, found, expected);
 
-    public override Exception AsException() => new ParseException(this);
+
+    public static implicit operator ParseError(string message) => FromMessage(message);
+
+    public static implicit operator ParseException(ParseError error) => new(error);
+
+    private static string FormatToken<TToken>(TToken token)
+    {
+        string? formatted = token?.ToString();
+
+        Debug.Assert(formatted != null, "Token should never be null.");
+
+        return $"'{formatted}'";
+    }
 
     private string FormatExpectations()
     {

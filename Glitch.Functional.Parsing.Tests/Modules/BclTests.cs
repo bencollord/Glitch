@@ -5,10 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Glitch.Functional.Parsing.Tests.Parse;
+namespace Glitch.Functional.Parsing.Tests.Modules;
 
 // UNDONE
-public class RecursiveTests
+public class BclTests
 {
     [Fact]
     public void FailOnPurposeSoIRememberToDoThis()

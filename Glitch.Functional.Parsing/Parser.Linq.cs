@@ -6,8 +6,6 @@ public static partial class Parser
 {
     extension<TToken, T>(IParser<TToken, T> source)
     {
-        public IParser<TToken, TResult> Select<TResult>(Func<T, TResult> selector) => new MapParser<TToken, T, TResult>(source, selector);
-
         public IParser<TToken, TResult> SelectMany<TElement, TResult>(Func<T, IParser<TToken, TElement>> bind, Func<T, TElement, TResult> project) => source.Then(bind, project);
 
         public IParser<TToken, T> Where(Func<T, bool> predicate) => source.Guard(predicate, ParseError.Empty);

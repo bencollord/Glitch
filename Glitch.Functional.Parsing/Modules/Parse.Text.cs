@@ -3,9 +3,12 @@ using Glitch.Functional.Parsing.Results;
 
 namespace Glitch.Functional.Parsing;
 
-public partial class Parse : Parse<char>
+/// <summary>
+/// Module for text parsing.
+/// </summary>
+public partial class Parse
 {
-    public static ITokenParser<char> AnyChar => Any;
+    public static ITokenParser<char> AnyChar => Parse<char>.Any;
 
     public static ITokenParser<char> Letter => Char(char.IsLetter).WithLabel("letter");
     
@@ -37,18 +40,21 @@ public partial class Parse : Parse<char>
 
     public static IParser<char, Unit> SkipWhitespace => Whitespace.SkipAll();
 
-    public static ITokenParser<char> Char(char c) => Token(c);
+    public static ITokenParser<char> Char(char c) => Parse<char>.Token(c);
 
-    public static ITokenParser<char> Char(Func<char, bool> predicate) => Satisfy(predicate);
+    public static ITokenParser<char> Char(Func<char, bool> predicate) => Parse<char>.Satisfy(predicate);
 
-    public static ITokenParser<char> Char(Func<char, bool> predicate, string label) => Satisfy(predicate, label);
+    public static ITokenParser<char> Char(Func<char, bool> predicate, string label) => Parse<char>.Satisfy(predicate, label);
 
-    public static ITokenParser<char> OneOf(string chars) => Char(chars.Contains, $"One of '{chars}'"); // DESIGN This error message will differ from other OneOf methods
+    public static ITokenParser<char> OneOf(string chars) => OneOf(chars.AsEnumerable());
+
+    public static ITokenParser<char> OneOf(params IEnumerable<char> chars) => Char(chars.Contains, $"One of {chars.Select(c => $"'{c}'").Join(", ")}"); // DESIGN This error message will differ from other OneOf methods
 
     public static IParser<char, string> Literal(string text)
     {
         return text.Select(Char)
                    .PipeInto(Sequence)
-                   .Select(chars => new string([.. chars]));
+                   .Select(chars => new string([.. chars]))
+                   .WithExpected(text);
     }
 }

@@ -1,17 +1,10 @@
-using Glitch.Functional.Parsing.Results;
-using System.Diagnostics.CodeAnalysis;
-
 namespace Glitch.Functional.Parsing;
-
-using static Parse;
 
 public static partial class Parser
 {
     extension<TToken, T>(IParser<TToken, T> source)
     {
         public IParser<TToken, T> Or(IParser<TToken, T> other) => Parse<TToken>.OneOf(source, other);
-
-        public IParser<TToken, TResult> Apply<TResult>(IParser<TToken, Func<T, TResult>> apply) => source.Then(x => apply.Select(y => y(x)));
 
         public IParser<TToken, T> Except<TOther>(IParser<TToken, TOther> other) => other.Not().Then(source);
 
@@ -28,7 +21,7 @@ public static partial class Parser
             source.Then(next, (x, _) => x);
 
         public IParser<TToken, TResult> Then<TResult>(Func<T, IParser<TToken, TResult>> next) => 
-            new BindParser<TToken, T, TResult>(source, next);
+            new ThenParser<TToken, T, TResult>(source, next);
 
         public IParser<TToken, TResult> Then<TElement, TResult>(Func<T, IParser<TToken, TElement>> next, Func<T, TElement, TResult> projection) =>
             source.Then(x => next(x).Select(projection.Apply(x)));

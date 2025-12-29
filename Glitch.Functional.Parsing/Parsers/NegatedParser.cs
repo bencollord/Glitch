@@ -14,7 +14,7 @@ internal class NegatedParser<TToken, T> : IParser<TToken, Unit>
     public IParseResult<TToken, Unit> Execute(ITokenSequence<TToken> input)
     {
         return parser.Execute(input)
-                        .Match(okay: val => ParseResult.Error<TToken, Unit>($"Negated parser succeeded with {val}", input),
+                     .Match(okay: val => ParseResult.Error<TToken, Unit>(ParseError.Unexpected(val, ["Anything else"]), input),
                             fail: _   => ParseResult.Okay(Unit.Value, input));
     }
 }

@@ -9,14 +9,14 @@ public partial class Parse<TToken>
         from state in State
         from check in state.IsEnd
                     ? Return(Unit.Value)
-                    : Error<Unit>(ParseError.New("Expected EOF"))
+                    : Error<Unit>(ParseError.FromMessage("Expected EOF"))
         select Unit.Value;
 
     public static IParser<TToken, T> Return<T>(T value) => State.Then(s => Return(ParseResult.Okay(value, s)));
 
     public static IParser<TToken, T> Return<T>(IParseResult<TToken, T> result) => new ReturnParser<TToken, T>(result);
 
-    public static IParser<TToken, T> Error<T>(string message) => Error<T>(ParseError.New(message));
+    public static IParser<TToken, T> Error<T>(string message) => Error<T>(ParseError.FromMessage(message));
 
     public static IParser<TToken, T> Error<T>(ParseError error) => new FailParser<TToken, T>(error);
 
