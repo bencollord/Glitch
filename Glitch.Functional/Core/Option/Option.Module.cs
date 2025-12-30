@@ -6,9 +6,11 @@ namespace Glitch.Functional;
 /// Static methods for <see cref="Option{T}"/>, mostly to simplify
 /// syntax when passing higher order functions.
 /// </summary>
-public static partial class Option
+public partial struct Option : IMaybe<Unit>
 {
-    public static OptionNone None => OptionNone.Value;
+    public static Option None => new();
+
+    public bool HasValue => false;
 
     public static Option<T> Some<T>(T value) => Option<T>.Some(value);
 
@@ -33,4 +35,6 @@ public static partial class Option
         (option.Select(x => x.Left), option.Select(x => x.Right));
 
     public static T IfNone<T>(Option<T> option, T none) => option.IfNone(none);
+
+    public TResult Match<TResult>(Func<Unit, TResult> some, Func<TResult> none) => none();
 }
