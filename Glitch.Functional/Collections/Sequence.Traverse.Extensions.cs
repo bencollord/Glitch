@@ -1,6 +1,5 @@
 using Glitch.Functional;
 using Glitch.Functional.Effects;
-using Glitch.Functional.Errors;
 
 namespace Glitch.Functional.Collections;
 

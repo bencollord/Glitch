@@ -1,4 +1,3 @@
-using Glitch.Functional.Errors;
 
 namespace Glitch.Functional.Validation.Recoverable;
 

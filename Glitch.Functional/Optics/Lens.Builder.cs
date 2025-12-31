@@ -1,4 +1,4 @@
-﻿namespace Glitch.Functional.Optics;
+namespace Glitch.Functional.Optics;
 
 public static partial class Lens
 {

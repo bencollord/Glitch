@@ -1,4 +1,4 @@
-﻿namespace Glitch.Functional.Core;
+namespace Glitch.Functional.Core;
 
 public static class OneOf
 {

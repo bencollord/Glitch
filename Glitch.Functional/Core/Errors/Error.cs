@@ -1,9 +1,9 @@
 using Glitch.Functional;
-using Glitch.Functional.Core.Errors;
+using Glitch.Functional.Core;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.ExceptionServices;
 
-namespace Glitch.Functional.Errors;
+namespace Glitch.Functional;
 
 public abstract partial record Error : IEquatable<Error>
 {

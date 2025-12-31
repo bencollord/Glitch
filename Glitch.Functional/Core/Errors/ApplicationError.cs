@@ -1,4 +1,4 @@
-namespace Glitch.Functional.Errors;
+namespace Glitch.Functional;
 
 using static Option;
 

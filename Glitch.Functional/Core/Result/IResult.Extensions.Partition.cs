@@ -1,4 +1,4 @@
-﻿namespace Glitch.Functional;
+namespace Glitch.Functional;
 
 /// <summary>
 /// Unwrapping and coalescing extensions for <see cref="IResult{T, E}"/>.

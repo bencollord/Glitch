@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Functional;
 
-using static Glitch.Functional.Errors.Error;
+using static Glitch.Functional.Error;
 
 public static partial class ResultExtensions
 {

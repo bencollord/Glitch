@@ -1,7 +1,6 @@
 namespace Glitch.Functional.Extensions.Impure;
 
 using Glitch.Functional.Effects;
-using Glitch.Functional.Errors;
 
 public static partial class ImpureExtensions
 {

@@ -1,4 +1,3 @@
-using Glitch.Functional.Errors;
 using System.Diagnostics;
 
 namespace Glitch.Functional;

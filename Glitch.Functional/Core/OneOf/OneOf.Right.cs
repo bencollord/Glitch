@@ -1,4 +1,4 @@
-﻿namespace Glitch.Functional.Core;
+namespace Glitch.Functional.Core;
 
 public abstract partial record OneOf<TLeft, TRight>
 {

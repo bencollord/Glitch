@@ -1,4 +1,4 @@
-namespace Glitch.Functional.Errors;
+namespace Glitch.Functional;
 
 using Glitch.Functional.Validation.Recoverable;
 using static FN;

@@ -1,6 +1,5 @@
 using Glitch.Functional;
 using Glitch.Functional.Effects;
-using Glitch.Functional.Errors;
 using System.Runtime.CompilerServices;
 
 namespace Glitch.Test.Functional;

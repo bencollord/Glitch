@@ -1,6 +1,5 @@
 using FluentAssertions;
 using Glitch.Functional;
-using Glitch.Functional.Errors;
 
 namespace Glitch.Test.Functional;
 

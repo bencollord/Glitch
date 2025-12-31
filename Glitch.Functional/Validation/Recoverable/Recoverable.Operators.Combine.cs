@@ -1,6 +1,6 @@
 using Glitch.Functional.Validation.Recoverable;
 
-namespace Glitch.Functional.Errors;
+namespace Glitch.Functional;
 
 public static partial class RecoverableExtensions
 {

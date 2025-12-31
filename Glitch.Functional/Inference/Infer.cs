@@ -1,4 +1,4 @@
-﻿namespace Glitch.Functional.Inference;
+namespace Glitch.Functional.Inference;
 
 public static class Infer
 {

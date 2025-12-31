@@ -1,6 +1,4 @@
 namespace Glitch.Functional.Extensions.Impure;
-
-using Glitch.Functional.Errors;
 using static FN;
 
 public static partial class ImpureExtensions

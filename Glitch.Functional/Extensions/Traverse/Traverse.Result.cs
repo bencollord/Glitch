@@ -1,6 +1,5 @@
 using Glitch.Functional;
 using Glitch.Functional.Collections;
-using Glitch.Functional.Errors;
 using System.Collections.Immutable;
 
 namespace Glitch.Functional.Extensions.Traverse;

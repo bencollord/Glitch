@@ -1,6 +1,6 @@
 using Glitch.Functional;
 
-namespace Glitch.Functional.Errors;
+namespace Glitch.Functional;
 
 public record ExceptionError : Error
 {
