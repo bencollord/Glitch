@@ -2,15 +2,9 @@ namespace Glitch.Functional;
 
 public static partial class Result
 {
-    public static Okay<T> Okay<T>() 
-        where T : new() 
-        => Okay(new T());
-
-    public static Okay<T> Okay<T>(T value) => new(value);
-
     public static Result<T, E> Okay<T, E>(T value) => new Result<T, E>.Okay(value);
-    
-    public static Fail<E> Fail<E>(E error) => new(error);
+
+    public static Result<Unit, E> Fail<E>(E error) => Fail<Unit, E>(error);
 
     public static Result<T, E> Fail<T, E>(E error) => new Result<T, E>.Fail(error);
 

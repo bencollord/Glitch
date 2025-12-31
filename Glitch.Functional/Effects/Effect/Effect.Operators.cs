@@ -6,7 +6,7 @@ namespace Glitch.Functional.Effects;
 // Instance
 public partial class Effect<T>
 {
-    public static implicit operator Effect<T>(Expected<T> result) => Return(result);
+    public static implicit operator Effect<T>(Result<T> result) => Return(result);
 
     public static implicit operator Effect<T>(Okay<T> result) => Return(result.Value);
 
@@ -18,9 +18,9 @@ public partial class Effect<T>
 
     public static Effect<T> operator |(Effect<T> x, Effect<T> y) => x.Or(y);
 
-    public static Effect<T> operator |(Effect<T> x, Expected<T> y) => x.Or(y);
+    public static Effect<T> operator |(Effect<T> x, Result<T> y) => x.Or(y);
 
-    public static Effect<T> operator |(Effect<T> x, Result<T, Error> y) => x.Or((Expected<T>)y);
+    public static Effect<T> operator |(Effect<T> x, Result<T, Error> y) => x.Or((Result<T>)y);
 
     public static Effect<T> operator |(Effect<T> x, Error y) => x.Or(y);
 
@@ -28,9 +28,9 @@ public partial class Effect<T>
 
     public static Effect<T> operator >>(Effect<T> x, Effect<Unit> y) => x.Then(y, (v, _) => v);
 
-    public static Effect<T> operator >>(Effect<T> x, Func<Expected<T>> y) => x.AndThen(_ => y());
+    public static Effect<T> operator >>(Effect<T> x, Func<Result<T>> y) => x.AndThen(_ => y());
 
-    public static Effect<T> operator >>(Effect<T> x, Func<Result<T, Error>> y) => x.AndThen(_ => y().Match(Expected.Okay, Expected.Fail<T>));
+    public static Effect<T> operator >>(Effect<T> x, Func<Result<T, Error>> y) => x.AndThen(_ => y().Match(Result.Okay, Result.Fail<T>));
 
     public static Effect<T> operator >>(Effect<T> x, Func<T> y) => x.Select(_ => y());
 }

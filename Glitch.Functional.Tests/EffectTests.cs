@@ -158,7 +158,7 @@ public class EffectTests
         var okayItem       = Effect.Return(10);
         var mapFunc        = (int _) => Throw<int>();
         var bindFunc       = (int _) => Throw<Effect<int>>();
-        var bindResultFunc = (int _) => Throw<Expected<int>>();
+        var bindResultFunc = (int _) => Throw<Result<int>>();
         var bindProjectionFunc = (int _, int _) => Throw<int>();
         var mapErrFunc     = (Error _) => Throw<Error>();
         var bindErrFunc    = (Error _) => Throw<Effect<int>>();
@@ -222,7 +222,7 @@ public class EffectTests
         // The delegates are curried so we can pass the name of the case in to know which one failed.
         var mapFunc        = (string caseName) => (int _) => MarkCaseRun(caseName, resultValue);
         var bindFunc       = (string caseName) => (int _) => MarkCaseRun(caseName, Effect.Return(resultValue));
-        var bindResultFunc = (string caseName) => (int _) => MarkCaseRun(caseName, Expected.Okay(resultValue));
+        var bindResultFunc = (string caseName) => (int _) => MarkCaseRun(caseName, Result.Okay(resultValue));
         var bindProjectionFunc = (string caseName) => (int _, int _) => MarkCaseRun(caseName, resultValue);
         var mapErrFunc     = (string caseName) => (Error _) => MarkCaseRun(caseName, errorValue);
         var mapErrToResultFunc = (string caseName) => (Error _) => MarkCaseRun(caseName, resultValue);

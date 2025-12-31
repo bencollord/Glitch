@@ -1,4 +1,6 @@
-namespace Glitch.Functional.Errors;
+using Glitch.Functional.Errors;
+
+namespace Glitch.Functional.Validation.Recoverable;
 
 public static partial class Recoverable
 {

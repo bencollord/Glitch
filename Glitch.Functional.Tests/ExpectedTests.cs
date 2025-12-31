@@ -4,15 +4,15 @@ using Glitch.Functional.Errors;
 
 namespace Glitch.Test.Functional;
 
-using static Expected;
+using static Result;
 
-public class ExpectedTests
+public class ResultTests
 {
     [Fact]
     public void Unwrap_Failed_ShouldThrowContainedException()
     {
         // Arrange
-        Expected<int> item = Fail(new KeyNotFoundException("The key wasn't found"));
+        Result<int> item = Fail<int>(new KeyNotFoundException("The key wasn't found"));
 
         // Act/Assert
         item.Invoking(ex => ex.Unwrap())

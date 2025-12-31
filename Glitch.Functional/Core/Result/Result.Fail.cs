@@ -1,3 +1,5 @@
+using Glitch.Functional.Errors;
+
 namespace Glitch.Functional;
 
 public partial record Result<T, E>

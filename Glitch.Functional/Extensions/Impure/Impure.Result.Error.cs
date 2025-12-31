@@ -5,25 +5,25 @@ using static FN;
 
 public static partial class ImpureExtensions
 {
-    extension<T>(Expected<T> self)
+    extension<T>(Result<T> self)
     {
-        public Expected<T> IfOkay(Action<T> action) =>
+        public Result<T> IfOkay(Action<T> action) =>
             self.Match(action, Nop).Return(self);
 
-        public Expected<T> IfOkay(Func<T, Unit> action) =>
+        public Result<T> IfOkay(Func<T, Unit> action) =>
             self.IfOkay(action.ReturnVoid());
 
-        public Expected<T> IfFail(Action action) =>
+        public Result<T> IfFail(Action action) =>
             self.Match(Nop, action).Return(self);
 
-        public Expected<T> IfFail(Action<Error> action) =>
+        public Result<T> IfFail(Action<Error> action) =>
             self.Match(Nop, action).Return(self);
 
         // Alias for IfOkay
-        public Expected<T> Do(Action<T> action) =>
+        public Result<T> Do(Action<T> action) =>
             self.Match(action, Nop).Return(self);
 
-        public Expected<T> Do(Func<T, Unit> action) =>
+        public Result<T> Do(Func<T, Unit> action) =>
             self.IfOkay(action.ReturnVoid());
 
         public Unit Match(Action<T> okay, Action fail) =>

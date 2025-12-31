@@ -8,7 +8,7 @@ public partial class Effect<TEnv, T>
 {
     public static implicit operator Effect<TEnv, T>(Effect<T> effect) => effect.With<TEnv>();
 
-    public static implicit operator Effect<TEnv, T>(Expected<T> result) => new(_ => result);
+    public static implicit operator Effect<TEnv, T>(Result<T> result) => new(_ => result);
 
     public static implicit operator Effect<TEnv, T>(Result<T, Error> result) => new(_ => result);
 
@@ -18,7 +18,7 @@ public partial class Effect<TEnv, T>
 
     public static Effect<TEnv, T> operator |(Effect<TEnv, T> x, Effect<TEnv, T> y) => x.Or(y);
     public static Effect<TEnv, T> operator |(Effect<TEnv, T> x, Effect<T> y) => x.Or(y);
-    public static Effect<TEnv, T> operator |(Effect<TEnv, T> x, Expected<T> y) => x.Or(y);
+    public static Effect<TEnv, T> operator |(Effect<TEnv, T> x, Result<T> y) => x.Or(y);
     public static Effect<TEnv, T> operator |(Effect<TEnv, T> x, Result<T, Error> y) => x.Or(y);
 
     public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Effect<TEnv, T> y)
@@ -45,7 +45,7 @@ public partial class Effect<TEnv, T>
         => new(i =>
         {
             _ = x.thunk(i);
-            return Expected.Okay(y());
+            return Result.Okay(y());
         });
 }
 

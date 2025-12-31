@@ -14,16 +14,16 @@ namespace Glitch.Functional.Effects;
 [Monad]
 public partial class Effect<TEnv, T>
 {
-    private Func<TEnv, Expected<T>> thunk;
+    private Func<TEnv, Result<T>> thunk;
 
-    public Effect(Func<TEnv, Expected<T>> thunk)
+    public Effect(Func<TEnv, Result<T>> thunk)
     {
         this.thunk = thunk;
     }
 
-    public static Effect<TEnv, T> Return(T value) => new(_ => Expected.Okay(value));
+    public static Effect<TEnv, T> Return(T value) => new(_ => Result.Okay(value));
 
-    public static Effect<TEnv, T> Fail(Error error) => new(_ => Expected.Fail<T>(error));
+    public static Effect<TEnv, T> Fail(Error error) => new(_ => Result.Fail<T>(error));
 
     public static Effect<TEnv, T> Return(Result<T, Error> result) => new(_ => result);
 
@@ -31,18 +31,18 @@ public partial class Effect<TEnv, T>
 
     public static Effect<TEnv, T> Lift(Effect<T> effect) => new(_ => effect.Run());
 
-    public static Effect<TEnv, T> Lift(Func<TEnv, Expected<T>> function) => new(function);
+    public static Effect<TEnv, T> Lift(Func<TEnv, Result<T>> function) => new(function);
 
-    public static Effect<TEnv, T> Lift(Func<TEnv, T> function) => new(i => Expected.Okay(function(i)));
+    public static Effect<TEnv, T> Lift(Func<TEnv, T> function) => new(i => Result.Okay(function(i)));
 
     // TODO Decide on this naming convention or Lift
     public static Effect<TEnv, T> Try<E>(Func<TEnv, Result<T, E>> function)
         where E : Error
-        => new(env => function(env).Match(Expected.Okay, Expected.Fail<T>));
+        => new(env => function(env).Match(Result.Okay, Result.Fail<T>));
 
-    public static Effect<TEnv, T> Try(Func<TEnv, Expected<T>> function) => new(function);
+    public static Effect<TEnv, T> Try(Func<TEnv, Result<T>> function) => new(function);
 
-    public static Effect<TEnv, T> Try(Func<TEnv, T> function) => new(i => Expected.Okay(function(i)));
+    public static Effect<TEnv, T> Try(Func<TEnv, T> function) => new(i => Result.Okay(function(i)));
 
     public Effect<TNewInput, T> With<TNewInput>(Func<TNewInput, TEnv> map)
         => new(newInput => thunk(map(newInput)));
@@ -173,12 +173,12 @@ public partial class Effect<TEnv, T>
 
     /// <summary>
     /// Convenience method that allows bind operations to work
-    /// with <see cref="Expected"/> types.
+    /// with <see cref="Result"/> types.
     /// </summary>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="bind"></param>
     /// <returns></returns>
-    public Effect<TEnv, TResult> AndThen<TResult>(Func<T, Expected<TResult>> bind)
+    public Effect<TEnv, TResult> AndThen<TResult>(Func<T, Result<TResult>> bind)
         => AndThen(e => Effect<TEnv, TResult>.Return(bind(e)));
 
     /// <summary>
@@ -190,7 +190,7 @@ public partial class Effect<TEnv, T>
     /// <param name="bind"></param>
     /// <param name="project"></param>
     /// <returns></returns>
-    public Effect<TEnv, TResult> AndThen<TElement, TResult>(Func<T, Expected<TElement>> bind, Func<T, TElement, TResult> project)
+    public Effect<TEnv, TResult> AndThen<TElement, TResult>(Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project)
         => AndThen(x => bind(x).Select(y => project(x, y)));
 
     public Effect<TEnv, TResult> Choose<TResult>(Func<T, Effect<TEnv, TResult>> okay, Func<Error, Effect<TEnv, TResult>> error)
@@ -331,7 +331,7 @@ public partial class Effect<TEnv, T>
     /// <param name="error"></param>
     /// <returns></returns>
     public Effect<TEnv, TResult> Match<TResult>(Func<T, TResult> okay, Func<Error, TResult> fail) 
-        => new(input => Expected.Okay(thunk(input).Match(okay, fail)));
+        => new(input => Result.Okay(thunk(input).Match(okay, fail)));
 
     /// <summary>
     /// Chooses one of two impure actions to run depending on the success or failure
@@ -362,10 +362,10 @@ public partial class Effect<TEnv, T>
 
     /// <summary>
     /// Executes the provided function, catching any exception
-    /// thrown and wrapping it in a <see cref="Expected{T}"/>
+    /// thrown and wrapping it in a <see cref="Result{T}"/>
     /// </summary>
     /// <returns></returns>
-    public Expected<T> Run(TEnv input)
+    public Result<T> Run(TEnv input)
     {
         try
         {
@@ -373,7 +373,7 @@ public partial class Effect<TEnv, T>
         }
         catch (Exception ex)
         {
-            return Expected.Fail<T>(ex);
+            return Result.Fail<T>(ex);
         }
     }
 }

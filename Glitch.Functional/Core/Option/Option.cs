@@ -304,7 +304,7 @@ public readonly partial struct Option<T>
     /// </summary>
     /// <param name="error"></param>
     /// <returns></returns>
-    public Result<T, E> OkayOr<E>(E error) => IsSome ? Result.Okay(value!) : Result.Fail(error);
+    public Result<T, E> OkayOr<E>(E error) => Result.Guard(IsSome, value!, error);
 
     /// <summary>
     /// Wraps the value in a <see cref="Result{T, E}" /> if it exists,
@@ -312,7 +312,7 @@ public readonly partial struct Option<T>
     /// the result of the provided error function.
     /// </summary>
     /// <param name="error"></param>
-    public Result<T, E> OkayOrElse<E>(Func<E> function) => IsSome ? Result.Okay(value!) : Result.Fail(function());
+    public Result<T, E> OkayOrElse<E>(Func<E> function) => IsSome ? value! : function();
 
     /// <summary>
     /// Wraps the value in a <see cref="Result{T, E}" /> if it exists,
@@ -320,7 +320,7 @@ public readonly partial struct Option<T>
     /// the result of the provided error function.
     /// </summary>
     /// <param name="error"></param>
-    public Result<T, E> OkayOrElse<E>(Func<Unit, E> function) => IsSome ? Result.Okay(value!) : Result.Fail(function(default));
+    public Result<T, E> OkayOrElse<E>(Func<Unit, E> function) => IsSome ? value! : function(default);
 
     public bool Equals(Option<T> other)
     {

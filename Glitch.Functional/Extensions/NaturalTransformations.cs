@@ -17,7 +17,7 @@ public static class NaturalTransformations
         public Option<E> ErrorOrNone() => source.Match(_ => Option.None, Option.Some);
     }
 
-    extension<T>(Expected<T> source)
+    extension<T>(Result<T> source)
     {
         public Option<T> OkayOrNone() => source.Match(Option.Some, _ => Option.None);
 

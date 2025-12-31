@@ -6,12 +6,12 @@ namespace Glitch.Functional.Collections;
 
 public partial class Sequence<T>
 {
-    public Expected<Sequence<TResult>> Traverse<TResult>(Func<T, Expected<TResult>> traverse)
+    public Result<Sequence<TResult>> Traverse<TResult>(Func<T, Result<TResult>> traverse)
         => this.Aggregate(
-            Expected.Okay(Sequence<TResult>.Empty),
+            Result.Okay(Sequence<TResult>.Empty),
             (list, item) => list.AndThen(_ => traverse(item), (lst, i) => lst.Append(i)));
 
-    public Expected<Sequence<TResult>> Traverse<TResult>(Func<T, int, Expected<TResult>> traverse)
+    public Result<Sequence<TResult>> Traverse<TResult>(Func<T, int, Result<TResult>> traverse)
         => Index().Traverse(pair => traverse(pair.Item, pair.Index));
 
     public Effect<Sequence<TResult>> Traverse<TResult>(Func<T, Effect<TResult>> traverse)

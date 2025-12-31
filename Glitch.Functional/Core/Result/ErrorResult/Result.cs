@@ -1,18 +1,18 @@
-using Glitch.Functional;
+using Glitch.Functional.Errors;
 
-namespace Glitch.Functional.Errors;
+namespace Glitch.Functional;
 
-public partial record Expected<T> : IResult<T, Error>
+public partial record Result<T> : IResult<T, Error>
 {
     private Result<T, Error> inner;
 
     // Prevent deriving from outside the type.
-    private Expected(Result<T, Error> inner)
+    private Result(Result<T, Error> inner)
     {
         this.inner = inner;
     }
 
-    public static Expected<T> From<E>(Result<T, E> result)
+    public static Result<T> From<E>(Result<T, E> result)
         where E : Error
         => new(result.SelectError(StaticCast<Error>.UpFrom));
 
@@ -38,7 +38,7 @@ public partial record Expected<T> : IResult<T, Error>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="map"></param>
     /// <returns></returns>
-    public Expected<TResult> Select<TResult>(Func<T, TResult> map) => new(inner.Select(map));
+    public Result<TResult> Select<TResult>(Func<T, TResult> map) => new(inner.Select(map));
 
     /// <summary>
     /// If the result is a failure, returns a new result with the mapping function
@@ -46,9 +46,9 @@ public partial record Expected<T> : IResult<T, Error>
     /// </summary>
     /// <param name="map"></param>
     /// <returns></returns>
-    public Expected<T> SelectError(Func<Error, Error> map) => inner.SelectError(e => map(e));
+    public Result<T> SelectError(Func<Error, Error> map) => inner.SelectError(e => map(e));
 
-    public Expected<T> SelectError(Func<Error, Exception> map) => SelectError(e => Error.New(map(e)));
+    public Result<T> SelectError(Func<Error, Exception> map) => SelectError(e => Error.New(map(e)));
 
     /// <summary>
     /// If the result is a failure, returns a new result with the mapping function
@@ -66,7 +66,7 @@ public partial record Expected<T> : IResult<T, Error>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="function"></param>
     /// <returns></returns>
-    public Expected<TResult> Apply<TResult>(Expected<Func<T, TResult>> function)
+    public Result<TResult> Apply<TResult>(Result<Func<T, TResult>> function)
         => AndThen(v => function.Select(fn => fn(v)));
 
     /// <summary>
@@ -76,7 +76,7 @@ public partial record Expected<T> : IResult<T, Error>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="other"></param>
     /// <returns></returns>
-    public Expected<TResult> And<TResult>(Expected<TResult> other) => IsOkay ? other : Cast<TResult>();
+    public Result<TResult> And<TResult>(Result<TResult> other) => IsOkay ? other : Cast<TResult>();
 
     /// <summary>
     /// If Okay, applies the function to the wrapped value. Otherwise, returns
@@ -85,7 +85,7 @@ public partial record Expected<T> : IResult<T, Error>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="bind"></param>
     /// <returns></returns>
-    public Expected<TResult> AndThen<TResult>(Func<T, Expected<TResult>> bind)
+    public Result<TResult> AndThen<TResult>(Func<T, Result<TResult>> bind)
         => inner.AndThen(x => bind(x).inner);
 
     /// <summary>
@@ -95,7 +95,7 @@ public partial record Expected<T> : IResult<T, Error>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="bind"></param>
     /// <returns></returns>
-    public Expected<TResult> AndThen<TResult>(Func<T, Result<TResult, Error>> bind)
+    public Result<TResult> AndThen<TResult>(Func<T, Result<TResult, Error>> bind)
         => inner.AndThen(x => bind(x));
 
     /// <summary>
@@ -106,7 +106,7 @@ public partial record Expected<T> : IResult<T, Error>
     /// <param name="bind"></param>
     /// <param name="project"></param>
     /// <returns></returns>
-    public Expected<TResult> AndThen<TElement, TResult>(Func<T, Expected<TElement>> bind, Func<T, TElement, TResult> project)
+    public Result<TResult> AndThen<TElement, TResult>(Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project)
         => AndThen(x => bind(x).Select(y => project(x, y)));
 
     /// <summary>
@@ -114,7 +114,7 @@ public partial record Expected<T> : IResult<T, Error>
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    public Expected<T> Or(Expected<T> other) => new(inner.Or(other.inner));
+    public Result<T> Or(Result<T> other) => new(inner.Or(other.inner));
 
     /// <summary>
     /// Returns the current result if Ok, otherwise applies the provided
@@ -122,7 +122,7 @@ public partial record Expected<T> : IResult<T, Error>
     /// </summary>
     /// <param name="bind"></param>
     /// <returns></returns>
-    public Expected<T> OrElse(Func<Error, Expected<T>> bind) => inner.OrElse(x => bind(x).inner);
+    public Result<T> OrElse(Func<Error, Result<T>> bind) => inner.OrElse(x => bind(x).inner);
 
     public T IfFail(T fallback) => inner.IfFail(fallback);
 
@@ -149,12 +149,12 @@ public partial record Expected<T> : IResult<T, Error>
     /// </summary>
     /// <typeparam name="TResult"></typeparam>
     /// <returns></returns>
-    public Expected<TResult> Cast<TResult>() =>
+    public Result<TResult> Cast<TResult>() =>
         AndThen(x => DynamicCast<TResult>.Try(x)
-            .Match(some: Expected.Okay, 
+            .Match(some: Result.Okay, 
                    none: Error.InvalidCast<TResult>(x)));
 
-    public Expected<T> Where(Func<T, bool> predicate) => Guard(predicate, Error.Empty);
+    public Result<T> Where(Func<T, bool> predicate) => Guard(predicate, Error.Empty);
 
     /// <summary>
     /// For a successful result, checks the value against a predicate
@@ -163,16 +163,16 @@ public partial record Expected<T> : IResult<T, Error>
     /// </summary>
     /// <param name="predicate"></param>
     /// <returns></returns>
-    public Expected<T> Guard(Func<T, bool> predicate, Error error)
+    public Result<T> Guard(Func<T, bool> predicate, Error error)
         => inner.Guard(predicate, error);
 
-    public Expected<T> Guard(Func<T, bool> predicate, Func<T, Error> error)
+    public Result<T> Guard(Func<T, bool> predicate, Func<T, Error> error)
         => inner.Guard(predicate, error);
 
-    public Expected<T> Guard(bool condition, Error error)
+    public Result<T> Guard(bool condition, Error error)
         => inner.Guard(condition, error);
 
-    public Expected<T> Guard(bool condition, Func<T, Error> error)
+    public Result<T> Guard(bool condition, Func<T, Error> error)
         => inner.Guard(condition, error);
 
     /// <summary>
@@ -181,7 +181,7 @@ public partial record Expected<T> : IResult<T, Error>
     /// <typeparam name="TOther"></typeparam>
     /// <param name="other"></param>
     /// <returns></returns>
-    public Expected<(T, TOther)> Zip<TOther>(Expected<TOther> other)
+    public Result<(T, TOther)> Zip<TOther>(Result<TOther> other)
         => Zip(other, (x, y) => (x, y));
 
     /// <summary>
@@ -194,7 +194,7 @@ public partial record Expected<T> : IResult<T, Error>
     /// <param name="other"></param>
     /// <param name="zip"></param>
     /// <returns></returns>
-    public Expected<TResult> Zip<TOther, TResult>(Expected<TOther> other, Func<T, TOther, TResult> zip)
+    public Result<TResult> Zip<TOther, TResult>(Result<TOther> other, Func<T, TOther, TResult> zip)
         => AndThen(_ => other, zip);
 
     /// <summary>
@@ -211,4 +211,33 @@ public partial record Expected<T> : IResult<T, Error>
     public Error UnwrapError() => inner.UnwrapError();
 
     public override string ToString() => inner.ToString();
+
+    public static implicit operator Result<T>(T value) => new Okay(value);
+
+    public static implicit operator Result<T>(Okay<T> success) => new Okay(success.Value);
+
+    public static implicit operator Result<T>(Error error) => new Fail(error);
+
+    public static implicit operator Result<T>(Fail<Error> failure) => new Fail(failure.Error);
+
+    public static implicit operator Result<T>(Result<T, Error> result) => new(result);
+
+    public static implicit operator Result<T, Error>(Result<T> result) => result.Match(Result.Okay<T, Error>, Result.Fail<T, Error>);
+
+    public static implicit operator Result<T, Exception>(Result<T> result) => result.Match(Result.Okay<T, Exception>, err => Result.Fail<T, Exception>(err.AsException()));
+
+    public static explicit operator T(Result<T> result)
+        => result.Match(Identity, err => throw new InvalidCastException($"Cannot cast a faulted result to a value", err.AsException()));
+
+    public static explicit operator Error(Result<T> result)
+        => result.Match(_ => throw new InvalidCastException("Cannot cast a successful result to an error"), Identity);
+
+    public static bool operator true(Result<T> result) => result.IsOkay;
+
+    public static bool operator false(Result<T> result) => result.IsFail;
+
+    // Short circuiting
+    public static Result<T> operator &(Result<T> x, Result<T> y) => x.And(y);
+
+    public static Result<T> operator |(Result<T> x, Result<T> y) => x.Or(y);
 }

@@ -75,7 +75,7 @@ public class CSharpFile
 
     public CSharpFile Revert() => SetState(state.Revert());
 
-    public Unit SaveChanges() => SetState(state.SaveChanges()).Ignore();
+    public Unit SaveChanges() => SetState(state.SaveChanges()).PipeInto(Unit.Ignore);
 
     public override string ToString() => state.ToString();
 

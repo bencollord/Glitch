@@ -1,9 +1,5 @@
-using Glitch.Functional;
-using Glitch.Functional.Errors;
-
 namespace Glitch.Functional.Extensions;
 
-using static Expected;
 using static Option;
 
 public static partial class LinqExtensions

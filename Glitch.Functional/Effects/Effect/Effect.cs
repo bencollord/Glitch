@@ -18,7 +18,7 @@ public partial class Effect<T>
 
     public static Effect<T> Return(Result<T, Error> result) => new(Effect<Unit, T>.Return(result));
 
-    public static Effect<T> Lift(Func<Expected<T>> function) => new(Effect<Unit, T>.Lift(_ => function()));
+    public static Effect<T> Lift(Func<Result<T>> function) => new(Effect<Unit, T>.Lift(_ => function()));
 
     public static Effect<T> Lift(Func<Result<T, Error>> function) => new(Effect<Unit, T>.Lift(_ => function()));
 
@@ -115,23 +115,23 @@ public partial class Effect<T>
         => new(inner.AndThen(v => bind(v).inner, project));
 
     /// <summary>
-    /// <inheritdoc cref="Effect{Unit, T}.AndThen{TResult}(Func{T, Expected{TResult}})"/>
+    /// <inheritdoc cref="Effect{Unit, T}.AndThen{TResult}(Func{T, Result{TResult}})"/>
     /// </summary>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="bind"></param>
     /// <returns></returns>
-    public Effect<TResult> AndThen<TResult>(Func<T, Expected<TResult>> bind)
+    public Effect<TResult> AndThen<TResult>(Func<T, Result<TResult>> bind)
         => AndThen(e => Effect<TResult>.Return(bind(e)));
 
     /// <summary>
-    /// <inheritdoc cref="Effect{Unit, T}.AndThen{TElement, TResult}(Func{T, Expected{TElement}}, Func{T, TElement, TResult})"/>
+    /// <inheritdoc cref="Effect{Unit, T}.AndThen{TElement, TResult}(Func{T, Result{TElement}}, Func{T, TElement, TResult})"/>
     /// </summary>
     /// <typeparam name="TElement"></typeparam>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="bind"></param>
     /// <param name="project"></param>
     /// <returns></returns>
-    public Effect<TResult> AndThen<TElement, TResult>(Func<T, Expected<TElement>> bind, Func<T, TElement, TResult> project)
+    public Effect<TResult> AndThen<TElement, TResult>(Func<T, Result<TElement>> bind, Func<T, TElement, TResult> project)
         => AndThen(x => bind(x).Select(y => project(x, y)));
 
     public Effect<TResult> Choose<TResult>(Func<T, Effect<TResult>> okay, Func<Error, Effect<TResult>> error)
@@ -235,5 +235,5 @@ public partial class Effect<T>
     /// <inheritdoc cref="Effect{Unit, T}.Run(Unit)"/>
     /// </summary>
     /// <returns></returns>
-    public Expected<T> Run() => inner.Run(Unit.Value);
+    public Result<T> Run() => inner.Run(Unit.Value);
 }
