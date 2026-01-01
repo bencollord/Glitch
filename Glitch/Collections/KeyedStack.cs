@@ -11,14 +11,29 @@ public class KeyedStack<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
 {
     private Dictionary<TKey, Stack<TValue>> map;
 
+    public KeyedStack() 
+        : this(EqualityComparer<TKey>.Default) { }
+
     public KeyedStack(IEqualityComparer<TKey> keyComparer)
     {
         map = new Dictionary<TKey, Stack<TValue>>(keyComparer);
     }
 
+    public KeyedStack(IEnumerable<KeyValuePair<TKey, TValue>> entries) 
+        : this(entries, EqualityComparer<TKey>.Default) { }
+
+    public KeyedStack(IEnumerable<KeyValuePair<TKey, TValue>> entries, IEqualityComparer<TKey> keyComparer)
+    {
+        map = entries.GroupBy(e => e.Key, e => e.Value, keyComparer)
+                     .Select(g => KeyValuePair.Create(g.Key, new Stack<TValue>(g)))
+                     .ToDictionary();
+    }
+
     public int KeyCount => map.Count;
 
-    public int Count => map.Values.Sum(s => s.Count);
+    public int EntryCount => map.Values.Sum(s => s.Count);
+
+    public int Count(TKey key) => map.TryGetValue(key, out var stack) ? stack.Count : 0;
 
     public bool ContainsKey(TKey key) => map.ContainsKey(key);
 

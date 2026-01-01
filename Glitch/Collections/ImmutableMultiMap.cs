@@ -82,10 +82,9 @@ public static class ImmutableMultiMap
         => new(key, values.ToImmutableList());
 }
 
-public partial class ImmutableMultiMap<TKey, TValue>
-    : IImmutableDictionary<TKey, IImmutableList<TValue>>, 
-      IReadOnlyMultiMap<TKey, TValue>,
-      IEnumerable<KeyValuePair<TKey, TValue>>
+public partial class ImmutableMultiMap<TKey, TValue> :
+    IReadOnlyMultiMap<TKey, TValue>,
+    IEnumerable<KeyValuePair<TKey, TValue>>
         where TKey : notnull
 {
     public static readonly ImmutableMultiMap<TKey, TValue> Empty = new(ImmutableDictionary<TKey, IImmutableList<TValue>>.Empty);
@@ -109,7 +108,7 @@ public partial class ImmutableMultiMap<TKey, TValue>
 
     public int KeyCount => dictionary.Count;
 
-    public int ValueCount => dictionary.Values.Sum(e => e.Count);
+    public int EntryCount => dictionary.Values.Sum(e => e.Count);
 
     public ImmutableMultiMap<TKey, TValue> WithComparer(IEqualityComparer<TKey>? comparer)
         => new(dictionary.WithComparers(comparer));
@@ -180,6 +179,14 @@ public partial class ImmutableMultiMap<TKey, TValue>
 
     int IReadOnlyCollection<KeyValuePair<TKey, IEnumerable<TValue>>>.Count => dictionary.Count;
 
+    IReadOnlyList<TKey> IReadOnlyMultiMap<TKey, TValue>.Keys => throw new NotImplementedException();
+
+    IReadOnlyList<TValue> IReadOnlyMultiMap<TKey, TValue>.Values => throw new NotImplementedException();
+
+    int IReadOnlyCollection<KeyValuePair<TKey, TValue>>.Count => throw new NotImplementedException();
+
+    IReadOnlyList<TValue> IReadOnlyMultiMap<TKey, TValue>.this[TKey key] => throw new NotImplementedException();
+
     IEnumerable<TValue> IReadOnlyDictionary<TKey, IEnumerable<TValue>>.this[TKey key] => this[key];
 
     IImmutableDictionary<TKey, IImmutableList<TValue>> IImmutableDictionary<TKey, IImmutableList<TValue>>.Remove(TKey key) => Remove(key);
@@ -211,4 +218,7 @@ public partial class ImmutableMultiMap<TKey, TValue>
 
     IEnumerator<KeyValuePair<TKey, IEnumerable<TValue>>> IEnumerable<KeyValuePair<TKey, IEnumerable<TValue>>>.GetEnumerator()
         => dictionary.Select(p => KeyValuePair.Create(p.Key, p.Value.AsEnumerable())).GetEnumerator();
+    public int Count(TKey key) => throw new NotImplementedException();
+    public bool TryGetValues(TKey key, [MaybeNullWhen(false)] out IReadOnlyList<TValue> values) => throw new NotImplementedException();
+    public ILookup<TKey, TValue> ToLookup() => throw new NotImplementedException();
 }

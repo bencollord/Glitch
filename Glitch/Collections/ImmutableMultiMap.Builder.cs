@@ -30,7 +30,7 @@ public partial class ImmutableMultiMap<TKey, TValue>
 
         public int KeyCount => mutable.Value.KeyCount;
 
-        public int ValueCount => mutable.Value.ValueCount;
+        public int EntryCount => mutable.Value.EntryCount;
 
         public IEqualityComparer<TKey> Comparer => mutable.Value.Comparer;
 
