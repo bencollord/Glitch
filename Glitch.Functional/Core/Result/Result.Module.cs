@@ -35,4 +35,6 @@ public static partial class Result
 
     public static Result<T, E> Guard<T, E>(Func<T, bool> predicate, T value, E error)
         => predicate(value) ? new Result<T, E>.Okay(value) : new Result<T, E>.Fail(error);
+
+    public static (IEnumerable<T> Successes, IEnumerable<E> Errors) Partition<T, E>(IEnumerable<Result<T, E>> results) => results.Partition();
 }

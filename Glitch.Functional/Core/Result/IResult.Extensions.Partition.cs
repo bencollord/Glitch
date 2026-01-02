@@ -15,6 +15,8 @@ public static partial class ResultExtensions
 
         public IEnumerable<E> Errors() => self.Where(r => r.IsFail).Select(r => r.UnwrapError());
 
-        public (IEnumerable<T> Successes, IEnumerable<E> Errors) Partition() => (self.Successes(), self.Errors());
+        public (IEnumerable<T> Successes, IEnumerable<E> Errors) Partition() => self.Partition((oks, errs) => (oks, errs));
+
+        public TResult Partition<TResult>(Func<IEnumerable<T>, IEnumerable<E>, TResult> partition) => partition(self.Successes(), self.Errors());
     }
 }
