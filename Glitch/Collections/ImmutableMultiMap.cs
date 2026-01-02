@@ -82,10 +82,8 @@ public static class ImmutableMultiMap
         => new(key, values.ToImmutableList());
 }
 
-public partial class ImmutableMultiMap<TKey, TValue> :
-    IReadOnlyMultiMap<TKey, TValue>,
-    IEnumerable<KeyValuePair<TKey, TValue>>
-        where TKey : notnull
+public partial class ImmutableMultiMap<TKey, TValue> : IReadOnlyMultiMap<TKey, TValue>
+    where TKey : notnull
 {
     public static readonly ImmutableMultiMap<TKey, TValue> Empty = new(ImmutableDictionary<TKey, IImmutableList<TValue>>.Empty);
 
@@ -170,55 +168,19 @@ public partial class ImmutableMultiMap<TKey, TValue> :
         return false;
     }
 
+    public int Count(TKey key) => TryGetList(key, out var list) ? list.Count : 0;
+
     public bool TryGetList(TKey key, [NotNullWhen(true)] out IImmutableList<TValue>? list) => dictionary.TryGetValue(key, out list);
-
-    IEnumerable<IImmutableList<TValue>> IReadOnlyDictionary<TKey, IImmutableList<TValue>>.Values => dictionary.Values;
-    int IReadOnlyCollection<KeyValuePair<TKey, IImmutableList<TValue>>>.Count => dictionary.Count;
-
-    IEnumerable<IEnumerable<TValue>> IReadOnlyDictionary<TKey, IEnumerable<TValue>>.Values => dictionary.Values;
-
-    int IReadOnlyCollection<KeyValuePair<TKey, IEnumerable<TValue>>>.Count => dictionary.Count;
-
-    IReadOnlyList<TKey> IReadOnlyMultiMap<TKey, TValue>.Keys => throw new NotImplementedException();
-
-    IReadOnlyList<TValue> IReadOnlyMultiMap<TKey, TValue>.Values => throw new NotImplementedException();
-
-    int IReadOnlyCollection<KeyValuePair<TKey, TValue>>.Count => throw new NotImplementedException();
-
-    IReadOnlyList<TValue> IReadOnlyMultiMap<TKey, TValue>.this[TKey key] => throw new NotImplementedException();
-
-    IEnumerable<TValue> IReadOnlyDictionary<TKey, IEnumerable<TValue>>.this[TKey key] => this[key];
-
-    IImmutableDictionary<TKey, IImmutableList<TValue>> IImmutableDictionary<TKey, IImmutableList<TValue>>.Remove(TKey key) => Remove(key);
-    IImmutableDictionary<TKey, IImmutableList<TValue>> IImmutableDictionary<TKey, IImmutableList<TValue>>.RemoveRange(IEnumerable<TKey> keys) => RemoveRange(keys);
-    IImmutableDictionary<TKey, IImmutableList<TValue>> IImmutableDictionary<TKey, IImmutableList<TValue>>.SetItem(TKey key, IImmutableList<TValue> value) => SetList(key, value);
-    IImmutableDictionary<TKey, IImmutableList<TValue>> IImmutableDictionary<TKey, IImmutableList<TValue>>.SetItems(IEnumerable<KeyValuePair<TKey, IImmutableList<TValue>>> items) => new ImmutableMultiMap<TKey, TValue>(dictionary.SetItems(items));
-    bool IReadOnlyDictionary<TKey, IImmutableList<TValue>>.TryGetValue(TKey key, out IImmutableList<TValue> value) => TryGetList(key, out value!);
-    IImmutableDictionary<TKey, IImmutableList<TValue>> IImmutableDictionary<TKey, IImmutableList<TValue>>.Add(TKey key, IImmutableList<TValue> value) => AddRange(key, value);
-    IImmutableDictionary<TKey, IImmutableList<TValue>> IImmutableDictionary<TKey, IImmutableList<TValue>>.AddRange(IEnumerable<KeyValuePair<TKey, IImmutableList<TValue>>> pairs) => new ImmutableMultiMap<TKey, TValue>(dictionary.AddRange(pairs));
-    IImmutableDictionary<TKey, IImmutableList<TValue>> IImmutableDictionary<TKey, IImmutableList<TValue>>.Clear() => Clear();
-    bool IImmutableDictionary<TKey, IImmutableList<TValue>>.Contains(KeyValuePair<TKey, IImmutableList<TValue>> pair) => dictionary.Contains(pair);
-    IEnumerator<KeyValuePair<TKey, IImmutableList<TValue>>> IEnumerable<KeyValuePair<TKey, IImmutableList<TValue>>>.GetEnumerator() => dictionary.GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-    bool IReadOnlyMultiMap<TKey, TValue>.TryGetList(TKey key, out IEnumerable<TValue> list)
+    
+    public bool TryGetValues(TKey key, [MaybeNullWhen(false)] out IReadOnlyList<TValue> values)
     {
-        if (TryGetList(key, out var stupidHackyCantBelieveOutParametersArentCovariantList))
-        {
-            list = stupidHackyCantBelieveOutParametersArentCovariantList;
-            return true;
-        }
-
-        list = [];
-        return false;
+        bool success = TryGetList(key, out var list);
+        values = list;
+        return success;
     }
 
-    bool IReadOnlyDictionary<TKey, IEnumerable<TValue>>.TryGetValue(TKey key, out IEnumerable<TValue> value)
-        => ((IReadOnlyMultiMap<TKey, TValue>)this).TryGetList(key, out value);
-
-    IEnumerator<KeyValuePair<TKey, IEnumerable<TValue>>> IEnumerable<KeyValuePair<TKey, IEnumerable<TValue>>>.GetEnumerator()
-        => dictionary.Select(p => KeyValuePair.Create(p.Key, p.Value.AsEnumerable())).GetEnumerator();
-    public int Count(TKey key) => throw new NotImplementedException();
-    public bool TryGetValues(TKey key, [MaybeNullWhen(false)] out IReadOnlyList<TValue> values) => throw new NotImplementedException();
     public ILookup<TKey, TValue> ToLookup() => throw new NotImplementedException();
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    // =========================
 }

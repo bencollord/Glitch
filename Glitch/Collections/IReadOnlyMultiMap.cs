@@ -42,12 +42,12 @@ public interface IReadOnlyMultiMap<TKey, TValue> : IReadOnlyCollection<KeyValueP
     /// <summary>
     /// Gets a list of all the keys in the map.
     /// </summary>
-    IReadOnlyCollection<TKey> Keys { get; }
+    IEnumerable<TKey> Keys { get; }
 
     /// <summary>
     /// Gets a list of the full, flattened list of values in the map.
     /// </summary>
-    IReadOnlyCollection<TValue> Values { get; }
+    IEnumerable<TValue> Values { get; }
 
     /// <summary>
     /// Gets the count of items under <paramref name="key"/>.
