@@ -51,6 +51,18 @@ public class Lookup<TKey, TValue> : ILookup<TKey, TValue>
         this.dictionary = dictionary.ToDictionary(keyComparer);
     }
 
+    public Lookup(IReadOnlyMultiMap<TKey, TValue> map)
+    {
+        var dictionary = new Dictionary<TKey, IEnumerable<TValue>>();
+
+        foreach (var key in map.Keys)
+        {
+            dictionary.Add(key, map[key]);
+        }
+
+        this.dictionary = dictionary;
+    }
+
     public IEnumerable<TValue> this[TKey key] => dictionary[key];
 
     public int Count => dictionary.Count;

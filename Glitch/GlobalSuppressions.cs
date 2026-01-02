@@ -18,3 +18,6 @@ using System.Diagnostics.CodeAnalysis;
 
 // This is borderline comical.
 [assembly: SuppressMessage("Style", "IDE0301:Simplify collection initialization", Justification = "May change semantics and should not cause noise from the compiler")]
+
+// Now it's not even borderline.
+[assembly: SuppressMessage("Style", "IDE0303:Simplify collection initialization", Justification = "May change semantics and should not cause noise from the compiler")]

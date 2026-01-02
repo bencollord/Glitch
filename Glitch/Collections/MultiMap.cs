@@ -182,7 +182,7 @@ public class MultiMap<TKey, TValue> : IMultiMap<TKey, TValue>
         return false;
     }
 
-    public EntryEnumerator GetEnumerator() => new(this);
+    public Enumerator GetEnumerator() => new(this);
 
     public Dictionary<TKey, IList<TValue>> ToDictionary() => new(dictionary, dictionary.Comparer);
 
@@ -197,8 +197,10 @@ public class MultiMap<TKey, TValue> : IMultiMap<TKey, TValue>
     }
 
     public int Count(TKey key) => TryGetList(key, out var list) ? list.Count : 0;
+    public Lookup<TKey, TValue> ToLookup() => new Lookup<TKey, TValue>(this);
 
-    public bool TryGetValues(TKey key, [MaybeNullWhen(false)] out IReadOnlyList<TValue> values)
+    #region Explicit Interface Implementations
+    bool IReadOnlyMultiMap<TKey, TValue>.TryGetList(TKey key, [MaybeNullWhen(false)] out IReadOnlyList<TValue> values)
     {
         if (TryGetList(key, out var list))
         {
@@ -210,9 +212,6 @@ public class MultiMap<TKey, TValue> : IMultiMap<TKey, TValue>
         return false;
     }
 
-    public Lookup ToLookup() => new Lookup(this);
-
-    #region Explicit Interface Implementations
     ILookup<TKey, TValue> IReadOnlyMultiMap<TKey, TValue>.ToLookup() => ToLookup();
     int IReadOnlyCollection<KeyValuePair<TKey, TValue>>.Count => EntryCount;
     int ICollection<KeyValuePair<TKey, TValue>>.Count => EntryCount;
@@ -245,29 +244,29 @@ public class MultiMap<TKey, TValue> : IMultiMap<TKey, TValue>
         public struct Enumerator : IEnumerator<TKey>
         {
             private readonly KeyCollection keys;
-            private LookupEnumerator? lookupEnumerator;
+            private Dictionary<TKey, IList<TValue>>.Enumerator? enumerator;
 
             internal Enumerator(KeyCollection keys) 
             {
                 this.keys = keys;
             }
 
-            public readonly TKey Current => lookupEnumerator.GetValueOrDefault().Current.Key;
+            public readonly TKey Current => enumerator.GetValueOrDefault().Current.Key;
             readonly object IEnumerator.Current => Current;
 
-            public readonly void Dispose() => lookupEnumerator?.Dispose();
+            public readonly void Dispose() => enumerator?.Dispose();
 
             public bool MoveNext()
             {
-                if (!lookupEnumerator.HasValue)
+                if (!enumerator.HasValue)
                 {
-                    lookupEnumerator = new LookupEnumerator(keys.map);
+                    enumerator = keys.map.dictionary.GetEnumerator();
                 }
 
-                return lookupEnumerator.Value.MoveNext();
+                return enumerator.Value.MoveNext();
             }
 
-            public void Reset() => lookupEnumerator = null;
+            public void Reset() => enumerator = null;
         }
     }
 
@@ -290,7 +289,7 @@ public class MultiMap<TKey, TValue> : IMultiMap<TKey, TValue>
         public struct Enumerator : IEnumerator<TValue>
         {
             private readonly ValueCollection values;
-            private EntryEnumerator? entryEnumerator;
+            private MultiMap<TKey, TValue>.Enumerator? entryEnumerator;
 
             internal Enumerator(ValueCollection values)
             {
@@ -306,7 +305,7 @@ public class MultiMap<TKey, TValue> : IMultiMap<TKey, TValue>
             {
                 if (!entryEnumerator.HasValue)
                 {
-                    entryEnumerator = new EntryEnumerator(values.map);
+                    this.entryEnumerator = new MultiMap<TKey, TValue>.Enumerator(this.values.map);
                 }
 
                 return entryEnumerator.Value.MoveNext();
@@ -316,14 +315,14 @@ public class MultiMap<TKey, TValue> : IMultiMap<TKey, TValue>
         }
     }
 
-    public struct EntryEnumerator : IEnumerator<KeyValuePair<TKey, TValue>>
+    public struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>
     {
         private readonly MultiMap<TKey, TValue> multiMap;
         private Dictionary<TKey, IList<TValue>>.Enumerator dictionaryEnumerator;
-        private IEnumerator<TValue>? listEnumerator;
+        private IEnumerator<TValue>? listEnumerator; // TODO Struct enumerator
         private State state = State.NotStarted;
 
-        internal EntryEnumerator(MultiMap<TKey, TValue> multiMap)
+        internal Enumerator(MultiMap<TKey, TValue> multiMap)
         {
             this.multiMap = multiMap;
         }
@@ -398,75 +397,5 @@ public class MultiMap<TKey, TValue> : IMultiMap<TKey, TValue>
         }
 
         private enum State { NotStarted, BeforeList, EnumeratingList, Complete }
-    }
-
-    public class Lookup : ILookup<TKey, TValue>
-    {
-        private readonly MultiMap<TKey, TValue> map;
-
-        internal Lookup(MultiMap<TKey, TValue> map)
-        {
-            this.map = map;
-        }
-
-        public IEnumerable<TValue> this[TKey key] => map[key];
-
-        public int Count => map.dictionary.Count;
-
-        public bool Contains(TKey key) => map.dictionary.ContainsKey(key);
-
-        public LookupEnumerator GetEnumerator() => new LookupEnumerator(map);
-
-        IEnumerator<IGrouping<TKey, TValue>> IEnumerable<IGrouping<TKey, TValue>>.GetEnumerator() => GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    }
-
-    public struct LookupEnumerator : IEnumerator<IGrouping<TKey, TValue>>
-    {
-        private readonly MultiMap<TKey, TValue> multiMap;
-        private Dictionary<TKey, IList<TValue>>.Enumerator? dictionaryEnumerator;
-
-        internal LookupEnumerator(MultiMap<TKey, TValue> multiMap)
-        {
-            this.multiMap = multiMap;
-        }
-
-        public Grouping Current { get; private set; }
-
-        readonly IGrouping<TKey, TValue> IEnumerator<IGrouping<TKey, TValue>>.Current => Current;
-        readonly object IEnumerator.Current => Current;
-
-        public bool MoveNext()
-        {
-            if (!dictionaryEnumerator.HasValue)
-            {
-                dictionaryEnumerator = multiMap.dictionary.GetEnumerator();
-            }
-
-            if (dictionaryEnumerator.Value.MoveNext())
-            {
-                Current = new Grouping(dictionaryEnumerator.Value.Current.Key, dictionaryEnumerator.Value.Current.Value);
-                return true;
-            }
-
-            return false;
-        }
-
-        public readonly void Dispose()
-        {
-            dictionaryEnumerator?.Dispose();
-        }
-
-        public void Reset()
-        {
-            dictionaryEnumerator = null;
-        }
-    }
-
-    public readonly record struct Grouping(TKey Key, IEnumerable<TValue> Values) : IGrouping<TKey, TValue>
-    {
-        public IEnumerator<TValue> GetEnumerator() => Values.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

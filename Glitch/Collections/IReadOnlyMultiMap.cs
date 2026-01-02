@@ -64,13 +64,19 @@ public interface IReadOnlyMultiMap<TKey, TValue> : IReadOnlyCollection<KeyValueP
     bool ContainsKey(TKey key);
 
     /// <summary>
-    /// Attempts to get all <paramref name="values">values</paramref> under <paramref name="key"/>
+    /// Attempts to get all <paramref name="list">values</paramref> under <paramref name="key"/>
     /// and returns true if successful.
     /// </summary>
+    /// <remarks>
+    /// Note to implementors: It is recommended to implement this method explicitly
+    /// if you are inheriting from <see cref="IMultiMap{TKey, TValue}"/> or
+    /// <see cref="IImmutableMultiMap{TKey, TValue}"/> if you don't want to have to specify
+    /// the type of <paramref name="list"/> explicitly.
+    /// </remarks>
     /// <param name="key"></param>
-    /// <param name="values"></param>
+    /// <param name="list"></param>
     /// <returns></returns>
-    bool TryGetValues(TKey key, [MaybeNullWhen(false)] out IReadOnlyList<TValue> values);
+    bool TryGetList(TKey key, [MaybeNullWhen(false)] out IReadOnlyList<TValue> list);
 
     /// <summary>
     /// Attempts to get the <paramref name="value"/> under <paramref name="key"/> at <paramref name="index"/>
