@@ -46,22 +46,6 @@ public sealed class BufferedCharStream : CharStream
         return ReadNextChar();
     }
 
-    public override string ReadToEnd()
-    { 
-        // TODO Check for performance and best practices, this is quick and dirty.
-        var remaining = stream.ReadToEnd();
-        var output = new StringBuilder(buffer.Count + remaining.Length);
-
-        while (!buffer.IsEmpty)
-        {
-            output.Append(buffer.Take());
-        }
-
-        output.Append(remaining);
-
-        return output.ToString();
-    }
-
     public override void Dispose()
     {
         stream.Dispose();
