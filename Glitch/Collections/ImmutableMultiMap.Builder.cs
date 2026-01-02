@@ -1,11 +1,9 @@
 using System.Collections;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Collections;
 
-#pragma warning disable IDE0305 // Simplify collection initialization
-#pragma warning disable IDE0306 // Simplify collection initialization
-#pragma warning disable IDE0303 // Simplify collection initialization
 public partial class ImmutableMultiMap<TKey, TValue>
 {
     public class Builder : IMultiMap<TKey, TValue>
@@ -30,7 +28,7 @@ public partial class ImmutableMultiMap<TKey, TValue>
 
         public int KeyCount => mutable.Value.KeyCount;
 
-        public int ValueCount => mutable.Value.ValueCount;
+        public int EntryCount => mutable.Value.EntryCount;
 
         public IEqualityComparer<TKey> Comparer => mutable.Value.Comparer;
 
@@ -50,14 +48,6 @@ public partial class ImmutableMultiMap<TKey, TValue>
 
         public IEnumerable<TValue> Values => mutable.Value.Values;
 
-        ICollection<TKey> IDictionary<TKey, IList<TValue>>.Keys => ((IDictionary<TKey, IList<TValue>>)mutable.Value).Keys;
-
-        ICollection<IList<TValue>> IDictionary<TKey, IList<TValue>>.Values => ((IDictionary<TKey, IList<TValue>>)mutable.Value).Values;
-
-        int ICollection<KeyValuePair<TKey, IList<TValue>>>.Count => ((IDictionary<TKey, IList<TValue>>)mutable.Value).Count;
-
-        bool ICollection<KeyValuePair<TKey, IList<TValue>>>.IsReadOnly => ((IDictionary<TKey, IList<TValue>>)mutable.Value).IsReadOnly;
-
         public ImmutableMultiMap<TKey, TValue> ToImmutable()
         {
             // If no properties have been accessed, the original never changed
@@ -70,25 +60,34 @@ public partial class ImmutableMultiMap<TKey, TValue>
                 .ToDictionary()
                 .ToImmutableDictionary(
                     pair => pair.Key,
-                    pair => (IImmutableList<TValue>)ImmutableList.CreateRange(pair.Value),
+                    pair => (IImmutableList<TValue>)[..pair.Value],
                     Comparer);
 
             return new(dictionary);
         }
 
-        public IList<TValue> Add(TKey key, TValue value) => mutable.Value.Add(key, value);
-
-        public IList<TValue> Add(TKey key, params TValue[] values) => mutable.Value.AddRange(key, values);
-
-        public IList<TValue> AddRange(TKey key, IEnumerable<TValue> values) => mutable.Value.AddRange(key, values);
-
-        public IList<TValue> AddRange(TKey key, IList<TValue> list) => mutable.Value.AddRange(key, list);
+        public void Add(TKey key, TValue value) => mutable.Value.Add(key, value);
+        public void Add(KeyValuePair<TKey, TValue> item) => mutable.Value.Add(item);
+        public void Add(TKey key, params TValue[] values) => mutable.Value.AddRange(key, values);
+        public void AddRange(TKey key, IEnumerable<TValue> values) => mutable.Value.AddRange(key, values);
+        public void AddRange(TKey key, IList<TValue> list) => mutable.Value.AddRange(key, list);
         
+        public int Count(TKey key) => mutable.Value.Count(key);
+        public bool ContainsKey(TKey key) => mutable.Value.ContainsKey(key);
+        public bool Contains(KeyValuePair<TKey, TValue> item) => mutable.Value.Contains(item);
+
+        public bool Remove(TKey key, TValue value) => mutable.Value.Remove(key, value);
+        public bool Remove(KeyValuePair<TKey, TValue> item) => mutable.Value.Remove(item);
+        public bool RemoveAt(TKey key, int index) => mutable.Value.RemoveAt(key, index);
+        public int RemoveAll(TKey key) => mutable.Value.RemoveAll(key);
+
         public void Clear() => mutable.Value.Clear();
 
-        public bool ContainsKey(TKey key) => mutable.Value.ContainsKey(key);
+        public IList<TValue> GetOrAddList(TKey key) => mutable.Value.GetOrAddList(key);
 
-        public bool Remove(TKey key) => mutable.Value.Remove(key);
+        public ILookup<TKey, TValue> ToLookup() => mutable.Value.ToLookup();
+
+        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) => mutable.Value.CopyTo(array, arrayIndex);
 
         public bool TryGetList(TKey key, out IList<TValue> list) => mutable.Value.TryGetList(key, out list);
 
@@ -96,10 +95,11 @@ public partial class ImmutableMultiMap<TKey, TValue>
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => mutable.Value.GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ((IEnumerable)mutable.Value).GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        IReadOnlyList<TValue> IReadOnlyMultiMap<TKey, TValue>.this[TKey key] => this[key] as IReadOnlyList<TValue> ?? this[key].ToReadOnlyList();
+        int IReadOnlyCollection<KeyValuePair<TKey, TValue>>.Count => EntryCount;
+        int ICollection<KeyValuePair<TKey, TValue>>.Count => EntryCount;
+        bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly => false;
 
         private MultiMap<TKey, TValue> InitMutable()
         {
@@ -122,39 +122,6 @@ public partial class ImmutableMultiMap<TKey, TValue>
             return map;
         }
 
-        void IDictionary<TKey, IList<TValue>>.Add(TKey key, IList<TValue> value)
-        {
-            ((IDictionary<TKey, IList<TValue>>)mutable.Value).Add(key, value);
-        }
-
-        bool IDictionary<TKey, IList<TValue>>.TryGetValue(TKey key, out IList<TValue> value)
-        {
-            return ((IDictionary<TKey, IList<TValue>>)mutable.Value).TryGetValue(key, out value!);
-        }
-
-        void ICollection<KeyValuePair<TKey, IList<TValue>>>.Add(KeyValuePair<TKey, IList<TValue>> item)
-        {
-            ((IDictionary<TKey, IList<TValue>>)mutable.Value).Add(item);
-        }
-
-        bool ICollection<KeyValuePair<TKey, IList<TValue>>>.Contains(KeyValuePair<TKey, IList<TValue>> item)
-        {
-            return ((IDictionary<TKey, IList<TValue>>)mutable.Value).Contains(item);
-        }
-
-        void ICollection<KeyValuePair<TKey, IList<TValue>>>.CopyTo(KeyValuePair<TKey, IList<TValue>>[] array, int arrayIndex)
-        {
-            ((IDictionary<TKey, IList<TValue>>)mutable.Value).CopyTo(array, arrayIndex);
-        }
-
-        bool ICollection<KeyValuePair<TKey, IList<TValue>>>.Remove(KeyValuePair<TKey, IList<TValue>> item)
-        {
-            return ((IDictionary<TKey, IList<TValue>>)mutable.Value).Remove(item);
-        }
-
-        IEnumerator<KeyValuePair<TKey, IList<TValue>>> IEnumerable<KeyValuePair<TKey, IList<TValue>>>.GetEnumerator()
-        {
-            return ((IDictionary<TKey, IList<TValue>>)mutable.Value).GetEnumerator();
-        }
+        bool IReadOnlyMultiMap<TKey, TValue>.TryGetList(TKey key, out IReadOnlyList<TValue> list) => throw new NotImplementedException();
     }
 }

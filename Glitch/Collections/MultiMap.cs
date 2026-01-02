@@ -6,38 +6,44 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Collections;
 
-public class MultiMap<TKey, TValue>
-    : IDictionary<TKey, IList<TValue>>,
-      IReadOnlyMultiMap<TKey, TValue>,
-      ILookup<TKey, TValue>,
-      IEnumerable<KeyValuePair<TKey, TValue>>, 
-      IMultiMap<TKey, TValue> 
-         where TKey : notnull
+public class MultiMap<TKey, TValue> : IMultiMap<TKey, TValue>
+    where TKey : notnull
 {
     private readonly Dictionary<TKey, IList<TValue>> dictionary;
 
     public MultiMap() : this(EqualityComparer<TKey>.Default) { }
 
-    public MultiMap(IEqualityComparer<TKey> comparer)
+    public MultiMap(IEqualityComparer<TKey> keyComparer)
     {
-        dictionary = new Dictionary<TKey, IList<TValue>>(comparer);
+        dictionary = new Dictionary<TKey, IList<TValue>>(keyComparer);
     }
 
-    public MultiMap(IEnumerable<KeyValuePair<TKey, TValue>> pairs)
-        : this(pairs, EqualityComparer<TKey>.Default) { }
+    public MultiMap(IEnumerable<KeyValuePair<TKey, TValue>> entries)
+        : this(entries, EqualityComparer<TKey>.Default) { }
 
-    public MultiMap(IEnumerable<KeyValuePair<TKey, TValue>> pairs, IEqualityComparer<TKey> comparer)
+    public MultiMap(IEnumerable<KeyValuePair<TKey, TValue>> entries, IEqualityComparer<TKey> keyComparer)
+        : this(keyComparer)
     {
-        dictionary = pairs
-            .GroupBy(p => p.Key, p => p.Value, comparer)
-            .ToDictionary(g => g.Key, g => (IList<TValue>)g.ToList(), comparer);
+        AddRange(entries);
     }
 
     public MultiMap(IDictionary<TKey, IList<TValue>> dictionary)
         : this(new Dictionary<TKey, IList<TValue>>(dictionary)) { }
 
-    public MultiMap(IDictionary<TKey, IList<TValue>> dictionary, IEqualityComparer<TKey> comparer)
-        : this(new Dictionary<TKey, IList<TValue>>(dictionary, comparer)) { }
+    public MultiMap(IDictionary<TKey, IList<TValue>> dictionary, IEqualityComparer<TKey> keyComparer)
+        : this(new Dictionary<TKey, IList<TValue>>(dictionary, keyComparer)) { }
+
+    public MultiMap(IMultiMap<TKey, TValue> map)
+        : this()
+    {
+        Merge(map);
+    }
+
+    public MultiMap(IMultiMap<TKey, TValue> map, IEqualityComparer<TKey> keyComparer) 
+        : this(keyComparer)
+    {
+        Merge(map);
+    }
 
     private MultiMap(Dictionary<TKey, IList<TValue>> dictionary)
     {
@@ -46,7 +52,7 @@ public class MultiMap<TKey, TValue>
 
     public int KeyCount => dictionary.Count;
 
-    public int ValueCount => dictionary.Values.Sum(v => v.Count);
+    public int EntryCount => dictionary.Values.Sum(v => v.Count);
 
     public IEqualityComparer<TKey> Comparer => dictionary.Comparer;
 
@@ -62,51 +68,113 @@ public class MultiMap<TKey, TValue>
         set => dictionary[key][index] = value;
     }
 
-    public IEnumerable<TKey> Keys => dictionary.Keys;
+    public KeyCollection Keys => new(this);
 
-    public IEnumerable<TValue> Values => dictionary.Values.Flatten();
+    public ValueCollection Values => new(this);
 
-    public IList<TValue> Add(TKey key, TValue value)
+    public void Add(TKey key, TValue value)
     {
-        if (!dictionary.ContainsKey(key))
+        if (!dictionary.TryGetValue(key, out var list))
         {
-            dictionary.Add(key, []);
+            list = [];
+            dictionary.Add(key, list);
         }
 
-        var list = dictionary[key];
         list.Add(value);
-        return list;
     }
 
-    public IList<TValue> Add(TKey key, params TValue[] values) => AddRange(key, values);
+    public void Add(TKey key, params TValue[] values) => AddRange(key, values);
 
-    public IList<TValue> AddRange(TKey key, IEnumerable<TValue> items)
-        => AddRange(key, items.ToList());
+    public void Add(KeyValuePair<TKey, TValue> item) => Add(item.Key, item.Value);
 
-    public IList<TValue> AddRange(TKey key, IList<TValue> list)
+    public void AddRange(IEnumerable<KeyValuePair<TKey, TValue>> entries)
     {
-        if(TryGetList(key, out var existing))
+        foreach (var (key, value) in entries)
+        {
+            Add(key, value);
+        }
+    }
+
+    public void AddRange(TKey key, IEnumerable<TValue> items) => AddRange(key, items.ToList());
+
+    public void AddRange(TKey key, IList<TValue> list)
+    {
+        if (TryGetList(key, out var existing))
         {
             existing.AddRange(list);
-            return existing;
+        }
+        else
+        {
+            dictionary.Add(key, list);
+        }
+    }
+
+    public void Merge(IDictionary<TKey, TValue> dictionary)
+    {
+        foreach (var key in dictionary.Keys)
+        {
+            Add(key, dictionary[key]);
+        }
+    }
+
+    public void Merge(IMultiMap<TKey, TValue> map)
+    {
+        foreach (var key in map.Keys)
+        {
+            AddRange(key, map[key]);
+        }
+    }
+
+    public bool Remove(TKey key, TValue value)
+    {
+        int index = TryGetList(key, out var list) ? list.IndexOf(value) : -1;
+
+        return index > -1 && RemoveAt(key, index);
+    }
+
+    public bool Remove(KeyValuePair<TKey, TValue> item) => Remove(item.Key, item.Value);
+
+    public bool RemoveAt(TKey key, int index)
+    {
+        if (!TryGetList(key, out var existing) || existing.Count <= index)
+        {
+            return false;
         }
 
-        dictionary.Add(key, list);
-        return list;
+        existing.RemoveAt(index);
+
+        if (existing.Count == 0)
+        {
+            dictionary.Remove(key);
+        }
+
+        return true;
+    }
+
+    public int RemoveAll(TKey key)
+    {
+        if (TryGetList(key, out var list))
+        {
+            dictionary.Remove(key);
+            return list.Count;
+        }
+
+        return -1;
     }
 
     public void Clear() => dictionary.Clear();
 
     public bool ContainsKey(TKey key) => dictionary.ContainsKey(key);
-
-    public bool Remove(TKey key) => dictionary.Remove(key);
-
-    public bool TryGetList(TKey key, out IList<TValue> list)
-        => dictionary.TryGetValue(key, out list!); // We either ignore nulls here or deal with the "Mismatched type" warning.
+    
+    public bool Contains(KeyValuePair<TKey, TValue> item) => TryGetList(item.Key, out var list) && list.Contains(item.Value);
+    
+    public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) => throw new NotImplementedException();
+    
+    public bool TryGetList(TKey key, [MaybeNullWhen(false)] out IList<TValue> list) => dictionary.TryGetValue(key, out list);
 
     public bool TryGetValue(TKey key, int index, [NotNullWhen(true)] out TValue? value)
     {
-        if (TryGetList(key, out IList<TValue> list) && list.Count < index)
+        if (TryGetList(key, out var list) && list.Count < index)
         {
             value = dictionary[key][index];
             return value != null;
@@ -120,11 +188,140 @@ public class MultiMap<TKey, TValue>
 
     public Dictionary<TKey, IList<TValue>> ToDictionary() => new(dictionary, dictionary.Comparer);
 
+    public IList<TValue> GetOrAddList(TKey key)
+    {
+        if (!TryGetList(key, out var list))
+        {
+            list = [];
+        }
+
+        return list;
+    }
+
+    public int Count(TKey key) => TryGetList(key, out var list) ? list.Count : 0;
+    public Lookup<TKey, TValue> ToLookup() => new Lookup<TKey, TValue>(this);
+
+    #region Explicit Interface Implementations
+    bool IReadOnlyMultiMap<TKey, TValue>.TryGetList(TKey key, [MaybeNullWhen(false)] out IReadOnlyList<TValue> values)
+    {
+        if (TryGetList(key, out var list))
+        {
+            values = list as IReadOnlyList<TValue> ?? new ReadOnlyList<TValue>(list);
+            return true;
+        }
+
+        values = default;
+        return false;
+    }
+
+    ILookup<TKey, TValue> IReadOnlyMultiMap<TKey, TValue>.ToLookup() => ToLookup();
+    int IReadOnlyCollection<KeyValuePair<TKey, TValue>>.Count => EntryCount;
+    int ICollection<KeyValuePair<TKey, TValue>>.Count => EntryCount;
+    bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly => false;
+
+    IEnumerable<TKey> IReadOnlyMultiMap<TKey, TValue>.Keys => Keys;
+    IEnumerable<TValue> IReadOnlyMultiMap<TKey, TValue>.Values => Values;
+
+    IReadOnlyList<TValue> IReadOnlyMultiMap<TKey, TValue>.this[TKey key] => this[key] as IReadOnlyList<TValue> ?? this[key].ToReadOnlyList();
+    IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() => GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    #endregion
+
+    public class KeyCollection : IReadOnlyCollection<TKey>
+    {
+        private readonly MultiMap<TKey, TValue> map;
+
+        internal KeyCollection(MultiMap<TKey, TValue> map)
+        {
+            this.map = map;
+        }
+
+        public int Count => map.KeyCount;
+
+        public Enumerator GetEnumerator() => new(this);
+
+        IEnumerator<TKey> IEnumerable<TKey>.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public struct Enumerator : IEnumerator<TKey>
+        {
+            private readonly KeyCollection keys;
+            private Dictionary<TKey, IList<TValue>>.Enumerator? enumerator;
+
+            internal Enumerator(KeyCollection keys) 
+            {
+                this.keys = keys;
+            }
+
+            public readonly TKey Current => enumerator.GetValueOrDefault().Current.Key;
+            readonly object IEnumerator.Current => Current;
+
+            public readonly void Dispose() => enumerator?.Dispose();
+
+            public bool MoveNext()
+            {
+                if (!enumerator.HasValue)
+                {
+                    enumerator = keys.map.dictionary.GetEnumerator();
+                }
+
+                return enumerator.Value.MoveNext();
+            }
+
+            public void Reset() => enumerator = null;
+        }
+    }
+
+    public class ValueCollection : IReadOnlyCollection<TValue>
+    {
+        private readonly MultiMap<TKey, TValue> map;
+
+        internal ValueCollection(MultiMap<TKey, TValue> map)
+        {
+            this.map = map;
+        }
+
+        public int Count => map.EntryCount;
+
+        public Enumerator GetEnumerator() => new(this);
+
+        IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public struct Enumerator : IEnumerator<TValue>
+        {
+            private readonly ValueCollection values;
+            private MultiMap<TKey, TValue>.Enumerator? entryEnumerator;
+
+            internal Enumerator(ValueCollection values)
+            {
+                this.values = values;
+            }
+
+            public readonly TValue Current => entryEnumerator.GetValueOrDefault().Current.Value;
+            readonly object? IEnumerator.Current => Current;
+
+            public readonly void Dispose() => entryEnumerator?.Dispose();
+
+            public bool MoveNext()
+            {
+                if (!entryEnumerator.HasValue)
+                {
+                    this.entryEnumerator = new MultiMap<TKey, TValue>.Enumerator(this.values.map);
+                }
+
+                return entryEnumerator.Value.MoveNext();
+            }
+
+            public void Reset() => entryEnumerator = null;
+        }
+    }
+
     public struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>
     {
-        private MultiMap<TKey, TValue> multiMap;
+        private readonly MultiMap<TKey, TValue> multiMap;
         private Dictionary<TKey, IList<TValue>>.Enumerator dictionaryEnumerator;
-        private IEnumerator<TValue>? listEnumerator;
+        private IEnumerator<TValue>? listEnumerator; // TODO Struct enumerator
         private State state = State.NotStarted;
 
         internal Enumerator(MultiMap<TKey, TValue> multiMap)
@@ -202,85 +399,5 @@ public class MultiMap<TKey, TValue>
         }
 
         private enum State { NotStarted, BeforeList, EnumeratingList, Complete }
-    }
-
-    #region Explicit Interface Implementations
-
-    #region IEnumerable
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-    IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() => GetEnumerator();
-
-    IEnumerator<IGrouping<TKey, TValue>> IEnumerable<IGrouping<TKey, TValue>>.GetEnumerator()
-    {
-        foreach (var (key, list) in dictionary)
-        {
-            yield return new Grouping(key, list);
-        }
-    }
-    IEnumerator<KeyValuePair<TKey, IList<TValue>>> IEnumerable<KeyValuePair<TKey, IList<TValue>>>.GetEnumerator() => dictionary.GetEnumerator();
-    #endregion
-
-    #region IDictionary
-    void IDictionary<TKey, IList<TValue>>.Add(TKey key, IList<TValue> list) => AddRange(key, list);
-    bool IDictionary<TKey, IList<TValue>>.TryGetValue(TKey key, out IList<TValue> list) => TryGetList(key, out list);
-    #endregion
-
-    #region ILookup
-    int ILookup<TKey, TValue>.Count => dictionary.Count;
-    IEnumerable<TValue> ILookup<TKey, TValue>.this[TKey key] => this[key];
-    bool ILookup<TKey, TValue>.Contains(TKey key) => ContainsKey(key);
-    #endregion
-
-    #region ICollection
-    int ICollection<KeyValuePair<TKey, IList<TValue>>>.Count => KeyCount;
-    ICollection<TKey> IDictionary<TKey, IList<TValue>>.Keys => dictionary.Keys;
-    ICollection<IList<TValue>> IDictionary<TKey, IList<TValue>>.Values => dictionary.Values;
-    bool ICollection<KeyValuePair<TKey, IList<TValue>>>.IsReadOnly => false;
-
-    IEnumerable<IEnumerable<TValue>> IReadOnlyDictionary<TKey, IEnumerable<TValue>>.Values => dictionary.Values;
-
-    int IReadOnlyCollection<KeyValuePair<TKey, IEnumerable<TValue>>>.Count => KeyCount;
-
-    IEnumerable<TValue> IReadOnlyDictionary<TKey, IEnumerable<TValue>>.this[TKey key] => this[key];
-
-    void ICollection<KeyValuePair<TKey, IList<TValue>>>.Add(KeyValuePair<TKey, IList<TValue>> item) => ((ICollection<KeyValuePair<TKey, IList<TValue>>>)dictionary).Add(item);
-    bool ICollection<KeyValuePair<TKey, IList<TValue>>>.Contains(KeyValuePair<TKey, IList<TValue>> item) => ((ICollection<KeyValuePair<TKey, IList<TValue>>>)dictionary).Contains(item);
-    void ICollection<KeyValuePair<TKey, IList<TValue>>>.CopyTo(KeyValuePair<TKey, IList<TValue>>[] array, int arrayIndex) => ((ICollection<KeyValuePair<TKey, IList<TValue>>>)dictionary).CopyTo(array, arrayIndex);
-    bool ICollection<KeyValuePair<TKey, IList<TValue>>>.Remove(KeyValuePair<TKey, IList<TValue>> item) => ((ICollection<KeyValuePair<TKey, IList<TValue>>>)dictionary).Remove(item);
-
-    bool IReadOnlyMultiMap<TKey, TValue>.TryGetList(TKey key, out IEnumerable<TValue> list)
-    {
-        if (TryGetList(key, out var stupidHackyCantBelieveOutParametersArentCovariantList))
-        {
-            list = stupidHackyCantBelieveOutParametersArentCovariantList;
-            return true;
-        }
-
-        list = [];
-        return false;
-    }
-
-    bool IReadOnlyDictionary<TKey, IEnumerable<TValue>>.TryGetValue(TKey key, out IEnumerable<TValue> value)
-        => ((IReadOnlyMultiMap<TKey, TValue>)this).TryGetList(key, out value);
-
-
-    IEnumerator<KeyValuePair<TKey, IEnumerable<TValue>>> IEnumerable<KeyValuePair<TKey, IEnumerable<TValue>>>.GetEnumerator()
-    {
-        foreach (var (key, value) in dictionary)
-        {
-            yield return KeyValuePair.Create(key, value.AsEnumerable());
-        }
-    }
-
-    #endregion
-
-    #endregion
-
-    private record Grouping(TKey Key, IEnumerable<TValue> Values) : IGrouping<TKey, TValue>
-    {
-        public IEnumerator<TValue> GetEnumerator() => Values.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
