@@ -103,8 +103,10 @@ public class MultiMap<TKey, TValue> : IMultiMap<TKey, TValue>
         {
             existing.AddRange(list);
         }
-
-        dictionary.Add(key, list);
+        else
+        {
+            dictionary.Add(key, list);
+        }
     }
 
     public void Merge(IDictionary<TKey, TValue> dictionary)
