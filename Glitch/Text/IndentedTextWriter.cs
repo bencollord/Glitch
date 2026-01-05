@@ -151,147 +151,147 @@ public class IndentedTextWriter : TextWriter, IIndentable
     {
         ApplyIndent();
         inner.WriteLine();
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(char value)
     {
         ApplyIndent();
         inner.WriteLine(value);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(char[]? buffer)
     {
         ApplyIndent();
         inner.WriteLine(buffer);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(char[] buffer, int index, int count)
     {
         ApplyIndent();
         inner.WriteLine(buffer, index, count);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(ReadOnlySpan<char> buffer)
     {
         ApplyIndent();
         inner.WriteLine(buffer);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(bool value)
     {
         ApplyIndent();
         inner.WriteLine(value);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(int value)
     {
         ApplyIndent();
         inner.WriteLine(value);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(uint value)
     {
         ApplyIndent();
         inner.WriteLine(value);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(long value)
     {
         ApplyIndent();
         inner.WriteLine(value);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(ulong value)
     {
         ApplyIndent();
         inner.WriteLine(value);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(float value)
     {
         ApplyIndent();
         inner.WriteLine(value);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(double value)
     {
         ApplyIndent();
         inner.WriteLine(value);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(decimal value)
     {
         ApplyIndent();
         inner.WriteLine(value);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(string? value)
     {
         ApplyIndent();
         inner.WriteLine(value);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(StringBuilder? value)
     {
         ApplyIndent();
         inner.WriteLine(value);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(object? value)
     {
         ApplyIndent();
         inner.WriteLine(value);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(string format, object? arg0)
     {
         ApplyIndent();
         inner.WriteLine(format, arg0);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(string format, object? arg0, object? arg1)
     {
         ApplyIndent();
         inner.WriteLine(format, arg0, arg1);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(string format, object? arg0, object? arg1, object? arg2)
     {
         ApplyIndent();
         inner.WriteLine(format, arg0, arg1, arg2);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(string format, object?[] arg)
     {
         ApplyIndent();
         inner.WriteLine(format, arg);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override void WriteLine(string format, ReadOnlySpan<object?> arg)
     {
         ApplyIndent();
         inner.WriteLine(format, arg);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override async Task WriteAsync(char value)
@@ -328,42 +328,42 @@ public class IndentedTextWriter : TextWriter, IIndentable
     {
         ApplyIndent();
         await inner.WriteLineAsync(value);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override async Task WriteLineAsync(string? value)
     {
         ApplyIndent();
         await inner.WriteLineAsync(value);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override async Task WriteLineAsync(StringBuilder? value, CancellationToken cancellationToken)
     {
         ApplyIndent();
         await inner.WriteLineAsync(value, cancellationToken);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override async Task WriteLineAsync(char[] buffer, int index, int count)
     {
         ApplyIndent();
         await inner.WriteLineAsync(buffer, index, count);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override async Task WriteLineAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken)
     {
         ApplyIndent();
         await inner.WriteLineAsync(buffer, cancellationToken);
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public override async Task WriteLineAsync()
     {
         ApplyIndent();
         await inner.WriteLineAsync();
-        shouldIndent = false;
+        shouldIndent = true;
     }
 
     public void WriteIf(bool condition, string? text)
@@ -414,8 +414,6 @@ public class IndentedTextWriter : TextWriter, IIndentable
     public override string ToString() => inner.ToString() ?? string.Empty;
 
     public override void Flush() => inner.Flush();
-
-    public IDisposable BeginBlock() => new IndentationScope(this);
 
     private void ApplyIndent()
     {

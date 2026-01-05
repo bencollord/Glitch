@@ -23,6 +23,16 @@ public static partial class FN
     public static Action<T1, T2, T3> Action<T1, T2, T3>(Action<T1, T2, T3> action) => action;
 
     public static Action<T1, T2, T3, T4> Action<T1, T2, T3, T4>(Action<T1, T2, T3, T4> action) => action;
+
+    public static Action Action(Func<Unit> action) => action.ReturnVoid();
+
+    public static Action<T> Action<T>(Func<T, Unit> action) => action.ReturnVoid();
+
+    public static Action<T1, T2> Action<T1, T2>(Func<T1, T2, Unit> action) => action.ReturnVoid();
+
+    public static Action<T1, T2, T3> Action<T1, T2, T3>(Func<T1, T2, T3, Unit> action) => action.ReturnVoid();
+
+    public static Action<T1, T2, T3, T4> Action<T1, T2, T3, T4>(Func<T1, T2, T3, T4, Unit> action) => action.ReturnVoid();
 }
 
 public static partial class FN<T>

@@ -36,7 +36,7 @@ public record JsonArray : JsonNode, IEnumerable<JsonNode>
     {
         buffer.Append('[').AppendLine();
 
-        using (buffer.BeginBlock())
+        using (buffer.BeginScope())
         {
             foreach (var i in items)
             {

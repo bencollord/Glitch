@@ -46,7 +46,7 @@ public record JsonObject : JsonNode, IEnumerable<JsonProperty>
     {
         buffer.Append('{').AppendLine();
 
-        using (buffer.BeginBlock())
+        using (buffer.BeginScope())
         {
             foreach (var p in properties)
             {

@@ -1,5 +1,4 @@
 using System.Text;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Glitch.Text;
 
@@ -158,6 +157,4 @@ public class IndentedStringBuilder : IIndentable
         Clear();
         return output;
     }
-
-    public IDisposable BeginBlock() => new IndentationScope(this);
 }
