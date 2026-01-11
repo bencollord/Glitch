@@ -13,6 +13,8 @@ public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePat
     public static FilePath Create(string path) => new(path);
     public static FilePath Create(FileSystemInfo node) => new(node.FullName);
 
+    public static bool IsNullOrEmpty(FilePath? path) => string.IsNullOrEmpty(path?.path);
+
     public static FilePath GetRandomFileName() => new(Path.GetRandomFileName());
     public static FilePath GetTempFileName() => new(Path.GetTempFileName());
 

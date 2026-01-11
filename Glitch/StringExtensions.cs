@@ -56,8 +56,8 @@ public static class StringExtensions
     public static string Wrap(this string input, string delimiter) => input.Wrap(delimiter, delimiter);
     public static string Wrap(this string input, string left, string right) => $"{left}{input}{right}";
 
-    public static string Coalesce(this string input, string fallback)
-        => String.IsNullOrEmpty(input) ? fallback : input;
+    public static string Coalesce(this string? input, string fallback)
+        => string.IsNullOrEmpty(input) ? fallback : input;
 
     public static string Slice(this string input, int start, int end)
     {

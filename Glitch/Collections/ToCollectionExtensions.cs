@@ -1,5 +1,3 @@
-using System.Collections.ObjectModel;
-
 namespace Glitch.Collections;
 
 public static class ToCollectionExtensions
@@ -9,6 +7,16 @@ public static class ToCollectionExtensions
         public ReadOnlyList<T> ToReadOnlyList() => new(source);
 
         public Deque<T> ToDeque() => new(source);
+
+        public MultiMap<TKey, T> ToMultiMap<TKey>(Func<T, TKey> keySelector)
+            where TKey : notnull =>
+            source.Select(x => KeyValuePair.Create(keySelector(x), x))
+                  .ToMultiMap();
+
+        public MultiMap<TKey, T> ToMultiMap<TKey>(Func<T, TKey> keySelector, IEqualityComparer<TKey> keyComparer)
+            where TKey : notnull =>
+            source.Select(x => KeyValuePair.Create(keySelector(x), x))
+                  .ToMultiMap(keyComparer);
 
         public MultiMap<TKey, TValue> ToMultiMap<TKey, TValue>(Func<T, TKey> keySelector, Func<T, TValue> valueSelector)
             where TKey : notnull =>
