@@ -14,8 +14,8 @@ public static partial class StateExtensions
         public static State<S, TResult> operator *(Func<T, TResult> map, State<S, T> x) => x.Select(map);
 
         // Apply
-        public static State<S, TResult> operator *(State<S, T> x, State<S, Func<T, TResult>> apply) => x.Apply(apply);
-        public static State<S, TResult> operator *(State<S, Func<T, TResult>> apply, State<S, T> x) => x.Apply(apply);
+        public static State<S, TResult> operator %(State<S, T> x, State<S, Func<T, TResult>> apply) => x.Apply(apply);
+        public static State<S, TResult> operator %(State<S, Func<T, TResult>> apply, State<S, T> x) => x.Apply(apply);
 
         // Bind
         public static State<S, TResult> operator >>>(State<S, T> x, Func<T, State<S, TResult>> bind) => x.AndThen(bind);

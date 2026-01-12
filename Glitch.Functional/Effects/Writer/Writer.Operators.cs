@@ -16,8 +16,8 @@ public static partial class WriterExtensions
         public static Writer<W, TResult> operator *(Func<T, TResult> map, Writer<W, T> x) => x.Select(map);
 
         // Apply
-        public static Writer<W, TResult> operator *(Writer<W, T> x, Writer<W, Func<T, TResult>> apply) => x.Apply(apply);
-        public static Writer<W, TResult> operator *(Writer<W, Func<T, TResult>> apply, Writer<W, T> x) => x.Apply(apply);
+        public static Writer<W, TResult> operator %(Writer<W, T> x, Writer<W, Func<T, TResult>> apply) => x.Apply(apply);
+        public static Writer<W, TResult> operator %(Writer<W, Func<T, TResult>> apply, Writer<W, T> x) => x.Apply(apply);
 
         // Bind
         public static Writer<W, TResult> operator >>>(Writer<W, T> x, Func<T, Writer<W, TResult>> bind) => x.AndThen(bind);

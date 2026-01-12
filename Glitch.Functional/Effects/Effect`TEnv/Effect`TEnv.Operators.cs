@@ -21,27 +21,27 @@ public partial class Effect<TEnv, T>
     public static Effect<TEnv, T> operator |(Effect<TEnv, T> x, Expected<T> y) => x.Or(y);
     public static Effect<TEnv, T> operator |(Effect<TEnv, T> x, Result<T, Error> y) => x.Or(y);
 
-    public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Effect<TEnv, T> y)
+    public static Effect<TEnv, T> operator >>>(Effect<TEnv, T> x, Effect<TEnv, T> y)
         => x.Then(y);
 
-    public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Effect<T> y)
+    public static Effect<TEnv, T> operator >>>(Effect<TEnv, T> x, Effect<T> y)
         => x.AndThen(_ => Lift(y));
 
-    public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Effect<TEnv, Unit> y)
+    public static Effect<TEnv, T> operator >>>(Effect<TEnv, T> x, Effect<TEnv, Unit> y)
         => x.AndThen(v => y.Select(_ => v));
 
-    public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Effect<Unit> y)
+    public static Effect<TEnv, T> operator >>>(Effect<TEnv, T> x, Effect<Unit> y)
         => x.AndThen(v => Lift(y.Select(_ => v)));
 
 
-    public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Func<TEnv, Result<T, Error>> y)
+    public static Effect<TEnv, T> operator >>>(Effect<TEnv, T> x, Func<TEnv, Result<T, Error>> y)
         => new(i =>
         {
             _ = x.thunk(i);
             return y(i);
         });
 
-    public static Effect<TEnv, T> operator >>(Effect<TEnv, T> x, Func<T> y)
+    public static Effect<TEnv, T> operator >>>(Effect<TEnv, T> x, Func<T> y)
         => new(i =>
         {
             _ = x.thunk(i);
@@ -65,8 +65,8 @@ public static partial class EffectExtensions
         public static Effect<TEnv, TResult> operator *(Func<T, TResult> map, Effect<TEnv, T> x) => x.Select(map);
 
         // Apply
-        public static Effect<TEnv, TResult> operator *(Effect<TEnv, T> x, Effect<TEnv, Func<T, TResult>> apply) => x.Apply(apply);
-        public static Effect<TEnv, TResult> operator *(Effect<TEnv, Func<T, TResult>> apply, Effect<TEnv, T> x) => x.Apply(apply);
+        public static Effect<TEnv, TResult> operator %(Effect<TEnv, T> x, Effect<TEnv, Func<T, TResult>> apply) => x.Apply(apply);
+        public static Effect<TEnv, TResult> operator %(Effect<TEnv, Func<T, TResult>> apply, Effect<TEnv, T> x) => x.Apply(apply);
 
         // Bind
         public static Effect<TEnv, TResult> operator >>>(Effect<TEnv, T> x, Func<T, Effect<TEnv, TResult>> bind) => x.AndThen(bind);

@@ -20,8 +20,8 @@ public static partial class RWSExtensions
         public static RWS<TEnv, S, W, TResult> operator *(Func<T, TResult> map, RWS<TEnv, S, W, T> x) => x.Select(map);
 
         // Apply
-        public static RWS<TEnv, S, W, TResult> operator *(RWS<TEnv, S, W, T> x, RWS<TEnv, S, W, Func<T, TResult>> apply) => x.Apply(apply);
-        public static RWS<TEnv, S, W, TResult> operator *(RWS<TEnv, S, W, Func<T, TResult>> apply, RWS<TEnv, S, W, T> x) => x.Apply(apply);
+        public static RWS<TEnv, S, W, TResult> operator %(RWS<TEnv, S, W, T> x, RWS<TEnv, S, W, Func<T, TResult>> apply) => x.Apply(apply);
+        public static RWS<TEnv, S, W, TResult> operator %(RWS<TEnv, S, W, Func<T, TResult>> apply, RWS<TEnv, S, W, T> x) => x.Apply(apply);
 
         // Bind
         public static RWS<TEnv, S, W, TResult> operator >>>(RWS<TEnv, S, W, T> x, Func<T, RWS<TEnv, S, W, TResult>> bind) => x.AndThen(bind);

@@ -16,7 +16,7 @@ public static partial class TraverseExtensions
             => source.Traverse(opt => opt.Select(traverse));
 
         public Result<Sequence<TResult>, E> Traverse<TResult>(Func<T, int, TResult> traverse)
-            => source.Select((s, i) => s * traverse * Result.Okay<int, E>(i))
+            => source.Select((s, i) => s * traverse % Result.Okay<int, E>(i))
                      .Traverse();
     }
 

@@ -50,8 +50,8 @@ public static partial class EffectExtensions
         public static Effect<TResult> operator *(Func<T, TResult> map, Effect<T> x) => x.Select(map);
 
         // Apply
-        public static Effect<TResult> operator *(Effect<T> x, Effect<Func<T, TResult>> apply) => x.Apply(apply);
-        public static Effect<TResult> operator *(Effect<Func<T, TResult>> apply, Effect<T> x) => x.Apply(apply);
+        public static Effect<TResult> operator %(Effect<T> x, Effect<Func<T, TResult>> apply) => x.Apply(apply);
+        public static Effect<TResult> operator %(Effect<Func<T, TResult>> apply, Effect<T> x) => x.Apply(apply);
 
         // Bind
         public static Effect<TResult> operator >>>(Effect<T> x, Func<T, Effect<TResult>> bind) => x.AndThen(bind);

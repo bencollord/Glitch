@@ -14,8 +14,8 @@ public static partial class ReaderExtensions
         public static Reader<TEnv, TResult> operator *(Func<T, TResult> map, Reader<TEnv, T> x) => x.Select(map);
 
         // Apply
-        public static Reader<TEnv, TResult> operator *(Reader<TEnv, T> x, Reader<TEnv, Func<T, TResult>> apply) => x.Apply(apply);
-        public static Reader<TEnv, TResult> operator *(Reader<TEnv, Func<T, TResult>> apply, Reader<TEnv, T> x) => x.Apply(apply);
+        public static Reader<TEnv, TResult> operator %(Reader<TEnv, T> x, Reader<TEnv, Func<T, TResult>> apply) => x.Apply(apply);
+        public static Reader<TEnv, TResult> operator %(Reader<TEnv, Func<T, TResult>> apply, Reader<TEnv, T> x) => x.Apply(apply);
 
         // Bind
         public static Reader<TEnv, TResult> operator >>>(Reader<TEnv, T> x, Func<T, Reader<TEnv, TResult>> bind) => x.AndThen(bind);
