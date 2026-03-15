@@ -6,6 +6,16 @@ public static class StringBuilderExtensions
 {
     extension(StringBuilder buffer)
     {
+        public StringBuilder AppendIf(bool condition, char c)
+        {
+            if (condition)
+            {
+                buffer.Append(c);
+            }
+
+            return buffer;
+        }
+
         public StringBuilder AppendIf(bool condition, string text)
         {
             if (condition)

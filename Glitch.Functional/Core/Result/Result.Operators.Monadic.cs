@@ -14,6 +14,12 @@ public static partial class ResultExtensions
         /// <param name="bind"></param>
         /// <returns></returns>
         public static Result<T, E> operator >>>(Result<T, E> x, Func<T, Result<Unit, E>> bind) => x.AndThen(bind, (x, _) => x);
+
+        /// <inheritdoc cref="operator }}}(Result{T, E}, System.Func{T, Result{Unit, E}})"/>
+        public static Result<T, E> operator >>>(Result<T, E> x, Func<T, Okay<Unit>> bind) => x.AndThen<Unit, T>(y => bind(y), (x, _) => x);
+
+        /// <inheritdoc cref="operator }}}(Result{T, E}, System.Func{T, Result{T, E}})"/>
+        public static Result<T, E> operator >>>(Result<T, E> x, Func<T, Fail<E>> bind) => x.AndThen<T>(y => bind(y));
     }
 
     extension<T, E, TResult>(Result<T, E> self)
@@ -25,6 +31,21 @@ public static partial class ResultExtensions
         /// <param name="bind"></param>
         /// <returns></returns>
         public static Result<TResult, E> operator >>>(Result<T, E> x, Func<T, Result<TResult, E>> bind) => x.AndThen(bind);
+
+        /// <inheritdoc cref="operator }}}(Result{T, E}, System.Func{T, Result{TResult, E}})"/>
+        public static Result<TResult, E> operator >>>(Result<T, E> x, Func<T, Okay<TResult>> bind) => x.AndThen<TResult>(y => bind(y));
+    }
+
+    extension<T, E>(Okay<T>)
+    {
+        /// <inheritdoc cref="operator }}}(Result{T, E}, System.Func{T, Result{Unit, E}})"/>
+        public static Result<T, E> operator >>>(Okay<T> x, Func<T, Result<Unit, E>> bind) => x.AndThen(bind, (x, _) => x);
+    }
+
+    extension<T, E, TResult>(Okay<T>)
+    {
+        /// <inheritdoc cref="operator }}}(Result{T, E}, System.Func{T, Result{TResult, E}})"/>
+        public static Result<TResult, E> operator >>>(Okay<T> x, Func<T, Result<TResult, E>> bind) => x.AndThen(bind);
     }
 
     // Map
