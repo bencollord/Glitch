@@ -1,3 +1,6 @@
+using Glitch.Functional.Errors;
+using Glitch.Functional.Extensions;
+
 namespace Glitch.Functional;
 
 public static partial class Result
@@ -35,6 +38,14 @@ public static partial class Result
 
     public static Result<T, E> Guard<T, E>(Func<T, bool> predicate, T value, E error)
         => predicate(value) ? new Result<T, E>.Okay(value) : new Result<T, E>.Fail(error);
+
+    public static Option<T> OkayOrNone<T, E>(Result<T, E> result) => result.OkayOrNone();
+
+    public static Option<E> ErrorOrNone<T, E>(Result<T, E> result) => result.ErrorOrNone();
+
+    public static T Unwrap<T, E>(Result<T, E> result) => result.Unwrap();
+
+    public static E UnwrapError<T, E>(Result<T, E> result) => result.UnwrapError();
 
     public static (IEnumerable<T> Successes, IEnumerable<E> Errors) Partition<T, E>(IEnumerable<Result<T, E>> results) => results.Partition();
 }

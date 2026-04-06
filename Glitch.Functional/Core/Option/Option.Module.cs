@@ -58,4 +58,24 @@ public static partial class Option
         (option.Select(x => x.Left), option.Select(x => x.Right));
 
     public static T IfNone<T>(Option<T> option, T none) => option.IfNone(none);
+
+    // ========================================================================
+    // Curried for use in Linq expressions and operators
+    // ========================================================================
+    // TODO If this works out, add to Result as well, then possibly other monads
+    public static Func<Option<T>, Option<TResult>> Map<T, TResult>(Func<T, TResult> map) => (Option<T> value) => value.Select(map);
+
+    public static Func<Option<Func<T, TResult>>, Option<TResult>> Apply<T, TResult>(Option<T> value) => (Option<Func<T, TResult>> func) => func.AndThen(fn => value * fn);
+
+    public static Func<Option<T>, Option<TResult>> Bind<T, TResult>(Func<T, Option<TResult>> bind) => (Option<T> value) => value.AndThen(bind);
+
+    public static Func<Option<T>, Option<T>> Filter<T>(Func<T, bool> predicate) => (Option<T> value) => value.Where(predicate);
+    
+    public static Func<Option<T>, TResult> Match<T, TResult>(Func<T, TResult> some, Func<Unit, TResult> none) => (Option<T> value) => value.Match(some, none);
+    
+    public static Func<Option<T>, TResult> Match<T, TResult>(Func<T, TResult> some, Func<TResult> none) => (Option<T> value) => value.Match(some, none);
+    
+    public static Func<Option<T>, TResult> Match<T, TResult>(Func<T, TResult> some, TResult none) => (Option<T> value) => value.Match(some, none);
+    
+    public static Func<Option<T>, T> IfNone<T>(T none) => (Option<T> value) => value.IfNone(none);
 }

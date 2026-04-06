@@ -1,8 +1,11 @@
 namespace Glitch.Functional;
 
-public interface IMaybe<out T>
+public interface IMaybe
 {
-    public abstract bool HasValue { get; }
+    bool HasValue { get; }
+}
 
-    public abstract TResult Match<TResult>(Func<T, TResult> some, Func<TResult> none);
+public interface IMaybe<out T> : IMaybe
+{
+    TResult Match<TResult>(Func<T, TResult> some, Func<TResult> none);
 }

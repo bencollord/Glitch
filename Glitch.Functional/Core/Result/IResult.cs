@@ -5,7 +5,7 @@ public interface IResult<out T, out E> : IMaybe<T>
     bool IsOkay { get; }
     bool IsFail { get; }
 
-    bool IMaybe<T>.HasValue => IsOkay;
+    bool IMaybe.HasValue => IsOkay;
 
     TResult Match<TResult>(Func<T, TResult> okay, Func<E, TResult> fail);
 

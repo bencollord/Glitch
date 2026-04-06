@@ -19,7 +19,7 @@ public static class OptionExtensions
     /// <typeparam name="T"></typeparam>
     /// <param name="options"></param>
     /// <returns></returns>
-    public static IEnumerable<T> Somes<T>(this IEnumerable<Option<T>> options)
+    public static IEnumerable<T> Somes<T>(this IEnumerable<Option<T>> options) // UNDONE This is an upwards dependency. Move the logic to the Option module and delegate here.
         => options.Where(o => o.IsSome).Select(o => o.Unwrap());
 
     public static Option<T> Select<T>(this Option<bool> result, Func<Unit, T> ifTrue, Func<Unit, T> ifFalse)

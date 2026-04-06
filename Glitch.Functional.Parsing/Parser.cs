@@ -1,4 +1,5 @@
 using Glitch.Functional.Parsing.Input;
+using Glitch.Functional.Parsing.Results;
 
 namespace Glitch.Functional.Parsing;
 
@@ -19,6 +20,10 @@ public static partial class ParserExecuteExtensions
 
         public T Parse(IEnumerable<char> chars) => source.Parse(CharSequence.From(chars));
 
+        public Result<T, ParseError> TryParse(string text) => source.TryParse(CharSequence.From(text));
+
+        public Result<T, ParseError> TryParse(IEnumerable<char> chars) => source.TryParse(CharSequence.From(chars));
+
         public IParseResult<char, T> Execute(string text) => source.Execute(CharSequence.From(text));
 
         public IParseResult<char, T> Execute(IEnumerable<char> chars) => source.Execute(CharSequence.From(chars));
@@ -30,6 +35,10 @@ public static partial class ParserExecuteExtensions
 
         public T Parse(IEnumerable<byte> bytes) => source.Parse(ByteSequence.From(bytes));
 
+        public Result<T, ParseError> TryParse(byte[] bytes) => source.TryParse(ByteSequence.From(bytes));
+
+        public Result<T, ParseError> TryParse(IEnumerable<byte> bytes) => source.TryParse(ByteSequence.From(bytes));
+
         public IParseResult<byte, T> Execute(byte[] bytes) => source.Execute(ByteSequence.From(bytes));
 
         public IParseResult<byte, T> Execute(IEnumerable<byte> bytes) => source.Execute(ByteSequence.From(bytes));
@@ -39,11 +48,16 @@ public static partial class ParserExecuteExtensions
     {
         public T Parse(IEnumerable<TToken> tokens) => source.Parse(new ArrayTokenSequence<TToken>(tokens));
 
+        public Result<T, ParseError> TryParse(IEnumerable<TToken> tokens) => source.TryParse(new ArrayTokenSequence<TToken>(tokens));
+
         public IParseResult<TToken, T> Execute(IEnumerable<TToken> tokens) => source.Execute(new ArrayTokenSequence<TToken>(tokens));
 
-        public T Parse(ITokenSequence<TToken> input) =>
+        public Result<T, ParseError> TryParse(ITokenSequence<TToken> input) =>
             source.Execute(input)
-                  .Match(okay: FN.Identity,
-                         fail: err => throw err);
+                  .Match(okay: Result.Okay<T, ParseError>,
+                         fail: Result.Fail<T, ParseError>);
+
+        public T Parse(ITokenSequence<TToken> input) =>
+            source.TryParse(input).IfFail(err => throw err);
     }
 }

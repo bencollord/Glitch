@@ -35,7 +35,7 @@ public readonly partial struct Option<T>
 
     public bool IsNone => !hasValue;
 
-    bool IMaybe<T>.HasValue => IsSome;
+    bool IMaybe.HasValue => IsSome;
 
     public bool IsSomeAnd(Func<T, bool> predicate)
         => Select(predicate).IfNone(false);

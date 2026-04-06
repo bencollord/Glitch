@@ -74,6 +74,9 @@ public readonly struct Checksum : IEquatable<Checksum>, IFormattable
         if (value is null)
             return other.value is null;
 
+        if (other.value is null)
+            return false;
+
         return value.Length == other.value.Length
             && value.SequenceEqual(other.value);
     }

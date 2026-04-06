@@ -1,4 +1,4 @@
-﻿namespace Glitch.Functional.Core;
+﻿namespace Glitch.Functional;
 
 /// <summary>
 /// An arity 2 discriminated union. 

@@ -18,29 +18,34 @@ public static partial class LinqExtensions
         private Expected<T> TrySingle(Option<Func<T, bool>> predicate)
         {
             return source.TrySingleOrNone(predicate)
-                         .AndThen(opt => opt.OkayOr(Error.NoElements));
+                         .IfNone(Error.NoElements);
         }
 
-        private Expected<Option<T>> TrySingleOrNone(Option<Func<T, bool>> predicate)
+        public Option<Expected<T>> TrySingleOrNone() => source.TrySingleOrNone(None);
+
+        public Option<Expected<T>> TrySingleOrNone(Func<T, bool> predicate)
+            => source.TrySingleOrNone(Some(predicate));
+
+        private Option<Expected<T>> TrySingleOrNone(Option<Func<T, bool>> predicate)
         {
             using var iterator = predicate
                 .Select(source.Where)
                 .IfNone(source)
                 .GetEnumerator();
 
-            Option<T> value = None;
+            Option<Expected<T>> value = None;
 
             if (iterator.MoveNext())
             {
-                value = Some(iterator.Current);
+                value = Okay(iterator.Current);
             }
 
             if (iterator.MoveNext())
             {
-                return Fail(Error.MoreThanOneElement);
+                value = Fail<T>(Error.MoreThanOneElement);
             }
 
-            return Okay(value);
+            return value;
         }
     }
 }

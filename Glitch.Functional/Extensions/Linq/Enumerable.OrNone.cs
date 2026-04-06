@@ -1,8 +1,6 @@
-using Glitch.Functional;
-using Glitch.Functional.Errors;
-
 namespace Glitch.Functional.Extensions;
 
+using Glitch.Functional.Errors;
 using static Option;
 
 public static partial class LinqExtensions
@@ -62,6 +60,6 @@ public static partial class LinqExtensions
             => source.SingleOrNone(Some(predicate));
 
         private Option<T> SingleOrNone(Option<Func<T, bool>> predicate)
-            => source.TrySingleOrNone(predicate).Unwrap();
+            => source.TrySingleOrNone(predicate) * Expected.Unwrap;
     }
 }

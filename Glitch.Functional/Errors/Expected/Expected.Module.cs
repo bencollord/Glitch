@@ -1,8 +1,10 @@
 using Glitch.Functional;
+using Glitch.Functional.Extensions;
 
 namespace Glitch.Functional.Errors;
 
 // TODO Incomplete
+// DESIGN Get rid of this. It's more trouble than it's worth keeping it in sync with Result.
 public static partial class Expected
 {
     public static Expected<T> Okay<T>() where T : new() => Okay(new T());
@@ -37,4 +39,10 @@ public static partial class Expected
 
     public static Expected<T> Guard<T>(Func<T, bool> predicate, T value, Func<T, Error> error)
         => predicate(value) ? Okay(value) : Fail<T>(error(value));
+
+    public static Option<T> OkayOrNone<T>(Expected<T> result) => result.OkayOrNone();
+
+    public static Option<Error> ErrorOrNone<T>(Expected<T> result) => result.ErrorOrNone();
+
+    public static T Unwrap<T>(Expected<T> result) => result.Unwrap();
 }

@@ -9,7 +9,7 @@ public abstract partial record Result<T, E> : IResult<T, E>, IMaybe<T>
 
     public abstract bool IsFail { get; }
 
-    bool IMaybe<T>.HasValue => IsOkay;
+    bool IMaybe.HasValue => IsOkay;
 
     /// <summary>
     /// If the result is <see cref="Result{T, E}.Okay" />, applies
