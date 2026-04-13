@@ -45,7 +45,7 @@ public partial class Parse
     
     public static ITokenParser<char> CharExcept(char c) => Parse<char>.Satisfy(x => x != c);
 
-    public static ITokenParser<char> CharExcept(params char[] c) => Parse<char>.Satisfy(x => !c.Contains(x));
+    public static ITokenParser<char> CharExcept(params IEnumerable<char> c) => Parse<char>.Satisfy(x => !c.Contains(x));
 
     public static ITokenParser<char> Char(Func<char, bool> predicate) => Parse<char>.Satisfy(predicate);
 

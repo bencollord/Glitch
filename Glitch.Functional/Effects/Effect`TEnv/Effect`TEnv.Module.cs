@@ -7,6 +7,8 @@ public static partial class Effect
 {
     public static Effect<TEnv, TEnv> Ask<TEnv>() => Effect<TEnv, TEnv>.Lift(Identity);
 
+    public static Effect<TEnv, T> Asks<TEnv, T>(Func<TEnv, T> function) => Effect<TEnv, T>.Lift(function);
+
     public static Effect<TEnv, T> Return<TEnv, T>(T value) => Effect<T>.Return(value);
 
     public static Effect<TEnv, T> Fail<TEnv, T>(Error error) => Effect<T>.Fail(error);

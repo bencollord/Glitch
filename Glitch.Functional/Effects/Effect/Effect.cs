@@ -12,6 +12,11 @@ public partial class Effect<T>
         this.inner = inner;
     }
 
+    // Kinda weird because it feels like factories for Effect<TEnv, T> don't belong on this type, but they're really conceptually the same type anyway.
+    public static Effect<T, T> Ask() => Asks(Identity);
+
+    public static Effect<T, U> Asks<U>(Func<T, U> func) => Effect<T, U>.Asks(func);
+
     public static Effect<T> Return(T value) => new(Effect<Unit, T>.Return(value));
 
     public static Effect<T> Fail(Error error) => new(Effect<Unit, T>.Fail(error));

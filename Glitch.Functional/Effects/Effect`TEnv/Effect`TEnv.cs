@@ -21,6 +21,8 @@ public partial class Effect<TEnv, T>
         this.thunk = thunk;
     }
 
+    public static Effect<TEnv, T> Asks(Func<TEnv, T> function) => new(i => Expected.Okay(function(i)));
+
     public static Effect<TEnv, T> Return(T value) => new(_ => Expected.Okay(value));
 
     public static Effect<TEnv, T> Fail(Error error) => new(_ => Expected.Fail<T>(error));

@@ -15,6 +15,7 @@ public static partial class IO
     public static IO<ConsoleKeyInfo> ReadKey() => Lift(_ => Console.ReadKey());
     public static IO<Option<string>> ReadLine() => Lift(_ => Option.Maybe(Console.ReadLine()));
     public static IO<Unit> Write(string text) => Lift(_ => Console.Write(text));
+    public static IO<Unit> Write<T>(T value) => Lift(_ => Console.Write(value));
     public static IO<Unit> WriteLine() => Lift(_ => Console.WriteLine());
     public static IO<Unit> WriteLine(string text) => Lift(_ => Console.WriteLine(text));
     public static IO<Unit> Clear() => Lift(_ => Console.Clear());

@@ -18,11 +18,6 @@ public abstract partial class IO<T>
     {
         var task = RunAsync(env);
 
-        if (task.IsCompleted)
-        {
-            return task.Result;
-        }
-
         return task.GetAwaiter().GetResult();
     }
 

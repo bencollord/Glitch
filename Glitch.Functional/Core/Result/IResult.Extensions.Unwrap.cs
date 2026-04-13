@@ -1,3 +1,4 @@
+using Glitch.Functional.Errors;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Functional;
@@ -10,7 +11,12 @@ public static partial class ResultExtensions
     {
         public T Unwrap() => source.Match(
             okay: Identity,
-            err => BadUnwrap(err).Throw<T>());
+            err => err switch
+            {
+                Exception ex => throw ex,
+                Error er => er.Throw<T>(),
+                _ => BadUnwrap(err).Throw<T>()
+            });
 
         public E UnwrapError() => source.Match(val => BadUnwrapError(val).Throw<E>(), Identity);
 
