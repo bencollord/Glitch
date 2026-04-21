@@ -8,7 +8,7 @@ public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePat
 
     public FilePath(string? path)
     {
-        this.path = path?.Replace(AltDirectorySeparatorChar, DirectorySeparatorChar) ?? string.Empty;
+        this.path = path?.Replace(AltDirectorySeparator, DirectorySeparator) ?? string.Empty;
     }
 
     public FilePath(FileSystemInfo fileOrDirectory)
@@ -29,7 +29,7 @@ public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePat
 
     public FilePath[] ToSegments()
         => Array.ConvertAll(
-            path.Split([DirectorySeparatorChar, AltDirectorySeparatorChar], StringSplitOptions.RemoveEmptyEntries),
+            path.Split([DirectorySeparator, AltDirectorySeparator], StringSplitOptions.RemoveEmptyEntries),
             p => new FilePath(p));
 
     public FilePath WithExtension(string extension)

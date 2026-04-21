@@ -1,78 +1,128 @@
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 
 namespace Glitch.IO;
 
 public static class FileExtensions
 {
-    public static void MoveTo(this FileInfo file, FileInfo destination)
-        => file.MoveTo(destination.FullName);
-
-    public static string ReadAllText(this FileInfo file)
+    extension(FileInfo file)
     {
-        using var stream = file.OpenText();
+        public ByteSize Size => new ByteSize(file.Length);
 
-        return stream.ReadToEnd();
-    }
+        public void MoveTo(FileInfo destination)
+            => file.MoveTo(destination.FullName);
 
-    public static IEnumerable<string> ReadLines(this FileInfo file)
-    {
-        using var stream = file.OpenText();
-
-        for (string? line = stream.ReadLine();
-             !String.IsNullOrEmpty(line);
-             line = stream.ReadLine())
+        public string ReadAllText()
         {
-            yield return line;
+            using var stream = file.OpenText();
+
+            return stream.ReadToEnd();
+        }
+
+        public async Task<string> ReadAllTextAsync(CancellationToken token = default)
+        {
+            using var stream = file.OpenText();
+
+            return await stream.ReadToEndAsync(token);
+        }
+
+        // TODO Async
+        public IEnumerable<string> ReadLines()
+        {
+            using var stream = file.OpenText();
+
+            for (string? line = stream.ReadLine();
+                 !String.IsNullOrEmpty(line);
+                 line = stream.ReadLine())
+            {
+                yield return line;
+            }
+        }
+
+        public async IAsyncEnumerable<string> ReadLinesAsync([EnumeratorCancellation] CancellationToken token = default)
+        {
+            using var stream = file.OpenText();
+
+            for (string? line = await stream.ReadLineAsync(token);
+                 !String.IsNullOrEmpty(line);
+                 line = await stream.ReadLineAsync(token))
+            {
+                yield return line;
+            }
+        }
+
+        public string[] ReadAllLines() => file.ReadLines().ToArray();
+
+        public async Task<string[]> ReadAllLinesAsync(CancellationToken token = default) => await file.ReadLinesAsync().ToArrayAsync();
+
+        public byte[] ReadAllBytes()
+        {
+            using var stream = file.OpenRead();
+
+            byte[] result = new byte[file.Length];
+
+            stream.ReadExactly(result);
+
+            return result;
+        }
+
+        public async Task<byte[]> ReadAllBytesAsync(CancellationToken token = default)
+        {
+            using var stream = file.OpenRead();
+
+            byte[] result = new byte[file.Length];
+
+            await stream.ReadExactlyAsync(result, token);
+
+            return result;
+        }
+
+        public void WriteAllText(string text)
+        {
+            using var stream = file.CreateText();
+
+            stream.Write(text);
+        }
+
+        public async Task WriteAllTextAsync(string text)
+        {
+            using var stream = file.CreateText();
+
+            await stream.WriteAsync(text); // No overload that accepts a cancellation token for some reason
+        }
+
+        public void WriteAllLines(IEnumerable<string> lines)
+        {
+            using var stream = file.CreateText();
+
+            foreach (string line in lines)
+            {
+                stream.WriteLine(line);
+            }
+        }
+
+        public async Task WriteAllLinesAsync(IEnumerable<string> lines)
+        {
+            using var stream = file.CreateText();
+
+            foreach (string line in lines)
+            {
+                await stream.WriteLineAsync(line); // No overload that accepts a cancellation token for some reason
+            }
+        }
+
+        public void WriteAllBytes(byte[] bytes)
+        {
+            using var stream = file.OpenWrite();
+
+            stream.Write(bytes);
+        }
+
+        public async Task WriteAllBytesAsync(byte[] bytes, CancellationToken token = default)
+        {
+            using var stream = file.OpenWrite();
+
+            await stream.WriteAsync(bytes, token);
         }
     }
-
-    public static string[] ReadAllLines(this FileInfo file) => file.ReadLines().ToArray();
-
-    public static byte[] ReadAllBytes(this FileInfo file)
-    {
-        using var stream = file.OpenRead();
-
-        byte[] result = new byte[file.Length];
-
-        stream.ReadExactly(result);
-
-        return result;
-    }
-
-    public static void WriteAllText(this FileInfo file, string text)
-    {
-        using var stream = file.CreateText();
-
-        stream.Write(text);
-    }
-
-    public static void WriteAllLines(this FileInfo file, IEnumerable<string> lines)
-    {
-        using var stream = file.CreateText();
-
-        foreach (string line in lines)
-        {
-            stream.WriteLine(line);
-        }
-    }
-
-    public static void WriteAllBytes(this FileInfo file, byte[] bytes)
-    {
-        using var stream = file.OpenWrite();
-
-        stream.Write(bytes);
-    }
-
-    [Obsolete("This method is tightly coupled to MD5 and doesn't support async. Will be replaced with something better")]
-    public static string Checksum(this FileInfo file)
-    {
-        using var stream = file.OpenRead();
-        using var alg = MD5.Create();
-
-        var hash = alg.ComputeHash(stream);
-
-        return BitConverter.ToString(hash).Strip('-');
-    }
-
-    public static ByteSize Size(this FileInfo file) => new ByteSize(file.Length);
 }

@@ -2,7 +2,7 @@ namespace Glitch.Functional;
 
 public readonly record struct Okay<T>(T Value)
 {
-    public Result<T, E> OrElse<E>() => Result.Okay<T, E>(Value);
+    public Result<T, E> AsResult<E>() => Result.Okay<T, E>(Value);
 
     public Option<T> ToOption() => Option.Some(Value);
 

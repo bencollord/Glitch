@@ -26,6 +26,9 @@ public partial record Validated<T, E>
         public override Validated<T, EResult> SelectError<EResult>(Func<E, EResult> _) => new Validated<T, EResult>.Okay(Value);
 
         /// <inheritdoc />
+        public override Validated<T, EResult> SelectErrors<EResult>(Func<Sequence<E>, EResult> _) => new Validated<T, EResult>.Okay(Value);
+
+        /// <inheritdoc />
         public override Validated<TResult, EResult> BiSelect<TResult, EResult>(Func<T, TResult> okay, Func<E, EResult> _)
             => new Validated<TResult, EResult>.Okay(okay(Value));
 
@@ -54,5 +57,7 @@ public partial record Validated<T, E>
 
         public override Validated<TResult, E> Zip<TOther, TResult>(Validated<TOther, E> other, Func<T, TOther, TResult> zipper)
             => AndThen(FN<T>.Constant(other), zipper);
+
+        public override T Unwrap() => Value;
     }
 }

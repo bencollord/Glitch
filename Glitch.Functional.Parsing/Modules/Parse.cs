@@ -28,6 +28,12 @@ public partial class Parse
 
     public static IParser<char, T> Error<T>(ParseError error) => Parse<char>.Error<T>(error);
 
+    public static IParser<char, Unit> Error(string message) => Parse<char>.Error(message);
+
+    public static IParser<char, Unit> Error(ParseError error) => Parse<char>.Error(error);
+
+    public static IParser<char, Unit> Guard(bool condition, ParseError error) => Parse<char>.Guard(condition, error);
+
     public static IParser<char, Unit> Not<T>(IParser<char, T> parser) => Parse<char>.Not(parser);
 
     public static IParser<char, T> OneOf<T>(params IEnumerable<IParser<char, T>> parsers) => Parse<char>.OneOf(parsers);

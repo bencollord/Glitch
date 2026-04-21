@@ -16,6 +16,10 @@ public static partial class Validated
 
     public static Validated<T, E> Fail<T, E>(params IEnumerable<E> errors) => new Validated<T, E>.Fail(Sequence.From(errors));
 
+    public static Validated<T, E> From<T, E>(Result<T, E> result) => result.SelectError(Sequence.Singleton);
+
+    public static Validated<T, E> From<T, E>(Result<T, Sequence<E>> result) => result.Match(Okay<T, E>, Fail<T, E>);
+
     public static bool IsOkay<T, E>(Validated<T, E> result) => result.IsOkay;
 
     public static bool IsFail<T, E>(Validated<T, E> result) => result.IsFail;

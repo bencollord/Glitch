@@ -7,9 +7,9 @@ namespace Glitch.Functional.Parsing.Results;
 
 using static Option;
 
-public record ParseError
+public record ParseError : Error
 {
-    public static readonly ParseError Empty = new(ParseErrorKind.Empty);
+    public static readonly new ParseError Empty = new(ParseErrorKind.Empty);
 
     public static readonly ParseError Unknown = new(ParseErrorKind.Unknown);
 
@@ -49,7 +49,7 @@ public record ParseError
         init => expectations = value; 
     }
 
-    public string Message => kind switch
+    public override string Message => kind switch
         {
             ParseErrorKind.Message                                => Label,
             ParseErrorKind.Unexpected when Expectations.Count > 0 => $"Unexpected {Label}. Expected: {Expectations}",

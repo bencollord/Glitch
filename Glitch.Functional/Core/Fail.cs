@@ -2,7 +2,7 @@ namespace Glitch.Functional;
 
 public readonly record struct Fail<E>(E Error)
 {
-    public Result<T, E> ToResult<T>() => Result.Fail<T, E>(Error);
+    public Result<T, E> AsResult<T>() => Result.Fail<T, E>(Error);
 
     public override string ToString() => $"Fail({Error})";
 

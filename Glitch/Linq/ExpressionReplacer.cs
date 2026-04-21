@@ -7,6 +7,18 @@ public class ExpressionReplacer : ExpressionVisitor
 {
     private readonly Dictionary<Expression, Expression> replacementMap = new();
 
+    public ExpressionReplacer() { }
+
+    public ExpressionReplacer(Expression original, Expression replacement)
+    {
+        Replace(original, replacement);
+    }
+
+    public ExpressionReplacer(IReadOnlyDictionary<Expression, Expression> replacements)
+    {
+        replacementMap = replacementMap.ToDictionary();
+    }
+
     public ExpressionReplacer Replace(Expression original, Expression replacement)
     {
         replacementMap[original] = replacement;

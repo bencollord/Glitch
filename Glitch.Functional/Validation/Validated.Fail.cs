@@ -1,4 +1,5 @@
 using Glitch.Functional.Collections;
+using Glitch.Functional.Extensions;
 using System.Diagnostics;
 
 namespace Glitch.Functional.Validation;
@@ -29,6 +30,9 @@ public partial record Validated<T, E>
         /// <inheritdoc />
         public override Validated<T, EResult> SelectError<EResult>(Func<E, EResult> map)
             => new Validated<T, EResult>.Fail(Errors.Select(map));
+
+        public override Validated<T, EResult> SelectErrors<EResult>(Func<Sequence<E>, EResult> map) =>
+            new Validated<T, EResult>.Fail([map(Errors)]);
 
         /// <inheritdoc />
         public override Validated<TResult, E> Apply<TResult>(Validated<Func<T, TResult>, E> function) =>
@@ -63,5 +67,11 @@ public partial record Validated<T, E>
 
         /// <inheritdoc />
         public override string ToString() => $"Error({Errors.Join(", ")})";
+
+        public override T Unwrap() =>
+            throw Errors.Select(Option.Maybe)
+                  .Select(e => e.AndThen(x => Option.Maybe(x.ToString())))
+                  .Somes()
+                  .PipeInto(x => new ValidationException(x));
     }
 }

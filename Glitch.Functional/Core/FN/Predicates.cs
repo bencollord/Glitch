@@ -2,9 +2,9 @@ namespace Glitch.Functional;
 
 public static partial class FN
 {
-    public static Func<T, bool> True<T>() => _ => true;
+    public static bool AlwaysTrue<T>(T _) => true;
 
-    public static Func<T, bool> False<T>() => _ => false;
+    public static bool AlwaysFalse<T>(T _) => false;
 
     public static Func<T, bool> Predicate<T>(Func<T, bool> predicate) => predicate;
 

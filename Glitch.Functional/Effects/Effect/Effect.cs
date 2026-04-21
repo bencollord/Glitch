@@ -139,6 +139,15 @@ public partial class Effect<T>
     public Effect<TResult> AndThen<TElement, TResult>(Func<T, Expected<TElement>> bind, Func<T, TElement, TResult> project)
         => AndThen(x => bind(x).Select(y => project(x, y)));
 
+    // Non generic version to allow for implicit conversion operators
+    public Effect<T> AndThen(Func<T, Guard<Unit, Error>> bind) => new(inner.AndThen(bind));
+
+    public Effect<TResult> AndThen<TResult>(Func<T, Guard<Unit, Error>> bind, Func<T, Unit, TResult> project) => new(inner.AndThen(bind, project));
+
+    public Effect<T> AndThen<E>(Func<T, Guard<Unit, E>> bind) where E : Error => new(inner.AndThen(bind));
+
+    public Effect<TResult> AndThen<E, TResult>(Func<T, Guard<Unit, E>> bind, Func<T, Unit, TResult> project) where E : Error => new(inner.AndThen(bind, project));
+
     public Effect<TResult> Choose<TResult>(Func<T, Effect<TResult>> okay, Func<Error, Effect<TResult>> error)
         => new(inner.Choose(okay: v => okay(v).inner, error: e => error(e).inner));
 

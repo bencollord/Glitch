@@ -28,12 +28,20 @@ public abstract partial record Validated<T, E> : IResult<T, Sequence<E>>
     public abstract Validated<TResult, E> Select<TResult>(Func<T, TResult> map);
 
     /// <summary>
-    /// Maps the error values if faulted.
+    /// Maps the error values if faulted. The provided function will be applied to each error in the list.
     /// </summary>
     /// <typeparam name="EResult"></typeparam>
     /// <param name="map"></param>
     /// <returns></returns>
     public abstract Validated<T, EResult> SelectError<EResult>(Func<E, EResult> map);
+
+    /// <summary>
+    /// Maps the entire error list if faulted and collapses them into a single error.
+    /// </summary>
+    /// <typeparam name="EResult"></typeparam>
+    /// <param name="map"></param>
+    /// <returns></returns>
+    public abstract Validated<T, EResult> SelectErrors<EResult>(Func<Sequence<E>, EResult> map);
 
     /// <summary>
     /// Maps both the success and error values and returns either/or
@@ -100,6 +108,15 @@ public abstract partial record Validated<T, E> : IResult<T, Sequence<E>>
     /// <returns></returns>
     public Validated<TResult, E> AndThen<TElement, TResult>(Func<T, Validated<TElement, E>> bind, Func<T, TElement, TResult> project)
         => AndThen(x => bind(x).Select(y => project(x, y)));
+
+    public Validated<TResult, E> AndThen<TResult>(Func<T, Result<TResult, E>> bind) => AndThen(x => Validated.From(bind(x)));
+    public Validated<TResult, E> AndThen<TElement, TResult>(Func<T, Result<TElement, E>> bind, Func<T, TElement, TResult> project) => AndThen(x => Validated.From(bind(x)), project);
+
+    public Validated<TResult, E> AndThen<TResult>(Func<T, Okay<TResult>> bind) => AndThen(x => bind(x).AsResult<E>());
+    public Validated<TResult, E> AndThen<TElement, TResult>(Func<T, Okay<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).AsResult<E>(), project);
+
+    public Validated<T, E> AndThen(Func<T, Fail<E>> bind) => AndThen(x => bind(x).AsResult<T>());
+    public Validated<TResult, E> AndThen<TResult>(Func<T, Fail<E>> bind, Func<T, Unit, TResult> project) => AndThen(x => bind(x).AsResult<Unit>(), project);
 
     /// <summary>
     /// If Okay, returns this. If <paramref name="other"/> is Okay, <paramref name="other"/>.
@@ -244,4 +261,6 @@ public abstract partial record Validated<T, E> : IResult<T, Sequence<E>>
     /// </summary>
     /// <returns></returns>
     public abstract override string ToString();
+
+    public abstract T Unwrap();
 }

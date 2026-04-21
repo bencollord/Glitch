@@ -17,10 +17,6 @@ public partial class Parse<TToken>
 
     public static IParser<TToken, T> Return<T>(IParseResult<TToken, T> result) => new ReturnParser<TToken, T>(result);
 
-    public static IParser<TToken, T> Error<T>(string message) => Error<T>(ParseError.FromMessage(message));
-
-    public static IParser<TToken, T> Error<T>(ParseError error) => new FailParser<TToken, T>(error);
-
     public static IParser<TToken, Unit> Not<T>(IParser<TToken, T> parser) => parser.Not();
 
     public static IParser<TToken, T> OneOf<T>(params IEnumerable<IParser<TToken, T>> parsers) => new OneOfParser<TToken, T>(parsers);

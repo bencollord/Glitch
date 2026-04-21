@@ -13,14 +13,19 @@ public static partial class EffectExtensions
     public static Effect<TEnv, TResult> SelectMany<TEnv, T, TElement, TResult>(this Effect<TEnv, T> source, Func<T, Effect<TElement>> bind, Func<T, TElement, TResult> bindMap)
         => source.AndThen(s => bind(s).Select(e => bindMap(s, e)));
 
-    // Result
+    // Expected
     public static Effect<TEnv, TResult> SelectMany<TEnv, T, TElement, TResult>(this Effect<TEnv, T> source, Func<T, Expected<TElement>> bind, Func<T, TElement, TResult> bindMap)
         => source.AndThen(s => bind(s).Select(e => bindMap(s, e)));
 
-    // Expected
+    // Result
     public static Effect<TEnv, TResult> SelectMany<TEnv, T, E, TElement, TResult>(this Effect<TEnv, T> source, Func<T, Result<TElement, E>> bind, Func<T, TElement, TResult> bindMap)
         where E : Error
         => source.AndThen(s => Effect.Return(bind(s)).Select(e => bindMap(s, e)));
+
+    // Guard (TODO Add guard to other error hanlding types)
+    public static Effect<TEnv, TResult> SelectMany<TEnv, T, E, TResult>(this Effect<TEnv, T> source, Func<T, Guard<Unit, E>> bind, Func<T, Unit, TResult> bindMap)
+        where E : Error
+        => source.AndThen(bind, bindMap);
 
     // Option
     // UNDONE Result -> Expected conversion

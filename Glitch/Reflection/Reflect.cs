@@ -5,20 +5,26 @@ namespace Glitch.Reflection;
 
 public static class Reflect
 {
+    public static FieldInfo FieldOf(LambdaExpression expression) => GetMember<FieldInfo>(expression);
     public static FieldInfo FieldOf(Expression<Action> expression) => GetMember<FieldInfo>(expression);
     public static FieldInfo FieldOf(Expression<Func<object>> expression) => GetMember<FieldInfo>(expression);
     public static FieldInfo FieldOf<T>(Expression<Action<T>> expression) => GetMember<FieldInfo>(expression);
-    public static FieldInfo FieldOf<T>(Expression<Func<T, object>> expression) => GetMember<FieldInfo>(expression);
+    public static FieldInfo FieldOf<TArg, T>(Expression<Func<TArg, T>> expression) => GetMember<FieldInfo>(expression);
+    public static FieldInfo FieldOf<TArg>(Expression<Func<TArg, object?>> expression) => GetMember<FieldInfo>(expression);
 
+    public static PropertyInfo PropertyOf(LambdaExpression expression) => GetMember<PropertyInfo>(expression);
     public static PropertyInfo PropertyOf(Expression<Action> expression) => GetMember<PropertyInfo>(expression);
-    public static PropertyInfo PropertyOf(Expression<Func<object>> expression) => GetMember<PropertyInfo>(expression);
+    public static PropertyInfo PropertyOf<T>(Expression<Func<T>> expression) => GetMember<PropertyInfo>(expression);
     public static PropertyInfo PropertyOf<T>(Expression<Action<T>> expression) => GetMember<PropertyInfo>(expression);
-    public static PropertyInfo PropertyOf<T>(Expression<Func<T, object>> expression) => GetMember<PropertyInfo>(expression);
+    public static PropertyInfo PropertyOf<TArg, T>(Expression<Func<TArg, T>> expression) => GetMember<PropertyInfo>(expression);
+    public static PropertyInfo PropertyOf<TArg>(Expression<Func<TArg, object?>> expression) => GetMember<PropertyInfo>(expression);
 
+    public static MethodInfo MethodOf(LambdaExpression expression) => GetMember<MethodInfo>(expression);
     public static MethodInfo MethodOf(Expression<Action> expression) => GetMember<MethodInfo>(expression);
-    public static MethodInfo MethodOf(Expression<Func<object>> expression) => GetMember<MethodInfo>(expression);
-    public static MethodInfo MethodOf<T>(Expression<Action<T>> expression) => GetMember<MethodInfo>(expression);
-    public static MethodInfo MethodOf<T>(Expression<Func<T, object>> expression) => GetMember<MethodInfo>(expression);
+    public static MethodInfo MethodOf<T>(Expression<Func<T>> expression) => GetMember<MethodInfo>(expression);
+    public static MethodInfo MethodOf<TArg>(Expression<Action<TArg>> expression) => GetMember<MethodInfo>(expression);
+    public static MethodInfo MethodOf<TArg, T>(Expression<Func<TArg, T>> expression) => GetMember<MethodInfo>(expression);
+    public static MethodInfo MethodOf<TArg>(Expression<Func<TArg, object?>> expression) => GetMember<MethodInfo>(expression);
 
     private static TMember GetMember<TMember>(LambdaExpression expression)
         where TMember : MemberInfo =>

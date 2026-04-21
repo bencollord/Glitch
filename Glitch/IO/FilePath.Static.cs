@@ -1,20 +1,25 @@
+using System.Collections.Immutable;
+
 namespace Glitch.IO;
 
 public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePath>
 {
     public static readonly FilePath Empty = new(string.Empty);
 
-    public static char[] InvalidFileNameChars => Path.GetInvalidFileNameChars();
-    public static char[] InvalidPathChars => Path.GetInvalidPathChars();
-    public static FilePath TempPath => new(Path.GetTempPath());
-    public static char DirectorySeparatorChar => Path.DirectorySeparatorChar;
-    public static char AltDirectorySeparatorChar => Path.AltDirectorySeparatorChar;
+    public static readonly char DirectorySeparator    = Path.DirectorySeparatorChar;
+    public static readonly char AltDirectorySeparator = Path.AltDirectorySeparatorChar;
+
+    public static readonly ImmutableArray<char> DirectorySeparators  = [DirectorySeparator, AltDirectorySeparator];
+    public static readonly ImmutableArray<char> InvalidPathChars     = Path.GetInvalidPathChars().ToImmutableArray();
+    public static readonly ImmutableArray<char> InvalidFileNameChars = Path.GetInvalidFileNameChars().ToImmutableArray();
+
 
     public static FilePath Create(string path) => new(path);
     public static FilePath Create(FileSystemInfo node) => new(node.FullName);
 
     public static bool IsNullOrEmpty(FilePath? path) => string.IsNullOrEmpty(path?.path);
 
+    public static FilePath GetTempPath() => new(Path.GetTempPath());
     public static FilePath GetRandomFileName() => new(Path.GetRandomFileName());
     public static FilePath GetTempFileName() => new(Path.GetTempFileName());
 

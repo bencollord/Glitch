@@ -25,6 +25,13 @@ public static partial class Effect
     public static Effect<TEnv, Unit> Lift<TEnv>(Func<TEnv, Unit> action) => Effect<TEnv, Unit>.Lift(action);
     public static Effect<TEnv, T> Lift<TEnv, T>(Func<TEnv, T> function) => Effect<TEnv, T>.Lift(function);
 
+    public static Guard<Unit, Error> Guard(bool condition, Error error) => Guard<Error>(condition, () => error);
+    public static Guard<Unit, Error> Guard(bool condition, Func<Error> error) => new(condition, error);
+    public static Guard<Unit, E> Guard<E>(bool condition, E error) where E : Error => Guard(condition, () => error);
+    public static Guard<Unit, E> Guard<E>(bool condition, Func<E> error) where E : Error => new(condition, error);
+    public static Guard<T, E> Guard<T, E>(bool condition, E error) where E : Error => Guard<T, E>(condition, () => error);
+    public static Guard<T, E> Guard<T, E>(bool condition, Func<E> error) where E : Error => new(condition, error);
+
     // TODO These are the same as Lift, but I'm experimenting with a new naming convention.
     // Pick one and stick with it.
     public static Effect<TEnv, T> TryWith<TEnv, T, E>(Func<TEnv, Result<T, E>> function) where E : Error => TryWith<TEnv, T>(x => function(x).Match(Result.Okay<T, Error>, Result.Fail<T, Error>));

@@ -220,6 +220,17 @@ public partial class Effect<TEnv, T>
     public Effect<TEnv, TResult> AndThen<TElement, TResult>(Func<T, Effect<TElement>> bind, Func<T, TElement, TResult> project)
         => AndThen(x => bind(x).Select(y => project(x, y)));
 
+    // Non generic version to allow for implicit conversion operators
+    public Effect<TEnv, T> AndThen(Func<T, Guard<Unit, Error>> bind) => AndThen<Error>(bind);
+
+    public Effect<TEnv, TResult> AndThen<TResult>(Func<T, Guard<Unit, Error>> bind, Func<T, Unit, TResult> project) => AndThen<Error, TResult>(bind, project);
+
+    public Effect<TEnv, T> AndThen<E>(Func<T, Guard<Unit, E>> bind) where E : Error =>
+        Select(x => new { Guard = bind(x), Value = x })
+            .AndThen(x => x.Guard.IsOkay ? Return(x.Value) : Fail(x.Guard.Fail()));
+
+    public Effect<TEnv, TResult> AndThen<E, TResult>(Func<T, Guard<Unit, E>> bind, Func<T, Unit, TResult> project) where E : Error =>
+        AndThen(bind).Select(x => project(x, Unit.Value));
 
     public Effect<TEnv, T> Guard(Func<T, bool> predicate, Error error)
         => new(i => thunk(i).Guard(predicate, _ => error));

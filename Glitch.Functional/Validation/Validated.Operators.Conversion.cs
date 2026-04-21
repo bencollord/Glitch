@@ -1,6 +1,4 @@
 using Glitch.Functional.Collections;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 namespace Glitch.Functional.Validation;
 
@@ -18,7 +16,7 @@ public partial record Validated<T, E>
 
     public static implicit operator Validated<T, E>(Fail<E> failure) => new Fail(failure.Error);
 
-    public static implicit operator Validated<T, E>(Result<T, E> result) => result.SelectError(Sequence.Singleton);
+    public static implicit operator Validated<T, E>(Result<T, E> result) => Validated.From(result);
 
-    public static implicit operator Validated<T, E>(Result<T, Sequence<E>> result) => result.Match(Validated.Okay<T, E>, Validated.Fail<T, E>);
+    public static implicit operator Validated<T, E>(Result<T, Sequence<E>> result) => Validated.From(result);
 }
