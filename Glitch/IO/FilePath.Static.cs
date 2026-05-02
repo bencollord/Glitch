@@ -13,7 +13,6 @@ public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePat
     public static readonly ImmutableArray<char> InvalidPathChars     = Path.GetInvalidPathChars().ToImmutableArray();
     public static readonly ImmutableArray<char> InvalidFileNameChars = Path.GetInvalidFileNameChars().ToImmutableArray();
 
-
     public static FilePath Create(string path) => new(path);
     public static FilePath Create(FileSystemInfo node) => new(node.FullName);
 

@@ -35,23 +35,18 @@ public static partial class Option
     public static Option<TResult> Apply<T, TResult>(Option<Func<T, TResult>> func, T? value) where T : struct => func % Maybe(value);
 
     public static Option<TResult> Bind<T, TResult>(Option<T> value, Func<T, Option<TResult>> bind) => value.AndThen(bind);
-    public static Option<TResult> Bind<T, TResult>(T? value, Func<T, Option<TResult>> bind) => Maybe(value).AndThen(bind);
     public static Option<TResult> Bind<T, TResult>(T? value, Func<T, Option<TResult>> bind) where T : struct => Maybe(value).AndThen(bind);
 
     public static Option<T> Filter<T>(Option<T> value, Func<T, bool> predicate) => value.Where(predicate);
-    public static Option<T> Filter<T>(T? value, Func<T, bool> predicate) => Maybe(value).Where(predicate);
     public static Option<T> Filter<T>(T? value, Func<T, bool> predicate) where T : struct => Maybe(value).Where(predicate);
 
     public static TResult Match<T, TResult>(Option<T> value, Func<T, TResult> some, Func<Unit, TResult> none) => value.Match(some, none);
-    public static TResult Match<T, TResult>(T? value, Func<T, TResult> some, Func<Unit, TResult> none) => Maybe(value).Match(some, none);
     public static TResult Match<T, TResult>(T? value, Func<T, TResult> some, Func<Unit, TResult> none) where T : struct => Maybe(value).Match(some, none);
 
     public static TResult Match<T, TResult>(Option<T> value, Func<T, TResult> some, Func<TResult> none) => value.Match(some, none);
-    public static TResult Match<T, TResult>(T? value, Func<T, TResult> some, Func<TResult> none) => Maybe(value).Match(some, none);
     public static TResult Match<T, TResult>(T? value, Func<T, TResult> some, Func<TResult> none) where T : struct => Maybe(value).Match(some, none);
 
     public static TResult Match<T, TResult>(Option<T> value, Func<T, TResult> some, TResult none) => value.Match(some, none);
-    public static TResult Match<T, TResult>(T? value, Func<T, TResult> some, TResult none) => Maybe(value).Match(some, none);
     public static TResult Match<T, TResult>(T? value, Func<T, TResult> some, TResult none) where T : struct => Maybe(value).Match(some, none);
 
     public static (Option<TLeft> Left, Option<TRight> Right) Unzip<TLeft, TRight>(Option<(TLeft Left, TRight Right)> option) =>

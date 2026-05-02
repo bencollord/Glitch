@@ -27,5 +27,7 @@ public static partial class ValidatedExtensions
         public static Validated<TResult, E> operator &(Validated<T, E> x, Validated<TResult, E> y) => x.And(y);
 
         public static Validated<TResult, E> operator &(Validated<T, E> x, Okay<TResult> y) => x.And(Validated.Okay<TResult, E>(y.Value));   
+
+        public static Validated<TResult, E> operator &(Validated<T, E> x, Result<TResult, E> y) => x.And(y);   
     }
 }

@@ -27,6 +27,14 @@ public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePat
     public bool IsRooted => Path.IsPathRooted(path);
     public bool IsValid => !InvalidPathChars.Any(path.Contains) && !InvalidFileNameChars.Any(path.Contains);
 
+    public bool IsChildOf(FilePath parent) => parent.IsParentOf(this);
+
+    public bool IsParentOf(FilePath child) =>
+        !child.ToFullPath()
+              .ToRelativePath(this)
+              .ToSegments()
+              .Any(x => x.path == "..");
+
     public FilePath[] ToSegments()
         => Array.ConvertAll(
             path.Split([DirectorySeparator, AltDirectorySeparator], StringSplitOptions.RemoveEmptyEntries),
@@ -34,8 +42,6 @@ public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePat
 
     public FilePath WithExtension(string extension)
         => Extension != extension ? new(Path.ChangeExtension(path, extension)) : this;
-
-    public FilePath TrimEndingDirectorySeparator() => new(Path.TrimEndingDirectorySeparator(path));
 
     public FilePath ToFullPath() => new(Path.GetFullPath(path));
     public FilePath ToFullPath(string basePath) => new(Path.GetFullPath(path, basePath));
@@ -103,7 +109,7 @@ public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePat
 
     public override int GetHashCode() => path.GetHashCode();
 
-    public override string ToString() => path;
+    public override string ToString() => Path.TrimEndingDirectorySeparator(path);
 
 
     public static implicit operator string(FilePath path) => path.path;

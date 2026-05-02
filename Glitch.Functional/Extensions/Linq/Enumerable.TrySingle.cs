@@ -3,46 +3,46 @@ using Glitch.Functional.Errors;
 
 namespace Glitch.Functional.Extensions;
 
-using static Expected;
+using static Result;
 using static Option;
 
 public static partial class LinqExtensions
 {
     extension<T>(IEnumerable<T> source)
     {
-        public Expected<T> TrySingle() => source.TrySingle(None);
+        public Result<T, Error> TrySingle() => source.TrySingle(None);
 
-        public Expected<T> TrySingle(Func<T, bool> predicate)
+        public Result<T, Error> TrySingle(Func<T, bool> predicate)
             => source.TrySingle(Some(predicate));
 
-        private Expected<T> TrySingle(Option<Func<T, bool>> predicate)
+        private Result<T, Error> TrySingle(Option<Func<T, bool>> predicate)
         {
             return source.TrySingleOrNone(predicate)
-                         .IfNone(Error.NoElements);
+                         .AndThen(opt => opt.OkayOr(Error.NoElements));
         }
 
-        public Option<Expected<T>> TrySingleOrNone() => source.TrySingleOrNone(None);
+        public Result<Option<T>, Error> TrySingleOrNone() => source.TrySingleOrNone(None);
 
-        public Option<Expected<T>> TrySingleOrNone(Func<T, bool> predicate)
+        public Result<Option<T>, Error> TrySingleOrNone(Func<T, bool> predicate)
             => source.TrySingleOrNone(Some(predicate));
 
-        private Option<Expected<T>> TrySingleOrNone(Option<Func<T, bool>> predicate)
+        private Result<Option<T>, Error> TrySingleOrNone(Option<Func<T, bool>> predicate)
         {
             using var iterator = predicate
                 .Select(source.Where)
                 .IfNone(source)
                 .GetEnumerator();
 
-            Option<Expected<T>> value = None;
+            Result<Option<T>, Error> value = Error.NoElements;
 
             if (iterator.MoveNext())
             {
-                value = Okay(iterator.Current);
+                value = Some(iterator.Current);
             }
 
             if (iterator.MoveNext())
             {
-                value = Fail<T>(Error.MoreThanOneElement);
+                value = Fail(Error.MoreThanOneElement);
             }
 
             return value;

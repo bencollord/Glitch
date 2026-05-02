@@ -73,6 +73,8 @@ public abstract partial record Validated<T, E> : IResult<T, Sequence<E>>
     /// <returns></returns>
     public abstract Validated<TResult, E> And<TResult>(Validated<TResult, E> other);
 
+    public Validated<TResult, E> And<TResult>(Result<TResult, E> other) => And(Validated.From(other));
+
     /// <summary>
     /// Returns <paramref name="other"/> wrapped in a <see cref="Validated{T, E}"/> if okay.
     /// Otherwise, returns the error set of self.
@@ -112,8 +114,8 @@ public abstract partial record Validated<T, E> : IResult<T, Sequence<E>>
     public Validated<TResult, E> AndThen<TResult>(Func<T, Result<TResult, E>> bind) => AndThen(x => Validated.From(bind(x)));
     public Validated<TResult, E> AndThen<TElement, TResult>(Func<T, Result<TElement, E>> bind, Func<T, TElement, TResult> project) => AndThen(x => Validated.From(bind(x)), project);
 
-    public Validated<TResult, E> AndThen<TResult>(Func<T, Okay<TResult>> bind) => AndThen(x => bind(x).AsResult<E>());
-    public Validated<TResult, E> AndThen<TElement, TResult>(Func<T, Okay<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).AsResult<E>(), project);
+    public Validated<TResult, E> AndThen<TResult>(Func<T, Okay<TResult>> bind) => AndThen(x => bind(x).OrFail<E>());
+    public Validated<TResult, E> AndThen<TElement, TResult>(Func<T, Okay<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).OrFail<E>(), project);
 
     public Validated<T, E> AndThen(Func<T, Fail<E>> bind) => AndThen(x => bind(x).AsResult<T>());
     public Validated<TResult, E> AndThen<TResult>(Func<T, Fail<E>> bind, Func<T, Unit, TResult> project) => AndThen(x => bind(x).AsResult<Unit>(), project);
@@ -263,4 +265,20 @@ public abstract partial record Validated<T, E> : IResult<T, Sequence<E>>
     public abstract override string ToString();
 
     public abstract T Unwrap();
+
+    public static bool operator true(Validated<T, E> result) => result.IsOkay;
+
+    public static bool operator false(Validated<T, E> result) => result.IsFail;
+
+    public static implicit operator Validated<T, E>(T value) => new Okay(value);
+
+    public static implicit operator Validated<T, E>(Okay<T> success) => new Okay(success.Value);
+
+    public static implicit operator Validated<T, E>(E error) => new Fail(error);
+
+    public static implicit operator Validated<T, E>(Fail<E> failure) => new Fail(failure.Error);
+
+    public static implicit operator Validated<T, E>(Result<T, E> result) => Validated.From(result);
+
+    public static implicit operator Validated<T, E>(Result<T, Sequence<E>> result) => Validated.From(result);
 }

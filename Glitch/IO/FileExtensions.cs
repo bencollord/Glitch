@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
 
 namespace Glitch.IO;
 
@@ -7,6 +6,8 @@ public static class FileExtensions
 {
     extension(FileInfo file)
     {
+        public string Stem => Path.GetFileNameWithoutExtension(file.Name);
+
         public ByteSize Size => new ByteSize(file.Length);
 
         public void MoveTo(FileInfo destination)

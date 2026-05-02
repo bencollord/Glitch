@@ -39,6 +39,9 @@ public static partial class Result
     public static Result<T, E> Guard<T, E>(Func<T, bool> predicate, T value, E error)
         => predicate(value) ? new Result<T, E>.Okay(value) : new Result<T, E>.Fail(error);
 
+    public static Result<T, E> Guard<T, E>(Func<T, bool> predicate, T value, Func<T, E> error)
+        => predicate(value) ? new Result<T, E>.Okay(value) : new Result<T, E>.Fail(error(value));
+
     public static Option<T> OkayOrNone<T, E>(Result<T, E> result) => result.OkayOrNone();
 
     public static Option<E> ErrorOrNone<T, E>(Result<T, E> result) => result.ErrorOrNone();
@@ -48,4 +51,17 @@ public static partial class Result
     public static E UnwrapError<T, E>(Result<T, E> result) => result.UnwrapError();
 
     public static (IEnumerable<T> Successes, IEnumerable<E> Errors) Partition<T, E>(IEnumerable<Result<T, E>> results) => results.Partition();
+
+    public static Result<TResult, E> Map<T, E, TResult>(Result<T, E> value, Func<T, TResult> map) => value.Select(map);
+    public static Result<TResult, E> Apply<T, E, TResult>(Result<Func<T, TResult>, E> func, Result<T, E> value) => func.AndThen(fn => value * fn);
+    public static Result<TResult, E> Bind<T, E, TResult>(Result<T, E> value, Func<T, Result<TResult, E>> bind) => value.AndThen(bind);
+
+    public static TResult Match<T, E, TResult>(Result<T, E> value, Func<T, TResult> okay, Func<E, TResult> fail) => value.Match(okay, fail);
+    public static TResult Match<T, E, TResult>(Result<T, E> value, Func<T, TResult> okay, TResult fail) => value.Match(okay, fail);
+
+    public static (Result<TLeft, E> Left, Result<TRight, E> Right) Unzip<TLeft, TRight, E>(Result<(TLeft Left, TRight Right), E> option) =>
+        (option.Select(x => x.Left), option.Select(x => x.Right));
+
+    public static T IfFail<T, E>(Result<T, E> value, T fail) => value.IfFail(fail);
+    public static T IfFail<T, E>(Result<T, E> value, Func<E, T> fail) => value.IfFail(fail);
 }

@@ -72,9 +72,9 @@ public class JsonFile : IEquatable<JsonFile>, IComparable<JsonFile>
         where TToken : JToken
         => (TToken)Load();
 
-    public Unit Write(JToken token) => Write(token, DefaultFormatting);
+    public Unit Save(JToken token) => Save(token, DefaultFormatting);
 
-    public virtual Unit Write(JToken token, Formatting formatting)
+    public virtual Unit Save(JToken token, Formatting formatting)
     {
         using var writer = OpenWrite(formatting);
 
@@ -106,6 +106,7 @@ public class JsonFile : IEquatable<JsonFile>, IComparable<JsonFile>
     public override int GetHashCode() => file.GetHashCode();
 
     public override string ToString() => file.ToString();
+
     public static bool operator ==(JsonFile? left, JsonFile? right) => ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.Equals(right);
 
     public static bool operator !=(JsonFile? left, JsonFile? right) => !(left == right);

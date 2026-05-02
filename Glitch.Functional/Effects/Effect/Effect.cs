@@ -108,6 +108,9 @@ public partial class Effect<T>
     public Effect<TResult> AndThen<TResult>(Func<T, Effect<TResult>> bind)
         => new(inner.AndThen(v => bind(v).inner));
 
+    public Effect<TEnv, TResult> AndThen<TEnv, TResult>(Func<T, Effect<TEnv, TResult>> bind)
+        => inner.With<TEnv>(env => Unit.Value).AndThen(bind);
+
     /// <summary>
     /// <inheritdoc cref="Effect{Unit, T}.AndThen{TElement, TResult}(Func{T, Effect{TElement}}, Func{T, TElement, TResult})"/>
     /// </summary>

@@ -39,7 +39,7 @@ public static class JTokenExtensions
 
         public Unit WriteTo(FileInfo file) => token.WriteTo(new JsonFile(file));
 
-        public Unit WriteTo(JsonFile file) => file.Write(token);
+        public Unit WriteTo(JsonFile file) => file.Save(token);
 
         public static JToken Load(FilePath path) =>
             Load(new FileInfo(path));

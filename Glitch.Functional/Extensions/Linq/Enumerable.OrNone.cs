@@ -60,6 +60,6 @@ public static partial class LinqExtensions
             => source.SingleOrNone(Some(predicate));
 
         private Option<T> SingleOrNone(Option<Func<T, bool>> predicate)
-            => source.TrySingleOrNone(predicate) * Expected.Unwrap;
+            => source.TrySingleOrNone(predicate).Unwrap();
     }
 }
