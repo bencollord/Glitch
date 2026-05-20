@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 namespace Glitch.IO;
 
@@ -8,7 +9,7 @@ public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePat
 
     public FilePath(string? path)
     {
-        this.path = path?.Replace(AltDirectorySeparator, DirectorySeparator) ?? string.Empty;
+        this.path = Normalize(path); ;
     }
 
     public FilePath(FileSystemInfo fileOrDirectory)
@@ -26,6 +27,7 @@ public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePat
     public bool IsFullyQualified => Path.IsPathFullyQualified(path);
     public bool IsRooted => Path.IsPathRooted(path);
     public bool IsValid => !InvalidPathChars.Any(path.Contains) && !InvalidFileNameChars.Any(path.Contains);
+    public bool IsDirectory => File.GetAttributes(path).HasFlag(FileAttributes.Directory);
 
     public bool IsChildOf(FilePath parent) => parent.IsParentOf(this);
 
@@ -162,4 +164,6 @@ public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePat
 
     public static bool operator >=(FilePath? left, FilePath? right)
         => left is null ? right is null : left.CompareTo(right) >= 0;
+
+    private static string Normalize(string? path) => Path.TrimEndingDirectorySeparator(path?.Replace(AltDirectorySeparator, DirectorySeparator) ?? string.Empty);
 }

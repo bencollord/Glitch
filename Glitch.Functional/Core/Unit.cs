@@ -9,6 +9,44 @@ public readonly struct Unit : IEquatable<Unit>, IComparable<Unit>
 
     public static Unit Ignore<T>(T _) => Value;
 
+    /// <summary>
+    /// Bit of a hacky method to chain monadic functions that return Unit in operators
+    /// and query expressions. Returns a function that can be used to map a unit valued
+    /// monad to a constant <paramref name="value"/> value.
+    /// 
+    /// Sort of like a unit specific K combinator
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public static Func<Unit, T> MapTo<T>(T value) => _ => value;
+
+    /// <summary>
+    /// Convenience method for returning unit from actions in expression-bodied methods.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="action"></param>
+    /// <param name="arg"></param>
+    /// <returns></returns>
+    public static Unit Return<T>(Action<T> action, T arg)
+    {
+        action(arg);
+        return Value;
+    }
+
+    /// <summary>
+    /// Convenience method for discarding the result and returning unit from functions in expression-bodied methods.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="action"></param>
+    /// <param name="arg"></param>
+    /// <returns></returns>
+    public static Unit Return<T, U>(Func<T, U> action, T arg)
+    {
+        action(arg);
+        return Value;
+    }
+
     public int CompareTo(Unit other) => 0;
 
     public bool Equals(Unit other) => true;

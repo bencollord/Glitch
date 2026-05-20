@@ -2,6 +2,7 @@ using Glitch.Functional;
 
 namespace Glitch.Functional.Errors;
 
+[Obsolete("Use Result<T, E> instead")]
 public partial record Expected<T> : IResult<T, Error>
 {
     private Result<T, Error> inner;

@@ -18,8 +18,15 @@ public static partial class ResultExtensions
         public static Result<TResult, E> operator &(Result<T, E> x, TResult y) => x.And(Result.Okay<TResult, E>(y));
     }
 
+    extension<T, E>(Result<T, E> self)
+    {
+        public static bool operator true(Result<T, E> x) => x.IsOkay;
+        public static bool operator false(Result<T, E> x) => x.IsFail;
+    }
+
     extension<T, E, EResult>(Result<T, E> self)
     {
+
         public static Result<T, EResult> operator |(Result<T, E> x, Result<T, EResult> y) => x.Or(y);
 
         public static Result<T, EResult> operator |(Result<T, E> x, Fail<EResult> y) => x.Or(Result.Fail<T, EResult>(y.Error));

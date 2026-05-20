@@ -30,7 +30,7 @@ public class ExpressionReplacer : ExpressionVisitor
     {
         if (node is not null && replacementMap.TryGetValue(node, out Expression? value))
         {
-            return base.Visit(value);
+            return value;
         }
 
         return base.Visit(node);

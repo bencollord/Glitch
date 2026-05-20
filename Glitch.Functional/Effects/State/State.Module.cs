@@ -12,7 +12,7 @@ public static partial class State
 
     public static State<S, Unit> Modify<S>(Func<S, S> modify) => Lift((S state) => (modify(state), Unit.Value));
 
-    public static State<S, T> Lift<S, T>(Func<S, (S, T)> runner) => Lift<S, T>(s => runner(s));
+    public static State<S, T> Lift<S, T>(Func<S, (S, T)> runner) => Lift<S, T>(s => { var x = runner(s); return new StateResult<S, T>(x.Item1, x.Item2); });
 
     public static State<S, T> Lift<S, T>(Func<S, StateResult<S, T>> runner) => s => runner(s);
 }

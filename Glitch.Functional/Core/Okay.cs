@@ -13,6 +13,7 @@ public readonly record struct Okay<T>(T Value)
 
     // Map
     // --------------------------------------------------------------------------------------------
+    public Okay<TResult> Cast<TResult>() => DynamicCast<TResult>.From(Value); // TODO Should this return a result?
     public Okay<TResult> Select<TResult>(Func<T, TResult> selector) => new(selector(Value));
 
     // Bind
