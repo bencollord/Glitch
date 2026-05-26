@@ -16,11 +16,4 @@ public static class NaturalTransformations
 
         public Option<E> ErrorOrNone() => source.Match(_ => Option.None, Option.Some);
     }
-
-    extension<T>(Expected<T> source)
-    {
-        public Option<T> OkayOrNone() => source.Match(Option.Some, _ => Option.None);
-
-        public Option<Error> ErrorOrNone() => source.Match(_ => Option.None, Option.Some);
-    }
 }

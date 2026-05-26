@@ -36,10 +36,6 @@ public static partial class IOExtensions
         => source.AndThen(bind, project);
 
     [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IO<TResult> SelectMany<T, TElement, TResult>(this IO<T> source, Func<T, Expected<TElement>> bind, Func<T, TElement, TResult> project)
-        => source.AndThen(bind, project);
-
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IO<TResult> SelectMany<T, E, TElement, TResult>(this IO<T> source, Func<T, Result<TElement, E>> bind, Func<T, TElement, TResult> project)
         => source.AndThen(bind, project);
 }

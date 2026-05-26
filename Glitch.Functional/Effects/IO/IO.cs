@@ -40,14 +40,14 @@ public abstract partial class IO<T>
 
     protected abstract Task<T> RunIOAsync(IOEnv env);
 
-    public Expected<T> Try()
+    public Result<T, Error> Try()
     {
         using var env = IOEnv.New();
 
         return Try(env);
     }
 
-    public Expected<T> Try(IOEnv env)
+    public Result<T, Error> Try(IOEnv env)
     {
         try
         {
@@ -55,7 +55,7 @@ public abstract partial class IO<T>
         }
         catch (Exception e)
         {
-            return Expected.Fail<T>(e);
+            return Result.Fail<T, Error>(e);
         }
     }
 
@@ -81,11 +81,6 @@ public abstract partial class IO<T>
     public IO<TResult> AndThen<TResult>(Func<T, Option<TResult>> bind) => AndThen(bind, (_, y) => y);
     [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public IO<TResult> AndThen<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, _ => IO.Fail<TElement>(Error.NoElements)), project);
-
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IO<TResult> AndThen<TResult>(Func<T, Expected<TResult>> bind) => AndThen(bind, (_, y) => y);
-    [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IO<TResult> AndThen<TElement, TResult>(Func<T, Expected<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Match(IO.Return, IO.Fail<TElement>), project);
 
     [DebuggerStepThrough, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public IO<TResult> AndThen<E, TResult>(Func<T, Result<TResult, E>> bind) => AndThen(bind, (_, y) => y);

@@ -8,6 +8,6 @@ public static class FlattenExtensions
 {
     public static Option<T> Flatten<T>(this Option<Option<T>> source) => source.AndThen(Identity);
 
-    public static Expected<T> Flatten<T>(this Expected<Expected<T>> source) => source.AndThen(Identity);
+    public static Result<T, E> Flatten<T, E>(this Result<Result<T, E>, E> source) => source.AndThen(Identity);
 
 }

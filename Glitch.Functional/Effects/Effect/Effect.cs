@@ -23,8 +23,6 @@ public partial class Effect<T>
 
     public static Effect<T> Return(Result<T, Error> result) => new(Effect<Unit, T>.Return(result));
 
-    public static Effect<T> Lift(Func<Expected<T>> function) => new(Effect<Unit, T>.Lift(_ => function()));
-
     public static Effect<T> Lift(Func<Result<T, Error>> function) => new(Effect<Unit, T>.Lift(_ => function()));
 
     public static Effect<T> Lift(Func<T> function) => new(Effect<Unit, T>.Lift(_ => function()));
@@ -121,26 +119,6 @@ public partial class Effect<T>
     /// <returns></returns>
     public Effect<TResult> AndThen<TElement, TResult>(Func<T, Effect<TElement>> bind, Func<T, TElement, TResult> project)
         => new(inner.AndThen(v => bind(v).inner, project));
-
-    /// <summary>
-    /// <inheritdoc cref="Effect{Unit, T}.AndThen{TResult}(Func{T, Expected{TResult}})"/>
-    /// </summary>
-    /// <typeparam name="TResult"></typeparam>
-    /// <param name="bind"></param>
-    /// <returns></returns>
-    public Effect<TResult> AndThen<TResult>(Func<T, Expected<TResult>> bind)
-        => AndThen(e => Effect<TResult>.Return(bind(e)));
-
-    /// <summary>
-    /// <inheritdoc cref="Effect{Unit, T}.AndThen{TElement, TResult}(Func{T, Expected{TElement}}, Func{T, TElement, TResult})"/>
-    /// </summary>
-    /// <typeparam name="TElement"></typeparam>
-    /// <typeparam name="TResult"></typeparam>
-    /// <param name="bind"></param>
-    /// <param name="project"></param>
-    /// <returns></returns>
-    public Effect<TResult> AndThen<TElement, TResult>(Func<T, Expected<TElement>> bind, Func<T, TElement, TResult> project)
-        => AndThen(x => bind(x).Select(y => project(x, y)));
 
     // Non generic version to allow for implicit conversion operators
     public Effect<T> AndThen(Func<T, Guard<Unit, Error>> bind) => new(inner.AndThen(bind));
@@ -252,5 +230,5 @@ public partial class Effect<T>
     /// <inheritdoc cref="Effect{Unit, T}.Run(Unit)"/>
     /// </summary>
     /// <returns></returns>
-    public Expected<T> Run() => inner.Run(Unit.Value);
+    public Result<T, Error> Run() => inner.Run(Unit.Value);
 }
