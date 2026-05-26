@@ -53,6 +53,8 @@ public static partial class Option
         (option.Select(x => x.Left), option.Select(x => x.Right));
 
     public static T IfNone<T>(Option<T> option, T none) => option.IfNone(none);
+    public static T IfNone<T>(Option<T> option, Func<T> none) => option.IfNone(none);
+    public static T IfNone<T>(Option<T> option, Func<Unit, T> none) => option.IfNone(none);
 
     // ========================================================================
     // Curried for use in Linq expressions and operators

@@ -77,8 +77,6 @@ public record ParseError : Error
 
     public static implicit operator ParseError(string message) => FromMessage(message);
 
-    public static implicit operator ParseException(ParseError error) => new(error);
-
     private static string FormatToken<TToken>(TToken token)
     {
         string? formatted = token?.ToString();

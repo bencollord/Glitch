@@ -19,10 +19,10 @@ public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePat
     public FilePath FileName => new(Path.GetFileName(path));
     public FilePath Stem => new(Path.GetFileNameWithoutExtension(path));
     public FilePath Root => new(Path.GetPathRoot(path));
+    public FilePath Extension => new(Path.GetExtension(path));
     public bool EndsInDirectorySeparator => Path.EndsInDirectorySeparator(path);
     public bool Exists => Path.Exists(path);
     public bool IsEmpty => string.IsNullOrEmpty(path);
-    public FilePath Extension => new(Path.GetExtension(path));
     public bool HasExtension => Path.HasExtension(path);
     public bool IsFullyQualified => Path.IsPathFullyQualified(path);
     public bool IsRooted => Path.IsPathRooted(path);
@@ -129,7 +129,7 @@ public sealed partial class FilePath : IEquatable<FilePath>, IComparable<FilePat
 
     public static implicit operator FilePath(FileSystemInfo? node) => new(node?.FullName);
 
-    public static bool operator ==(FilePath? left, FilePath? right) => left is null ? right == null : left.Equals(right);
+    public static bool operator ==(FilePath? left, FilePath? right) => left is null ? right is null : left.Equals(right);
 
     public static bool operator !=(FilePath? left, FilePath? right) => !(left == right);
 

@@ -103,9 +103,6 @@ public static class QueryableExtensions
 
     public static T Random<T>(this IQueryable<T> source) => source.Shuffle().First();
 
-    public static IQueryable<T> Shuffle<T>(this IQueryable<T> items)
-        => items.OrderBy(_ => Guid.NewGuid());
-
     public static IQueryable<TResult> Cartesian<TSource, TResult>(this IQueryable<TSource> source, Expression<Func<TSource, TSource, TResult>> projection)
     {
         return source.SelectMany(_ => source, projection);

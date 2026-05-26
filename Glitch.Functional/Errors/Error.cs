@@ -38,7 +38,7 @@ public abstract partial record Error : IEquatable<Error>
 
     public static Error New<TCode>(TCode code, Exception exception) where TCode : Enum => New(Convert.ToInt32(code), exception);
 
-    public static Error New(params IEnumerable<Error> errors)
+    public static Error New(IEnumerable<Error> errors)
         => errors.ToArray() switch
         {
             { Length: 1 } => errors.Single(),
@@ -172,6 +172,7 @@ public abstract partial record Error : IEquatable<Error>
     public static implicit operator Error((int code, string message) pair) => New(pair.code, pair.message);
 
     public static implicit operator Error(Exception exception) => New(exception);
+    public static implicit operator Exception(Error error) => error.AsException();
 
     public static Error operator +(Error? x, Error? y) => (y is null ? x : x?.Add(y) ?? y) ?? Empty;
 }

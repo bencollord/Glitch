@@ -378,7 +378,7 @@ public partial class Effect<TEnv, T>
     /// thrown and wrapping it in a <see cref="Expected{T}"/>
     /// </summary>
     /// <returns></returns>
-    public Expected<T> Run(TEnv input)
+    public Result<T, Error> Run(TEnv input)
     {
         try
         {
@@ -386,7 +386,7 @@ public partial class Effect<TEnv, T>
         }
         catch (Exception ex)
         {
-            return Expected.Fail<T>(ex);
+            return Result.Fail(Error.New(ex));
         }
     }
 }
