@@ -1,4 +1,4 @@
-using Glitch.Functional.Collections;
+using System.Collections.Immutable;
 
 namespace Glitch.Functional.Validation;
 
@@ -6,12 +6,12 @@ using static FN;
 
 /// <summary>
 /// A validation monad. Equivalent to <see cref="Result{T, E}"/>, but accumulates failures
-/// into a <see cref="Sequence{E}"/> instead of short-circuiting on failure.
+/// into a <see cref="ImmutableList{E}"/> instead of short-circuiting on failure.
 /// </summary>
 /// <typeparam name="T"></typeparam>
 /// <typeparam name="E"></typeparam>
 [Monad]
-public abstract partial record Validated<T, E> : IResult<T, Sequence<E>>
+public abstract partial record Validated<T, E> : IResult<T, ImmutableList<E>>
 {
     private protected Validated() { }
 
@@ -41,7 +41,7 @@ public abstract partial record Validated<T, E> : IResult<T, Sequence<E>>
     /// <typeparam name="EResult"></typeparam>
     /// <param name="map"></param>
     /// <returns></returns>
-    public abstract Validated<T, EResult> SelectErrors<EResult>(Func<Sequence<E>, EResult> map);
+    public abstract Validated<T, EResult> SelectErrors<EResult>(Func<ImmutableList<E>, EResult> map);
 
     /// <summary>
     /// Maps both the success and error values and returns either/or
@@ -135,7 +135,7 @@ public abstract partial record Validated<T, E> : IResult<T, Sequence<E>>
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    public abstract Validated<T, E> OrElse(Func<Sequence<E>, Validated<T, E>> other);
+    public abstract Validated<T, E> OrElse(Func<ImmutableList<E>, Validated<T, E>> other);
 
     /// <summary>
     /// If Okay, returns <paramref name="okay"/> applied to the wrapped value.
@@ -155,14 +155,14 @@ public abstract partial record Validated<T, E> : IResult<T, Sequence<E>>
     /// <param name="okay"></param>
     /// <param name="fail"></param>
     /// <returns></returns>
-    public abstract TResult Match<TResult>(Func<T, TResult> okay, Func<Sequence<E>, TResult> fail);
+    public abstract TResult Match<TResult>(Func<T, TResult> okay, Func<ImmutableList<E>, TResult> fail);
 
     /// <summary>
     /// Unwraps the <typeparamref name="T"/> value, or returns the result of <paramref name="fallback"/>.
     /// </summary>
     /// <param name="fallback"></param>
     /// <returns></returns>
-    public T IfFail(Func<Sequence<E>, T> fallback) => Match(Identity, fallback);
+    public T IfFail(Func<ImmutableList<E>, T> fallback) => Match(Identity, fallback);
 
     /// <summary>
     /// Unwraps the <typeparamref name="T"/> value, or returns <paramref name="fallback"/>.
@@ -280,5 +280,5 @@ public abstract partial record Validated<T, E> : IResult<T, Sequence<E>>
 
     public static implicit operator Validated<T, E>(Result<T, E> result) => Validated.From(result);
 
-    public static implicit operator Validated<T, E>(Result<T, Sequence<E>> result) => Validated.From(result);
+    public static implicit operator Validated<T, E>(Result<T, ImmutableList<E>> result) => Validated.From(result);
 }

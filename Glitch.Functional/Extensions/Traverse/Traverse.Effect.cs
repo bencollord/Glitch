@@ -1,6 +1,4 @@
-﻿using Glitch.Functional.Collections;
-using Glitch.Functional.Effects;
-using Glitch.Functional.Errors;
+﻿using Glitch.Functional.Effects;
 using System.Collections.Immutable;
 using System.Diagnostics;
 

@@ -1,4 +1,4 @@
-using Glitch.Functional.Collections;
+using System.Collections.Immutable;
 
 namespace Glitch.Functional.Validation;
 
@@ -26,7 +26,7 @@ public partial record Validated<T, E>
         public override Validated<T, EResult> SelectError<EResult>(Func<E, EResult> _) => new Validated<T, EResult>.Okay(Value);
 
         /// <inheritdoc />
-        public override Validated<T, EResult> SelectErrors<EResult>(Func<Sequence<E>, EResult> _) => new Validated<T, EResult>.Okay(Value);
+        public override Validated<T, EResult> SelectErrors<EResult>(Func<ImmutableList<E>, EResult> _) => new Validated<T, EResult>.Okay(Value);
 
         /// <inheritdoc />
         public override Validated<TResult, EResult> BiSelect<TResult, EResult>(Func<T, TResult> okay, Func<E, EResult> _)
@@ -37,14 +37,14 @@ public partial record Validated<T, E>
             function.Select(fn => fn(Value));
 
         /// <inheritdoc />
-        public override TResult Match<TResult>(Func<T, TResult> ifOkay, Func<Sequence<E>, TResult> _)
+        public override TResult Match<TResult>(Func<T, TResult> ifOkay, Func<ImmutableList<E>, TResult> _)
             => ifOkay(Value);
 
         /// <inheritdoc />
         public override Validated<T, E> Or(Validated<T, E> other) => this;
 
         /// <inheritdoc />
-        public override Validated<T, E> OrElse(Func<Sequence<E>, Validated<T, E>> _) => this;
+        public override Validated<T, E> OrElse(Func<ImmutableList<E>, Validated<T, E>> _) => this;
 
         /// <inheritdoc />
         public override Validated<T, E> Guard(Func<T, bool> predicate, E error)

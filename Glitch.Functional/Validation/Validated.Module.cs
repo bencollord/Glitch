@@ -1,4 +1,4 @@
-using Glitch.Functional.Collections;
+using System.Collections.Immutable;
 
 namespace Glitch.Functional.Validation;
 
@@ -14,11 +14,11 @@ public static partial class Validated
     
     public static Fail<E> Fail<E>(E error) => new(error);
 
-    public static Validated<T, E> Fail<T, E>(params IEnumerable<E> errors) => new Validated<T, E>.Fail(Sequence.From(errors));
+    public static Validated<T, E> Fail<T, E>(params IEnumerable<E> errors) => new Validated<T, E>.Fail(ImmutableList.CreateRange(errors));
 
-    public static Validated<T, E> From<T, E>(Result<T, E> result) => result.SelectError(Sequence.Singleton);
+    public static Validated<T, E> From<T, E>(Result<T, E> result) => result.SelectError(ImmutableList.Create);
 
-    public static Validated<T, E> From<T, E>(Result<T, Sequence<E>> result) => result.Match(Okay<T, E>, Fail<T, E>);
+    public static Validated<T, E> From<T, E>(Result<T, ImmutableList<E>> result) => result.Match(Okay<T, E>, Fail<T, E>);
 
     public static bool IsOkay<T, E>(Validated<T, E> result) => result.IsOkay;
 

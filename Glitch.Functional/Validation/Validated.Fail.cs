@@ -1,14 +1,12 @@
-using Glitch.Functional.Collections;
-using Glitch.Functional.Extensions;
-using System.Diagnostics;
+using System.Collections.Immutable;
 
 namespace Glitch.Functional.Validation;
 
 public partial record Validated<T, E>
 {
-    public sealed record Fail(Sequence<E> Errors) : Validated<T, E>
+    public sealed record Fail(ImmutableList<E> Errors) : Validated<T, E>
     {
-        public Fail(params IEnumerable<E> errors) : this(Sequence.From(errors)) { }
+        public Fail(params IEnumerable<E> errors) : this([.. errors]) { }
 
         public override bool IsOkay => false;
 
@@ -31,7 +29,7 @@ public partial record Validated<T, E>
         public override Validated<T, EResult> SelectError<EResult>(Func<E, EResult> map)
             => new Validated<T, EResult>.Fail(Errors.Select(map));
 
-        public override Validated<T, EResult> SelectErrors<EResult>(Func<Sequence<E>, EResult> map) =>
+        public override Validated<T, EResult> SelectErrors<EResult>(Func<ImmutableList<E>, EResult> map) =>
             new Validated<T, EResult>.Fail([map(Errors)]);
 
         /// <inheritdoc />
@@ -49,7 +47,7 @@ public partial record Validated<T, E>
                         fail: e => new Fail(Errors.Concat(e)));
 
         /// <inheritdoc />
-        public override Validated<T, E> OrElse(Func<Sequence<E>, Validated<T, E>> fail) => Or(fail(Errors));
+        public override Validated<T, E> OrElse(Func<ImmutableList<E>, Validated<T, E>> fail) => Or(fail(Errors));
 
         /// <inheritdoc />
         public override Validated<T, E> Guard(Func<T, bool> predicate, E _) => this;
@@ -58,7 +56,7 @@ public partial record Validated<T, E>
         public override Validated<T, E> Guard(Func<T, bool> predicate, Func<T, E> _) => this;
 
         /// <inheritdoc />
-        public override TResult Match<TResult>(Func<T, TResult> okay, Func<Sequence<E>, TResult> fail) => fail(Errors);
+        public override TResult Match<TResult>(Func<T, TResult> okay, Func<ImmutableList<E>, TResult> fail) => fail(Errors);
 
         /// <inheritdoc />
         public override Validated<TResult, E> Zip<TOther, TResult>(Validated<TOther, E> other, Func<T, TOther, TResult> _) =>
