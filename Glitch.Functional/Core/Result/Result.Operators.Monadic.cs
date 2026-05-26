@@ -155,7 +155,7 @@ public static partial class ResultExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Result<TResult, E> operator %(Result<T, E> x, Result<Func<T, TResult>, E> apply) => x.Apply(apply);
+        public static Result<TResult, E> operator *(Result<T, E> x, Result<Func<T, TResult>, E> apply) => x.Apply(apply);
 
         /// <summary>
         /// Applicative apply operator.
@@ -163,7 +163,7 @@ public static partial class ResultExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Result<TResult, E> operator %(Result<Func<T, TResult>, E> apply, Result<T, E> x) => x.Apply(apply);
+        public static Result<TResult, E> operator *(Result<Func<T, TResult>, E> apply, Result<T, E> x) => x.Apply(apply);
     }
 
     extension<T1, T2, E, TResult>(Result<T1, E> self)
@@ -174,7 +174,7 @@ public static partial class ResultExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Result<Func<T2, TResult>, E> operator %(Result<T1, E> x, Result<Func<T1, T2, TResult>, E> apply) => x.Apply(apply * Curry);
+        public static Result<Func<T2, TResult>, E> operator *(Result<T1, E> x, Result<Func<T1, T2, TResult>, E> apply) => x.Apply(apply * Curry);
 
         /// <summary>
         /// Curried Applicative apply operator.
@@ -182,7 +182,7 @@ public static partial class ResultExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Result<Func<T2, TResult>, E> operator %(Result<Func<T1, T2, TResult>, E> apply, Result<T1, E> x) => x.Apply(apply * Curry);
+        public static Result<Func<T2, TResult>, E> operator *(Result<Func<T1, T2, TResult>, E> apply, Result<T1, E> x) => x.Apply(apply * Curry);
     }
 
     extension<T1, T2, T3, E, TResult>(Result<T1, E> self)
@@ -193,7 +193,7 @@ public static partial class ResultExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Result<Func<T2, Func<T3, TResult>>, E> operator %(Result<T1, E> x, Result<Func<T1, T2, T3, TResult>, E> apply) => x.Apply(apply * Curry);
+        public static Result<Func<T2, Func<T3, TResult>>, E> operator *(Result<T1, E> x, Result<Func<T1, T2, T3, TResult>, E> apply) => x.Apply(apply * Curry);
 
         /// <summary>
         /// Curried Applicative apply operator.
@@ -201,7 +201,7 @@ public static partial class ResultExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Result<Func<T2, Func<T3, TResult>>, E> operator %(Result<Func<T1, T2, T3, TResult>, E> apply, Result<T1, E> x) => x.Apply(apply * Curry);
+        public static Result<Func<T2, Func<T3, TResult>>, E> operator *(Result<Func<T1, T2, T3, TResult>, E> apply, Result<T1, E> x) => x.Apply(apply * Curry);
     }
 
     extension<T1, T2, T3, T4, E, TResult>(Result<T1, E> self)
@@ -212,7 +212,7 @@ public static partial class ResultExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Result<Func<T2, Func<T3, Func<T4, TResult>>>, E> operator %(Result<T1, E> x, Result<Func<T1, T2, T3, T4, TResult>, E> apply) => x.Apply(apply * Curry);
+        public static Result<Func<T2, Func<T3, Func<T4, TResult>>>, E> operator *(Result<T1, E> x, Result<Func<T1, T2, T3, T4, TResult>, E> apply) => x.Apply(apply * Curry);
 
         /// <summary>
         /// Curried Applicative apply operator.
@@ -220,7 +220,7 @@ public static partial class ResultExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Result<Func<T2, Func<T3, Func<T4, TResult>>>, E> operator %(Result<Func<T1, T2, T3, T4, TResult>, E> apply, Result<T1, E> x) => x.Apply(apply * Curry);
+        public static Result<Func<T2, Func<T3, Func<T4, TResult>>>, E> operator *(Result<Func<T1, T2, T3, T4, TResult>, E> apply, Result<T1, E> x) => x.Apply(apply * Curry);
     }
 
     extension<T1, T2, T3, T4, T5, E, TResult>(Result<T1, E> self)
@@ -231,7 +231,7 @@ public static partial class ResultExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Result<Func<T2, Func<T3, Func<T4, Func<T5, TResult>>>>, E> operator %(Result<T1, E> x, Result<Func<T1, T2, T3, T4, T5, TResult>, E> apply) => x.Apply(apply * Curry);
+        public static Result<Func<T2, Func<T3, Func<T4, Func<T5, TResult>>>>, E> operator *(Result<T1, E> x, Result<Func<T1, T2, T3, T4, T5, TResult>, E> apply) => x.Apply(apply * Curry);
 
         /// <summary>
         /// Curried Applicative apply operator.
@@ -239,6 +239,6 @@ public static partial class ResultExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Result<Func<T2, Func<T3, Func<T4, Func<T5, TResult>>>>, E> operator %(Result<Func<T1, T2, T3, T4, T5, TResult>, E> apply, Result<T1, E> x) => x.Apply(apply * Curry);
+        public static Result<Func<T2, Func<T3, Func<T4, Func<T5, TResult>>>>, E> operator *(Result<Func<T1, T2, T3, T4, T5, TResult>, E> apply, Result<T1, E> x) => x.Apply(apply * Curry);
     }
 }

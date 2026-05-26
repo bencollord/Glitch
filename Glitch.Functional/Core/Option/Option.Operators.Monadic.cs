@@ -134,7 +134,7 @@ public static partial class OptionExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Option<TResult> operator %(Option<T> x, Option<Func<T, TResult>> apply) => x.Apply(apply);
+        public static Option<TResult> operator *(Option<T> x, Option<Func<T, TResult>> apply) => x.Apply(apply);
 
         /// <summary>
         /// Applicative apply operator.
@@ -142,7 +142,7 @@ public static partial class OptionExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Option<TResult> operator %(Option<Func<T, TResult>> apply, Option<T> x) => x.Apply(apply);
+        public static Option<TResult> operator *(Option<Func<T, TResult>> apply, Option<T> x) => x.Apply(apply);
     }
 
     extension<T1, T2, TResult>(Option<T1> self)
@@ -153,7 +153,7 @@ public static partial class OptionExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Option<Func<T2, TResult>> operator %(Option<T1> x, Option<Func<T1, T2, TResult>> apply) => x.Apply(apply * Curry);
+        public static Option<Func<T2, TResult>> operator *(Option<T1> x, Option<Func<T1, T2, TResult>> apply) => x.Apply(apply * Curry);
 
         /// <summary>
         /// Curried Applicative apply operator.
@@ -161,7 +161,7 @@ public static partial class OptionExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Option<Func<T2, TResult>> operator %(Option<Func<T1, T2, TResult>> apply, Option<T1> x) => x.Apply(apply * Curry);
+        public static Option<Func<T2, TResult>> operator *(Option<Func<T1, T2, TResult>> apply, Option<T1> x) => x.Apply(apply * Curry);
     }
 
     extension<T1, T2, T3, TResult>(Option<T1> self)
@@ -172,7 +172,7 @@ public static partial class OptionExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Option<Func<T2, Func<T3, TResult>>> operator %(Option<T1> x, Option<Func<T1, T2, T3, TResult>> apply) => x.Apply(apply * Curry);
+        public static Option<Func<T2, Func<T3, TResult>>> operator *(Option<T1> x, Option<Func<T1, T2, T3, TResult>> apply) => x.Apply(apply * Curry);
 
         /// <summary>
         /// Curried Applicative apply operator.
@@ -180,7 +180,7 @@ public static partial class OptionExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Option<Func<T2, Func<T3, TResult>>> operator %(Option<Func<T1, T2, T3, TResult>> apply, Option<T1> x) => x.Apply(apply * Curry);
+        public static Option<Func<T2, Func<T3, TResult>>> operator *(Option<Func<T1, T2, T3, TResult>> apply, Option<T1> x) => x.Apply(apply * Curry);
     }
 
     extension<T1, T2, T3, T4, TResult>(Option<T1> self)
@@ -191,7 +191,7 @@ public static partial class OptionExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Option<Func<T2, Func<T3, Func<T4, TResult>>>> operator %(Option<T1> x, Option<Func<T1, T2, T3, T4, TResult>> apply) => x.Apply(apply * Curry);
+        public static Option<Func<T2, Func<T3, Func<T4, TResult>>>> operator *(Option<T1> x, Option<Func<T1, T2, T3, T4, TResult>> apply) => x.Apply(apply * Curry);
 
         /// <summary>
         /// Curried Applicative apply operator.
@@ -199,7 +199,7 @@ public static partial class OptionExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Option<Func<T2, Func<T3, Func<T4, TResult>>>> operator %(Option<Func<T1, T2, T3, T4, TResult>> apply, Option<T1> x) => x.Apply(apply * Curry);
+        public static Option<Func<T2, Func<T3, Func<T4, TResult>>>> operator *(Option<Func<T1, T2, T3, T4, TResult>> apply, Option<T1> x) => x.Apply(apply * Curry);
     }
 
     extension<T1, T2, T3, T4, T5, TResult>(Option<T1> self)
@@ -210,7 +210,7 @@ public static partial class OptionExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Option<Func<T2, Func<T3, Func<T4, Func<T5, TResult>>>>> operator %(Option<T1> x, Option<Func<T1, T2, T3, T4, T5, TResult>> apply) => x.Apply(apply * Curry);
+        public static Option<Func<T2, Func<T3, Func<T4, Func<T5, TResult>>>>> operator *(Option<T1> x, Option<Func<T1, T2, T3, T4, T5, TResult>> apply) => x.Apply(apply * Curry);
 
         /// <summary>
         /// Curried Applicative apply operator.
@@ -218,6 +218,6 @@ public static partial class OptionExtensions
         /// <param name="x"></param>
         /// <param name="apply"></param>
         /// <returns></returns>
-        public static Option<Func<T2, Func<T3, Func<T4, Func<T5, TResult>>>>> operator %(Option<Func<T1, T2, T3, T4, T5, TResult>> apply, Option<T1> x) => x.Apply(apply * Curry);
+        public static Option<Func<T2, Func<T3, Func<T4, Func<T5, TResult>>>>> operator *(Option<Func<T1, T2, T3, T4, T5, TResult>> apply, Option<T1> x) => x.Apply(apply * Curry);
     }
 }

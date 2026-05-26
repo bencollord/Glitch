@@ -65,8 +65,8 @@ public static partial class EffectExtensions
         public static Effect<TEnv, TResult> operator *(Func<T, TResult> map, Effect<TEnv, T> x) => x.Select(map);
 
         // Apply
-        public static Effect<TEnv, TResult> operator %(Effect<TEnv, T> x, Effect<TEnv, Func<T, TResult>> apply) => x.Apply(apply);
-        public static Effect<TEnv, TResult> operator %(Effect<TEnv, Func<T, TResult>> apply, Effect<TEnv, T> x) => x.Apply(apply);
+        public static Effect<TEnv, TResult> operator *(Effect<TEnv, T> x, Effect<TEnv, Func<T, TResult>> apply) => x.Apply(apply);
+        public static Effect<TEnv, TResult> operator *(Effect<TEnv, Func<T, TResult>> apply, Effect<TEnv, T> x) => x.Apply(apply);
 
         // Bind
         public static Effect<TEnv, TResult> operator >>>(Effect<TEnv, T> x, Func<T, Effect<TEnv, TResult>> bind) => x.AndThen(bind);

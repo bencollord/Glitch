@@ -32,8 +32,8 @@ public static partial class IOExtensions
         public static IO<TResult> operator *(Func<T, TResult> map, IO<T> x) => x.Select(map);
 
         // Apply
-        public static IO<TResult> operator %(IO<T> x, IO<Func<T, TResult>> apply) => x.Apply(apply);
-        public static IO<TResult> operator %(IO<Func<T, TResult>> apply, IO<T> x) => x.Apply(apply);
+        public static IO<TResult> operator *(IO<T> x, IO<Func<T, TResult>> apply) => x.Apply(apply);
+        public static IO<TResult> operator *(IO<Func<T, TResult>> apply, IO<T> x) => x.Apply(apply);
 
         // Bind
         public static IO<TResult> operator >>>(IO<T> x, Func<T, IO<TResult>> bind) => x.AndThen(bind);

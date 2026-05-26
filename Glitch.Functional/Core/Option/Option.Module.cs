@@ -31,8 +31,8 @@ public static partial class Option
     public static Option<TResult> Map<T, TResult>(T? value, Func<T, TResult> map) where T : struct => Maybe(value).Select(map);
 
     public static Option<TResult> Apply<T, TResult>(Option<Func<T, TResult>> func, Option<T> value) => func.AndThen(fn => value * fn);
-    public static Option<TResult> Apply<T, TResult>(Option<Func<T, TResult>> func, T? value) => func % Maybe(value);
-    public static Option<TResult> Apply<T, TResult>(Option<Func<T, TResult>> func, T? value) where T : struct => func % Maybe(value);
+    public static Option<TResult> Apply<T, TResult>(Option<Func<T, TResult>> func, T? value) => func * Maybe(value);
+    public static Option<TResult> Apply<T, TResult>(Option<Func<T, TResult>> func, T? value) where T : struct => func * Maybe(value);
 
     public static Option<TResult> Bind<T, TResult>(Option<T> value, Func<T, Option<TResult>> bind) => value.AndThen(bind);
     public static Option<TResult> Bind<T, TResult>(T? value, Func<T, Option<TResult>> bind) where T : struct => Maybe(value).AndThen(bind);
