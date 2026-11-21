@@ -10,7 +10,6 @@ using static FN;
 /// </summary>
 /// <typeparam name="T"></typeparam>
 /// <typeparam name="E"></typeparam>
-[Monad]
 public abstract partial record Validated<T, E> : IResult<T, ImmutableList<E>>
 {
     private protected Validated() { }

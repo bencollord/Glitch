@@ -3,7 +3,6 @@ using Glitch.Functional.Errors;
 
 namespace Glitch.Functional.Effects;
 
-[Monad]
 public interface IEffect<TInput, TOutput>
 {
     IEffect<TInput, TResult> Select<TResult>(Func<TOutput, TResult> map);

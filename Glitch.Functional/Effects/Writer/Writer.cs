@@ -1,6 +1,5 @@
 namespace Glitch.Functional.Effects;
 
-[Monad]
 public class Writer<W, T>
     where W : IWritable<W>
 {

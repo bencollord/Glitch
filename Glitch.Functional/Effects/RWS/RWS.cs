@@ -1,6 +1,5 @@
 namespace Glitch.Functional.Effects;
 
-[Monad]
 public partial class RWS<TEnv, S, W, T>
     where W : IWritable<W>
 {

@@ -1,6 +1,5 @@
 namespace Glitch.Functional.Effects;
 
-[Monad]
 public delegate T Reader<in TEnv, out T>(TEnv env) ;
 
 public static partial class ReaderExtensions

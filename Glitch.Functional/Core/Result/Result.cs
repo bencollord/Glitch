@@ -1,6 +1,5 @@
 namespace Glitch.Functional;
 
-[Monad]
 public abstract partial record Result<T, E> : IResult<T, E>, IMaybe<T>
 {
     private protected Result() { }

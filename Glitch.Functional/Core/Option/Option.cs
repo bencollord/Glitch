@@ -9,7 +9,6 @@ namespace Glitch.Functional;
 /// where the failure case is <see cref="Option.None"/>.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-[Monad]
 public readonly partial struct Option<T>
     : IEquatable<Option<T>>,
       IComparable<Option<T>>,

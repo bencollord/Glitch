@@ -2,7 +2,6 @@ using Glitch.Functional.Errors;
 
 namespace Glitch.Functional.Effects;
 
-[Monad]
 public partial class Effect<T>
 {
     private Effect<Unit, T> inner;

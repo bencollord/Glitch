@@ -11,7 +11,6 @@ namespace Glitch.Functional.Effects;
 /// </summary>
 /// <typeparam name="TEnv"></typeparam>
 /// <typeparam name="T"></typeparam>
-[Monad]
 public partial class Effect<TEnv, T>
 {
     private Func<TEnv, Result<T, Error>> thunk;
