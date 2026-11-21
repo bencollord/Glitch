@@ -8,7 +8,7 @@ namespace Glitch.Functional;
 /// </summary>
 public static partial class Option
 {
-    public static OptionNone None => OptionNone.Value;
+    public static Nothing None => Nothing.Value;
 
     public static Option<T> Some<T>(T value) => Option<T>.Some(value);
 

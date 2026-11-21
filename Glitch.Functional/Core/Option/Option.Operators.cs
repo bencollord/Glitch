@@ -6,7 +6,7 @@ public readonly partial struct Option<T>
 {
     public static implicit operator Option<T>(T? value) => Maybe(value);
 
-    public static implicit operator Option<T>(OptionNone _) => new();
+    public static implicit operator Option<T>(Nothing _) => new();
 
     public static explicit operator T(Option<T> option) => option.OkayOr(Error.InvalidCast<T>(option)).IfFail(err => err.Throw<T>());
 
