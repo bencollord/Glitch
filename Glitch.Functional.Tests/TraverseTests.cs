@@ -1,6 +1,4 @@
 using Glitch.Functional;
-using Glitch.Functional.Collections;
-using Glitch.Functional.Errors;
 using Glitch.Functional.Extensions.Traverse;
 
 namespace Glitch.Test.Functional;
@@ -11,17 +9,17 @@ public class TraverseTests
     public void Expected_IfOneFails_AllFail()
     {
         // Arrange
-        var successfulResults = Sequence.Range(1, 10).Select(Expected.Okay).ToList();
+        var successfulResults = Enumerable.Range(1, 10).Select(Result.Okay<int, string>).ToList();
 
-        var failedResult = Expected.Fail<int>("Bad result");
+        var failedResult = Result.Fail<int, string>("Bad result");
 
         // Act
         successfulResults.Add(failedResult);
 
-        Expected<Sequence<int>> result = successfulResults.Traverse();
+        Result<IEnumerable<int>, string> result = successfulResults.Traverse();
 
         // Assert
         Assert.True(result.IsFail);
-        Assert.Equal("Bad result", result.UnwrapError().Message);
+        Assert.Equal("Bad result", result.UnwrapError());
     }
 }

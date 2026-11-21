@@ -4,15 +4,15 @@ using Glitch.Functional.Errors;
 
 namespace Glitch.Test.Functional;
 
-using static Expected;
+using static Result;
 
-public class ExpectedTests
+public class ResultTests
 {
     [Fact]
     public void Unwrap_Failed_ShouldThrowContainedException()
     {
         // Arrange
-        Expected<int> item = Fail(new KeyNotFoundException("The key wasn't found"));
+        Result<int, KeyNotFoundException> item = Fail(new KeyNotFoundException("The key wasn't found"));
 
         // Act/Assert
         item.Invoking(ex => ex.Unwrap())
@@ -24,8 +24,8 @@ public class ExpectedTests
     public void ZipWith_BothResultsOkay_ShouldApplyFunction()
     {
         // Arrange
-        var left  = Okay(10);
-        var right = Okay(20);
+        Result<int, string> left  = Okay(10);
+        Result<int, string> right = Okay(20);
 
         // Act
         var result = left.Zip(right, (x, y) => x + y);
@@ -39,9 +39,9 @@ public class ExpectedTests
     public void ZipWith_OneResultFailed_ShouldReturnErroredResult()
     {
         // Arrange
-        var okay = Okay(10);
-        var leftError = Fail<int>("Left failed");
-        var rightError = Fail<int>("Right failed");
+        Result<int, string> okay = Okay(10);
+        Result<int, string> leftError = Fail("Left failed");
+        Result<int, string> rightError = Fail("Right failed");
 
         // Act
         var leftResult = leftError.Zip(okay, (x, y) => x + y);
@@ -50,7 +50,7 @@ public class ExpectedTests
         // Assert
         Assert.False(leftResult.IsOkay);
         Assert.False(rightResult.IsOkay);
-        Assert.Equal("Left failed", leftResult.UnwrapError().Message);
-        Assert.Equal("Right failed", rightResult.UnwrapError().Message);
+        Assert.Equal("Left failed", leftResult.UnwrapError());
+        Assert.Equal("Right failed", rightResult.UnwrapError());
     }
 }

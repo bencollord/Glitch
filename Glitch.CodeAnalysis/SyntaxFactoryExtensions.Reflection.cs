@@ -1,5 +1,4 @@
 using Glitch.CodeAnalysis.Builders;
-using Glitch.Functional.Collections;
 using Glitch.Functional.Extensions;
 using Glitch.Reflection;
 using Microsoft.CodeAnalysis;
@@ -118,7 +117,7 @@ public static partial class SyntaxFactoryExtensions
             var setAccessor = setMethod.Select(_ => SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration))
                                        .Select(s => setterModifiers.Select(m => s.WithModifiers(m)).IfNone(s));
 
-            var accessors = Sequence.Of(getAccessor, setAccessor)
+            var accessors = Enumerable.Of(getAccessor, setAccessor)
                 .Somes()
                 .Select(a => a.WithSemicolonToken(
                     SyntaxFactory.Token(SyntaxKind.SemicolonToken)

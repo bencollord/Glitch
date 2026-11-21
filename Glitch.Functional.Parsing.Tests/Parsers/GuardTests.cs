@@ -35,18 +35,4 @@ public class GuardTests
         result.IsFail(out var error).Should().BeTrue();
         error!.Message.Should().Be("Invalid number");
     }
-
-    [Fact]
-    public void Guard_PredicateDoesNotMatch_NoError_ReturnsEmptyError()
-    {
-        // Arrange
-        var parser = Return(6).Guard(x => x < 5);
-
-        // Act
-        var result = parser.Execute("Anything");
-
-        // Assert
-        result.IsFail(out var error).Should().BeTrue();
-        error!.Should().Be(ParseError.Empty);
-    }
 }

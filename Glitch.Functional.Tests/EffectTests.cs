@@ -158,7 +158,6 @@ public class EffectTests
         var okayItem       = Effect.Return(10);
         var mapFunc        = (int _) => Throw<int>();
         var bindFunc       = (int _) => Throw<Effect<int>>();
-        var bindResultFunc = (int _) => Throw<Expected<int>>();
         var bindProjectionFunc = (int _, int _) => Throw<int>();
         var mapErrFunc     = (Error _) => Throw<Error>();
         var bindErrFunc    = (Error _) => Throw<Effect<int>>();
@@ -169,8 +168,6 @@ public class EffectTests
         Effect<int> map        = okayItem.Select(mapFunc);
         Effect<int> andThen    = okayItem.AndThen(bindFunc);
         Effect<int> andThen2   = okayItem.AndThen(bindFunc, bindProjectionFunc);
-        Effect<int> andThenResult  = okayItem.AndThen(bindResultFunc);
-        Effect<int> andThenResult2 = okayItem.AndThen(bindResultFunc, bindProjectionFunc);
         Effect<int> andThenBiBind  = okayItem.Choose(bindFunc, bindErrFunc);
         Effect<int> filter     = okayItem.Where(filterFunc);
         Effect<int> zipWith    = okayItem.Zip(Effect.Return(1), bindProjectionFunc);
@@ -186,8 +183,6 @@ public class EffectTests
             [nameof(mapError)]   = mapError,
             [nameof(andThen)]    = andThen,
             [nameof(andThen2)]   = andThen2,
-            [nameof(andThenResult)]  = andThenResult,
-            [nameof(andThenResult2)] = andThenResult2,
             [nameof(andThenBiBind)]  = andThenBiBind,
             [nameof(orElse)]     = orElse,
             [nameof(filter)]     = filter,
@@ -222,7 +217,6 @@ public class EffectTests
         // The delegates are curried so we can pass the name of the case in to know which one failed.
         var mapFunc        = (string caseName) => (int _) => MarkCaseRun(caseName, resultValue);
         var bindFunc       = (string caseName) => (int _) => MarkCaseRun(caseName, Effect.Return(resultValue));
-        var bindResultFunc = (string caseName) => (int _) => MarkCaseRun(caseName, Expected.Okay(resultValue));
         var bindProjectionFunc = (string caseName) => (int _, int _) => MarkCaseRun(caseName, resultValue);
         var mapErrFunc     = (string caseName) => (Error _) => MarkCaseRun(caseName, errorValue);
         var mapErrToResultFunc = (string caseName) => (Error _) => MarkCaseRun(caseName, resultValue);
@@ -234,8 +228,6 @@ public class EffectTests
         Effect<int> map        = okayItem.Select(mapFunc(nameof(map)));
         Effect<int> andThen    = okayItem.AndThen(bindFunc(nameof(andThen)));
         Effect<int> andThen2   = okayItem.AndThen(bindFunc(nameof(andThen2)), bindProjectionFunc(nameof(andThen2)));
-        Effect<int> andThenResult  = okayItem.AndThen(bindResultFunc(nameof(andThenResult)));
-        Effect<int> andThenResult2 = okayItem.AndThen(bindResultFunc(nameof(andThenResult2)), bindProjectionFunc(nameof(andThenResult2)));
         Effect<int> filter     = okayItem.Where(filterFunc(nameof(filter)));
         Effect<int> zipWith    = okayItem.Zip(Effect.Return(1), bindProjectionFunc(nameof(zipWith)));
 
@@ -254,8 +246,6 @@ public class EffectTests
             [nameof(mapError)]       = mapError,
             [nameof(andThen)]        = andThen,
             [nameof(andThen2)]       = andThen2,
-            [nameof(andThenResult)]  = andThenResult,
-            [nameof(andThenResult2)] = andThenResult2,
             [nameof(andThenBiBindOkay)]  = andThenBiBindOkay,
             [nameof(andThenBiBindFail)]  = andThenBiBindFail,
             [nameof(orElse)]         = orElse,

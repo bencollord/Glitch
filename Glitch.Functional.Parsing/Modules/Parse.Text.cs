@@ -63,5 +63,9 @@ public partial class Parse
                    .WithExpected(text);
     }
 
-    public static IParser<char, T> Lexeme<T>(IParser<char, T> parser) => NonBreakingSpace.SkipAll() >> parser >> NonBreakingSpace.SkipAll();
+    public static IParser<char, T> Lexeme<T>(IParser<char, T> parser) => 
+        from _1 in NonBreakingSpace.ZeroOrMoreTimes()
+        from x in parser
+        from _2 in NonBreakingSpace.ZeroOrMoreTimes()
+        select x;
 }
