@@ -1,10 +1,25 @@
-using Glitch.Functional.Validation;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Functional;
 
-public readonly record struct Just<T>([NotNull] T Value)
+public readonly record struct Just<T>
 {
+    private readonly bool isInitialized = false;
+
+    public Just(T value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        Value = value;
+        isInitialized = true;
+    }
+
+    [NotNull]
+    public readonly T Value
+    {
+        get => isInitialized ? field! : throw new InvalidOperationException("Do not use Just<T> uninitialized");
+        init => field = value ?? throw new ArgumentNullException(nameof(value));
+    }
+
     public Option<T> OrNone() => Option.Some(Value);
 
     // Linq
@@ -20,6 +35,11 @@ public readonly record struct Just<T>([NotNull] T Value)
        => bind(Value).Select(project.Curry(Value));
     public Option<TResult> SelectMany<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project)
        => bind(Value).Select(project.Curry(Value));
+
+    public void Deconstruct(out T value)
+    {
+        value = Value;
+    }
 
     public override string ToString() => $"Just({Value})";
 

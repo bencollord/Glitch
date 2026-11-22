@@ -14,10 +14,10 @@ public readonly union Option<T>(Just<T>, Nothing)
       IComparable<Option<T>>,
       IMaybe<T>
 {
-    public static readonly Option<T> None = new();
+    public static readonly Option<T> None = new Nothing();
 
     public static Option<T> Some(T value)
-        => value is not null ? new Option<T>(value) : throw new ArgumentNullException(nameof(value));
+        => value is not null ? new Just<T>(value) : throw new ArgumentNullException(nameof(value));
 
     public static Option<T> Maybe(T? value) => value != null ? Some(value) : None;
 
@@ -65,7 +65,7 @@ public readonly union Option<T>(Just<T>, Nothing)
     /// <param name="other"></param>
     /// <returns></returns>
     public Option<TResult> And<TResult>(Option<TResult> other)
-        => IsSome ? other : new Option<TResult>();
+        => IsSome ? other : new Nothing();
 
     /// <summary>
     /// If some, applies the function to the wrapped value. Otherwise, returns
@@ -114,20 +114,15 @@ public readonly union Option<T>(Just<T>, Nothing)
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    public Option<T> Xor(Option<T> other)
-    {
-        if (IsSome && other.IsNone)
+    public Option<T> Xor(Option<T> other) =>
+        (this, other) switch
         {
-            return this;
-        }
-
-        if (IsNone && other.IsSome)
-        {
-            return other;
-        }
-
-        return new Option<T>();
-    }
+            (Just<T> x, Nothing) => x,
+            (Nothing, Just<T> y) => y,
+            (Just<T>, Just<T>) => None,
+            (Nothing, Nothing) => None,
+        };
+    
 
     /// <summary>
     /// Returns the current <see cref="Option{T}"/> if it contains a value.
