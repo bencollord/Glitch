@@ -1,12 +1,10 @@
 namespace Glitch.Functional;
 
-public abstract partial record Result<T, E> : IResult<T, E>, IMaybe<T>
+public readonly union Result<T, E>(Okay<T>, Fail<E>) : IResult<T, E>, IMaybe<T>
 {
-    private protected Result() { }
+    public readonly bool IsOkay => this is Okay<T>;
 
-    public abstract bool IsOkay { get; }
-
-    public abstract bool IsFail { get; }
+    public readonly bool IsFail => this is Fail<E>;
 
     bool IMaybe.HasValue => IsOkay;
 
@@ -19,7 +17,12 @@ public abstract partial record Result<T, E> : IResult<T, E>, IMaybe<T>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="map"></param>
     /// <returns></returns>
-    public abstract Result<TResult, E> Select<TResult>(Func<T, TResult> map);
+    public Result<TResult, E> Select<TResult>(Func<T, TResult> map) =>
+        this switch
+        {
+            Okay<T>(var val) => map(val),
+            Fail<E> err => err
+        };
 
     /// <summary>
     /// If the result is a failure, returns a new result with the mapping function
@@ -27,7 +30,12 @@ public abstract partial record Result<T, E> : IResult<T, E>, IMaybe<T>
     /// </summary>
     /// <param name="map"></param>
     /// <returns></returns>
-    public abstract Result<T, EResult> SelectError<EResult>(Func<E, EResult> map);
+    public Result<T, EResult> SelectError<EResult>(Func<E, EResult> map) =>
+        this switch
+        {
+            Okay<T> ok => ok,
+            Fail<E>(var err) => map(err)
+        };
 
     /// <summary>
     /// Bifunctor map operation. 
@@ -39,7 +47,12 @@ public abstract partial record Result<T, E> : IResult<T, E>, IMaybe<T>
     /// <param name="okay"></param>
     /// <param name="fail"></param>
     /// <returns></returns>
-    public abstract Result<TResult, EResult> BiSelect<TResult, EResult>(Func<T, TResult> okay, Func<E, EResult> fail);
+    public Result<TResult, EResult> BiSelect<TResult, EResult>(Func<T, TResult> okay, Func<E, EResult> fail) =>
+        this switch
+        {
+            Okay<T>(var val) => okay(val),
+            Fail<E>(var err) => fail(err)
+        };
 
     /// <summary>
     /// Applies a wrapped function to the wrapped value if both exist.
@@ -59,10 +72,12 @@ public abstract partial record Result<T, E> : IResult<T, E>, IMaybe<T>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="other"></param>
     /// <returns></returns>
-    public abstract Result<TResult, E> And<TResult>(Result<TResult, E> other);
-
-    public Result<TResult, E> And<TResult>(Okay<TResult> other)
-        => And(Result.Okay<TResult, E>(other.Value));
+    public Result<TResult, E> And<TResult>(Result<TResult, E> other) =>
+        this switch
+        {
+            Okay<T> => other,
+            Fail<E> err => err
+        };
 
     /// <summary>
     /// If Okay, applies the function to the wrapped value. Otherwise, returns
@@ -71,7 +86,12 @@ public abstract partial record Result<T, E> : IResult<T, E>, IMaybe<T>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="bind"></param>
     /// <returns></returns>
-    public abstract Result<TResult, E> AndThen<TResult>(Func<T, Result<TResult, E>> bind);
+    public Result<TResult, E> AndThen<TResult>(Func<T, Result<TResult, E>> bind) =>
+        this switch
+        {
+            Okay<T>(var val) => bind(val),
+            Fail<E> err => err
+        };
 
     /// <summary>
     /// BindMap operation, similar to the two arg overload of SelectMany.
@@ -84,12 +104,20 @@ public abstract partial record Result<T, E> : IResult<T, E>, IMaybe<T>
     public Result<TResult, E> AndThen<TElement, TResult>(Func<T, Result<TElement, E>> bind, Func<T, TElement, TResult> project)
         => AndThen(x => bind(x).Select(y => project(x, y)));
 
+    public Result<TResult, E> SelectMany<TElement, TResult>(Func<T, Result<TElement, E>> bind, Func<T, TElement, TResult> project) => AndThen(bind, project);
+    public Result<TResult, E> SelectMany<TElement, TResult>(Func<T, Okay<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => Result.Okay<TElement, E>(bind(x).Value), project);
+
     /// <summary>
     /// Returns the current result if Ok, otherwise returns the other result.
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    public abstract Result<T, EResult> Or<EResult>(Result<T, EResult> other);
+    public Result<T, EResult> Or<EResult>(Result<T, EResult> other) =>
+        this switch
+        {
+            Okay<T> ok => ok,
+            Fail<E> => other
+        };
 
     /// <summary>
     /// Returns the current result if Ok, otherwise applies the provided
@@ -97,7 +125,12 @@ public abstract partial record Result<T, E> : IResult<T, E>, IMaybe<T>
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    public abstract Result<T, EResult> OrElse<EResult>(Func<E, Result<T, EResult>> other);
+    public Result<T, EResult> OrElse<EResult>(Func<E, Result<T, EResult>> other) =>
+        this switch
+        {
+            Okay<T> ok => ok,
+            Fail<E>(var err) => other(err)
+        };
 
     public TResult Match<TResult>(Func<T, TResult> okay, TResult fail) => Match(okay, _ => fail);
 
@@ -109,7 +142,12 @@ public abstract partial record Result<T, E> : IResult<T, E>, IMaybe<T>
     /// <param name="okay"></param>
     /// <param name="fail"></param>
     /// <returns></returns>
-    public abstract TResult Match<TResult>(Func<T, TResult> okay, Func<E, TResult> fail);
+    public TResult Match<TResult>(Func<T, TResult> okay, Func<E, TResult> fail) =>
+        this switch
+        {
+            Okay<T>(var val) => okay(val),
+            Fail<E>(var err) => fail(err)
+        };
 
     /// <summary>
     /// If Okay, casts the wrapped value to <typeparamref name="TResult"/>,
@@ -171,15 +209,23 @@ public abstract partial record Result<T, E> : IResult<T, E>, IMaybe<T>
     /// </summary>
     /// <param name="predicate"></param>
     /// <returns></returns>
-    public abstract Result<T, E> Guard(Func<T, bool> predicate, E error);
+    public Result<T, E> Guard(Func<T, bool> predicate, E error) =>
+        this switch
+        {
+            Okay<T>(var val) when !predicate(val) => error,
+            _ => this
+        };
 
-    public abstract Result<T, E> Guard(Func<T, bool> predicate, Func<T, E> error);
+    public Result<T, E> Guard(Func<T, bool> predicate, Func<T, E> error) =>
+        this switch
+        {
+            Okay<T>(var val) when !predicate(val) => error(val),
+            _ => this
+        };
 
-    public Result<T, E> Guard(bool condition, E error)
-        => Guard(_ => condition, error);
+    public Result<T, E> Guard(bool condition, E error) => Guard(_ => condition, error);
 
-    public Result<T, E> Guard(bool condition, Func<T, E> error)
-        => Guard(_ => condition, error);
+    public Result<T, E> Guard(bool condition, Func<T, E> error) => Guard(_ => condition, error);
 
     /// <summary>
     /// Combines another result into a result of a tuple.
@@ -187,8 +233,7 @@ public abstract partial record Result<T, E> : IResult<T, E>, IMaybe<T>
     /// <typeparam name="TOther"></typeparam>
     /// <param name="other"></param>
     /// <returns></returns>
-    public Result<(T, TOther), E> Zip<TOther>(Result<TOther, E> other)
-        => Zip(other, (x, y) => (x, y));
+    public Result<(T, TOther), E> Zip<TOther>(Result<TOther, E> other) => Zip(other, (x, y) => (x, y));
 
     /// <summary>
     /// Combines two results using a provided function if both are okay.
@@ -200,10 +245,28 @@ public abstract partial record Result<T, E> : IResult<T, E>, IMaybe<T>
     /// <param name="other"></param>
     /// <param name="zipper"></param>
     /// <returns></returns>
-    public Result<TResult, E> Zip<TOther, TResult>(Result<TOther, E> other, Func<T, TOther, TResult> zipper)
-        => AndThen(_ => other, zipper);
+    public Result<TResult, E> Zip<TOther, TResult>(Result<TOther, E> other, Func<T, TOther, TResult> zipper) => AndThen(_ => other, zipper);
 
-    public abstract override string ToString();
+    public override string ToString() =>
+        this switch
+        {
+            Okay<T>(var val) => $"Okay({val})",
+            Fail<E>(var err) => $"Fail({err})",
+        };
 
     TResult IMaybe<T>.Match<TResult>(Func<T, TResult> some, Func<TResult> none) => Match(some, _ => none());
+
+    public static bool operator true(Result<T, E> result) => result.IsOkay;
+
+    public static bool operator false(Result<T, E> result) => result.IsFail;
+
+    public static implicit operator Result<T, E>(T value) => new Okay<T>(value);
+
+    public static implicit operator Result<T, E>(E error) => new Fail<E>(error);
+
+    public static explicit operator T(Result<T, E> result)
+        => result.Match(Identity, e => throw new InvalidCastException(ErrorMessages.InvalidCast<T>(e)));
+
+    public static explicit operator E(Result<T, E> result)
+        => result.Match(v => throw new InvalidCastException(ErrorMessages.InvalidCast<E>(result)), Identity);
 }

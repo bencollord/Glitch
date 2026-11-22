@@ -1,5 +1,4 @@
 using Glitch.Functional.Errors;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Functional;
@@ -10,7 +9,7 @@ namespace Glitch.Functional;
 /// where the failure case is <see cref="Option.None"/>.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public union Option<T>(Just<T>, Nothing)
+public readonly union Option<T>(Just<T>, Nothing)
     : IEquatable<Option<T>>,
       IComparable<Option<T>>,
       IMaybe<T>
@@ -365,7 +364,7 @@ public union Option<T>(Just<T>, Nothing)
         => obj is Option<T> other && Equals(other);
 
     public override int GetHashCode()
-        => Select(x => x.GetHashCode()).IfNone(0);
+        => Select(x => x!.GetHashCode()).IfNone(0);
 
     public override string ToString()
         => Match(v => $"Some({v})", () => "None");

@@ -22,6 +22,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Core\Result\IResult.Extensions.Partition.cs" />
+    <Compile Remove="Core\Result\Result.Fail.cs" />
+    <Compile Remove="Core\Result\Result.Okay.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Glitch\Glitch.csproj" />
   </ItemGroup>
 

@@ -1,8 +1,9 @@
 using Glitch.Functional.Validation;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Glitch.Functional;
 
-public readonly record struct Just<T>(T Value)
+public readonly record struct Just<T>([NotNull] T Value)
 {
     public Option<T> OrNone() => Option.Some(Value);
 
