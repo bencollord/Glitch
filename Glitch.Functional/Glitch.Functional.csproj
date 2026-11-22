@@ -25,6 +25,8 @@
     <Compile Remove="Core\Result\IResult.Extensions.Partition.cs" />
     <Compile Remove="Core\Result\Result.Fail.cs" />
     <Compile Remove="Core\Result\Result.Okay.cs" />
+    <Compile Remove="Validation\Validated.Fail.cs" />
+    <Compile Remove="Validation\Validated.Okay.cs" />
   </ItemGroup>
 
   <ItemGroup>

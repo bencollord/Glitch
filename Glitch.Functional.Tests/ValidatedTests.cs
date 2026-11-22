@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Glitch.Functional;
 using Glitch.Functional.Validation;
+using System.Collections.Immutable;
 
 namespace Glitch.Test.Functional;
 
@@ -34,8 +35,8 @@ public class ValidatedTests
         var result = left.And(right);
 
         // Assert
-        result.Should().BeOfType<Validated<int, string>.Fail>()
-              .Which.Errors.Should()
+        result.Should().BeOfType<Fail<ImmutableArray<string>>>()
+              .Which.Error.Should()
               .BeEquivalentTo(["Left failed", "Right failed"]);
     }
 
@@ -50,8 +51,8 @@ public class ValidatedTests
         var result = left.And(right);
 
         // Assert
-        result.Should().BeOfType<Validated<int, string>.Fail>()
-              .Which.Errors.Should()
+        result.Should().BeOfType<Fail<ImmutableArray<string>>>()
+              .Which.Error.Should()
               .BeEquivalentTo(["Right failed"]);
     }
 
@@ -66,8 +67,8 @@ public class ValidatedTests
         var result = left.And(right);
 
         // Assert
-        result.Should().BeOfType<Validated<int, string>.Fail>()
-              .Which.Errors.Should()
+        result.Should().BeOfType<Fail<ImmutableArray<string>>>()
+              .Which.Error.Should()
               .BeEquivalentTo(["Left failed"]);
     }
 
@@ -82,7 +83,7 @@ public class ValidatedTests
         var result = left.And(right);
 
         // Assert
-        result.Should().BeOfType<Validated<int, string>.Okay>()
+        result.Should().BeOfType<Okay<int>>()
               .Which.Value.Should()
               .Be(44);
     }
@@ -98,8 +99,8 @@ public class ValidatedTests
         var result = left.Or(right);
 
         // Assert
-        result.Should().BeOfType<Validated<int, string>.Fail>()
-              .Which.Errors.Should()
+        result.Should().BeOfType<Fail<ImmutableArray<string>>>()
+              .Which.Error.Should()
               .BeEquivalentTo(["Left failed", "Right failed"]);
     }
 
@@ -113,8 +114,8 @@ public class ValidatedTests
         var result = left.OrElse(e => Fail<int, string>("Right failed"));
 
         // Assert
-        result.Should().BeOfType<Validated<int, string>.Fail>()
-              .Which.Errors.Should()
+        result.Should().BeOfType<Fail<ImmutableArray<string>>>()
+              .Which.Error.Should()
               .BeEquivalentTo(["Left failed", "Right failed"]);
     }
 
@@ -135,8 +136,8 @@ public class ValidatedTests
         result.IsFail.Should().BeTrue();
         result.IsOkay.Should().BeFalse();
 
-        result.Should().BeOfType<Validated<int, string>.Fail>()
-              .Which.Errors.Should()
+        result.Should().BeOfType<Fail<ImmutableArray<string>>>()
+              .Which.Error.Should()
               .BeEquivalentTo(["Left failed", "Right failed"]);
     }
 }

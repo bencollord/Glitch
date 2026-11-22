@@ -6,17 +6,15 @@ using static FN;
 
 /// <summary>
 /// A validation monad. Equivalent to <see cref="Result{T, E}"/>, but accumulates failures
-/// into a <see cref="ImmutableList{E}"/> instead of short-circuiting on failure.
+/// into a <see cref="ImmutableArray{E}"/> instead of short-circuiting on failure.
 /// </summary>
 /// <typeparam name="T"></typeparam>
 /// <typeparam name="E"></typeparam>
-public abstract partial record Validated<T, E> : IResult<T, ImmutableList<E>>
+public readonly union Validated<T, E>(Okay<T>, Fail<ImmutableArray<E>>) : IResult<T, ImmutableArray<E>>
 {
-    private protected Validated() { }
+    public readonly bool IsOkay => this is Okay<T>;
 
-    public abstract bool IsOkay { get; }
-
-    public abstract bool IsFail { get; }
+    public readonly bool IsFail => this is Fail<ImmutableArray<E>>;
 
     /// <summary>
     /// Maps the success value if okay.
@@ -24,7 +22,12 @@ public abstract partial record Validated<T, E> : IResult<T, ImmutableList<E>>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="map"></param>
     /// <returns></returns>
-    public abstract Validated<TResult, E> Select<TResult>(Func<T, TResult> map);
+    public Validated<TResult, E> Select<TResult>(Func<T, TResult> map) =>
+        this switch
+        {
+            Okay<T>(var val) => map(val),
+            Fail<ImmutableArray<E>> err => err
+        };
 
     /// <summary>
     /// Maps the error values if faulted. The provided function will be applied to each error in the list.
@@ -32,15 +35,12 @@ public abstract partial record Validated<T, E> : IResult<T, ImmutableList<E>>
     /// <typeparam name="EResult"></typeparam>
     /// <param name="map"></param>
     /// <returns></returns>
-    public abstract Validated<T, EResult> SelectError<EResult>(Func<E, EResult> map);
-
-    /// <summary>
-    /// Maps the entire error list if faulted and collapses them into a single error.
-    /// </summary>
-    /// <typeparam name="EResult"></typeparam>
-    /// <param name="map"></param>
-    /// <returns></returns>
-    public abstract Validated<T, EResult> SelectErrors<EResult>(Func<ImmutableList<E>, EResult> map);
+    public Validated<T, EResult> SelectError<EResult>(Func<E, EResult> map) =>
+        this switch
+        {
+            Okay<T> ok => ok,
+            Fail<ImmutableArray<E>>(var err) => Validated.Fail(err.Select(map)),
+        };
 
     /// <summary>
     /// Maps both the success and error values and returns either/or
@@ -51,7 +51,12 @@ public abstract partial record Validated<T, E> : IResult<T, ImmutableList<E>>
     /// <param name="okay"></param>
     /// <param name="fail"></param>
     /// <returns></returns>
-    public abstract Validated<TResult, EResult> BiSelect<TResult, EResult>(Func<T, TResult> okay, Func<E, EResult> fail);
+    public Validated<TResult, EResult> BiSelect<TResult, EResult>(Func<T, TResult> okay, Func<E, EResult> fail) =>
+        this switch
+        {
+            Okay<T>(var val) => okay(val),
+            Fail<ImmutableArray<E>>(var err) => Validated.Fail(err.Select(fail)),
+        };
 
     /// <summary>
     /// Applies a wrapped function to the wrapped value if both are okay.
@@ -61,7 +66,8 @@ public abstract partial record Validated<T, E> : IResult<T, ImmutableList<E>>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="function"></param>
     /// <returns></returns>
-    public abstract Validated<TResult, E> Apply<TResult>(Validated<Func<T, TResult>, E> function);
+    public Validated<TResult, E> Apply<TResult>(Validated<Func<T, TResult>, E> function) =>
+        Zip(function, (val, fn) => fn(val));
 
     /// <summary>
     /// Returns other if Okay, otherwise returns a faulted result
@@ -70,19 +76,15 @@ public abstract partial record Validated<T, E> : IResult<T, ImmutableList<E>>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="other"></param>
     /// <returns></returns>
-    public abstract Validated<TResult, E> And<TResult>(Validated<TResult, E> other);
+    public Validated<TResult, E> And<TResult>(Validated<TResult, E> other) =>
+        (this, other) switch
+        {
+            (Fail<ImmutableArray<E>>(var x), Fail<ImmutableArray<E>>(var y)) => Validated.Fail(x.AddRange(y)),
+            (Okay<T>, _) => other,
+            (Fail<ImmutableArray<E>> err, _) => err,
+        };
 
     public Validated<TResult, E> And<TResult>(Result<TResult, E> other) => And(Validated.From(other));
-
-    /// <summary>
-    /// Returns <paramref name="other"/> wrapped in a <see cref="Validated{T, E}"/> if okay.
-    /// Otherwise, returns the error set of self.
-    /// </summary>
-    /// <typeparam name="TResult"></typeparam>
-    /// <param name="other"></param>
-    /// <returns></returns>
-    public Validated<TResult, E> And<TResult>(Okay<TResult> other)
-        => And(Validated.Okay<TResult, E>(other.Value));
 
     /// <summary>
     /// If Okay, applies the function to the wrapped value. Otherwise, returns
@@ -97,7 +99,12 @@ public abstract partial record Validated<T, E> : IResult<T, ImmutableList<E>>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="bind"></param>
     /// <returns></returns>
-    public abstract Validated<TResult, E> AndThen<TResult>(Func<T, Validated<TResult, E>> bind);
+    public Validated<TResult, E> AndThen<TResult>(Func<T, Validated<TResult, E>> bind) =>
+        this switch
+        {
+            Okay<T>(var val) => bind(val),
+            Fail<ImmutableArray<E>> err => err
+        };
 
     /// <summary>
     /// BindMap operation, similar to the two arg overload of SelectMany.
@@ -107,17 +114,13 @@ public abstract partial record Validated<T, E> : IResult<T, ImmutableList<E>>
     /// <param name="bind"></param>
     /// <param name="project"></param>
     /// <returns></returns>
-    public Validated<TResult, E> AndThen<TElement, TResult>(Func<T, Validated<TElement, E>> bind, Func<T, TElement, TResult> project)
-        => AndThen(x => bind(x).Select(y => project(x, y)));
+    public Validated<TResult, E> AndThen<TElement, TResult>(Func<T, Validated<TElement, E>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).Select(y => project(x, y)));
 
     public Validated<TResult, E> AndThen<TResult>(Func<T, Result<TResult, E>> bind) => AndThen(x => Validated.From(bind(x)));
     public Validated<TResult, E> AndThen<TElement, TResult>(Func<T, Result<TElement, E>> bind, Func<T, TElement, TResult> project) => AndThen(x => Validated.From(bind(x)), project);
 
-    public Validated<TResult, E> AndThen<TResult>(Func<T, Okay<TResult>> bind) => AndThen(x => bind(x).OrFail<E>());
-    public Validated<TResult, E> AndThen<TElement, TResult>(Func<T, Okay<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => bind(x).OrFail<E>(), project);
-
-    public Validated<T, E> AndThen(Func<T, Fail<E>> bind) => AndThen(x => bind(x).AsResult<T>());
-    public Validated<TResult, E> AndThen<TResult>(Func<T, Fail<E>> bind, Func<T, Unit, TResult> project) => AndThen(x => bind(x).AsResult<Unit>(), project);
+    public Validated<TResult, E> SelectMany<TElement, TResult>(Func<T, Validated<TElement, E>> bind, Func<T, TElement, TResult> project) => AndThen(bind, project);
+    public Validated<TResult, E> SelectMany<TElement, TResult>(Func<T, Result<TElement, E>> bind, Func<T, TElement, TResult> project) => AndThen(bind, project);
 
     /// <summary>
     /// If Okay, returns this. If <paramref name="other"/> is Okay, <paramref name="other"/>.
@@ -125,7 +128,13 @@ public abstract partial record Validated<T, E> : IResult<T, ImmutableList<E>>
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    public abstract Validated<T, E> Or(Validated<T, E> other);
+    public Validated<T, E> Or(Validated<T, E> other) =>
+        (this, other) switch
+        {
+            (Okay<T> ok, _) => ok,
+            (_, Okay<T> ok) => ok,
+            (Fail<ImmutableArray<E>>(var x), Fail<ImmutableArray<E>>(var y)) => Validated.Fail(x.AddRange(y))
+        };
 
     /// <summary>
     /// Returns the current result if Okay, otherwise applies the provided
@@ -134,7 +143,12 @@ public abstract partial record Validated<T, E> : IResult<T, ImmutableList<E>>
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    public abstract Validated<T, E> OrElse(Func<ImmutableList<E>, Validated<T, E>> other);
+    public Validated<T, E> OrElse(Func<ImmutableArray<E>, Validated<T, E>> other) =>
+        this switch
+        {
+            Okay<T> ok => ok,
+            Fail<ImmutableArray<E>>(var err) => other(err)
+        };
 
     /// <summary>
     /// If Okay, returns <paramref name="okay"/> applied to the wrapped value.
@@ -154,14 +168,19 @@ public abstract partial record Validated<T, E> : IResult<T, ImmutableList<E>>
     /// <param name="okay"></param>
     /// <param name="fail"></param>
     /// <returns></returns>
-    public abstract TResult Match<TResult>(Func<T, TResult> okay, Func<ImmutableList<E>, TResult> fail);
+    public TResult Match<TResult>(Func<T, TResult> okay, Func<ImmutableArray<E>, TResult> fail) =>
+        this switch
+        {
+            Okay<T>(var val) => okay(val),
+            Fail<ImmutableArray<E>>(var errs) => fail(errs)
+        };
 
     /// <summary>
     /// Unwraps the <typeparamref name="T"/> value, or returns the result of <paramref name="fallback"/>.
     /// </summary>
     /// <param name="fallback"></param>
     /// <returns></returns>
-    public T IfFail(Func<ImmutableList<E>, T> fallback) => Match(Identity, fallback);
+    public T IfFail(Func<ImmutableArray<E>, T> fallback) => Match(Identity, fallback);
 
     /// <summary>
     /// Unwraps the <typeparamref name="T"/> value, or returns <paramref name="fallback"/>.
@@ -200,7 +219,12 @@ public abstract partial record Validated<T, E> : IResult<T, ImmutableList<E>>
     /// <param name="predicate"></param>
     /// <param name="error"></param>
     /// <returns></returns>
-    public abstract Validated<T, E> Guard(Func<T, bool> predicate, E error);
+    public Validated<T, E> Guard(Func<T, bool> predicate, E error) =>
+        this switch
+        {
+            Okay<T>(var val) when !predicate(val) => error,
+            _ => this
+        };
 
     /// <summary>
     /// For a successful validation, checks the value against a predicate
@@ -210,7 +234,12 @@ public abstract partial record Validated<T, E> : IResult<T, ImmutableList<E>>
     /// <param name="predicate"></param>
     /// <param name="error"></param>
     /// <returns></returns>
-    public abstract Validated<T, E> Guard(Func<T, bool> predicate, Func<T, E> error);
+    public Validated<T, E> Guard(Func<T, bool> predicate, Func<T, E> error) =>
+        this switch
+        {
+            Okay<T>(var val) when !predicate(val) => error(val),
+            _ => this
+        };
 
     /// <summary>
     /// For a successful validation, checks the <paramref name="condition"/>
@@ -254,30 +283,41 @@ public abstract partial record Validated<T, E> : IResult<T, ImmutableList<E>>
     /// <param name="other"></param>
     /// <param name="zipper"></param>
     /// <returns></returns>
-    public abstract Validated<TResult, E> Zip<TOther, TResult>(Validated<TOther, E> other, Func<T, TOther, TResult> zipper);
+    public Validated<TResult, E> Zip<TOther, TResult>(Validated<TOther, E> other, Func<T, TOther, TResult> zipper) =>
+        (this, other) switch
+        {
+            (Okay<T>(var x), Okay<TOther>(var y)) => zipper(x, y),
+            (Fail<ImmutableArray<E>>(var x), Fail<ImmutableArray<E>>(var y)) => Validated.Fail(x.AddRange(y)),
+            (Fail<ImmutableArray<E>> err, _) => err,
+            (_, Fail<ImmutableArray<E>> err) => err,
+        };
 
     /// <summary>
     /// Returns a string representing this <see cref="Validated{T, E}"/>.
     /// If fail, errors are combined into a comma separated list.
     /// </summary>
     /// <returns></returns>
-    public abstract override string ToString();
+    public override string ToString() =>
+        this switch
+        {
+            Okay<T>(var val) => $"Okay({val})",
+            Fail<ImmutableArray<E>>(var err) => $"Error({err.Join(", ")})"
+        };
 
-    public abstract T Unwrap();
+    public T Unwrap() =>
+        this switch
+        {
+            Okay<T>(var val) => val,
+            Fail<ImmutableArray<E>>(var errs) => throw new ValidationException(errs.Select(x => Option.Maybe(x!.ToString())).Somes())
+        };
 
     public static bool operator true(Validated<T, E> result) => result.IsOkay;
 
     public static bool operator false(Validated<T, E> result) => result.IsFail;
 
-    public static implicit operator Validated<T, E>(T value) => new Okay(value);
+    public static implicit operator Validated<T, E>(T value) => new Okay<T>(value);
 
-    public static implicit operator Validated<T, E>(Okay<T> success) => new Okay(success.Value);
-
-    public static implicit operator Validated<T, E>(E error) => new Fail(error);
-
-    public static implicit operator Validated<T, E>(Fail<E> failure) => new Fail(failure.Error);
+    public static implicit operator Validated<T, E>(E error) => new Fail<ImmutableArray<E>>([error]);
 
     public static implicit operator Validated<T, E>(Result<T, E> result) => Validated.From(result);
-
-    public static implicit operator Validated<T, E>(Result<T, ImmutableList<E>> result) => Validated.From(result);
 }

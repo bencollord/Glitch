@@ -105,7 +105,6 @@ public readonly union Result<T, E>(Okay<T>, Fail<E>) : IResult<T, E>, IMaybe<T>
         => AndThen(x => bind(x).Select(y => project(x, y)));
 
     public Result<TResult, E> SelectMany<TElement, TResult>(Func<T, Result<TElement, E>> bind, Func<T, TElement, TResult> project) => AndThen(bind, project);
-    public Result<TResult, E> SelectMany<TElement, TResult>(Func<T, Okay<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(x => Result.Okay<TElement, E>(bind(x).Value), project);
 
     /// <summary>
     /// Returns the current result if Ok, otherwise returns the other result.
