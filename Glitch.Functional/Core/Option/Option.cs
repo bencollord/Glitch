@@ -1,3 +1,4 @@
+using Glitch.Functional.Errors;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
@@ -9,7 +10,7 @@ namespace Glitch.Functional;
 /// where the failure case is <see cref="Option.None"/>.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public readonly partial struct Option<T>
+public union Option<T>(Just<T>, Nothing)
     : IEquatable<Option<T>>,
       IComparable<Option<T>>,
       IMaybe<T>
@@ -21,18 +22,9 @@ public readonly partial struct Option<T>
 
     public static Option<T> Maybe(T? value) => value != null ? Some(value) : None;
 
-    private readonly T? value = default;
-    private readonly bool hasValue = false;
+    public bool IsSome => this is Just<T>;
 
-    public Option(T? value)
-    {
-        this.value = value;
-        hasValue = value != null;
-    }
-
-    public bool IsSome => hasValue;
-
-    public bool IsNone => !hasValue;
+    public bool IsNone => this is Nothing;
 
     bool IMaybe.HasValue => IsSome;
 
@@ -50,8 +42,12 @@ public readonly partial struct Option<T>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="map"></param>
     /// <returns></returns>
-    public Option<TResult> Select<TResult>(Func<T, TResult> map)
-        => IsSome ? new Option<TResult>(map(value!)) : new Option<TResult>();
+    public Option<TResult> Select<TResult>(Func<T, TResult> map) =>
+        this switch
+        {
+            Just<T>(var val) => map(val),
+            Nothing => Option.None,
+        };
 
     /// <summary>
     /// Applies a wrapped function to the wrapped value if both exist.
@@ -79,8 +75,12 @@ public readonly partial struct Option<T>
     /// <typeparam name="TResult"></typeparam>
     /// <param name="bind"></param>
     /// <returns></returns>
-    public Option<TResult> AndThen<TResult>(Func<T, Option<TResult>> bind)
-        => IsSome ? bind(value!) : new Option<TResult>();
+    public Option<TResult> AndThen<TResult>(Func<T, Option<TResult>> bind) =>
+        this switch
+        {
+            Just<T>(var val) => bind(val),
+            Nothing => Option.None
+        };
 
     /// <summary>
     /// Applies the element selector to the wrapped value
@@ -215,11 +215,18 @@ public readonly partial struct Option<T>
     /// <param name="some"></param>
     /// <param name="none"></param>
     /// <returns></returns>
-    public TResult Match<TResult>(Func<T, TResult> some, Func<TResult> none)
-        => IsSome ? some(value!) : none();
+    public TResult Match<TResult>(Func<T, TResult> some, Func<TResult> none) =>
+        this switch
+        {
+            Just<T>(var val) => some(val),
+            Nothing => none()
+        };
 
     public TResult Match<TResult>(Func<T, TResult> some, Func<Unit, TResult> none)
         => Match(some, () => none(default));
+
+    public Option<TResult> SelectMany<TElement, TResult>(Func<T, Option<TElement>> bind, Func<T, TElement, TResult> project) => AndThen(bind, project);
+    public Option<TResult> SelectMany<TElement, TResult>(Func<T, Okay<TElement>> bind, Func<T, TElement, TResult> project) => Select(x => project(x, bind(x).Value));
 
     /// <summary>
     /// If the current <see cref="Option{T}"/> contains a value, casts it to 
@@ -248,14 +255,19 @@ public readonly partial struct Option<T>
     /// Returns the wrapped value if it exists. Otherwise throws an exception.
     /// </summary>
     /// <returns></returns>
-    public T Unwrap() => IsSome ? value! : throw new InvalidOperationException("Attempted to unwrap an empty option");
+    public T Unwrap() =>
+        this switch
+        {
+            Just<T>(var val) => val,
+            Nothing => throw new InvalidOperationException("Attempted to unwrap an empty option")
+        };
 
     /// <summary>
     /// Returns the wrapped value if exists. Otherwise, returns the default value
     /// of <typeparamref name="T"/>.
     /// </summary>
     /// <returns></returns>
-    public T? UnwrapOrDefault() => IsSome ? value : default;
+    public T? UnwrapOrDefault() => UnwrapOrDefault(default);
 
     /// <summary>
     /// Returns the wrapped value if exists. Otherwise, returns the fallback.
@@ -265,7 +277,12 @@ public readonly partial struct Option<T>
     /// </remarks>
     /// <param name="fallback"></param>
     /// <returns></returns>
-    public T? UnwrapOrDefault(T? fallback) => IsSome ? value : fallback;
+    public T? UnwrapOrDefault(T? fallback) =>
+        this switch
+        {
+            Just<T>(var val) => val,
+            Nothing => fallback
+        };
 
     public bool TryUnwrap([MaybeNullWhen(false)] out T result)
     {
@@ -303,7 +320,12 @@ public readonly partial struct Option<T>
     /// </summary>
     /// <param name="error"></param>
     /// <returns></returns>
-    public Result<T, E> OkayOr<E>(E error) => IsSome ? Result.Okay(value!) : Result.Fail(error);
+    public Result<T, E> OkayOr<E>(E error) =>
+        this switch
+        {
+            Just<T>(var val) => Result.Okay(val),
+            Nothing => Result.Fail(error)
+        };
 
     /// <summary>
     /// Wraps the value in a <see cref="Result{T, E}" /> if it exists,
@@ -311,7 +333,12 @@ public readonly partial struct Option<T>
     /// the result of the provided error function.
     /// </summary>
     /// <param name="error"></param>
-    public Result<T, E> OkayOrElse<E>(Func<E> function) => IsSome ? Result.Okay(value!) : Result.Fail(function());
+    public Result<T, E> OkayOrElse<E>(Func<E> function) =>
+        this switch
+        {
+            Just<T>(var val) => Result.Okay(val),
+            Nothing => function()
+        };
 
     /// <summary>
     /// Wraps the value in a <see cref="Result{T, E}" /> if it exists,
@@ -319,22 +346,26 @@ public readonly partial struct Option<T>
     /// the result of the provided error function.
     /// </summary>
     /// <param name="error"></param>
-    public Result<T, E> OkayOrElse<E>(Func<Unit, E> function) => IsSome ? Result.Okay(value!) : Result.Fail(function(default));
+    public Result<T, E> OkayOrElse<E>(Func<Unit, E> function) =>
+        this switch
+        {
+            Just<T>(var val) => Result.Okay(val),
+            Nothing => function(default)
+        };
 
-    public bool Equals(Option<T> other)
-    {
-        if (IsNone) return other.IsNone;
-
-        if (other.IsNone) return false;
-
-        return EqualityComparer<T>.Default.Equals(value, other.value);
-    }
+    public bool Equals(Option<T> other) =>
+        (this, other) switch
+        {
+            (Just<T>(var x), Just<T>(var y)) => EqualityComparer<T>.Default.Equals(x, y),
+            (Nothing, Nothing) => true,
+            _ => false
+        };
 
     public override bool Equals([NotNullWhen(true)] object? obj)
         => obj is Option<T> other && Equals(other);
 
     public override int GetHashCode()
-        => IsSome ? value!.GetHashCode() : 0;
+        => Select(x => x.GetHashCode()).IfNone(0);
 
     public override string ToString()
         => Match(v => $"Some({v})", () => "None");
@@ -352,4 +383,34 @@ public readonly partial struct Option<T>
             })
             .IfNone(_ => self.IsSome.CompareTo(other.IsSome));
     }
+
+    public static implicit operator Option<T>(T? value) => Maybe(value);
+
+    public static implicit operator Option<T>(Nothing _) => new();
+
+    public static explicit operator T(Option<T> option) => option.OkayOr(Error.InvalidCast<T>(option)).IfFail(err => err.Throw<T>());
+
+    public static bool operator ==(Option<T> x, Option<T> y) => x.Equals(y);
+
+    public static bool operator >=(Option<T> x, Option<T> y) => x.CompareTo(y) >= 0;
+
+    public static bool operator <=(Option<T> x, Option<T> y) => x.CompareTo(y) <= 0;
+
+    public static bool operator >(Option<T> x, Option<T> y) => x.CompareTo(y) > 0;
+
+    public static bool operator <(Option<T> x, Option<T> y) => x.CompareTo(y) < 0;
+
+    public static bool operator !=(Option<T> x, Option<T> y) => !(x == y);
+
+    public static Option<T> operator ^(Option<T> x, Option<T> y) => x.Xor(y);
+
+    // Short-circuiting
+    public static bool operator false(Option<T> option) => option.IsNone;
+    public static bool operator true(Option<T> option) => option.IsSome;
+    public static Option<T> operator &(Option<T> x, Option<T> y) => x.And(y);
+    public static Option<T> operator |(Option<T> x, Option<T> y) => x.Or(y);
+
+    // Coalesce
+    public static T operator |(Option<T> x, T y) => x.IfNone(y);
+    public static T operator |(Option<T> x, Okay<T> y) => x.IfNone(y.Value);
 }

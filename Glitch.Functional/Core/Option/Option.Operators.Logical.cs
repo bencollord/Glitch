@@ -1,20 +1,5 @@
 namespace Glitch.Functional;
 
-public readonly partial struct Option<T>
-{
-    public static Option<T> operator ^(Option<T> x, Option<T> y) => x.Xor(y);
-
-    // Short-circuiting
-    public static bool operator false(Option<T> option) => option.IsNone;
-    public static bool operator true(Option<T> option) => option.IsSome;
-    public static Option<T> operator &(Option<T> x, Option<T> y) => x.And(y);
-    public static Option<T> operator |(Option<T> x, Option<T> y) => x.Or(y);
-
-    // Coalesce
-    public static T operator |(Option<T> x, T y) => x.IfNone(y);
-    public static T operator |(Option<T> x, Okay<T> y) => x.IfNone(y.Value);
-}
-
 public static partial class OptionExtensions
 {
     extension<T, TResult>(Option<T> self)
